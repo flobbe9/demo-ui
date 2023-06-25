@@ -1,0 +1,9 @@
+version: "3.9"
+
+services: 
+  frontend:
+    build: .
+    image:  demo-ui:0.0.1
+    container_name: demo-ui
+    ports:
+      - 3000:3000
