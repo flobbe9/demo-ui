@@ -1,8 +1,8 @@
 FROM node
 
-WORKDIR /app/demo/ui
+WORKDIR /app/frontend/ui
 
-COPY . /app/demo/ui//
+COPY . /app/frontend/ui/
 
 RUN npm ci
 
