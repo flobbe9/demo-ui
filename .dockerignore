@@ -14,5 +14,19 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+### Gradle ###
+.gradle/
+build/
+gradle/
+build
+gradlew
+gradlew.bat
+
+### VS Code ###
+.vscode/
+
+### Other ###
+.github
 .gitignore
+*.md
 docker-compose.yml
