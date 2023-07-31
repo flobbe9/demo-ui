@@ -1,0 +1,13 @@
+:root {
+    --column-height: 800px;
+}
+
+.container {
+    /* border: 2px solid black; */
+
+    display: flex;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    width: 100%;
+}
