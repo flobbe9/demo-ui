@@ -1,0 +1,37 @@
+.Style {
+    border: 2px solid red;
+    /* height: fit-content; */
+    width: 30%;
+
+    position: sticky;
+    top: 165px;
+}
+
+.inputTypeSwitch {
+    display: flex;
+
+    .text {
+        /* border-right: 2px solid blue; */
+    }
+
+    .picture {
+        /* border-right: 2px solid blue; */
+    }
+    
+    ._table {
+
+    }
+}
+
+.StylePanel {
+    border: 2px solid black;
+
+    .styleInput {
+        margin: 5px;
+    }
+
+    .styleLabel {
+        margin: 5px;
+        
+    }
+}

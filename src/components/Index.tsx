@@ -8,7 +8,9 @@ export default function Index(props) {
         <div>
             <h2>Index</h2>
 
-            <Link to="/login">Login</Link>
+            <Link to="/login">Login</Link><br /><br />
+            <Link to="/builder">Builder</Link>
+
         </div>
     );
 }

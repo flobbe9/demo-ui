@@ -1,87 +1,130 @@
-import React, { useEffect } from "react";
-import useState from "react-usestateref";
+import React, { useEffect, useRef, useState } from "react";
 import "../styles/DocumentForm.css";
 import { wordDocument } from "./Document";
 
 
 export default function DocumentForm(props) {
 
-    const [frontInputs, setFrontInputs, currentFrontInputs] = useState([<TextInput page="front" />]);
-    const [page1Inputs, setPage1Inputs, currentPage1Inputs] = useState([<TextInput page="page1" />]);
-    const [page2Inputs, setPage2Inputs, currentPage2Inputs] = useState([<TextInput page="page2" />]);
-    const [backInputs, setBackInputs, currentBackInputs] = useState([<TextInput page="back" />]);
+    // TODO: add set wordDocument functions
+    const textInputId = props.textInputId;
+    const setTextInputId = props.setTextInputId;
+    
+    
+    function Page(props) {
 
+        const pageType: string = props.pageType;
 
-    function TextInput(props) {
-
-        const [buttonsDisplay, setButtonsDisplay, currentButtonsDisplay] = useState("none");
-        const [index, setIndex, currentIndex] = useState(0);
+        const initialKey = crypto.randomUUID();
         
-        const page:string = props.page;
-
-
-        useEffect(() => {
-            setIndex(currentFrontInputs.current.length - 1);
-        }, []);
-
-
-        function setInputs(newInputs: React.JSX.Element[], remove: boolean) {
-
-            if (page === "front") {
-                // TODO: set basicParagraph
-                setFrontInputs(remove ? [...newInputs] : [...currentFrontInputs.current, ...newInputs]);
-
-            } else if (page === "page1") {
-                setPage1Inputs(remove ? [...newInputs] : [...currentPage1Inputs.current, ...newInputs]);
-
-            } else if (page === "page2") {
-                setPage2Inputs(remove ? [...newInputs] : [...currentPage2Inputs.current, ...newInputs]);
-
-            } else if (page === "back")
-                setBackInputs(remove ? [...newInputs] : [...currentBackInputs.current, ...newInputs]);
-        }
+        const [textInputs, setTextInputs] = useState([<BasicParagraph id={"basicParagraph-" + pageType + "-" + 1} key={initialKey} propsKey={initialKey} />]);
         
+        /** Starting at 3 becuase 0, 1 and 2 are used by the first 3 paragraphs */
+        let textInputCount = useRef(3);
 
-        function switchButtonDisplay() {
 
-            setButtonsDisplay(currentButtonsDisplay.current === "none" ? "block" : "none");
+        function addBasicParagraph(propsKey: string): void {
+            
+            let basicParagraphIndex = getCurrentIndex(propsKey);
+            
+            const newKey = crypto.randomUUID();
+            textInputs.splice(basicParagraphIndex + 1, 0, <BasicParagraph id={"basicParagraph-" + pageType + "-" + (textInputCount.current)} key={newKey} propsKey={newKey} />);
+            setTextInputs([...textInputs]);
+
+            textInputCount.current++;
         }
 
 
-        function addInput(): void {
+        function removeBasicParagraph(propsKey: string): void {
 
-            setInputs([<TextInput page={page} />], false);
-        }
+            let basicParagraphIndex = getCurrentIndex(propsKey);
 
-
-        function removeInput(): void {
-
-            // case: first input
-            if (currentIndex.current === 0)
+            // always leave one paragraph
+            if (textInputs.length === 1) 
                 return;
-
-            // remove current element
-            const inputs = currentFrontInputs.current;
-            inputs.splice(currentIndex.current, 1);
-
-            // set updated inputs
-            setInputs([...inputs], true);
+            
+            textInputs.splice(basicParagraphIndex, 1);
+            setTextInputs([...textInputs]);
         }
 
 
+        function getCurrentIndex(propsKey: string): number {
+
+            let index = -1;
+
+            textInputs.forEach((textInput, i) => {
+                if (textInput.key === propsKey)  {
+                    index = i;
+                    return;
+                }
+            });
+
+            return index;
+        }
+
+
+        function HeaderFooter(props) {
+
+            function keyUpHeaderFooter(event) {
+
+                // replace values of all other header / footer inputs
+                Array.from(document.getElementsByClassName("HeaderFooter")).forEach(headerFooter => {
+                    const textInput = headerFooter.querySelector("input");
+
+                    // check type (header or footer)
+                    if ((textInput as HTMLInputElement).className === props.type)
+                        (textInput as HTMLInputElement).value = event.target.value;
+                })
+            }
+
+
+            return (
+                <div id={props.id} className="HeaderFooter">
+                    <input className={props.type}
+                            type="text" 
+                            placeholder={props.placeholder}
+                            onKeyUp={(event) => keyUpHeaderFooter(event)}
+                            onFocus={() => setTextInputId(props.id)} />         
+                </div>
+            )
+        }
+
+        
+        function BasicParagraph(props) {
+
+            const [buttonsDisplay, setButtonsDisplay] = useState("none");
+
+
+            function hoverButtons() {
+
+                setButtonsDisplay(buttonsDisplay === "none" ? "block" : "none");
+            }
+
+
+            return (
+                <div id={props.id}
+                     className="BasicParagraph"
+                     onMouseEnter={hoverButtons}
+                     onMouseLeave={hoverButtons}>
+
+                    <input type="text" placeholder="Text..." onFocus={() => setTextInputId(props.id)} />
+
+                    <div style={{display: buttonsDisplay}}>
+                        <button className="plusButton" onClick={() => addBasicParagraph(props.propsKey)}>+</button>
+                        <button className="deleteButton" onClick={() => removeBasicParagraph(props.propsKey)}>x</button><br />
+                    </div>
+                </div>
+            )
+        }
+
+        
         return (
-            <div className="TextInput" 
-                 onMouseOver={switchButtonDisplay}
-                 onMouseOut={switchButtonDisplay}>
+            <div className="Page">
+                <div className={pageType}>
+                    <HeaderFooter id={"headerFooter-" + pageType + "-" + 0} type="header" placeholder="Kopfzeile..." />
 
-                <input className="text" 
-                       type="text" 
-                       name="text" 
-                       placeholder="Kopfzeile"/>
+                    {textInputs}
 
-                <div style={{display: currentButtonsDisplay.current}}>
-                    <button className="plusButton" onClick={addInput}>+</button>
-                    <button className="deleteButton" onClick={removeInput}>x</button><br />
+                    <HeaderFooter id={"headerFooter-" + pageType + "-" + 2} type="footer" placeholder="Fußzeile..." />
                 </div>
             </div>
         )
@@ -90,38 +133,18 @@ export default function DocumentForm(props) {
 
     return (
         <div className="DocumentForm">
-            <div className="page">
-                <section className="front">
-                    <h3>Front page</h3>
+            <h3>Front page</h3>
+            <Page pageType="front" />
 
-                    {currentFrontInputs.current}
-                </section>
-            </div>
+            <h3>Page1</h3>
+            <Page pageType="page1" />
 
-            <div className="page">
-                <section className="pieces">
-                    <h3>Page1</h3>
+            <h3>Page2</h3>
+            <Page pageType="page2" />
 
-                    {page1Inputs}
-                </section>
-            </div>
-
-            <div className="page">
-                <section className="pieces">
-                    <h3>Page2</h3>
-
-                    {page2Inputs}
-                </section>
-            </div>
-
-            <div className="page">
-                <section className="back">
-                    <h3>Back</h3>
-
-                    {backInputs}
-                </section>
-            </div>
-
+            <h3>Back</h3>
+            <Page pageType="back" />
+            
             <div style={{textAlign: "right"}}>
                 <button>Download</button>
             </div>
