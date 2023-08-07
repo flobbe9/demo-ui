@@ -1,6 +1,7 @@
 import React from "react";
 import "./styles/NavBar.css"
-import { Link } from "react-router-dom";
+import LinkConfirm from "./LinkConfirm";
+
 
 export default function NavBar(props) {
 
@@ -8,8 +9,8 @@ export default function NavBar(props) {
         <div className="NavBar">
 
                 <div className="text-left">
-                    <Link to="/" className="navItem">Left</Link>
-                    <Link to="/" className="navItem">Left2</Link>
+                    <LinkConfirm to="/" className="navItem">Left</LinkConfirm>
+                    <LinkConfirm to="/" className="navItem">Left2</LinkConfirm>
                 </div>
 
                 <div className="text-right">
