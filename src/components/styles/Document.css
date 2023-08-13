@@ -1,29 +1,39 @@
-.DocumentForm {
+.Document {
     border: 2px solid blue;
     padding: 10px;
     width: 100%
 }
 
-.BasicParagraph {
-    display: flex;
-    width: fit-content;
-}
-
 .Page {
     border: 2px solid black;
     margin: 5px 0;
-}
+
+    .HeaderFooter {
+        
+    }
     
-.front {
-    /* border: 2px solid yellow; */
+    .BasicParagraph {
+        display: flex;
+        width: fit-content;
+    }
+    
+    .front {
+        /* border: 2px solid yellow; */
+    }
+
+    .page1 .page2 {
+        /* border: 2px solid green; */
+    }
+
+    .back {
+        /* border: 2px solid blue; */
+    }
 }
 
-.page1 .page2 {
-    /* border: 2px solid green; */
-}
-
-.back {
-    /* border: 2px solid blue; */
+.testTable {
+    .col {
+        display: flex;
+    }
 }
 
 h3 {
