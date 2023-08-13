@@ -10,27 +10,27 @@
 .inputTypeSwitch {
     display: flex;
 
-    .text {
+    #text {
         /* border-right: 2px solid blue; */
     }
 
-    .picture {
+    #picture {
         /* border-right: 2px solid blue; */
     }
     
-    ._table {
+    #_table {
 
     }
 }
 
-.StylePanel {
+.stylePanel {
     border: 2px solid black;
 
-    .styleInput {
+    .stylePanelInput {
         margin: 5px;
     }
 
-    .styleLabel {
+    .stylePanelLabel {
         margin: 5px;
         
     }

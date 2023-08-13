@@ -1,1 +1,13 @@
-export const BACKEND_BASE_URL: string = "http://localhost:4000";
+export const BACKEND_BASE_URL: string = "http://localhost:4001";
+
+export const fontFamilies = [
+    "Arial", 
+    "Verdana",
+    "Tahoma",
+    "Trebuchet MS",
+    "Times New Roman",
+    "Georgia",
+    "Garamond",
+    "Courier New",
+    "Brush Script MT"
+]

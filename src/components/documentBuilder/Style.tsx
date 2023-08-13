@@ -1,135 +1,224 @@
-import React, { useState } from "react";
+import React from "react";
 import "../styles/Style.css"
-import { wordDocument } from "./Document";
+import { fontFamilies } from "../../utils/GlobalVariables";
 
 
 export default function Style(props) {
-
     // TODO: reset button? for everything or for each input?
+    // TODO: consider applying textAlign to input tag, not to it's value
     // TODO: add disabled conditions
-    // TODO: change lables to german
-    // TODO: add more font-families
+    // TODO: make checkboxes buttons like in word
 
-    const textInputId = props.textInputId;
+    // TODO: what to do with table button??
 
-
-    function getCurrentTextInput(): HTMLInputElement | null {
-
-        // TODO: consider message
-        // TODO: consider popup style
-        const component = document.getElementById(textInputId.current);
-        if (!component) {
-            alert("Please select an input fieled first")
-            return null;
-        }
-        
-        return component.querySelector("input");
-    }
+    const getCurrentTextInput = props.getCurrentTextInput;
 
 
     function isHeaderFooter(textInput: HTMLInputElement): boolean {
 
-        return textInput.className === "header" || textInput.className === "footer";
+        return !textInput || textInput.className === "header" || textInput.className === "footer";
     }
 
 
-    function updateStyle(event, styleAttribute: string): void {
+    // TODO: textInput gets smaller when decreasing fontSize
+    function updateCurrentTextInputStyle(event, styleAttributeCSS: string, styleValueDefault: string, styleValueCheckbox?: string): void {
 
-        const styleInput = event.target as HTMLInputElement;
+        const currentTextInput = getCurrentTextInput();
 
-        const textInput = getCurrentTextInput();
-        if (!textInput)
+        if (!currentTextInput) {
+            event.preventDefault();
             return;
-
-        // case: headerFooter
-        if (isHeaderFooter(textInput)) {
-            Array.from(document.getElementsByClassName(textInput.className)).forEach(textInput => {
-                (textInput as HTMLInputElement).style[styleAttribute] = styleInput.value;});
-
-            return;   
         }
 
-        textInput.style[styleAttribute] = styleInput.value;
+        const stylePanelInput = event.target as HTMLInputElement;
+        
+        let stylePanelInputValue: string | boolean = stylePanelInput.value;
+
+        // case: checkbox
+        if (stylePanelInput.type === "checkbox") {
+            stylePanelInputValue = stylePanelInput.checked ? styleValueCheckbox! : styleValueDefault;
+        }
+
+        // case: headerFooter
+        if (isHeaderFooter(currentTextInput)) {
+            Array.from(document.getElementsByClassName(currentTextInput.className)).forEach(textInput => {
+                (textInput as HTMLInputElement).style[styleAttributeCSS] = stylePanelInputValue || styleValueDefault});
+
+        // case: basicParagraph
+        } else
+            currentTextInput.style[styleAttributeCSS] = stylePanelInputValue || styleValueDefault;
     }
 
 
-    function toggleStyle(event, styleAttribute: string, defaultValue: string, value?: string): void {
-
-        const styleInput = event.target as HTMLInputElement;
-        const checkBoxValue = styleInput.checked;
-        value = value? value : styleInput.name;
-
+    function updateCurrentTextInputType(event, textInputType: string) {
+        
         const textInput = getCurrentTextInput();
-        if (!textInput)
+
+        if (!textInput) {
+            event.preventDefault();
             return;
-
-        // case: headerFooter
-        if (isHeaderFooter(textInput)) {
-            Array.from(document.getElementsByClassName(textInput.className)).forEach(textInput => {
-                (textInput as HTMLInputElement).style[styleAttribute] = checkBoxValue ? value : defaultValue;});
-
-            return;   
         }
 
-        textInput.style[styleAttribute] = checkBoxValue ? value : defaultValue;
+        // case: trying to assign header/footer different type than "text"
+        if (isHeaderFooter(textInput) && textInputType !== "text") {
+            event.preventDefault();
+            alert("Header and footer fields can only by of type 'Text'.");
+            return;
+        }
+
+        textInput.type = textInputType;
+    }
+
+
+    function StylePanelRadioButton(props: {label: string, 
+                                           textInputType: string, 
+                                           onClick
+                                        }) {
+
+        return (
+            <div className="StylePanelRadioButton">
+                <label htmlFor="textInputTypeSwitch">{props.label}</label>
+                <input id={"textInputTypeSwitch-" + props.textInputType} 
+                       className="stylePanelInput" 
+                       name="textInputTypeSwitch" 
+                       type="radio" 
+                       // only for alert if no input selected
+                       onMouseDown={getCurrentTextInput}            
+                       onClick={(event) => props.onClick(event, props.textInputType)} />
+            </div>
+        );
+    }
+
+
+    function StylePanelSelect(props: {
+                                label?: string,
+                                styleAttributeBackend: string,
+                                styleAttributeCSS: string, 
+                                styleValueDefault: string,
+                                optionsArray: () => React.JSX.Element[], 
+                                onChange
+                            }) {
+
+        return (
+            <div className="StylePanelSelect">
+                {props.label ? <label className="stylePanelLabel" htmlFor={props.styleAttributeBackend}>{props.label}</label> : null}
+                <select className="stylePanelInput" 
+                        name={props.styleAttributeBackend} 
+                        // only for alert if no input selected
+                        onMouseDown={getCurrentTextInput}
+                        onChange={(event) => props.onChange(event, props.styleAttributeCSS, props.styleValueDefault)}>
+                    {props.optionsArray()}
+                </select>
+            </div>
+        );
+    }
+
+
+    function StylePanelCheckbox(props: {label: string, 
+                                        styleValue: string,
+                                        styleAttributeCSS: string, 
+                                        styleValueDefault: string,
+                                        onChange
+                                    }) {
+
+        return (
+            <div className="StylePanelCheckbox">
+                <label className="stylePanelLabel" htmlFor={props.styleValue}>{props.label}</label>
+                <input className="stylePanelInput" 
+                       type="checkbox" 
+                       name={props.styleValue} 
+                       onChange={(event) => props.onChange(event, props.styleAttributeCSS, props.styleValueDefault, props.styleValue)} />
+            </div>
+        );
     }
 
 
     return (
         <div className="Style">
             <div className="inputTypeSwitch">
-                <button className="text" onClick={() => getCurrentTextInput()!.type = "text"}>
-                    Text
-                </button>
+                <StylePanelRadioButton label="Text" textInputType="text" onClick={updateCurrentTextInputType} />
 
-                <button className="picture" onClick={() => getCurrentTextInput()!.type = "file"}>
-                    Bild
-                </button>
-
-                <button className="_table" onClick={() => getCurrentTextInput()!.type = "text"}>
-                    Tabelle
-                </button>
+                <StylePanelRadioButton label="Bild" textInputType="file" onClick={updateCurrentTextInputType} />
+                
+                <StylePanelRadioButton label="Tabelle" textInputType="text" onClick={updateCurrentTextInputType} />
             </div>
 
-            <div className="StylePanel" >
-                <select className="styleInput" placeholder="Schriftart" onChange={(event) => updateStyle(event, "fontFamily")}>
-                    <option value="calibri">Calibri</option>
-                    <option value="times new roman">Time New Roman</option>
-                </select><br />
+            <div className="stylePanel">
+                <StylePanelSelect label="Schriftgröße" styleAttributeBackend="fontSize" styleAttributeCSS="font-size" styleValueDefault="16px" optionsArray={getFontSizeSelectOptions} onChange={updateCurrentTextInputStyle} />
 
-                <label className="styleLabel" htmlFor="">Color</label>
-                <input className="styleInput" type="color" name="color" onChange={(event) => updateStyle(event, "color")} /><br />
+                <StylePanelSelect label="Schriftart" styleAttributeBackend="fontFamily" styleAttributeCSS="font-family" styleValueDefault="Calibri" optionsArray={getFontFamilySelectOptions} onChange={updateCurrentTextInputStyle} />
 
-                <label className="styleLabel" htmlFor="">Bold</label>
-                <input className="styleInput" type="checkBox" name="bold" onChange={(event) => toggleStyle(event, "font-weight", "normal")} /><br />
+                <label className="stylePanelLabel" htmlFor="color">Farbe</label>
+                <input className="stylePanelInput" 
+                       type="color" 
+                       name="color" 
+                       // only for alert if no input selected
+                       onMouseDown={getCurrentTextInput}
+                       onChange={(event) => updateCurrentTextInputStyle(event, "color", "#000000")} />
+                
+                <StylePanelCheckbox label="Fett" styleValue="bold" styleAttributeCSS="font-weight" styleValueDefault="normal" onChange={updateCurrentTextInputStyle} />
+                
+                <StylePanelCheckbox label="Kursiv" styleValue="italic" styleAttributeCSS="font-style" styleValueDefault="normal" onChange={updateCurrentTextInputStyle} />
+                
+                <StylePanelCheckbox label="Unterstrichen" styleValue="underline"  styleAttributeCSS="text-decoration" styleValueDefault="none" onChange={updateCurrentTextInputStyle} />
 
-                <label className="styleLabel" htmlFor="">Italic</label>
-                <input className="styleInput" type="checkBox" name="italic" onChange={(event) => toggleStyle(event, "font-style", "normal")}/><br />
+                <StylePanelSelect label="Einrückungen" styleAttributeBackend="indent" styleAttributeCSS="margin-left" styleValueDefault="0px" optionsArray={() => indentSelectOptions} onChange={updateCurrentTextInputStyle} />
 
-                <label className="styleLabel" htmlFor="">Underline</label>
-                <input className="styleInput" type="checkBox" name="underline" onChange={(event) => toggleStyle(event, "text-decoration", "none")} /><br />
-
-                <label className="styleLabel" htmlFor="">Indent</label>
-                <select className="styleInput" name="indent" onChange={(event) => updateStyle(event, "margin-left")} >
-                    <option value="0px">0</option>
-                    <option value="30px">1</option>
-                    <option value="60px">2</option>
-                </select><br />
-
-                <label className="styleLabel" htmlFor="">Text align</label>
-                <select className="styleInput" name="textAlign" id="textAlign" onChange={(event) => updateStyle(event, "text-align")}>
-                    <option value="LEFT">LEFT</option>
-                    <option value="CENTER">CENTER</option>
-                    <option value="RIGHT">RIGHT</option>
-                </select><br />
-{/* 
-                <label className="styleLabel" htmlFor="">Break type</label>
-                <select className="styleInput" name="breakType" id="breakType">
-                    <option value="TEXT_WRAPPING">LINE</option>
-                    <option value="COLUMN">COLUMN</option>
-                    <option value="PAGE">PAGE</option>
-                </select><br /><br /> */}
+                <StylePanelSelect label="Text Ausrichtung" styleAttributeBackend="textAlign" styleAttributeCSS="text-align" styleValueDefault="LEFT" optionsArray={() => textAlignSelectOptions} onChange={updateCurrentTextInputStyle} />
             </div>
         </div>
     );
 }
+
+
+/**
+ * Return font-size select options from 8 to 72. Use "16" as default
+ * 
+ * @returns array with option tags
+ */
+function getFontSizeSelectOptions(): React.JSX.Element[] {
+
+    const options = [<option value="8px">8</option>]
+
+    for (let i = 9; i < 72; i++) {
+        // use 16 as default
+        if (i === 16) {
+            options.push(<option value={i + "px"} selected>{i}</option>)
+
+        } else
+            options.push(<option value={i + "px"}>{i}</option>)
+        
+        // start going up by two from here (like 12, 14, 16...)
+        if (i >= 12)
+            i++;
+    }
+
+    return options
+}
+
+
+/**
+ * Return a few font-family select options. Use "Calibri as default".
+ * 
+ * @returns array with option tags
+ */
+function getFontFamilySelectOptions(): React.JSX.Element[] {
+
+    const options = [<option value="Calibri" style={{fontFamily: "calibri"}} selected>Calibri</option>]
+    
+    fontFamilies.forEach(fontFamily => {
+        options.push(<option value={fontFamily} style={{fontFamily: fontFamily}}>{fontFamily}</option>)
+    });
+
+    return options;
+}
+
+
+const indentSelectOptions = [<option value="0px">0</option>, 
+                             <option value="30px">1</option>, 
+                             <option value="60px">2</option>];
+
+
+const textAlignSelectOptions = [<option value="LEFT">Links</option>, 
+                                <option value="CENTER">Mitte</option>, 
+                                <option value="RIGHT">Rechts</option>];
