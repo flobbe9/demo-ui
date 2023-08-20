@@ -10,11 +10,22 @@
 
     .HeaderFooter {
         
+        .header {
+            width: 12em; 
+        }
+
+        .footer {
+            width: 12em;
+        }
     }
     
     .BasicParagraph {
         display: flex;
         width: fit-content;
+        
+        .basicParagraph {
+            width: 12em;
+        }
     }
     
     .front {

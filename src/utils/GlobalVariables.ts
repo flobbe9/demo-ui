@@ -11,3 +11,5 @@ export const fontFamilies = [
     "Courier New",
     "Brush Script MT"
 ]
+
+export const NO_TEXT_INPUT_SELECTED = "Please select an input fieled first.";

@@ -1,77 +1,70 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import sendHttpRequest from "../../utils/fetch/fetch";
 import "../styles/DocumentBuilder.css";
-import Style from "./Style";
 import Document from "./Document";
 import FileSaver from "file-saver"
 import { BACKEND_BASE_URL } from "../../utils/GlobalVariables";
+import StylePanel from "./style/StylePanel";
 
 
+/** id of BasicParagraphs text input currently selected */
+export let currentBasicParagraphId = "";
+
+
+// TODO: add default or required props to all components
+// TODO: consider error throwing and handling, alert?
 export default function DocumentBuilder(props) {
-
-    // TODO: add tab close check
-    // TODO: add default or required props to all components
-
-    const textInputId = useRef("");
-
-
-    useEffect(() => {
-        // confirm page refresh
-        window.addEventListener("beforeunload", (event) => {
-            event.preventDefault();
-            event.returnValue = "";
-        });
-    }, [])
-
-   
-    /**
-     * Setter for id of the text input currently focused in {@link Document}.
-     * 
-     * @param newTextInputId 
-     */
-    function setTextInputId(newTextInputId: string) {
-
-        textInputId.current = newTextInputId;
-    };
     
-
-    /**
-     * Gets the text input currently selected in {@link Document} using the {@link textInputId}.
-     * 
-     * @returns the text input currently focused in {@link Document}
-     */
-    function getCurrentTextInput(): HTMLInputElement | null {
-
-        // TODO: consider message
-        // TODO: consider popup style
-        const component = document.getElementById(textInputId.current);
-        if (!component) {
-            alert("Please select an input fieled first")
-            return null;
-        }
-        
-        return component.querySelector("input");
-    }
-
+    useEffect(() => {
+        // confirm page refresh / tab close / window close
+        // window.addEventListener("beforeunload", (event) => {
+        //     event.preventDefault();
+        //     event.returnValue = "";
+        // });
+    }, [])
 
     return (
         <div className="DocumentBuilder">
             <div style={{textAlign: "center"}}>
-                <h1 onClick={() => alert(textInputId.current)}>Document builder</h1><br />
+                <h1>Document builder</h1><br />
             </div>
 
             <div className="container">
-                <Document textInputId={textInputId} 
-                          setTextInputId={setTextInputId} 
-                          getCurrentTextInput={getCurrentTextInput} />
+                <Document />
 
-                <Style textInputId={textInputId} 
-                       setTextInputId={setTextInputId}
-                       getCurrentTextInput={getCurrentTextInput} />
+                <StylePanel />
             </div>   
         </div>
     )
 }
+
+
+/**
+ * Setter for id of the text input currently focused in {@link Document}.
+ * 
+ * @param newBasicParagraphId 
+ */
+export function setCurrentBasicParagraphId(newBasicParagraphId: string) {
+    
+    currentBasicParagraphId = newBasicParagraphId;
+};
+
+
+/**
+ * Gets the text input currently selected in {@link Document} using the {@link currentBasicParagraphId}.
+ * 
+ * @returns the text input currently focused in {@link Document}
+ */
+export function getCurrentTextInput(): HTMLInputElement | null {
+    
+    const currentBasicParagraph = document.getElementById(currentBasicParagraphId);
+
+    if (!currentBasicParagraph) 
+        return null;
+            
+    return currentBasicParagraph.querySelector("input");
+}
+
 
 
 // TODO: has to be session scoped somehow
@@ -89,7 +82,7 @@ function setUpWordDocument(): void {
 
     // iterate all inputs inside "Document"
     const textInputs = Document.getElementsByTagName("input");
-    Array.from(textInputs).forEach((input, i) => {
+    Array.from(textInputs).forEach(async (input, i) => {
         // add break at the top of first page to even out COLUMN break bug
         if (i === 1)
             wordDocument.content.push(null);
@@ -123,7 +116,7 @@ function setUpWordDocument(): void {
         // case: is picture
         } else if (inputType === "file") {
             // case: picutres have been uploaded
-            uploadFiles(input, basicParagraph);                
+            await uploadFiles(input, basicParagraph);            
 
         // case: TODO: is table
         }
@@ -131,7 +124,6 @@ function setUpWordDocument(): void {
 }
 
 
-// TODO: methods should wait for eachother
 export async function downloadWordDocument(): Promise<void> {
 
     setUpWordDocument();
@@ -146,9 +138,9 @@ export async function downloadWordDocument(): Promise<void> {
     // download request
     if (createDocumentResponse.status === 200) 
         FileSaver.saveAs(BACKEND_BASE_URL + "/test/download?pdf=false");
-
-    // clean up request
-    sendHttpRequest(BACKEND_BASE_URL + "/test/clearResourceFolder");
+    
+    // clean up request, wait 2 seconds after download
+    setTimeout(() => sendHttpRequest(BACKEND_BASE_URL + "/test/clearResourceFolder"), 2000);
 
     cleanUpWordDocument();
 }
@@ -164,8 +156,6 @@ function cleanUpWordDocument(): void {
 }
 
 
-// TODO: consider error throwing and handling, alert?
-
 function getBasicParagraph(input: HTMLInputElement): BasicParagraph {
 
     if (!input)
@@ -179,7 +169,7 @@ function getBasicParagraph(input: HTMLInputElement): BasicParagraph {
 }
 
 
-export function getTextInputStyle(textInput: HTMLInputElement): Style {
+export function getTextInputStyle(textInput: HTMLInputElement): BasicStyle {
 
     if (!textInput)
         throw Error("Failed to setup style for basic paragraph.");
@@ -271,7 +261,7 @@ function isAddColumnBreak(content: HTMLCollectionOf<HTMLInputElement>, currentIn
         const currentTextInput = content[currentIndex];
 
         // case: is last page
-        if (currentTextInput.name === "page2")
+        if (currentTextInput.name === "page1")
             return false;
         
         // ommit headers and footers
@@ -298,12 +288,12 @@ function isAddColumnBreak(content: HTMLCollectionOf<HTMLInputElement>, currentIn
  * @param fileInput html input of type "file" holding the uploaded file
  * @param basicParagraph of current iteration
  */
-function uploadFiles(fileInput: HTMLInputElement, basicParagraph: BasicParagraph): void {
+async function uploadFiles(fileInput: HTMLInputElement, basicParagraph: BasicParagraph): Promise<void> {
 
     if (fileInput.files) {
         for (let i = 0; i < fileInput.files.length; i++) {
             const file = fileInput.files.item(i);
-            if (file) {
+            if (file) { 
                 // create formData
                 const formData = new FormData();
                 formData.append("file", file);
@@ -320,7 +310,7 @@ function uploadFiles(fileInput: HTMLInputElement, basicParagraph: BasicParagraph
 }
 
 
-function sendUploadPicturesRequest(formData: FormData, pictureName: string) {
+async function sendUploadPicturesRequest(formData: FormData, pictureName: string) {
 
     fetch(BACKEND_BASE_URL + "/test/uploadFile?fileName=" + pictureName, {
         method: "post",
@@ -340,11 +330,12 @@ interface DocumentWrapper {
 
 interface BasicParagraph {
     text: string, 
-    style: Style
+    style: BasicStyle
 }
 
 
-export interface Style {
+// TODO: reconsider name
+export interface BasicStyle {
     fontSize: number,   
     fontFamily: string,
     color: string,
