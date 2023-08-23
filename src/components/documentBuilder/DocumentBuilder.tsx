@@ -18,14 +18,15 @@ export function setCurrentBasicParagraphId(newBasicParagraphId: string) {
 };
 
 
+// TODO: make helper for alert/log combinations, add error popup instead of alert
 export default function DocumentBuilder(props) {
 
     useEffect(() => {
         // confirm page refresh / tab close / window close
-        // window.addEventListener("beforeunload", (event) => {
-        //     event.preventDefault();
-        //     event.returnValue = "";
-        // });
+        window.addEventListener("beforeunload", (event) => {
+            event.preventDefault();
+            event.returnValue = "";
+        });
     }, [])
 
     return (
@@ -74,8 +75,10 @@ export async function downloadWordDocument(): Promise<void> {
     const createDocumentResponse = await sendHttpRequest(BACKEND_BASE_URL + "/test/createDocument?file=asdf", "post", wordDocument);
 
     // handle build errors
-    if (createDocumentResponse.status !== 200) 
-        alert(createDocumentResponse.error + ": " + createDocumentResponse.message);
+    if (createDocumentResponse.status !== 200) {
+        console.log(createDocumentResponse.error + ": " + createDocumentResponse.message);
+        alert("Server Error. Bitte versuche es erneut oder lade die Seite neu!")
+    }
         
     // download request
     if (createDocumentResponse.status === 200) 
@@ -113,7 +116,7 @@ async function pushBasicParagraph(currentInput: HTMLInputElement, inputs: HTMLCo
     const inputType = currentInput.type;
 
     // get text and style
-    const basicParagraph = getBasicParagraph(currentInput);
+    const basicParagraph = getBasicParagraph(currentInput)!;
 
     // case: column break
     if (isAddColumnBreak(inputs, i)) 
@@ -138,10 +141,7 @@ async function pushBasicParagraph(currentInput: HTMLInputElement, inputs: HTMLCo
 }
 
 
-function getBasicParagraph(input: HTMLInputElement): BasicParagraph {
-
-    if (!input) 
-        throw Error("Failed to get basicParagraph. Input falsy.");
+function getBasicParagraph(input: HTMLInputElement): BasicParagraph | null {
 
     let inputValue = input.value
 
@@ -151,41 +151,52 @@ function getBasicParagraph(input: HTMLInputElement): BasicParagraph {
 
     return {
         text: inputValue, 
-        style: getTextInputStyle(input)
+        style: getTextInputStyle(input)!
     };
 }
 
 
 
-export function getTextInputStyle(textInput: HTMLInputElement): BasicStyle {
+export function getTextInputStyle(textInput: HTMLInputElement): BasicStyle | null {
 
-    if (!textInput)
-        throw Error("Failed to setup style for basic paragraph.");
+    if (!textInput) {
+        console.log("Failed to setup style for basic paragraph.");
+        alert("Das hat leider nicht geklappt. Bitte versuche es erneut oder lade die Seite neu!");
+        return null;
+    }
     
     const textInputStyle = textInput.style;
     
-    return {
-        fontSize: Number.parseInt(getTextInputStyleValue(textInput, "font-size", textInputStyle.fontSize)),
-        fontFamily: getTextInputStyleValue(textInput, "font-family", textInputStyle.fontFamily),
-        color: rgbToHex(getTextInputStyleValue(textInput, "color", textInputStyle.color)),
-        bold: getTextInputStyleValue(textInput, "font-weight", textInputStyle.fontWeight) === "bold",
-        italic: getTextInputStyleValue(textInput, "font-style", textInputStyle.fontStyle) === "italic",
-        underline: getTextInputStyleValue(textInput, "text-decoration", textInputStyle.textDecoration) === "underline",
-        // this condition might change 
-        indentFirstLine: Number.parseInt(getTextInputStyleValue(textInput, "margin-left", textInputStyle.marginLeft)) >= 30,
-        indentParagraph: Number.parseInt(getTextInputStyleValue(textInput, "margin-left", textInputStyle.marginLeft)) >= 60,
-        textAlign: getTextInputStyleValue(textInput, "text-align", textInputStyle.textAlign).toUpperCase(),
-        breakType: null
+    try {
+        return {
+            fontSize: Number.parseInt(getTextInputStyleValue(textInput, "font-size", textInputStyle.fontSize)!),
+            fontFamily: getTextInputStyleValue(textInput, "font-family", textInputStyle.fontFamily)!,
+            color: rgbToHex(getTextInputStyleValue(textInput, "color", textInputStyle.color)!),
+            bold: getTextInputStyleValue(textInput, "font-weight", textInputStyle.fontWeight)! === "bold",
+            italic: getTextInputStyleValue(textInput, "font-style", textInputStyle.fontStyle)! === "italic",
+            underline: getTextInputStyleValue(textInput, "text-decoration", textInputStyle.textDecoration)! === "underline",
+            // this condition might change 
+            indentFirstLine: Number.parseInt(getTextInputStyleValue(textInput, "margin-left", textInputStyle.marginLeft)!) >= 30,
+            indentParagraph: Number.parseInt(getTextInputStyleValue(textInput, "margin-left", textInputStyle.marginLeft)!) >= 60,
+            textAlign: getTextInputStyleValue(textInput, "text-align", textInputStyle.textAlign)!.toUpperCase(),
+            breakType: null
+        }
+
+    // case: no default style found
+    } catch (e) {
+        console.log(e.name + ": " + e.message);
+        alert("Das hat leider nicht geklappt. Bitte versuche es erneut oder lade die Seite neu!");
+        return null;
     }
 }
 
 
-function getTextInputStyleValue(textInput: HTMLInputElement, textInputStyleAttribute: string, currentTextInputStyleValue: string): string {
+function getTextInputStyleValue(textInput: HTMLInputElement, textInputStyleAttribute: string, currentTextInputStyleValue: string): string | null {
 
     let defaultStyleValue = textInput.computedStyleMap().get(textInputStyleAttribute);
 
-    if (!defaultStyleValue)
-        throw Error("Failed to read default style attribute.")
+    if (!defaultStyleValue) 
+        return null;
     
     defaultStyleValue = defaultStyleValue.toString();
 
@@ -301,8 +312,11 @@ async function uploadFiles(fileInput: HTMLInputElement, basicParagraph: BasicPar
                 const response = await sendUploadPicturesRequest(formData, file.name);
 
                 // case: upload failed
-                if (response.status !== 200) 
-                    throw Error(response);
+                if (response.status !== 200) {
+                    console.log(response);
+                    alert("Server Error. Bitte versuche es erneut oder lade die Seite neu!")
+                    return;
+                }
 
                 // add bp with file name for backend
                 basicParagraph.text = file.name;

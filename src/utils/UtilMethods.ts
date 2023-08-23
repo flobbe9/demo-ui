@@ -1,10 +1,3 @@
-function logError() {
-    // TODO: log somehow
+export function logError() {
     console.log("Errorrrr")
-}
-
-
-async function sleep(callBack, timeout: number) {
-
-    
 }
