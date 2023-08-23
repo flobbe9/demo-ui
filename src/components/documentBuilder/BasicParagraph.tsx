@@ -4,6 +4,19 @@ import { BasicParagraphContext, setTextInputCount, textInputCount } from "./Docu
 import { NO_TEXT_INPUT_SELECTED } from "../../utils/GlobalVariables";
 
 
+/** Key of the BasicParagraph currently selected. */
+let key = "";
+
+
+/**
+ * Componnt defining a basic text input in the Document component that can be added multiple times.
+ * 
+ * @param props.id id of component
+ * @param props.key unique key for each BasicParagraph in the Document component
+ * @param props.propsKey identical with props.key. Exists because props.key cannot be accessed through props
+ * @param props.pageType type of Page component (e.g. page1, front...)
+ * @since 0.0.1
+ */
 export default function BasicParagraph(props: {
     id: string,
     key: string,
@@ -19,8 +32,11 @@ export default function BasicParagraph(props: {
     useEffect(() => {
         // case: more than one bp on this page
         if (textInputCount > 3) {
+
+            key = props.propsKey
+            
             // get styles from prev text input
-            transferTextInputStyle(props.id);
+            transferTextInputStyle(props.id, basicParagraphs);
 
             // focus new text input
             document.getElementById(props.id)?.querySelector("input")?.focus();
@@ -56,7 +72,7 @@ export default function BasicParagraph(props: {
                    name={props.pageType}
                    type="text" 
                    placeholder="Text..." 
-                   onFocus={() => {setCurrentBasicParagraphId(props.id)}} 
+                   onFocus={() => setCurrentBasicParagraphId(props.id)} 
                    onClick={updateStylePanel}
                    onInput={handleInput}/>
 
@@ -71,7 +87,7 @@ export default function BasicParagraph(props: {
 
 function addBasicParagraph(propsKey: string, pageType: string, basicParagraphs, setBasicParagraphs): void {
 
-    const basicParagraphIndex = getCurrentBasicParagraphIndex(propsKey, basicParagraphs);
+    const basicParagraphIndex = getBasicParagraphIndex(propsKey, basicParagraphs);
     const basicParagraphId = "basicParagraph-" + pageType + "-" + (textInputCount);
     const newKey = crypto.randomUUID();
 
@@ -83,9 +99,9 @@ function addBasicParagraph(propsKey: string, pageType: string, basicParagraphs, 
 }
 
 
-function removeBasicParagraph(propsKey: string, basicParagraphs, setBasicParagraphs): void {
+function removeBasicParagraph(key: string, basicParagraphs, setBasicParagraphs): void {
 
-    const basicParagraphIndex = getCurrentBasicParagraphIndex(propsKey, basicParagraphs);
+    const basicParagraphIndex = getBasicParagraphIndex(key, basicParagraphs);
 
     // always leave one basic paragraph
     if (basicParagraphs.length === 1) 
@@ -98,7 +114,7 @@ function removeBasicParagraph(propsKey: string, basicParagraphs, setBasicParagra
 }
 
 
-function getCurrentBasicParagraphIndex(propsKey: string, basicParagraphs): number {
+function getBasicParagraphIndex(propsKey: string, basicParagraphs): number {
 
     let index = -1;
 
@@ -211,15 +227,14 @@ function getMarginFromIndent(style: BasicStyle): string {
  * 
  * @param newBasicParagraphId id of the basicParagraph holding the new text input to apply the styles to
  */
-// TODO: should use text input above as "currentTextInput" instead of "getCurrentTextInput()"
-function transferTextInputStyle(newBasicParagraphId: string): void {
+function transferTextInputStyle(newBasicParagraphId: string, basicParagraphs): void {
 
-    // case: only one bp on this page                                    
+    // case: only one bp on this page
     if (textInputCount === 1)
         return;
 
-    const currentTextInput = getCurrentTextInput();
-    if (!currentTextInput)
+    const textInputAbove = getTextInputAbove(basicParagraphs);
+    if (!textInputAbove)
         return;
 
     const newTextInput = document.getElementById(newBasicParagraphId)?.querySelector("input");
@@ -227,12 +242,31 @@ function transferTextInputStyle(newBasicParagraphId: string): void {
         return;
 
     // set each style attribute of new text input to current text input style
-    newTextInput.style.fontSize = currentTextInput.style.fontSize;
-    newTextInput.style.fontFamily = currentTextInput.style.fontFamily;
-    newTextInput.style.color = currentTextInput.style.color;
-    newTextInput.style.fontWeight = currentTextInput.style.fontWeight;
-    newTextInput.style.fontStyle = currentTextInput.style.fontStyle;
-    newTextInput.style.textDecoration = currentTextInput.style.textDecoration;
-    newTextInput.style.marginLeft = currentTextInput.style.marginLeft;
-    newTextInput.style.textAlign = currentTextInput.style.textAlign;
+    newTextInput.style.fontSize = textInputAbove.style.fontSize;
+    newTextInput.style.fontFamily = textInputAbove.style.fontFamily;
+    newTextInput.style.color = textInputAbove.style.color;
+    newTextInput.style.fontWeight = textInputAbove.style.fontWeight;
+    newTextInput.style.fontStyle = textInputAbove.style.fontStyle;
+    newTextInput.style.textDecoration = textInputAbove.style.textDecoration;
+    newTextInput.style.marginLeft = textInputAbove.style.marginLeft;
+    newTextInput.style.textAlign = textInputAbove.style.textAlign;
+}
+
+
+/**
+ * Get the text input above the BP that was created last.
+ * 
+ * @param basicParagraphs see state of {@link BasicParagraph}
+ * @returns the text input of the BP above or null if not found
+ */
+function getTextInputAbove(basicParagraphs): HTMLInputElement | null {
+
+    // index of BP last created
+    const newBasicParagraphIndex = getBasicParagraphIndex(key, basicParagraphs);
+
+    // get as HTMLElement
+    const basicParagraphAbove = document.getElementById(basicParagraphs[newBasicParagraphIndex - 1].props.id);
+
+    // get input element
+    return basicParagraphAbove ? basicParagraphAbove.querySelector("input") : null;
 }

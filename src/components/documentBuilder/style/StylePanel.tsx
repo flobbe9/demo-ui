@@ -13,7 +13,6 @@ import StylePanelRadioButton from "./StylePanelRadioButton";
     // reset styles on picture type click
 // TODO: make checkboxes buttons like in word
 // BUG: textInput gets smaller when decreasing fontSize
-// TODO: rename to StylePanel
 export default function StylePanel(props) {
 
     return (
@@ -81,7 +80,6 @@ function updateCurrentTextInputStyle(event, styleAttributeCSS: string, styleValu
     const currentTextInput = getCurrentTextInput();
 
     if (!currentTextInput) {
-        // TODO: consider message
         // TODO: consider popup style
         alert(NO_TEXT_INPUT_SELECTED)
         event.preventDefault();

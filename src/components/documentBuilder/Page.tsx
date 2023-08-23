@@ -5,7 +5,6 @@ import BasicParagraph from "./BasicParagraph";
 
 
 /**
- * TODO: 
  * "textInput" refers to any text input on a page. <p>
  * "basicParagraph" refers to a normal text input from the array, thus not beeing a header, footer, style or table text input.
  * @param props 

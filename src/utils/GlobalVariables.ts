@@ -12,4 +12,4 @@ export const fontFamilies = [
     "Brush Script MT"
 ]
 
-export const NO_TEXT_INPUT_SELECTED = "Please select an input fieled first.";
+export const NO_TEXT_INPUT_SELECTED = "Wähle zuerst ein Texteingabefeld aus.";

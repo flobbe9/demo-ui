@@ -24,6 +24,8 @@ export default function App() {
                     </Routes>
                 </div>
 
+                <br />
+
                 <Footer />
 
             </BrowserRouter>

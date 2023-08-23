@@ -1,5 +1,5 @@
-import React from 'react'
-import { BACKEND_BASE_URL } from '../utils/GlobalVariables'
+import React from "react"
+import { BACKEND_BASE_URL } from "../utils/GlobalVariables"
 
 
 
