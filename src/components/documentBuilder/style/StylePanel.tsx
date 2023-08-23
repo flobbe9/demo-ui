@@ -1,5 +1,5 @@
 import React from "react";
-import "../../styles/Style.css";
+import "../../styles/StylePanel.css";
 import { NO_TEXT_INPUT_SELECTED, fontFamilies } from "../../../utils/GlobalVariables";
 import { getCurrentTextInput } from "../DocumentBuilder";
 import StylePanelCheckbox from "./StylePanelCheckbox";
@@ -118,22 +118,17 @@ function isHeaderFooter(textInput: HTMLInputElement): boolean {
  */
 function getFontSizeSelectOptions(): React.JSX.Element[] {
 
-    const options = [<option value="8px">8</option>]
+    const options = [<option key={crypto.randomUUID()} value="8px">8</option>]
 
-    for (let i = 9; i < 72; i++) {
-        // use 16 as default
-        if (i === 16) {
-            options.push(<option value={i + "px"} selected>{i}</option>)
-
-        } else
-            options.push(<option value={i + "px"}>{i}</option>)
+    for (let i = 9; i <= 72; i++) {
+        options.push(<option key={crypto.randomUUID()} value={i + "px"}>{i}</option>)
         
         // start going up by two from here (like 12, 14, 16...)
         if (i >= 12)
             i++;
     }
 
-    return options
+    return options;
 }
 
 
@@ -144,21 +139,21 @@ function getFontSizeSelectOptions(): React.JSX.Element[] {
  */
 function getFontFamilySelectOptions(): React.JSX.Element[] {
 
-    const options = [<option value="Calibri" style={{fontFamily: "calibri"}} selected>Calibri</option>]
+    const options = [<option key={crypto.randomUUID()} value="Calibri" style={{fontFamily: "calibri"}}>Calibri</option>]
     
     fontFamilies.forEach(fontFamily => {
-        options.push(<option value={fontFamily} style={{fontFamily: fontFamily}}>{fontFamily}</option>)
+        options.push(<option key={crypto.randomUUID()} value={fontFamily} style={{fontFamily: fontFamily}}>{fontFamily}</option>)
     });
 
     return options;
 }
 
 
-const indentSelectOptions = [<option value="0px">0</option>, 
-                             <option value="30px">1</option>, 
-                             <option value="60px">2</option>];
+const indentSelectOptions = [<option key={crypto.randomUUID()} value="0px">0</option>, 
+                             <option key={crypto.randomUUID()} value="30px">1</option>, 
+                             <option key={crypto.randomUUID()} value="60px">2</option>];
 
 
-const textAlignSelectOptions = [<option value="LEFT">Links</option>, 
-                                <option value="CENTER">Mitte</option>, 
-                                <option value="RIGHT">Rechts</option>];
+const textAlignSelectOptions = [<option key={crypto.randomUUID()} value="LEFT">Links</option>, 
+                                <option key={crypto.randomUUID()} value="CENTER">Mitte</option>, 
+                                <option key={crypto.randomUUID()} value="RIGHT">Rechts</option>];

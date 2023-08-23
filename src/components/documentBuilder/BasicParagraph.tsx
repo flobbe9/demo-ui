@@ -156,7 +156,7 @@ export function updateStylePanel(): void {
 
     updateStylePanelInputTypeSwitch(currentTextInput);
 
-    const currentTextInputStyle = getTextInputStyle(currentTextInput);
+    const currentTextInputStyle = getTextInputStyle(currentTextInput)!;
 
     Array.from(document.getElementsByClassName("stylePanelInput")).forEach(el => {
         const stylePanelInput = el as HTMLInputElement;

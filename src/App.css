@@ -3,6 +3,12 @@ body {
     padding: 0;
 }
 
+.App {
+    position: relative;
+    min-height: 100vh;
+}
+
 .content {
     margin: 10px;
+    padding-bottom: 80px;
 }

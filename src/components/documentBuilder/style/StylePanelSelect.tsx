@@ -15,6 +15,7 @@ import StylePanel from "./StylePanel";
  * @param props.onChange callback for onChange event
  * @since 0.0.1
  */
+// TODO: prevent default wont prevent select
 export default function StylePanelSelect(props: {
     label?: string,
     styleAttributeBackend: string,
@@ -32,7 +33,8 @@ export default function StylePanelSelect(props: {
                     name={props.styleAttributeBackend} 
                     // only for alert if no input selected
                     onMouseDown={getCurrentTextInput}
-                    onChange={(event) => props.onChange(event, props.styleAttributeCSS, props.styleValueDefault)}>
+                    onChange={(event) => props.onChange(event, props.styleAttributeCSS, props.styleValueDefault)}
+                    defaultValue={"16px"}>
                     {props.optionsArray()}
             </select>
         </div>

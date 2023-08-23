@@ -6,6 +6,7 @@ import Index from "./components/Index";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import DocumentBuilder from "./components/documentBuilder/DocumentBuilder";
+import NotFound from "./components/error/NotFound";
 
 
 export default function App() {
@@ -13,7 +14,6 @@ export default function App() {
     return (
         <div className="App">
             <BrowserRouter>
-
                 <NavBar />
 
                 <div className="content">
@@ -21,13 +21,11 @@ export default function App() {
                         <Route path="/" element={<Index />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/builder" element={<DocumentBuilder />} />
+                        <Route path="*" element={<NotFound />} />
                     </Routes>
                 </div>
 
-                <br />
-
                 <Footer />
-
             </BrowserRouter>
         </div>
     );
