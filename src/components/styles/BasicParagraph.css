@@ -1,0 +1,38 @@
+.BasicParagraph {
+    display: flex;
+    width: 100%;
+    
+    .basicParagraphInputContainer {
+        width: 90%;
+        
+        .basicParagraphInput {
+            border: 0;
+            border-radius: 4px;
+            width: 12em;
+            
+            &:focus {
+                outline: 0;
+            }
+        }
+    }
+
+    .plusButton {
+        background-color: rgb(0, 110, 255);
+        border: none;
+        border-radius: 100%;
+        color: white;
+
+        display: fixed;
+        outline: none;
+    }
+
+    .deleteButton {
+        background-color: rgb(255, 0, 0);
+        border: none;
+        border-radius: 100%;
+        color: white;
+
+        display: fixed;
+        outline: none;
+    }
+}

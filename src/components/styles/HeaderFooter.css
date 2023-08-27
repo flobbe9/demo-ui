@@ -1,0 +1,18 @@
+.HeaderFooter {
+    .header, .footer {
+        border: 0;
+        width: 12em; 
+
+        &:focus {
+            outline: 0;
+        }
+    }
+    
+    .header {
+        margin-bottom: 10px;
+    }
+
+    .footer {
+        margin-top: 10px;
+    }
+}

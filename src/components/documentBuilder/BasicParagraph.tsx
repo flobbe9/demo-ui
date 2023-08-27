@@ -2,6 +2,10 @@ import React, { useContext, useEffect, useState } from "react";
 import { BasicStyle, getCurrentTextInput, getTextInputStyle, setCurrentBasicParagraphId } from "./DocumentBuilder";
 import { BasicParagraphContext, setTextInputCount, textInputCount } from "./Document";
 import { NO_TEXT_INPUT_SELECTED } from "../../utils/GlobalVariables";
+import { toggleCheckboxStyle } from "./style/StylePanelCheckbox";
+import { toggleColor } from "./style/StylePanelColor";
+import { toggleRadioButtonStyle } from "./style/StylePanelRadioButton";
+import "../styles/BasicParagraph.css";
 
 
 /** Key of the BasicParagraph currently selected. */
@@ -14,14 +18,14 @@ let key = "";
  * @param props.id id of component
  * @param props.key unique key for each BasicParagraph in the Document component
  * @param props.propsKey identical with props.key. Exists because props.key cannot be accessed through props
- * @param props.pageType type of Page component (e.g. page1, front...)
+ * @param props.columnPosition type of PageColumn component ("left" or "right")
  * @since 0.0.1
  */
 export default function BasicParagraph(props: {
     id: string,
     key: string,
     propsKey: string,
-    pageType: string
+    columnPosition: string
 }) {
 
     const [buttonsDisplay, setButtonsDisplay] = useState("none");
@@ -32,7 +36,6 @@ export default function BasicParagraph(props: {
     useEffect(() => {
         // case: more than one bp on this page
         if (textInputCount > 3) {
-
             key = props.propsKey
             
             // get styles from prev text input
@@ -46,7 +49,7 @@ export default function BasicParagraph(props: {
 
     function addBasicParagraphHelper(): void {
 
-        addBasicParagraph(props.propsKey, props.pageType, basicParagraphs, setBasicParagraphs);
+        addBasicParagraph(props.propsKey, props.columnPosition, basicParagraphs, setBasicParagraphs);
     }
 
 
@@ -68,13 +71,15 @@ export default function BasicParagraph(props: {
              onMouseEnter={hoverButtons}
              onMouseLeave={hoverButtons}>
 
-            <input className="basicParagraph" 
-                   name={props.pageType}
-                   type="text" 
-                   placeholder="Text..." 
-                   onFocus={() => setCurrentBasicParagraphId(props.id)} 
-                   onClick={updateStylePanel}
-                   onInput={handleInput}/>
+            <div className="basicParagraphInputContainer">
+                <input className="basicParagraphInput"
+                    name={props.columnPosition}
+                    type="text" 
+                    placeholder="Text..." 
+                    onFocus={() => setCurrentBasicParagraphId(props.id)} 
+                    onClick={updateStylePanel}
+                    onInput={handleInput}/>
+            </div>
 
             <div style={{display: buttonsDisplay}}>
                 <button className="plusButton" onClick={addBasicParagraphHelper}>+</button>
@@ -85,14 +90,14 @@ export default function BasicParagraph(props: {
 }
 
 
-function addBasicParagraph(propsKey: string, pageType: string, basicParagraphs, setBasicParagraphs): void {
+function addBasicParagraph(propsKey: string, columnPosition: string, basicParagraphs, setBasicParagraphs): void {
 
     const basicParagraphIndex = getBasicParagraphIndex(propsKey, basicParagraphs);
-    const basicParagraphId = "basicParagraph-" + pageType + "-" + (textInputCount);
+    const basicParagraphId = "BasicParagraph-" + columnPosition + "-" + (textInputCount);
     const newKey = crypto.randomUUID();
 
     // case: normal text input
-    basicParagraphs.splice(basicParagraphIndex + 1, 0, <BasicParagraph id={basicParagraphId} key={newKey} propsKey={newKey} pageType={pageType} />);
+    basicParagraphs.splice(basicParagraphIndex + 1, 0, <BasicParagraph id={basicParagraphId} key={newKey} propsKey={newKey} columnPosition={columnPosition} />);
     setBasicParagraphs([...basicParagraphs]);
 
     setTextInputCount(textInputCount + 1);
@@ -154,55 +159,74 @@ export function updateStylePanel(): void {
         return;
     }
 
-    updateStylePanelInputTypeSwitch(currentTextInput);
+    updateStylePanelInputs(currentTextInput);
+}
+
+
+/**
+ * Updates the StylePanel's input fields according to given text input.
+ * 
+ * @param currentTextInput text input currently selected
+ */
+function updateStylePanelInputs(currentTextInput: HTMLInputElement) {
 
     const currentTextInputStyle = getTextInputStyle(currentTextInput)!;
 
     Array.from(document.getElementsByClassName("stylePanelInput")).forEach(el => {
         const stylePanelInput = el as HTMLInputElement;
         const stylePanelInputType = stylePanelInput.type;
-        let stylePanelStyleAttribute = stylePanelInput.name;
+        const stylePanelStyleAttribute = stylePanelInput.name;
 
         // case: select
         if (stylePanelInputType === "select-one") {
-            stylePanelInput.value = getCurrentTextInputStyleValueForSelect(stylePanelStyleAttribute, currentTextInputStyle);
+            stylePanelInput.value = getCurrentTextInputStyleValueByBasicStyle(stylePanelStyleAttribute, currentTextInputStyle);
 
         // case: checkbox
         } else if (stylePanelInputType === "checkbox") {
             stylePanelInput.checked = currentTextInputStyle[stylePanelStyleAttribute];
+            toggleCheckboxStyle(stylePanelInput.parentElement!.id);
 
         // case: color
-        } else if (stylePanelInputType === "color")
+        } else if (stylePanelInputType === "color") {
             stylePanelInput.value = "#" + currentTextInputStyle[stylePanelStyleAttribute];
+            toggleColor("#" + currentTextInputStyle[stylePanelStyleAttribute]);
+            
+        } else if (stylePanelInputType === "radio") {
+            let checked = getCurrentTextInputStyleValueByBasicStyle(stylePanelStyleAttribute, currentTextInputStyle) === stylePanelInput.value;
+            
+            // case: type switch
+            if (stylePanelStyleAttribute === "textInputTypeSwitch")
+                checked = currentTextInput.type === stylePanelInput.value;
+
+            if (checked) {
+                toggleRadioButtonStyle("StylePanelRadioButton-" + stylePanelInput.value, stylePanelInput.name)
+                stylePanelInput.checked = checked;
+            }
+        }
     });
 }
 
 
-function updateStylePanelInputTypeSwitch(currentTextInput: HTMLInputElement): void {
-
-    const currentTextInputType = currentTextInput.type;
-
-    if (currentTextInputType === "text") {
-        (document.getElementById("textInputTypeSwitch-text") as HTMLInputElement)!.checked = true;
-
-    } else if (currentTextInputType === "file")
-        (document.getElementById("textInputTypeSwitch-file") as HTMLInputElement)!.checked = true;
-}
-
-
-function getCurrentTextInputStyleValueForSelect(stylePanelStyleAttribute: string, currentTextInputStyle: BasicStyle): string {
+function getCurrentTextInputStyleValueByBasicStyle(basicStyleAttribute: string, currentTextInputStyle: BasicStyle): string {
 
     // case: indent
-    if (stylePanelStyleAttribute === "indent") {
+    if (basicStyleAttribute === "indent") {
         return getMarginFromIndent(currentTextInputStyle);
 
     // case: fontSize
-    } else if (stylePanelStyleAttribute === "fontSize")  {
-        return currentTextInputStyle[stylePanelStyleAttribute] + "px";
+    } else if (basicStyleAttribute === "fontSize")  {
+        return currentTextInputStyle[basicStyleAttribute] + "px";
 
     // case: any other
-    } else
-        return currentTextInputStyle[stylePanelStyleAttribute];
+    } else {
+        let currentStyleValue = currentTextInputStyle[basicStyleAttribute];
+
+        // ignore case
+        if (currentStyleValue)
+            currentStyleValue = currentStyleValue.toLowerCase();
+
+        return currentStyleValue;
+    }
 }
 
 

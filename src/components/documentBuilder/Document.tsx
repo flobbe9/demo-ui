@@ -19,20 +19,11 @@ export function setTextInputCount(newTextInputCount: number): void {
 
 export default function Document(props) {
     
-    // TODO: reconsider page order, back first is confusing
     return (
         <div className="Document">
-            <h3>Back</h3>
-            <Page pageType="back" />
+                <Page pageNumber={1} />
 
-            <h3>Front page</h3>
-            <Page pageType="front" />
-
-            <h3>Page2</h3>
-            <Page pageType="page2" />
-
-            <h3>Page1</h3>
-            <Page pageType="page1" />
+                <Page pageNumber={2} />
             
             <div style={{textAlign: "right"}}>
                 {/* TODO: add some kind of "pending" button */}

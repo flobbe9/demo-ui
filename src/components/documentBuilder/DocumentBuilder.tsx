@@ -32,12 +32,12 @@ export default function DocumentBuilder(props) {
     return (
         <div className="DocumentBuilder">
 
-            <h1 style={{textAlign: "center"}}>Document builder</h1><br />
+            {/* <h1 style={{textAlign: "center"}}>Document builder</h1><br /> */}
 
             <div className="container">
-                <Document />
-
                 <StylePanel />
+
+                <Document />
             </div>   
         </div>
     )
@@ -116,7 +116,7 @@ async function pushBasicParagraph(currentInput: HTMLInputElement, inputs: HTMLCo
     const inputType = currentInput.type;
 
     // get text and style
-    const basicParagraph = getBasicParagraph(currentInput)!;
+    const basicParagraph = createBasicParagraph(currentInput)!;
 
     // case: column break
     if (isAddColumnBreak(inputs, i)) 
@@ -141,7 +141,7 @@ async function pushBasicParagraph(currentInput: HTMLInputElement, inputs: HTMLCo
 }
 
 
-function getBasicParagraph(input: HTMLInputElement): BasicParagraph | null {
+function createBasicParagraph(input: HTMLInputElement): BasicParagraph | null {
 
     let inputValue = input.value
 
@@ -263,7 +263,7 @@ function isAddColumnBreak(content: HTMLCollectionOf<HTMLInputElement>, currentIn
             return false;
         
         // ommit headers and footers
-        if (currentTextInput.className !== "basicParagraph")
+        if (currentTextInput.className !== "basicParagraphInput")
             return false;
 
         const nextTextInput = content[currentIndex + 1];
