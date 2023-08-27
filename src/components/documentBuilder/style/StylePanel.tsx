@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../../styles/StylePanel.css";
 import { NO_TEXT_INPUT_SELECTED, fontFamilies } from "../../../utils/GlobalVariables";
 import { getCurrentTextInput } from "../DocumentBuilder";
 import StylePanelCheckbox from "./StylePanelCheckbox";
 import StylePanelSelect from "./StylePanelSelect";
 import StylePanelRadioButton from "./StylePanelRadioButton";
+import StylePanelColor from "./StylePanelColor";
 
 
 // TODO: consider applying textAlign to input tag, not to it's value
@@ -12,70 +13,194 @@ import StylePanelRadioButton from "./StylePanelRadioButton";
     // no style for picture type inputs
     // reset styles on picture type click
 // TODO: make checkboxes buttons like in word
+// TODO: add style reset
 // BUG: textInput gets smaller when decreasing fontSize
+// BUG: fontfamily disappears on textinput click
 export default function StylePanel(props) {
 
     return (
-        <div className="Style">
+        <div className="StylePanel">
             <div className="inputTypeSwitch">
-                <StylePanelRadioButton label="Text" inputType="text" onClick={updateCurrentTextInputType} />
-
-                <StylePanelRadioButton label="Bild" inputType="file" onClick={updateCurrentTextInputType} />
-                
+                <StylePanelRadioButton radioButtonGroup="textInputTypeSwitch" 
+                                       styleValue="text" 
+                                       height="50px" 
+                                       width="50px"
+                                       styleValueDefault="text">
+                    Text
+                </StylePanelRadioButton>
+                <StylePanelRadioButton radioButtonGroup="textInputTypeSwitch" 
+                                       styleValue="file" 
+                                       height="50px" 
+                                       width="50px" 
+                                       styleValueDefault="text">
+                    Bild
+                </StylePanelRadioButton>
                 {/* TODO:  */}
-                {/* <StylePanelRadioButton label="Tabelle" textInputType="table" onClick={updateCurrentTextInputType} /> */}
+                {/* <StylePanelRadioButton label="Tabelle" textstyleValue="table" onClick={updateCurrentTextInputType} /> */}
             </div>
 
-            <div className="stylePanel">
-                <StylePanelSelect label="Schriftgröße" styleAttributeBackend="fontSize" styleAttributeCSS="font-size" styleValueDefault="16px" optionsArray={getFontSizeSelectOptions} onChange={updateCurrentTextInputStyle} />
+            <hr className="verticalHr" />
 
-                <StylePanelSelect label="Schriftart" styleAttributeBackend="fontFamily" styleAttributeCSS="font-family" styleValueDefault="Calibri" optionsArray={getFontFamilySelectOptions} onChange={updateCurrentTextInputStyle} />
+            <div className="style">
+                <div>
+                    <div className="StylePanelFlex">
+                        <StylePanelSelect label="Schriftart" styleAttributeBackend="fontFamily" styleAttributeCSS="font-family" styleValueDefault="Calibri" optionsArray={getFontFamilySelectOptions} />
+                        <StylePanelSelect label="Schriftgröße" styleAttributeBackend="fontSize" styleAttributeCSS="font-size" styleValueDefault="16px" optionsArray={getFontSizeSelectOptions} />
 
-                <label className="stylePanelLabel" htmlFor="color">Farbe</label>
-                <input className="stylePanelInput" 
-                       type="color" 
-                       name="color" 
-                       // only for alert if no input selected
-                       onMouseDown={getCurrentTextInput}
-                       onChange={(event) => updateCurrentTextInputStyle(event, "color", "#000000")} />
-                
-                <StylePanelCheckbox label="Fett" styleValue="bold" styleAttributeCSS="font-weight" styleValueDefault="normal" onChange={updateCurrentTextInputStyle} />
-                
-                <StylePanelCheckbox label="Kursiv" styleValue="italic" styleAttributeCSS="font-style" styleValueDefault="normal" onChange={updateCurrentTextInputStyle} />
-                
-                <StylePanelCheckbox label="Unterstrichen" styleValue="underline"  styleAttributeCSS="text-decoration" styleValueDefault="none" onChange={updateCurrentTextInputStyle} />
+                    </div>
 
-                <StylePanelSelect label="Einrückungen" styleAttributeBackend="indent" styleAttributeCSS="margin-left" styleValueDefault="0px" optionsArray={() => indentSelectOptions} onChange={updateCurrentTextInputStyle} />
+                    <div className="StylePanelFlex">
+                        <StylePanelCheckbox styleValue="bold" styleAttributeCSS="font-weight" styleValueDefault="normal" ><strong>F</strong></StylePanelCheckbox>
+                        <StylePanelCheckbox styleValue="italic" styleAttributeCSS="font-style" styleValueDefault="normal"><i>K</i></StylePanelCheckbox>
+                        <StylePanelCheckbox styleValue="underline"  styleAttributeCSS="text-decoration" styleValueDefault="none"><u>U</u></StylePanelCheckbox>
+                        
+                        <StylePanelColor styleAttributeCSS="color" styleValueDefault="#000000"/>
+                    </div>
+                </div>
 
-                <StylePanelSelect label="Text Ausrichtung" styleAttributeBackend="textAlign" styleAttributeCSS="text-align" styleValueDefault="LEFT" optionsArray={() => textAlignSelectOptions} onChange={updateCurrentTextInputStyle} />
+                <hr className="verticalHr" />
+
+                <div>
+                    <div className="StylePanelFlex">
+                        <StylePanelRadioButton radioButtonGroup="indent" 
+                                               styleValue="0px" 
+                                               height="30px" 
+                                               width="40px"
+                                               styleAttributeCSS="margin-left"
+                                               styleValueDefault="0px">
+                            <IndentIcon parentId="StylePanelRadioButton-0px" numIndents={0} alignment="left">
+                                <hr className="indentLine" />
+                            </IndentIcon>
+                        </StylePanelRadioButton>
+
+                        <StylePanelRadioButton radioButtonGroup="indent" 
+                                               styleValue="30px" 
+                                               height="30px" 
+                                               width="40px"
+                                               styleAttributeCSS="margin-left"
+                                               styleValueDefault="0px">
+                            <IndentIcon parentId="StylePanelRadioButton-30px" numIndents={1} alignment="left">
+                                <hr className="indentLine" />
+                            </IndentIcon>
+                        </StylePanelRadioButton>
+
+                        <StylePanelRadioButton radioButtonGroup="indent" 
+                                               styleValue="60px"
+                                               height="30px" 
+                                               width="40px"
+                                               styleAttributeCSS="margin-left"
+                                               styleValueDefault="0px">
+                            <IndentIcon parentId="StylePanelRadioButton-60px" numIndents={2} alignment="left">
+                                <hr className="indentLine" />
+                            </IndentIcon>
+                        </StylePanelRadioButton>
+                    </div>
+
+                    <div className="StylePanelFlex">
+                        <StylePanelRadioButton radioButtonGroup="textAlign" 
+                                               styleValue="left" 
+                                               height="35px" 
+                                               width="35px"
+                                               styleAttributeCSS="text-align"
+                                               styleValueDefault="left">
+                            <IndentIcon parentId="StylePanelRadioButton-left" numIndents={0} alignment="left">
+                                <hr className="indentLine" />
+                                <hr className="indentLine" />
+                            </IndentIcon>
+                        </StylePanelRadioButton>
+
+                        <StylePanelRadioButton radioButtonGroup="textAlign" 
+                                               styleValue="center" 
+                                               height="35px" 
+                                               width="35px"
+                                               styleAttributeCSS="text-align"
+                                               styleValueDefault="left">
+                            <IndentIcon parentId="StylePanelRadioButton-center" numIndents={0} alignment="center">
+                                <hr className="indentLine" />
+                                <hr className="indentLine" />
+                            </IndentIcon>
+                        </StylePanelRadioButton>
+
+                        <StylePanelRadioButton radioButtonGroup="textAlign" 
+                                               styleValue="right"
+                                               height="35px" 
+                                               width="35px"
+                                               styleAttributeCSS="text-align"
+                                               styleValueDefault="left">
+                            <IndentIcon parentId="StylePanelRadioButton-right" numIndents={0} alignment="right">
+                                <hr className="indentLine" />
+                                <hr className="indentLine" />
+                            </IndentIcon>
+                        </StylePanelRadioButton>
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
 
 
-function updateCurrentTextInputType(event, textInputType: string): void {
+function IndentIcon(props: {
+    children,
+    numIndents: number,
+    alignment: string
+    parentId?: string,
+}) {
+
+    const [marginLeft, setMarginLeft] = useState("");
+
+
+    useEffect(() => {
+        // display flex align
+        if (props.parentId) {
+            const parent = document.getElementById(props.parentId)!;
+            parent.style.justifyContent = props.alignment;
+            parent.style.padding = "0";
+        }
+
+        if (props.numIndents === 1) {
+            setMarginLeft("10px");
+    
+        } else if (props.numIndents === 2) {
+            setMarginLeft("20px");
+        }
+    }, []);
+    
+
+    return (
+        <div className="IndentIcon">
+            {props.children}
+            <hr className="indentLine" style={{marginLeft: marginLeft}}/>
+        </div>
+    )
+}
+
+
+export function updateCurrentTextInputType(event, textInputType: string): boolean {
         
     const currentTextInput = getCurrentTextInput();
 
     if (!currentTextInput) {
         alert(NO_TEXT_INPUT_SELECTED)
         event.preventDefault();
-        return;
+        return false;
     }
 
     // case: trying to assign header/footer different type than "text"
     if (isHeaderFooter(currentTextInput) && textInputType !== "text") {
         event.preventDefault();
         alert("Header and footer fields can only by of type 'Text'.");
-        return;
+        return false;
     }
 
     currentTextInput.type = textInputType;
+
+    return true;
 }
 
 
-function updateCurrentTextInputStyle(event, styleAttributeCSS: string, styleValueDefault: string, styleValueCheckbox?: string): void {
+// TODO: change this
+export function updateCurrentTextInputStyle(event, styleAttributeCSS: string, styleValueDefault: string, styleValueCheckbox?: string): boolean {
 
     const currentTextInput = getCurrentTextInput();
 
@@ -83,8 +208,12 @@ function updateCurrentTextInputStyle(event, styleAttributeCSS: string, styleValu
         // TODO: consider popup style
         alert(NO_TEXT_INPUT_SELECTED)
         event.preventDefault();
-        return;
+        return false;
     }
+
+    // case: is not "text" input
+    if (currentTextInput.type !== "text")
+        return false;
 
     const stylePanelInput = event.target as HTMLInputElement;
     
@@ -102,6 +231,8 @@ function updateCurrentTextInputStyle(event, styleAttributeCSS: string, styleValu
     // case: basicParagraph
     } else
         currentTextInput.style[styleAttributeCSS] = stylePanelInputValue || styleValueDefault;
+
+    return true;
 }
 
 

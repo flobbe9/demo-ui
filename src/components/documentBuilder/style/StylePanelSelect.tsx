@@ -1,7 +1,8 @@
 import React from "react"; 
 import { getCurrentTextInput } from "../DocumentBuilder";
 import { BasicStyle } from "../DocumentBuilder";
-import StylePanel from "./StylePanel";
+import StylePanel, { updateCurrentTextInputStyle } from "./StylePanel";
+import "../../styles/StylePanelSelect.css";
 
 
 /**
@@ -22,19 +23,17 @@ export default function StylePanelSelect(props: {
     styleAttributeCSS: string, 
     styleValueDefault: string,
     optionsArray: () => React.JSX.Element[], 
-    onChange
 }) {
 
     return (
         <div className="StylePanelSelect">
-            {props.label ? <label className="stylePanelLabel" htmlFor={props.styleAttributeBackend}>{props.label}</label> : null}
-
             <select className="stylePanelInput" 
                     name={props.styleAttributeBackend} 
                     // only for alert if no input selected
                     onMouseDown={getCurrentTextInput}
-                    onChange={(event) => props.onChange(event, props.styleAttributeCSS, props.styleValueDefault)}
+                    onChange={(event) => updateCurrentTextInputStyle(event, props.styleAttributeCSS, props.styleValueDefault)}
                     defaultValue={"16px"}>
+
                     {props.optionsArray()}
             </select>
         </div>

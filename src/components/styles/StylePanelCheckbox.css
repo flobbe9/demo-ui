@@ -1,0 +1,30 @@
+:root {
+    --stylePanelCheckboxSize: 25px;
+}
+
+.StylePanelCheckbox {
+    align-items: center;
+    background-color: rgb(238, 238, 238);
+    box-shadow: 0px 0px 1px 1px rgb(184, 184, 184) inset;
+    border: 1px solid black;
+    border-radius: 4px;
+    display: flex;
+    height: var(--stylePanelCheckboxSize);
+    justify-content: center;
+    margin: 5px;
+    padding: 5px;
+    width: var(--stylePanelCheckboxSize);
+
+    /* hidden input */
+    .stylePanelInput {
+        position: absolute;
+        opacity: 0;
+        height: var(--stylePanelCheckboxSize);
+        width: var(--stylePanelCheckboxSize)
+    }
+}
+
+.StylePanelCheckbox:hover {
+    box-shadow: 0px 0px 3px 1px grey inset;
+    cursor: pointer;
+}
