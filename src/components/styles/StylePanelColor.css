@@ -4,8 +4,7 @@
 
 .StylePanelColor {
     align-items: center;
-    box-shadow: 0px 0px 1px 1px rgb(184, 184, 184) inset;
-    border: 1px solid black;   
+    border: 1px solid rgb(143, 143, 143);
     border-radius: 4px;
     display: flex;
     font-size: 18px;
@@ -27,8 +26,4 @@
         position: absolute;
         width: var(--stylePanelColorSize);
     }
-}
-
-.StylePanelColor:hover {
-    cursor: pointer;
 }

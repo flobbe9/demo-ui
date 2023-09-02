@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { BasicStyle, getCurrentTextInput, getTextInputStyle, setCurrentBasicParagraphId } from "./DocumentBuilder";
-import { BasicParagraphContext, setTextInputCount, textInputCount } from "./Document";
 import { NO_TEXT_INPUT_SELECTED } from "../../utils/GlobalVariables";
 import { toggleCheckboxStyle } from "./style/StylePanelCheckbox";
 import { toggleColor } from "./style/StylePanelColor";
 import { toggleRadioButtonStyle } from "./style/StylePanelRadioButton";
 import "../styles/BasicParagraph.css";
+import { BasicParagraphContext } from "./PageColumn";
 
 
 /** Key of the BasicParagraph currently selected. */
@@ -21,6 +21,7 @@ let key = "";
  * @param props.columnPosition type of PageColumn component ("left" or "right")
  * @since 0.0.1
  */
+// TODO: make inputs the size of a column but not resizable
 export default function BasicParagraph(props: {
     id: string,
     key: string,
@@ -30,16 +31,16 @@ export default function BasicParagraph(props: {
 
     const [buttonsDisplay, setButtonsDisplay] = useState("none");
 
-    const {basicParagraphs, setBasicParagraphs} = useContext(BasicParagraphContext);
+    const {basicParagraphs, setBasicParagraphs, pageNumber, basicParagraphCount, setBasicParagraphCount} = useContext(BasicParagraphContext);
 
 
     useEffect(() => {
         // case: more than one bp on this page
-        if (textInputCount > 3) {
+        if (basicParagraphCount > 1) {
             key = props.propsKey
             
             // get styles from prev text input
-            transferTextInputStyle(props.id, basicParagraphs);
+            transferTextInputStyle(props.id, basicParagraphs, basicParagraphCount);
 
             // focus new text input
             document.getElementById(props.id)?.querySelector("input")?.focus();
@@ -49,13 +50,13 @@ export default function BasicParagraph(props: {
 
     function addBasicParagraphHelper(): void {
 
-        addBasicParagraph(props.propsKey, props.columnPosition, basicParagraphs, setBasicParagraphs);
+        addBasicParagraph(props.propsKey, pageNumber, props.columnPosition, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount);
     }
 
 
     function removeBasicParagraphHelper(): void {
 
-        removeBasicParagraph(props.propsKey, basicParagraphs, setBasicParagraphs);
+        removeBasicParagraph(props.propsKey, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount);
     }
     
 
@@ -65,6 +66,13 @@ export default function BasicParagraph(props: {
     }
 
 
+    // TODO: handle "Tab" for "indent"
+    function handleKeyDown(event): void {
+        
+        if (event.key === "Enter")
+            addBasicParagraphHelper();
+    }
+
     return (
         <div id={props.id}
              className="BasicParagraph"
@@ -72,13 +80,13 @@ export default function BasicParagraph(props: {
              onMouseLeave={hoverButtons}>
 
             <div className="basicParagraphInputContainer">
-                <input className="basicParagraphInput"
-                    name={props.columnPosition}
-                    type="text" 
-                    placeholder="Text..." 
-                    onFocus={() => setCurrentBasicParagraphId(props.id)} 
-                    onClick={updateStylePanel}
-                    onInput={handleInput}/>
+                <input className="basicParagraphInput textInput"
+                        name={props.id}
+                        type="text" 
+                        // placeholder="Text..." 
+                        onFocus={() => setCurrentBasicParagraphId(props.id)} 
+                        onClick={updateStylePanel}
+                        onKeyDown={handleKeyDown}/>
             </div>
 
             <div style={{display: buttonsDisplay}}>
@@ -90,21 +98,21 @@ export default function BasicParagraph(props: {
 }
 
 
-function addBasicParagraph(propsKey: string, columnPosition: string, basicParagraphs, setBasicParagraphs): void {
-
+function addBasicParagraph(propsKey: string, pageNumber: number, columnPosition: string, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount): void {
+    
     const basicParagraphIndex = getBasicParagraphIndex(propsKey, basicParagraphs);
-    const basicParagraphId = "BasicParagraph-" + columnPosition + "-" + (textInputCount);
+    const basicParagraphId = "BasicParagraph-" + pageNumber + "-" + columnPosition + "-" + (basicParagraphCount + 1);
     const newKey = crypto.randomUUID();
-
+    
     // case: normal text input
     basicParagraphs.splice(basicParagraphIndex + 1, 0, <BasicParagraph id={basicParagraphId} key={newKey} propsKey={newKey} columnPosition={columnPosition} />);
     setBasicParagraphs([...basicParagraphs]);
 
-    setTextInputCount(textInputCount + 1);
+    setBasicParagraphCount(basicParagraphCount + 1);
 }
 
 
-function removeBasicParagraph(key: string, basicParagraphs, setBasicParagraphs): void {
+function removeBasicParagraph(key: string, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount): void {
 
     const basicParagraphIndex = getBasicParagraphIndex(key, basicParagraphs);
 
@@ -115,7 +123,7 @@ function removeBasicParagraph(key: string, basicParagraphs, setBasicParagraphs):
     basicParagraphs.splice(basicParagraphIndex, 1);
     setBasicParagraphs([...basicParagraphs]);
 
-    setTextInputCount(textInputCount - 1);
+    setBasicParagraphCount(basicParagraphCount - 1);
 }
 
 
@@ -131,22 +139,6 @@ function getBasicParagraphIndex(propsKey: string, basicParagraphs): number {
     });
 
     return index;
-}
-
-
-function handleInput(): void {
-
-    const currentTextInput = getCurrentTextInput();
-
-    if (!currentTextInput)
-        return;
-
-    // TODO: does not work properly, don't use length
-    currentTextInput.style.width = (currentTextInput.value.length + 1) + 'em';
-
-    // TODO: this is crap :D
-    if (Number.parseInt(currentTextInput.style.width.replace("em", "")) < 12)
-        currentTextInput.style.width = "12em"
 }
 
 
@@ -251,10 +243,10 @@ function getMarginFromIndent(style: BasicStyle): string {
  * 
  * @param newBasicParagraphId id of the basicParagraph holding the new text input to apply the styles to
  */
-function transferTextInputStyle(newBasicParagraphId: string, basicParagraphs): void {
+function transferTextInputStyle(newBasicParagraphId: string, basicParagraphs, basicParagraphCount): void {
 
     // case: only one bp on this page
-    if (textInputCount === 1)
+    if (basicParagraphCount === 1)
         return;
 
     const textInputAbove = getTextInputAbove(basicParagraphs);
@@ -274,6 +266,7 @@ function transferTextInputStyle(newBasicParagraphId: string, basicParagraphs): v
     newTextInput.style.textDecoration = textInputAbove.style.textDecoration;
     newTextInput.style.marginLeft = textInputAbove.style.marginLeft;
     newTextInput.style.textAlign = textInputAbove.style.textAlign;
+    newTextInput.parentElement!.style.textAlign = textInputAbove.style.textAlign;
 }
 
 
@@ -293,4 +286,35 @@ function getTextInputAbove(basicParagraphs): HTMLInputElement | null {
 
     // get input element
     return basicParagraphAbove ? basicParagraphAbove.querySelector("input") : null;
+}
+
+
+export function getLastBasicParagraphIdInColumn(pageNumber: number, columnPosition: string): string {
+
+    const pageColumn = pageNumber + "-" + columnPosition;
+
+    // iterate pageColumn
+    const basicParagraphsInPageColumn = Array.from(document.getElementsByClassName("BasicParagraph"))
+                                             .filter(bp => bp.id.startsWith("BasicParagraph-" + pageColumn));
+
+    // case: falsy columnPosition
+    if (basicParagraphsInPageColumn.length === 0)
+        return "";
+
+    // return id of last bp in list
+    return basicParagraphsInPageColumn[basicParagraphsInPageColumn.length - 1].id;
+}
+
+
+export function getPageNumberByBasicParagraphId(basicParagraphId: string): number {
+
+    const pageNumber = basicParagraphId.split("-")[1];
+
+    return Number.parseInt(pageNumber);
+}
+
+
+export function getColumnPositionByBasicParagraphId(basicParagraphId: string): string {
+    
+    return basicParagraphId.split("-")[2];
 }

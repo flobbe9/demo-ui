@@ -1,10 +1,13 @@
 .StylePanel {
-    background-color: rgb(226, 226, 226);
-    border: 2px solid red;
+    background-color: white;
+    /* border: 2px solid red; */
+    box-shadow: 0px 4px 4px 2px rgb(194, 194, 194);
     display: flex;
-
-    position: sticky;
+    margin-bottom: 20px;
+    padding: 10px 5px;
+    position: fixed;
     top: 70px;
+    width: 80%;
     
     .inputTypeSwitch {
         align-items: center;
@@ -32,11 +35,10 @@
             display: flex;
         }
     }
-}
-
-.verticalHr {
-    border: none;
-    border-left: 1px solid hsla(200, 10%, 50%, 100);
-    height: 60px;
-    margin: 3px 10px;
+    
+    .borderRight {
+        border-right: 1px solid  rgb(194, 192, 192);
+        margin-right: 5px;
+        padding-right: 5px;
+    }
 }

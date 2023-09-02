@@ -16,6 +16,9 @@ export default function StylePanelCheckbox(props: {
     styleValueDefault: string
 }) {
 
+    const componentId = "StylePanelCheckbox-" + props.styleAttributeCSS;
+
+
     function handleChange(event) {
 
         // apply text input style
@@ -23,13 +26,31 @@ export default function StylePanelCheckbox(props: {
 
         // toggle checkbox style
         if (inputSelected)
-            toggleCheckboxStyle("StylePanelCheckbox-" + props.styleAttributeCSS);
+            toggleCheckboxStyle(componentId);
+    }
+
+
+    function handleMouseOver() {
+
+        let thisComponent = document.getElementById(componentId)!;
+        thisComponent.style.backgroundColor = "rgb(184, 184, 184)";        
+    }
+
+
+    function handleMouseOut() {
+
+        let thisComponent = document.getElementById(componentId)!;
+
+        if (!isChecked(componentId))
+            thisComponent.style.backgroundColor = "rgb(238, 238, 238)";
     }
 
 
     return (
-        <div id={"StylePanelCheckbox-" + props.styleAttributeCSS} 
-             className="StylePanelCheckbox">
+        <div id={componentId} 
+             className="StylePanelCheckbox"
+             onMouseOver={handleMouseOver}
+             onMouseOut={handleMouseOut}>
 
             {props.children}
 

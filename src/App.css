@@ -1,5 +1,5 @@
 body {
-    background: white;
+    background: rgb(230, 230, 230);
     padding: 0;
 }
 
@@ -9,6 +9,5 @@ body {
 }
 
 .content {
-    margin: 10px;
     padding-bottom: 80px;
 }

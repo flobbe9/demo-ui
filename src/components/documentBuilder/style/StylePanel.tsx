@@ -12,15 +12,22 @@ import StylePanelColor from "./StylePanelColor";
 // TODO: add disabled conditions
     // no style for picture type inputs
     // reset styles on picture type click
-// TODO: make checkboxes buttons like in word
 // TODO: add style reset
 // BUG: textInput gets smaller when decreasing fontSize
 // BUG: fontfamily disappears on textinput click
+// TODO: add key enter and key tab functions
+// TODO: size radio buttons properly
+// TODO: make margin a public constant
+// TODO: increase margin 
+// TODO: add info texts on hover
+// TODO: add plus button to header
+// BUG: color button hover does not work
+// TODO: display images in frontend
 export default function StylePanel(props) {
 
     return (
         <div className="StylePanel">
-            <div className="inputTypeSwitch">
+            <div className="inputTypeSwitch borderRight">
                 <StylePanelRadioButton radioButtonGroup="textInputTypeSwitch" 
                                        styleValue="text" 
                                        height="50px" 
@@ -39,10 +46,8 @@ export default function StylePanel(props) {
                 {/* <StylePanelRadioButton label="Tabelle" textstyleValue="table" onClick={updateCurrentTextInputType} /> */}
             </div>
 
-            <hr className="verticalHr" />
-
             <div className="style">
-                <div>
+                <div className="borderRight">
                     <div className="StylePanelFlex">
                         <StylePanelSelect label="Schriftart" styleAttributeBackend="fontFamily" styleAttributeCSS="font-family" styleValueDefault="Calibri" optionsArray={getFontFamilySelectOptions} />
                         <StylePanelSelect label="Schriftgröße" styleAttributeBackend="fontSize" styleAttributeCSS="font-size" styleValueDefault="16px" optionsArray={getFontSizeSelectOptions} />
@@ -57,8 +62,6 @@ export default function StylePanel(props) {
                         <StylePanelColor styleAttributeCSS="color" styleValueDefault="#000000"/>
                     </div>
                 </div>
-
-                <hr className="verticalHr" />
 
                 <div>
                     <div className="StylePanelFlex">
@@ -99,8 +102,8 @@ export default function StylePanel(props) {
                     <div className="StylePanelFlex">
                         <StylePanelRadioButton radioButtonGroup="textAlign" 
                                                styleValue="left" 
-                                               height="35px" 
-                                               width="35px"
+                                               height="30px" 
+                                               width="40px"
                                                styleAttributeCSS="text-align"
                                                styleValueDefault="left">
                             <IndentIcon parentId="StylePanelRadioButton-left" numIndents={0} alignment="left">
@@ -111,8 +114,8 @@ export default function StylePanel(props) {
 
                         <StylePanelRadioButton radioButtonGroup="textAlign" 
                                                styleValue="center" 
-                                               height="35px" 
-                                               width="35px"
+                                               height="30px" 
+                                               width="40px"
                                                styleAttributeCSS="text-align"
                                                styleValueDefault="left">
                             <IndentIcon parentId="StylePanelRadioButton-center" numIndents={0} alignment="center">
@@ -123,8 +126,8 @@ export default function StylePanel(props) {
 
                         <StylePanelRadioButton radioButtonGroup="textAlign" 
                                                styleValue="right"
-                                               height="35px" 
-                                               width="35px"
+                                               height="30px" 
+                                               width="40px"
                                                styleAttributeCSS="text-align"
                                                styleValueDefault="left">
                             <IndentIcon parentId="StylePanelRadioButton-right" numIndents={0} alignment="right">
@@ -189,7 +192,7 @@ export function updateCurrentTextInputType(event, textInputType: string): boolea
     // case: trying to assign header/footer different type than "text"
     if (isHeaderFooter(currentTextInput) && textInputType !== "text") {
         event.preventDefault();
-        alert("Header and footer fields can only by of type 'Text'.");
+        alert("Kopf - und Fußzeilen können nur den Typ 'Text' haben.");
         return false;
     }
 
@@ -199,7 +202,6 @@ export function updateCurrentTextInputType(event, textInputType: string): boolea
 }
 
 
-// TODO: change this
 export function updateCurrentTextInputStyle(event, styleAttributeCSS: string, styleValueDefault: string, styleValueCheckbox?: string): boolean {
 
     const currentTextInput = getCurrentTextInput();
@@ -228,17 +230,22 @@ export function updateCurrentTextInputStyle(event, styleAttributeCSS: string, st
         Array.from(document.getElementsByClassName(currentTextInput.className)).forEach(textInput => 
             (textInput as HTMLInputElement).style[styleAttributeCSS] = stylePanelInputValue || styleValueDefault);
 
-    // case: basicParagraph
-    } else
+    // case: any other styleInput
+    } else {
         currentTextInput.style[styleAttributeCSS] = stylePanelInputValue || styleValueDefault;
+
+        // case: text-align, shift text and HTML input
+        if (styleAttributeCSS === "text-align")
+            currentTextInput.parentElement!.style[styleAttributeCSS] = stylePanelInputValue || styleValueDefault;
+    }
 
     return true;
 }
 
 
-function isHeaderFooter(textInput: HTMLInputElement): boolean {
+export function isHeaderFooter(textInput: HTMLInputElement): boolean {
 
-    return !textInput || textInput.className === "header" || textInput.className === "footer";
+    return !textInput || textInput.className.startsWith("header") || textInput.className.startsWith("footer");
 }
 
 
@@ -278,13 +285,3 @@ function getFontFamilySelectOptions(): React.JSX.Element[] {
 
     return options;
 }
-
-
-const indentSelectOptions = [<option key={crypto.randomUUID()} value="0px">0</option>, 
-                             <option key={crypto.randomUUID()} value="30px">1</option>, 
-                             <option key={crypto.randomUUID()} value="60px">2</option>];
-
-
-const textAlignSelectOptions = [<option key={crypto.randomUUID()} value="LEFT">Links</option>, 
-                                <option key={crypto.randomUUID()} value="CENTER">Mitte</option>, 
-                                <option key={crypto.randomUUID()} value="RIGHT">Rechts</option>];

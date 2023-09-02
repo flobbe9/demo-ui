@@ -16,7 +16,6 @@ export default function NavBar(props) {
                 <div className="text-right">
                     Right
                 </div>
-
         </div>
     );
 }

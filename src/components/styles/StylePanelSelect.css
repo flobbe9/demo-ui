@@ -1,0 +1,13 @@
+.StylePanelSelect {
+    
+    .stylePanelInput {
+        background-color: rgb(238, 238, 238);
+        border: none;
+        border-radius: 4px;
+        outline: none;
+        
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}

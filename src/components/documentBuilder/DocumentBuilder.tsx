@@ -1,11 +1,13 @@
 import React, { useEffect } from "react";
 import sendHttpRequest, { ApiExceptionFormat } from "../../utils/fetch/fetch";
 import "../styles/DocumentBuilder.css";
-import Document from "./Document";
+import Document, { getPageCount } from "./Document";
 import FileSaver from "file-saver"
 import { setTimeout } from "timers-promises";
 import { BACKEND_BASE_URL } from "../../utils/GlobalVariables";
-import StylePanel from "./style/StylePanel";
+import StylePanel, { isHeaderFooter } from "./style/StylePanel";
+import { getColumnPositionByBasicParagraphId, getLastBasicParagraphIdInColumn, getPageNumberByBasicParagraphId } from "./BasicParagraph";
+import { logError } from "../../utils/UtilMethods";
 
 
 /** Id of BasicParagraphs text input currently selected */
@@ -18,7 +20,6 @@ export function setCurrentBasicParagraphId(newBasicParagraphId: string) {
 };
 
 
-// TODO: make helper for alert/log combinations, add error popup instead of alert
 export default function DocumentBuilder(props) {
 
     useEffect(() => {
@@ -31,14 +32,18 @@ export default function DocumentBuilder(props) {
 
     return (
         <div className="DocumentBuilder">
-
-            {/* <h1 style={{textAlign: "center"}}>Document builder</h1><br /> */}
-
-            <div className="container">
+            <div className="displayFlex">
                 <StylePanel />
+            </div>
 
+            <div className="displayFlex">
                 <Document />
-            </div>   
+            </div>
+                        
+            <div style={{textAlign: "right"}}>
+                {/* TODO: add some kind of "pending" button */}
+                <button onClick={downloadWordDocument}>Download</button>
+            </div>
         </div>
     )
 }
@@ -69,75 +74,86 @@ export const wordDocument: DocumentWrapper = {
 
 export async function downloadWordDocument(): Promise<void> {
 
-    setUpWordDocument();
+    // fill object
+    const setUpSuccessfully = await fillWordDocument();
+    if (!setUpSuccessfully)
+        return;
 
-    // build request
+    // build
     const createDocumentResponse = await sendHttpRequest(BACKEND_BASE_URL + "/test/createDocument?file=asdf", "post", wordDocument);
-
-    // handle build errors
     if (createDocumentResponse.status !== 200) {
-        console.log(createDocumentResponse.error + ": " + createDocumentResponse.message);
-        alert("Server Error. Bitte versuche es erneut oder lade die Seite neu!")
+        logError(createDocumentResponse);
+        alert("Server Error. Bitte versuche es erneut oder lade die Seite neu!");
     }
         
-    // download request
+    // download
     if (createDocumentResponse.status === 200) 
         FileSaver.saveAs(BACKEND_BASE_URL + "/test/download?pdf=false");
 
     // wait 2 seconds before cleaning up
     await setTimeout(2000);
     
-    // clean up request
+    // clean up
     sendHttpRequest(BACKEND_BASE_URL + "/test/clearResourceFolder");
 
     cleanUpWordDocument();
 }
 
 
-function setUpWordDocument(): void {
+async function fillWordDocument(): Promise<boolean> {
 
     const Document = document.getElementsByClassName("Document")[0];
     const inputs = Document.getElementsByTagName("input");
 
-    // iterate all inputs inside "Document"
-    Array.from(inputs).forEach((input, i) => {
-        // add break at the top of first page to even out COLUMN break bug
+    for (let i = 0; i < inputs.length; i++) {
+        // add line break at the top of first page to even out COLUMN break bug
         if (i === 1)
             wordDocument.content.push(null);
 
-        pushBasicParagraph(input, inputs, i);
-    });
+        const pushedSuccessfully = await pushBasicParagraph(inputs, i);
+
+        if (!pushedSuccessfully)
+            return false;
+    };
+
+    return true;
 }
 
 
-async function pushBasicParagraph(currentInput: HTMLInputElement, inputs: HTMLCollectionOf<HTMLInputElement>, i: number): Promise<void> {
+async function pushBasicParagraph(inputs: HTMLCollectionOf<HTMLInputElement>, i: number): Promise<boolean> {
 
-    const inputClassName = currentInput.className;
-    const inputType = currentInput.type;
+    const input = inputs[i];
+    const inputType = input.type;
+    const pageNumber = getPageNumberByBasicParagraphId(input.name);
+    const columnPosition = getColumnPositionByBasicParagraphId(input.name);
 
     // get text and style
-    const basicParagraph = createBasicParagraph(currentInput)!;
+    const basicParagraph = createBasicParagraph(input)!;
 
     // case: column break
-    if (isAddColumnBreak(inputs, i)) 
+    if (isAddColumnBreak(inputs, i, pageNumber, columnPosition)) 
         addColumnBreak(basicParagraph);
 
-    // case: header
-    if (inputClassName === "header" && i !== 0)
-        return;
-
-    // case: footer
-    if (inputClassName === "footer" && i !== inputs.length - 1)
-        return;
+    // case: header or footer
+    if (isHeaderFooter(input) && !(i === 0 || i === inputs.length - 1)) 
+        return true;
 
     // case: is text
     if (inputType === "text") {
         wordDocument.content.push(basicParagraph.text === "" ? null : basicParagraph);
 
     // case: is picture
-    } else if (inputType === "file")
+    } else if (inputType === "file") {
         // upload files and add one bp each to wordDocument
-        await uploadFiles(currentInput, basicParagraph);      
+        const uploadSuccessful = await uploadFiles(input, basicParagraph);
+
+        if (uploadSuccessful)
+            wordDocument.content.push(basicParagraph);
+        else
+            return false;
+    }   
+    
+    return true;
 }
 
 
@@ -251,24 +267,24 @@ function hex(rgbStringRegex: string) {
  * 
  * @param content all text inputs from Document
  * @param currentIndex index of current iteration
+ * @param pageNumber of the current text input
+ * @param columnPosition of the current text input
  * @returns true if current text input has different page type than next one, else false
  */
-function isAddColumnBreak(content: HTMLCollectionOf<HTMLInputElement>, currentIndex: number): boolean {
+function isAddColumnBreak(content: HTMLCollectionOf<HTMLInputElement>, currentIndex: number, pageNumber: number, columnPosition: string): boolean {
 
     try {      
         const currentTextInput = content[currentIndex];
 
-        // case: is last page
-        if (currentTextInput.name === "page1")
+        // case: is last ColumnPage
+        if (currentTextInput.name.startsWith("BasicParagraph-" + getPageCount() + "-right-"))
             return false;
         
         // ommit headers and footers
         if (currentTextInput.className !== "basicParagraphInput")
             return false;
 
-        const nextTextInput = content[currentIndex + 1];
-
-        return nextTextInput.className !== currentTextInput.className;
+        return currentTextInput.name === getLastBasicParagraphIdInColumn(pageNumber, columnPosition);
 
     } catch (e) {
         // expect IndexOutOfBounds
@@ -289,19 +305,21 @@ function addColumnBreak(basicParagraph: BasicParagraph): void {
 
 
 /**
- * Iterates all files of a file input and uploads them as {@link FormData}. Also adds the 
- * neccessary bp to {@link wordDocument} with the file name as text.<p>
+ * Iterates all files of a file input and uploads them as {@link FormData}.<p>
+ * Will set text of given basicParagraph to file name. Will center the picture.<p>
  * 
  * Backend endpoint has to define a RequestBody with name "file".
  * 
  * @param fileInput html input of type "file" holding the uploaded file
  * @param basicParagraph of current iteration
  */
-async function uploadFiles(fileInput: HTMLInputElement, basicParagraph: BasicParagraph): Promise<void> {
+async function uploadFiles(fileInput: HTMLInputElement, basicParagraph: BasicParagraph): Promise<boolean> {
 
-    if (fileInput.files) {
-        for (let i = 0; i < fileInput.files.length; i++) {
-            const file = fileInput.files.item(i);
+    const files = fileInput.files;
+
+    if (files) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files.item(i);
 
             if (file) { 
                 // create formData
@@ -313,17 +331,18 @@ async function uploadFiles(fileInput: HTMLInputElement, basicParagraph: BasicPar
 
                 // case: upload failed
                 if (response.status !== 200) {
-                    console.log(response);
+                    logError(response);
                     alert("Server Error. Bitte versuche es erneut oder lade die Seite neu!")
-                    return;
+                    return false;
                 }
 
-                // add bp with file name for backend
                 basicParagraph.text = file.name;
-                wordDocument.content.push(basicParagraph);
+                basicParagraph.style.textAlign = "CENTER";
             }
         }
     }
+
+    return true;
 }
 
 

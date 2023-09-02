@@ -41,6 +41,7 @@
     ]
   },
   "devDependencies": {
-    "@types/file-saver": "^2.0.5"
+    "@types/file-saver": "^2.0.5",
+    "@babel/plugin-proposal-private-property-in-object": "true"
   }
 }

@@ -1,18 +1,16 @@
 .BasicParagraph {
+    /* border: 1px solid blue; */
     display: flex;
     width: 100%;
     
     .basicParagraphInputContainer {
+        /* border: 1px solid blue; */
         width: 90%;
-        
+
         .basicParagraphInput {
-            border: 0;
-            border-radius: 4px;
-            width: 12em;
-            
-            &:focus {
-                outline: 0;
-            }
+            width: 100%;
+            transition: 0.2s;
+
         }
     }
 

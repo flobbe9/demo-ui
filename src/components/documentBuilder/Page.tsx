@@ -4,22 +4,24 @@ import "../styles/Page.css";
 import PageColumn from "./PageColumn";
 
 
-// TODO: print method expects last column to be of type "page1"
 export default function Page(props: {
     pageNumber: number
 }) {
 
+    const pageNumber = props.pageNumber;
+    
+
     return (
         <div className="Page">
-            <HeaderFooter id={"headerFooter-" + props.pageNumber} type="header" placeholder="Kopfzeile..." />
+            <HeaderFooter id={"header-" + pageNumber} type="header" placeholder="Kopfzeile..." />
 
             <div className="displayFlex">
-                <PageColumn columnPosition="left" />
+                <PageColumn pageNumber={pageNumber} columnPosition="left" />
 
-                <PageColumn columnPosition="right" />
+                <PageColumn pageNumber={pageNumber} columnPosition="right" />
             </div>
 
-            <HeaderFooter id={"headerFooter-" + props.pageNumber} type="footer" placeholder="Fußzeile..." />
+            <HeaderFooter id={"footer-" + pageNumber} type="footer" placeholder="Fußzeile..." />
         </div>
     );
 }

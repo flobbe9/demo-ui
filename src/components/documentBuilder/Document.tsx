@@ -1,34 +1,40 @@
-import React, { createContext } from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/Document.css";
-import { downloadWordDocument } from "./DocumentBuilder";
 import Page from "./Page";
 
 
-/** Context holding array with all {@link BasicParagraph}s */
-export const BasicParagraphContext = createContext({basicParagraphs: [<></>], setBasicParagraphs: (basicParagraphs) => {}})
-
-/** Count of all {@link BasicParagraph}s in {@link Document} plus 2 {@link HeaderFooter}s  */
-export let textInputCount = 3;
+// increase this if an "add page" feature should come up
+let pageCount = 2;
 
 
-export function setTextInputCount(newTextInputCount: number): void {
+export function getPageCount(): number {
 
-    textInputCount = newTextInputCount;
+    return pageCount;
 }
 
 
+export function setPageCount(newPageCount: number): void {
+
+    pageCount = newPageCount;
+}
+
+
+// IDEA: consider adding / removing pages
 export default function Document(props) {
+
+    const [pageCountState, setPageCountState] = useState(1);
+
+
+    useEffect(() => {
+        setPageCount(pageCountState + 1);
+    }, [pageCountState]);
+
     
     return (
         <div className="Document">
-                <Page pageNumber={1} />
+            <Page pageNumber={1} />
 
-                <Page pageNumber={2} />
-            
-            <div style={{textAlign: "right"}}>
-                {/* TODO: add some kind of "pending" button */}
-                <button onClick={downloadWordDocument}>Download</button>
-            </div>
+            <Page pageNumber={2} />
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { setCurrentBasicParagraphId } from "./DocumentBuilder";
 import { updateStylePanel } from "./BasicParagraph";
+import "../styles/HeaderFooter.css";
 
 
 /**
@@ -20,12 +21,12 @@ export default function HeaderFooter(props: {
     return (
         <div id={props.id} className="HeaderFooter">
 
-            <input className={props.type}
+            <input className={props.type + " textInput"}
                     type="text" 
                     placeholder={props.placeholder}
                     onKeyUp={(event) => keyUpHeaderFooter(event, props.type)}
                     onFocus={() => setCurrentBasicParagraphId(props.id)} 
-                    onClick={updateStylePanel} />         
+                    onClick={updateStylePanel} />     
         </div>
     )
 }
@@ -44,7 +45,7 @@ function keyUpHeaderFooter(event, type: string) {
         const textInput = headerFooter.querySelector("input");
 
         // check type (header or footer)
-        if ((textInput as HTMLInputElement).className === type)
+        if ((textInput as HTMLInputElement).className.startsWith(type))
             (textInput as HTMLInputElement).value = event.target.value;
     })
 }
