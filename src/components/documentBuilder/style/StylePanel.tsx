@@ -13,16 +13,15 @@ import StylePanelColor from "./StylePanelColor";
     // no style for picture type inputs
     // reset styles on picture type click
 // TODO: add style reset
-// BUG: textInput gets smaller when decreasing fontSize
 // BUG: fontfamily disappears on textinput click
 // TODO: add key enter and key tab functions
 // TODO: size radio buttons properly
 // TODO: make margin a public constant
 // TODO: increase margin 
 // TODO: add info texts on hover
-// TODO: add plus button to header
 // BUG: color button hover does not work
-// TODO: display images in frontend
+// IDEA: display images in frontend
+// IDEA: save and load functionality (connected to login)
 export default function StylePanel(props) {
 
     return (

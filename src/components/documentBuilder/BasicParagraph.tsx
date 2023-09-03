@@ -9,7 +9,19 @@ import { BasicParagraphContext } from "./PageColumn";
 
 
 /** Key of the BasicParagraph currently selected. */
-let key = "";
+let currentBasicParagraphKey = "";
+
+
+export function getCurrentBasicParagraphKey() {
+
+    return currentBasicParagraphKey;
+}
+
+
+export function setCurrentBasicParagraphKey(newKey: string): void {
+
+    currentBasicParagraphKey = newKey;
+}
 
 
 /**
@@ -18,26 +30,23 @@ let key = "";
  * @param props.id id of component
  * @param props.key unique key for each BasicParagraph in the Document component
  * @param props.propsKey identical with props.key. Exists because props.key cannot be accessed through props
- * @param props.columnPosition type of PageColumn component ("left" or "right")
  * @since 0.0.1
  */
-// TODO: make inputs the size of a column but not resizable
 export default function BasicParagraph(props: {
     id: string,
     key: string,
-    propsKey: string,
-    columnPosition: string
+    propsKey: string
 }) {
 
     const [buttonsDisplay, setButtonsDisplay] = useState("none");
 
-    const {basicParagraphs, setBasicParagraphs, pageNumber, basicParagraphCount, setBasicParagraphCount} = useContext(BasicParagraphContext);
+    const {basicParagraphs, setBasicParagraphs, pageNumber, columnPosition, basicParagraphCount, setBasicParagraphCount} = useContext(BasicParagraphContext);
 
 
     useEffect(() => {
         // case: more than one bp on this page
         if (basicParagraphCount > 1) {
-            key = props.propsKey
+            setCurrentBasicParagraphKey(props.propsKey);
             
             // get styles from prev text input
             transferTextInputStyle(props.id, basicParagraphs, basicParagraphCount);
@@ -45,18 +54,31 @@ export default function BasicParagraph(props: {
             // focus new text input
             document.getElementById(props.id)?.querySelector("input")?.focus();
         }
-    }, [])
+
+        if (pageNumber === 1 && columnPosition === "left")
+            document.getElementById(props.id)?.querySelector("input")?.focus();
+    }, []);
 
 
     function addBasicParagraphHelper(): void {
 
-        addBasicParagraph(props.propsKey, pageNumber, props.columnPosition, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount);
+        addBasicParagraph(pageNumber, columnPosition, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount);
     }
 
 
     function removeBasicParagraphHelper(): void {
 
-        removeBasicParagraph(props.propsKey, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount);
+        removeBasicParagraph(basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount);
+    }
+
+
+    function handleFocus() {
+
+        setCurrentBasicParagraphId(props.id);
+
+        updateStylePanel();
+
+        setCurrentBasicParagraphKey(props.propsKey);
     }
     
 
@@ -67,10 +89,32 @@ export default function BasicParagraph(props: {
 
 
     // TODO: handle "Tab" for "indent"
-    function handleKeyDown(event): void {
+    function handleKeyDown(event) {
+
+        const textInputAbove = getTextInputAbove(basicParagraphs);
         
+        // add bp
         if (event.key === "Enter")
             addBasicParagraphHelper();
+
+        // remove bp
+        if (event.key === "Backspace" && getCurrentTextInput()?.value.length === 0) {
+            removeBasicParagraphHelper();
+            textInputAbove?.focus();
+        }
+
+        // select bp above
+        if (event.key === "ArrowUp") {
+            if (textInputAbove)
+                textInputAbove.focus();
+        }
+
+        // select bp below
+        if (event.key === "ArrowDown") {
+            const textInputAbove = getTextInputBelow(basicParagraphs);
+            if (textInputAbove)
+               textInputAbove.focus();
+        }
     }
 
     return (
@@ -83,43 +127,36 @@ export default function BasicParagraph(props: {
                 <input className="basicParagraphInput textInput"
                         name={props.id}
                         type="text" 
-                        // placeholder="Text..." 
-                        onFocus={() => setCurrentBasicParagraphId(props.id)} 
-                        onClick={updateStylePanel}
+                        onFocus={handleFocus} 
                         onKeyDown={handleKeyDown}/>
-            </div>
-
-            <div style={{display: buttonsDisplay}}>
-                <button className="plusButton" onClick={addBasicParagraphHelper}>+</button>
-                <button className="deleteButton" onClick={removeBasicParagraphHelper}>x</button><br />
             </div>
         </div>
     )
 }
 
 
-function addBasicParagraph(propsKey: string, pageNumber: number, columnPosition: string, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount): void {
+function addBasicParagraph(pageNumber: number, columnPosition: string, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount): void {
     
-    const basicParagraphIndex = getBasicParagraphIndex(propsKey, basicParagraphs);
+    const basicParagraphIndex = getCurrentBasicParagraphIndex(basicParagraphs);
     const basicParagraphId = "BasicParagraph-" + pageNumber + "-" + columnPosition + "-" + (basicParagraphCount + 1);
     const newKey = crypto.randomUUID();
     
     // case: normal text input
-    basicParagraphs.splice(basicParagraphIndex + 1, 0, <BasicParagraph id={basicParagraphId} key={newKey} propsKey={newKey} columnPosition={columnPosition} />);
+    basicParagraphs.splice(basicParagraphIndex + 1, 0, <BasicParagraph id={basicParagraphId} key={newKey} propsKey={newKey} />);
     setBasicParagraphs([...basicParagraphs]);
 
     setBasicParagraphCount(basicParagraphCount + 1);
 }
 
 
-function removeBasicParagraph(key: string, basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount): void {
+function removeBasicParagraph(basicParagraphs, setBasicParagraphs, basicParagraphCount, setBasicParagraphCount): void {
 
-    const basicParagraphIndex = getBasicParagraphIndex(key, basicParagraphs);
+    const basicParagraphIndex = getCurrentBasicParagraphIndex(basicParagraphs);
 
     // always leave one basic paragraph
     if (basicParagraphs.length === 1) 
         return;
-    
+
     basicParagraphs.splice(basicParagraphIndex, 1);
     setBasicParagraphs([...basicParagraphs]);
 
@@ -127,12 +164,12 @@ function removeBasicParagraph(key: string, basicParagraphs, setBasicParagraphs, 
 }
 
 
-function getBasicParagraphIndex(propsKey: string, basicParagraphs): number {
+export function getCurrentBasicParagraphIndex(basicParagraphs): number {
 
     let index = -1;
 
     basicParagraphs.forEach((basicParagraph, i) => {
-        if (basicParagraph.key === propsKey)  {
+        if (basicParagraph.key === getCurrentBasicParagraphKey())  {
             index = i;
             return;
         }
@@ -278,14 +315,58 @@ function transferTextInputStyle(newBasicParagraphId: string, basicParagraphs, ba
  */
 function getTextInputAbove(basicParagraphs): HTMLInputElement | null {
 
+    try {
+        // get as HTMLElement
+        const basicParagraphAbove = getBasicParagraphAbove(basicParagraphs);
+        
+        // get input element
+        return basicParagraphAbove ? basicParagraphAbove.querySelector("input") : null;
+
+    // expect IndexOutOfBounds
+    } catch (e) {
+        return null;
+    }
+}
+
+
+function getBasicParagraphAbove(basicParagraphs): Element | null {
+
+    try {
+        // index of BP last created
+        const currentBasicParagraphIndex = getCurrentBasicParagraphIndex(basicParagraphs);
+
+        // get as HTMLElement
+        return document.getElementById(basicParagraphs[currentBasicParagraphIndex - 1].props.id);
+
+    // expect IndexOutOfBounds
+    } catch (e) {
+        return null;
+    }
+}
+
+
+/**
+ * Get the text input above the BP that was created last.
+ * 
+ * @param basicParagraphs see state of {@link BasicParagraph}
+ * @returns the text input of the BP above or null if not found
+ */
+function getTextInputBelow(basicParagraphs): HTMLInputElement | null {
+
     // index of BP last created
-    const newBasicParagraphIndex = getBasicParagraphIndex(key, basicParagraphs);
+    const newBasicParagraphIndex = getCurrentBasicParagraphIndex(basicParagraphs);
 
-    // get as HTMLElement
-    const basicParagraphAbove = document.getElementById(basicParagraphs[newBasicParagraphIndex - 1].props.id);
+    try {
+        // get as HTMLElement
+        const basicParagraphAbove = document.getElementById(basicParagraphs[newBasicParagraphIndex + 1].props.id);
+        
+        // get input element
+        return basicParagraphAbove ? basicParagraphAbove.querySelector("input") : null;
 
-    // get input element
-    return basicParagraphAbove ? basicParagraphAbove.querySelector("input") : null;
+    // expect IndexOutOfBounds
+    } catch (e) {
+        return null;
+    }
 }
 
 

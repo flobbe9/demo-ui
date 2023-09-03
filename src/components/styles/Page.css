@@ -1,5 +1,10 @@
 .Page {
     background-color: white;
     margin-bottom: 20px;
-    padding: 10px 40px;
+    padding: 20px 40px 10px;
+
+    .pageNumber {
+        color: rgba(128, 128, 128, 0.582);
+        text-align: right;
+    }
 }

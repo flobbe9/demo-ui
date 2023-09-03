@@ -21,7 +21,9 @@ export default function Page(props: {
                 <PageColumn pageNumber={pageNumber} columnPosition="right" />
             </div>
 
-            <HeaderFooter id={"footer-" + pageNumber} type="footer" placeholder="Fußzeile..." />
+            <HeaderFooter id={"footer-" + pageNumber} type="footer" placeholder="Fußzeile..."/>
+
+            <div className="pageNumber">{props.pageNumber}</div>
         </div>
     );
 }

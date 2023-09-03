@@ -7,6 +7,7 @@ import "../styles/PageColumn.css";
 export const BasicParagraphContext = createContext({basicParagraphs: [<></>], 
                                                     setBasicParagraphs: (basicParagraphs) => {}, 
                                                     pageNumber: 1,
+                                                    columnPosition: "left",
                                                     basicParagraphCount: 1, 
                                                     setBasicParagraphCount: (basicParagraphCount) => {}});
 
@@ -30,13 +31,13 @@ export default function PageColumn(props: {
     const initialKey = crypto.randomUUID();
     
     /** Initial basicParagraph array */
-    const [basicParagraphs, setBasicParagraphs] = useState([<BasicParagraph id={"BasicParagraph-" + props.pageNumber + "-" + columnPosition + "-" + basicParagraphCount} key={initialKey} propsKey={initialKey} columnPosition={columnPosition}/>]);
+    const [basicParagraphs, setBasicParagraphs] = useState([<BasicParagraph id={"BasicParagraph-" + props.pageNumber + "-" + columnPosition + "-" + basicParagraphCount} key={initialKey} propsKey={initialKey} />]);
     
 
     return (
         <div className="PageColumn">
             <div className={"pageColumn-" + columnPosition}>
-                <BasicParagraphContext.Provider value={{basicParagraphs, setBasicParagraphs, pageNumber, basicParagraphCount, setBasicParagraphCount}}>
+                <BasicParagraphContext.Provider value={{basicParagraphs, setBasicParagraphs, pageNumber, columnPosition, basicParagraphCount, setBasicParagraphCount}}>
 
                     {basicParagraphs}
 
