@@ -6,6 +6,9 @@ on:
     branches: 
       - main
 
+env:    
+    API_VERSION: 0.0.2
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -41,4 +44,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: flobbe9/myairline-frontend:${API_VERSION}
+          tags: flobbe9/myairline-frontend:$API_VERSION
