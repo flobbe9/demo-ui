@@ -1,13 +1,10 @@
-name: myAirline-frontend CI
+name: vorspiel_frontend main
 
 run-name: ${{ github.event.head_commit.message }}
 on: 
   push: 
     branches: 
       - main
-
-env:    
-    API_VERSION: 0.0.2
 
 jobs:
   build:
@@ -44,4 +41,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: flobbe9/myairline-frontend:$API_VERSION
+          tags: flobbe9/myairline-frontend:0.0.2

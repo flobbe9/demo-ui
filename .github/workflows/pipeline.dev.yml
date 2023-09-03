@@ -1,4 +1,4 @@
-name: myAirline-frontend CI
+name: vorspiel_frontend dev
 
 run-name: ${{ github.event.head_commit.message }}
 on: 
