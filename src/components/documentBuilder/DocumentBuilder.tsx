@@ -24,10 +24,10 @@ export default function DocumentBuilder(props) {
 
     useEffect(() => {
         // confirm page refresh / tab close / window close
-        // window.addEventListener("beforeunload", (event) => {
-        //     event.preventDefault();
-        //     event.returnValue = "";
-        // });
+        window.addEventListener("beforeunload", (event) => {
+            event.preventDefault();
+            event.returnValue = "";
+        });
     }, [])
 
     return (
@@ -281,7 +281,7 @@ function isAddColumnBreak(content: HTMLCollectionOf<HTMLInputElement>, currentIn
             return false;
         
         // ommit headers and footers
-        if (currentTextInput.className !== "basicParagraphInput")
+        if (isHeaderFooter(currentTextInput))
             return false;
 
         return currentTextInput.name === getLastBasicParagraphIdInColumn(pageNumber, columnPosition);
