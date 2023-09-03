@@ -3,7 +3,7 @@ version: "3.9"
 services: 
   api:
     build: .
-    image: vorspiel_frontend:${API_VERSION}
+    image: vorspiel_frontend:latest
     container_name: vorspiel_frontend
     ports:
       - 3000:3000

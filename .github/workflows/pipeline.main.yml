@@ -41,4 +41,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: flobbe9/myairline-frontend:0.0.2
+          tags: flobbe9/myairline-frontend:latest
