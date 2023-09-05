@@ -1,4 +1,6 @@
-export const BACKEND_BASE_URL: string = "http://localhost:4001";
+export const BACKEND_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+
+alert(BACKEND_BASE_URL)
 
 export const fontFamilies = [
     "Arial", 
