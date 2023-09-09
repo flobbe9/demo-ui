@@ -7,18 +7,18 @@ on:
       - main
 
 jobs:
-#   build:
-#     runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout repository 
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@v3
 
-#       - run: npm ci
+      - run: npm ci
       
-#       - run: npm run build
-#         env: 
-#           CI: ""
+      - run: npm run build
+        env: 
+          CI: ""
 
   push_to_DockerHub:
     runs-on: ubuntu-latest
@@ -37,16 +37,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      - name: Tag image with old version
-        uses: docker/metadata-action@v4.6.0
-        with: 
-          images: ${{secrets.DOCKERHUB_USERNAME}}/vorspiel_frontend
-          tags: | 
-              type=semver,pattern={{raw}},value=0.0.3
-          
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/vorspiel_frontend:0.0.3,
-                ${{ secrets.DOCKERHUB_USERNAME }}/vorspiel_frontend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/vorspiel_frontend:latest
