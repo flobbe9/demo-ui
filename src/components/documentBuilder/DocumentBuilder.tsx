@@ -80,7 +80,7 @@ export async function downloadWordDocument(): Promise<void> {
         return;
 
     // build
-    const createDocumentResponse = await sendHttpRequest(BACKEND_BASE_URL + "/test/createDocument?file=asdf", "post", wordDocument);
+    const createDocumentResponse = await sendHttpRequest(BACKEND_BASE_URL + "/test/createDocument", "post", wordDocument);
     if (createDocumentResponse.status !== 200) {
         logError(createDocumentResponse);
         alert("Server Error. Bitte versuche es erneut oder lade die Seite neu!");
