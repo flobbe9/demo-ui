@@ -1,6 +1,6 @@
 import React from "react";
 import "../../styles/StylePanelCheckbox.css";
-import { updateCurrentTextInputStyle } from "./StylePanel";
+import { handleMouseOut, handleMouseOver, isChecked, updateCurrentTextInputStyle } from "./StylePanel";
 
 /**
  * 
@@ -10,7 +10,7 @@ import { updateCurrentTextInputStyle } from "./StylePanel";
  * @since 0.0.1 
  */
 export default function StylePanelCheckbox(props: {
-    children,
+    children?,
     styleValue: string,
     styleAttributeCSS: string, 
     styleValueDefault: string
@@ -30,27 +30,11 @@ export default function StylePanelCheckbox(props: {
     }
 
 
-    function handleMouseOver() {
-
-        let thisComponent = document.getElementById(componentId)!;
-        thisComponent.style.backgroundColor = "rgb(184, 184, 184)";        
-    }
-
-
-    function handleMouseOut() {
-
-        let thisComponent = document.getElementById(componentId)!;
-
-        if (!isChecked(componentId))
-            thisComponent.style.backgroundColor = "rgb(238, 238, 238)";
-    }
-
-
     return (
         <div id={componentId} 
              className="StylePanelCheckbox"
-             onMouseOver={handleMouseOver}
-             onMouseOut={handleMouseOut}>
+             onMouseOver={() => handleMouseOver(componentId)}
+             onMouseOut={() => handleMouseOut(componentId)}>
 
             {props.children}
 
@@ -61,14 +45,6 @@ export default function StylePanelCheckbox(props: {
                    onChange={handleChange} />
         </div>
     );
-}
-
-
-function isChecked(componentId: string): boolean {
-
-    let thisComponent = document.getElementById(componentId)!;
-
-    return thisComponent.querySelector("input")!.checked;
 }
 
 

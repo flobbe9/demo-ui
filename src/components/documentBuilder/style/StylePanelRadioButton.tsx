@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { updateCurrentTextInputStyle, updateCurrentTextInputType } from "./StylePanel";
+import { handleMouseOut, handleMouseOver, isChecked, updateCurrentTextInputStyle, updateCurrentTextInputType } from "./StylePanel";
 import "../../styles/StylePanelRadioButton.css";
 
 
@@ -12,7 +12,7 @@ import "../../styles/StylePanelRadioButton.css";
  * @since 0.0.1
  */
 export default function StylePanelRadioButton(props: {
-    children,
+    children?,
     radioButtonGroup: string,
     styleValue: string,
     styleValueDefault: string,
@@ -21,13 +21,13 @@ export default function StylePanelRadioButton(props: {
     styleAttributeCSS?: string,
 }) {
 
-    const className = "StylePanelRadioButton-" + props.styleValue;
+    const componentId = "StylePanelRadioButton-" + props.styleValue;
 
     
     useEffect(() => {
         // style default buttons
         if (isDefaultChecked())
-            toggleRadioButtonStyle(className, props.radioButtonGroup);
+            toggleRadioButtonStyle(componentId, props.radioButtonGroup);
     }, []);
 
     
@@ -50,17 +50,21 @@ export default function StylePanelRadioButton(props: {
             isTextInputSelected = updateCurrentTextInputStyle(event, props.styleAttributeCSS!, props.styleValueDefault);
 
         if (isTextInputSelected)
-            toggleRadioButtonStyle(className, props.radioButtonGroup);
+            toggleRadioButtonStyle(componentId, props.radioButtonGroup);
     }
+    
 
     return (
-        <div id={className} 
+        <div id={componentId} 
              className="StylePanelRadioButton" 
              style={{height: props.height,
-                     width: props.width}}>
+                     width: props.width}}
+             onMouseOver={() => handleMouseOver(componentId)}
+             onMouseOut={() => handleMouseOut(componentId)}>
 
             <span>{props.children}</span>
 
+            {/* hidden input for checked functionality */}
             <input id={"textInputTypeSwitch-" + props.styleValue} 
                     className="stylePanelInput" 
                     name={props.radioButtonGroup} 
@@ -73,15 +77,6 @@ export default function StylePanelRadioButton(props: {
         </div>
     );
 }
-
-
-function isChecked(componentId: string): boolean {
-
-    const thisComponent = document.getElementById(componentId)!;
-
-    return thisComponent.querySelector("input")!.checked;
-}
-
 
 export function toggleRadioButtonStyle(thisComponentId: string, radioButtonGroup: string): void {
 

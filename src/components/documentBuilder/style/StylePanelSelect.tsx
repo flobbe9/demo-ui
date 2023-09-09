@@ -31,8 +31,7 @@ export default function StylePanelSelect(props: {
                     name={props.styleAttributeBackend} 
                     // only for alert if no input selected
                     onMouseDown={getCurrentTextInput}
-                    onChange={(event) => updateCurrentTextInputStyle(event, props.styleAttributeCSS, props.styleValueDefault)}
-                    defaultValue={"16px"}>
+                    onChange={(event) => updateCurrentTextInputStyle(event, props.styleAttributeCSS, props.styleValueDefault)}>
 
                     {props.optionsArray()}
             </select>

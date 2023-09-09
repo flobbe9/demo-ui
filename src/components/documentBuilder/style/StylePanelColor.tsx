@@ -13,6 +13,8 @@ export default function StylePanelColor(props: {
     styleValueDefault: string
 }) {
 
+    const componentId = "StylePanelColor";
+
 
     useEffect(() => {
         // use red on render
@@ -27,10 +29,30 @@ export default function StylePanelColor(props: {
         if (isTextInputSelected)
             toggleColor((event.target as HTMLInputElement).value);
     }
+        
+
+    function handleMouseOver() {
+
+        let thisComponent = document.getElementById(componentId)!;
+        if (!isChecked(componentId))
+            thisComponent.style.backgroundColor = "rgb(238, 238, 238)";        
+    }
+
+
+    function handleMouseOut() {
+
+        let thisComponent = document.getElementById(componentId)!;
+
+        if (!isChecked(componentId))
+            thisComponent.style.backgroundColor = "white";
+    }
 
 
     return (
-        <div className="StylePanelColor">
+        <div id={componentId}
+             className="StylePanelColor"
+             onMouseOver={handleMouseOver}
+             onMouseOut={handleMouseOut}>
             A
             <input className="stylePanelInput" 
                     type="color" 
@@ -38,6 +60,14 @@ export default function StylePanelColor(props: {
                     onChange={handleChange} />
         </div>
     );
+}
+
+
+function isChecked(componentId: string): boolean {
+
+    const thisComponent = document.getElementById(componentId)!;
+
+    return thisComponent.querySelector("input")!.checked;
 }
 
 

@@ -250,8 +250,8 @@ function getCurrentTextInputStyleValueByBasicStyle(basicStyleAttribute: string, 
     } else {
         let currentStyleValue = currentTextInputStyle[basicStyleAttribute];
 
-        // ignore case
-        if (currentStyleValue)
+        // ignore case for textAlign
+        if (currentStyleValue && basicStyleAttribute === "textAlign")
             currentStyleValue = currentStyleValue.toLowerCase();
 
         return currentStyleValue;

@@ -25,10 +25,10 @@ export default function DocumentBuilder(props) {
 
     useEffect(() => {
         // confirm page refresh / tab close / window close
-        window.addEventListener("beforeunload", (event) => {
-            event.preventDefault();
-            event.returnValue = "";
-        });
+        // window.addEventListener("beforeunload", (event) => {
+        //     event.preventDefault();
+        //     event.returnValue = "";
+        // });
     }, [])
 
     return (

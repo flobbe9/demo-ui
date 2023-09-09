@@ -143,7 +143,7 @@ export default function StylePanel(props) {
 
 
 function IndentIcon(props: {
-    children,
+    children?,
     numIndents: number,
     alignment: string
     parentId?: string,
@@ -276,11 +276,68 @@ function getFontSizeSelectOptions(): React.JSX.Element[] {
  */
 function getFontFamilySelectOptions(): React.JSX.Element[] {
 
-    const options = [<option key={crypto.randomUUID()} value="Calibri" style={{fontFamily: "calibri"}}>Calibri</option>]
+    const options = [<option key={crypto.randomUUID()} value="Calibri" style={{fontFamily: "Calibri"}}>Calibri</option>]
     
     fontFamilies.forEach(fontFamily => {
         options.push(<option key={crypto.randomUUID()} value={fontFamily} style={{fontFamily: fontFamily}}>{fontFamily}</option>)
     });
 
     return options;
+}
+
+
+/**
+ * Handles mouseOver effect to HTMLElement of given id. This will only work if element has an input
+ * that is "checkable" as child.
+ * 
+ * @param componentId if of component wrapping the hidden input
+ */
+export function handleMouseOver(componentId: string): void {
+
+    let thisComponent = document.getElementById(componentId);
+
+    if (!thisComponent)
+        return;
+
+    if (!isChecked(componentId))
+        thisComponent.style.backgroundColor = "rgb(184, 184, 184)";        
+}
+
+
+/**
+ * Handles mouseOut effect to HTMLElement of given id. This will only work if element has an input
+ * that is "checkable" as child.
+ * 
+ * @param componentId if of component wrapping the hidden input
+ */
+export function handleMouseOut(componentId: string): void {
+
+    let thisComponent = document.getElementById(componentId);
+
+    if (!thisComponent)
+        return;
+
+    if (!isChecked(componentId))
+        thisComponent.style.backgroundColor = "rgb(238, 238, 238)";
+}
+
+
+/**
+ * Query HTMLElement with given id for first child input element and return "checked" attribute on it.
+ * 
+ * @param componentId if of component wrapping the hidden input
+ * @returns true if hidden input is checked, else false
+ */
+export function isChecked(componentId: string): boolean {
+
+    const thisComponent = document.getElementById(componentId);
+
+    if (!thisComponent)
+        return false;
+
+    const childInput = thisComponent.querySelector("input")
+    if (!childInput)
+        return false;
+    
+    return childInput.checked;
 }
