@@ -1,8 +1,9 @@
 .NotFound {
+    margin-top: 20px;
     text-align: center;
 
     .backToHomePage {
-        color: black;
+        color: white;
         text-decoration: none;
     }
 }

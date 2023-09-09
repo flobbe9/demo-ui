@@ -94,6 +94,7 @@ export const wordDocument: DocumentWrapper = {
 }
 
 
+// TODO: add download method that does not open new tab and returns promise, remove settimeout
 async function downloadWordDocument(): Promise<void> {
 
     // fill object

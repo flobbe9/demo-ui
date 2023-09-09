@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/NotFound.css";
 import { Link } from "react-router-dom";
+import { LoadingButton } from "@mui/lab";
 
 
 /**
@@ -13,13 +14,12 @@ export default function NotFound(props) {
     return (
         <div className="NotFound">
             <h1>404</h1>
-            <h3>Diese Seite gibt es nicht...</h3> <br />
+            <h3>This page does not exist...</h3> <br />
 
             <div>
-                {/* TODO: style this button */}
-                <button>
+                <LoadingButton variant="contained">
                     <Link className="backToHomePage" to="/">Zurück zur Startseite</Link>
-                </button>
+                </LoadingButton>
             </div>
         </div>
     )
