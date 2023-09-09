@@ -15,6 +15,7 @@ export default function App() {
         <div className="App">
             <BrowserRouter>
                 <NavBar />
+                <div>0.0.4 latest</div>
 
                 <div className="content">
                     <Routes>
