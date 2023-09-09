@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import sendHttpRequest, { ApiExceptionFormat } from "../../utils/fetch/fetch";
 import "../styles/DocumentBuilder.css";
 import Document, { getPageCount } from "./Document";
@@ -8,6 +8,7 @@ import { BACKEND_BASE_URL } from "../../utils/GlobalVariables";
 import StylePanel, { isHeaderFooter } from "./style/StylePanel";
 import { getColumnPositionByBasicParagraphId, getLastBasicParagraphIdInColumn, getPageNumberByBasicParagraphId } from "./BasicParagraph";
 import { logError } from "../../utils/UtilMethods";
+import { LoadingButton } from "@mui/lab";
 
 
 /** Id of BasicParagraphs text input currently selected */
@@ -23,6 +24,9 @@ export function setCurrentBasicParagraphId(newBasicParagraphId: string) {
 // TODO: add onUrl change event
 export default function DocumentBuilder(props) {
 
+    const [loading, setLoading] = useState(false);
+
+
     useEffect(() => {
         // confirm page refresh / tab close / window close
         // window.addEventListener("beforeunload", (event) => {
@@ -30,6 +34,19 @@ export default function DocumentBuilder(props) {
         //     event.returnValue = "";
         // });
     }, [])
+
+
+    async function handleDownload(event): Promise<void> {
+
+        console.log(event.target.style);
+        
+        setLoading(true);
+
+        await downloadWordDocument();
+
+        setLoading(false);
+    }
+
 
     return (
         <div className="DocumentBuilder">
@@ -41,9 +58,13 @@ export default function DocumentBuilder(props) {
                 <Document />
             </div>
                         
-            <div style={{textAlign: "right"}}>
-                {/* TODO: add some kind of "pending" button */}
-                <button onClick={downloadWordDocument}>Download</button>
+            <div className="displayFlex">
+                <div className="downloadButtonContainer">
+                    {/* TODO: add some kind of "pending" button */}
+                    <LoadingButton id="downloadButton" loading={loading} onClick={handleDownload} loadingIndicator="Downloading..." variant="contained">
+                        Download
+                    </LoadingButton>
+                </div>
             </div>
         </div>
     )
@@ -73,7 +94,7 @@ export const wordDocument: DocumentWrapper = {
 }
 
 
-export async function downloadWordDocument(): Promise<void> {
+async function downloadWordDocument(): Promise<void> {
 
     // fill object
     const setUpSuccessfully = await fillWordDocument();

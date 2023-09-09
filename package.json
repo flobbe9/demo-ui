@@ -3,6 +3,7 @@
   "version": "0.0.3",
   "private": true,
   "dependencies": {
+    "@mui/lab": "^5.0.0-alpha.143",
     "file-saver": "^2.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -35,7 +36,7 @@
     ]
   },
   "devDependencies": {
-    "@types/file-saver": "^2.0.5",
-    "@babel/plugin-proposal-private-property-in-object": "true"
+    "@babel/plugin-proposal-private-property-in-object": "true",
+    "@types/file-saver": "^2.0.5"
   }
 }
