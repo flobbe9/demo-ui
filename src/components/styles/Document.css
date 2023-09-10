@@ -1,7 +1,6 @@
 .Document {
-    text-align: left;
     margin-top: 130px;
-    
+    text-align: left;
     width: 80%;
 
     .column {

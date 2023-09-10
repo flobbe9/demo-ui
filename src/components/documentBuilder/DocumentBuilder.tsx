@@ -21,7 +21,7 @@ export function setCurrentBasicParagraphId(newBasicParagraphId: string) {
 };
 
 
-// TODO: add onUrl change event
+// TODO: add onUrl change event, navigate maybe
 export default function DocumentBuilder(props) {
 
     const [loading, setLoading] = useState(false);
@@ -38,8 +38,6 @@ export default function DocumentBuilder(props) {
 
     async function handleDownload(event): Promise<void> {
 
-        console.log(event.target.style);
-        
         setLoading(true);
 
         await downloadWordDocument();
@@ -51,6 +49,7 @@ export default function DocumentBuilder(props) {
     return (
         <div className="DocumentBuilder">
             <div className="displayFlex">
+                <div className="randomDiv">{" "}</div>
                 <StylePanel />
             </div>
 
@@ -60,8 +59,7 @@ export default function DocumentBuilder(props) {
                         
             <div className="displayFlex">
                 <div className="downloadButtonContainer">
-                    {/* TODO: add some kind of "pending" button */}
-                    <LoadingButton id="downloadButton" loading={loading} onClick={handleDownload} loadingIndicator="Downloading..." variant="contained">
+                    <LoadingButton id="downloadButton" className="blackButton blackButtonContained" loading={loading} onClick={handleDownload} loadingIndicator="Downloading..." variant="contained">
                         Download
                     </LoadingButton>
                 </div>

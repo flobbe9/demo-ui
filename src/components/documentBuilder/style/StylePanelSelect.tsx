@@ -28,6 +28,7 @@ export default function StylePanelSelect(props: {
     return (
         <div className="StylePanelSelect">
             <select className="stylePanelInput" 
+                    title={props.styleAttributeBackend} 
                     name={props.styleAttributeBackend} 
                     // only for alert if no input selected
                     onMouseDown={getCurrentTextInput}

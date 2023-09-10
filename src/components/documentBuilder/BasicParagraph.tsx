@@ -32,6 +32,7 @@ export function setCurrentBasicParagraphKey(newKey: string): void {
  * @param props.propsKey identical with props.key. Exists because props.key cannot be accessed through props
  * @since 0.0.1
  */
+// TODO: picture input moves on click
 export default function BasicParagraph(props: {
     id: string,
     key: string,

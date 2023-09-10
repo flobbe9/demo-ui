@@ -29,30 +29,35 @@ export default function StylePanelColor(props: {
         if (isTextInputSelected)
             toggleColor((event.target as HTMLInputElement).value);
     }
-        
 
-    function handleMouseOver() {
 
-        let thisComponent = document.getElementById(componentId)!;
-        if (!isChecked(componentId))
-            thisComponent.style.backgroundColor = "rgb(238, 238, 238)";        
+    function handleMouseOver(componentId: string): void {
+
+        let thisComponent = document.getElementById(componentId);
+
+        if (!thisComponent)
+            return;
+    
+        thisComponent.style.backgroundColor = "rgb(231, 231, 231)";
     }
+    
 
+    function handleMouseOut(componentId: string): void {
 
-    function handleMouseOut() {
+        let thisComponent = document.getElementById(componentId);
 
-        let thisComponent = document.getElementById(componentId)!;
-
-        if (!isChecked(componentId))
-            thisComponent.style.backgroundColor = "white";
+        if (!thisComponent)
+            return;
+    
+        thisComponent.style.backgroundColor = "rgb(238, 238, 238)";
     }
 
 
     return (
         <div id={componentId}
              className="StylePanelColor"
-             onMouseOver={handleMouseOver}
-             onMouseOut={handleMouseOut}>
+             onMouseOver={() => handleMouseOver(componentId)}
+             onMouseOut={() => handleMouseOut(componentId)}>
             A
             <input className="stylePanelInput" 
                     type="color" 
@@ -60,14 +65,6 @@ export default function StylePanelColor(props: {
                     onChange={handleChange} />
         </div>
     );
-}
-
-
-function isChecked(componentId: string): boolean {
-
-    const thisComponent = document.getElementById(componentId)!;
-
-    return thisComponent.querySelector("input")!.checked;
 }
 
 

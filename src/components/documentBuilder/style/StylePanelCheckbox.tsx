@@ -53,7 +53,7 @@ export function toggleCheckboxStyle(componentId: string): void {
     let thisComponent = document.getElementById(componentId)!;
 
     if (isChecked(componentId)) 
-        thisComponent.style.backgroundColor = "rgb(155, 155, 155)"
+        thisComponent.style.backgroundColor = "rgb(200, 200, 200)"
     else 
         thisComponent.style.backgroundColor = "rgb(238, 238, 238)";
 }

@@ -8,18 +8,11 @@ import StylePanelRadioButton from "./StylePanelRadioButton";
 import StylePanelColor from "./StylePanelColor";
 
 
-// TODO: consider applying textAlign to input tag, not to it's value
 // TODO: add disabled conditions
-    // no style for picture type inputs
     // reset styles on picture type click
 // TODO: add style reset
-// BUG: fontfamily disappears on textinput click
-// TODO: add key enter and key tab functions
-// TODO: size radio buttons properly
 // TODO: make margin a public constant
-// TODO: increase margin 
 // TODO: add info texts on hover
-// BUG: color button hover does not work
 // IDEA: display images in frontend
 // IDEA: save and load functionality (connected to login)
 export default function StylePanel(props) {
@@ -300,7 +293,7 @@ export function handleMouseOver(componentId: string): void {
         return;
 
     if (!isChecked(componentId))
-        thisComponent.style.backgroundColor = "rgb(184, 184, 184)";        
+        thisComponent.style.backgroundColor = "rgb(231, 231, 231)";
 }
 
 

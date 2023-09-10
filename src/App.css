@@ -1,13 +1,40 @@
 body {
-    background: rgb(230, 230, 230);
+    background: white;
     padding: 0;
 }
 
 .App {
     position: relative;
     min-height: 100vh;
-}
 
-.content {
-    padding-bottom: 80px;
+    .blackButton {
+        border-color: black;
+        padding-right: 20px;
+        text-decoration: none;
+    }
+    
+    .blackButton:focus {
+        outline: none;
+    }
+    
+    
+    .blackButtonContained {
+        background-color: black;
+        color: white;
+    }
+    .blackButtonContained:hover {
+        background-color: rgb(77, 77, 77);
+    }
+    
+    .blackButtonOutlined {
+        color: black;
+    }
+    
+    .blackButtonOutlined:hover {
+        border-color: black;
+    }
+    
+    .content {
+        padding-bottom: 80px;
+    }
 }

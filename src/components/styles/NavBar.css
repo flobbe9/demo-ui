@@ -1,35 +1,52 @@
 :root {
-    --marginNavBarInside: 10px;
+    --marginNavBarInside: 30px;
 }
 
 .NavBar {
     align-items: center;
     background-color: bisque;
-    border: 5px solid black;
+    box-shadow: 0 1px 8px -2px black;
     display: flex;
     font-size: 20px;
     height: 70px;
     position: sticky;
     top: 0;
-}
-
-.text-left {
-    border: 5px solid green;
-    display: flex;
-    margin-left: var(--marginNavBarInside);
-
-    .navItem {
-        border: 5px solid blue;
-        color: black;
-        padding: 0 20px;
-        text-decoration: none;
-    }
-}
+    z-index: 1;
     
+    .text-left {
+        display: flex;
+        margin-left: var(--marginNavBarInside);
+    
+        .navLink {
+            color: black;
+            padding-right: 20px;
+            text-decoration: none;
+        }
 
-.text-right {
-    border: 5px solid red;
+        .navHeading {
+            margin-left: 10px;
+        }
+    }
+        
+    .text-right {
+        position: absolute;
+        right: var(--marginNavBarInside);
+    
+        .navButton {
+            margin-left: 10px;
+    
+            .navLink {
+                color: bisque;
+                text-decoration: none;
+            }
+        }
+    
+        .navButton:focus {
+            outline: none;
+        }
 
-    position: absolute;
-    right: var(--marginNavBarInside);
+        #loginButton {
+            color: bisque;
+        }
+    }
 }

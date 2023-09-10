@@ -8,7 +8,13 @@ import { Link, useLocation } from "react-router-dom";
  * @param param0 
  * @returns react-router-dom Link with confirm function on click
  */
-export default function LinkConfirm({className, to, children}) {
+export default function LinkConfirm(props: {
+    id?,
+    className?, 
+    style?,
+    children?,
+    to
+}) {
 
     const location = useLocation();
 
@@ -22,12 +28,12 @@ export default function LinkConfirm({className, to, children}) {
 
         const confirmLeaveMessage = "Seite verlassen? \nVorgenommene Änderungen werden unter Umständen nicht gespeichert."
 
-        if (location.pathname === "/builder" && !window.confirm(confirmLeaveMessage))
+        if (location.pathname === "/" && !window.confirm(confirmLeaveMessage))
             event.preventDefault();
     }
 
     
     return (
-        <Link className={className} to={to} onClick={confirmNavigate}>{children}</Link>
+        <Link id={props.id} className={props.className} to={props.to} style={props.style} onClick={confirmNavigate}>{props.children}</Link>
     );
 }

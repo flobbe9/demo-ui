@@ -93,5 +93,5 @@ export function toggleRadioButtonStyle(thisComponentId: string, radioButtonGroup
         // uncheck checked component
         checkedComponent.style.backgroundColor = "rgb(238, 238, 238)";
 
-    thisComponent.style.backgroundColor = "rgb(155, 155, 155)";
+    thisComponent.style.backgroundColor = "rgb(200, 200, 200)";
 }

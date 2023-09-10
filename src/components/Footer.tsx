@@ -6,7 +6,7 @@ export default function Footer(props) {
 
     return (
         <div className="Footer">
-            Footer
+            <span className="footerItem">&copy; DocumentBuilder</span>
         </div>
     );
 }
