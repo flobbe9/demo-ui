@@ -10,6 +10,9 @@ import NotFound from "./components/error/NotFound";
 
 export default function App() {
 
+    // use this when backend login is implemented (https://www.baeldung.com/spring-security-csrf)
+    const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+
     return (
         <div className="App">
             <BrowserRouter>
@@ -18,7 +21,7 @@ export default function App() {
                 <div className="content">
                     <Routes>
                         <Route path="/" element={<DocumentBuilder />} />
-                        <Route path="/login" element={<Login />} />
+                        {/* <Route path="/login" element={<Login />} /> */}
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </div>

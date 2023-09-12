@@ -17,7 +17,7 @@ export default function NotFound(props) {
             <h3>This page does not exist...</h3> <br />
 
             <div>
-                <LoadingButton variant="contained">
+                <LoadingButton className="blackButton blackButtonContained" variant="contained">
                     <Link className="backToHomePage" to="/">Zurück zur Startseite</Link>
                 </LoadingButton>
             </div>

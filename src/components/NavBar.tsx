@@ -18,11 +18,11 @@ export default function NavBar(props) {
                 </div>
 
                 <div className="text-right">
-                    <LoadingButton className="blackButton blackButtonOutlined navButton" variant="outlined">
+                    <LoadingButton disabled={true} className="blackButton blackButtonOutlined navButton" variant="outlined">
                         Registrieren
                     </LoadingButton>
 
-                    <LoadingButton className="blackButton blackButtonContained navButton" variant="contained" >
+                    <LoadingButton disabled={true} className="blackButton blackButtonContained navButton" variant="contained" >
                         <LinkConfirm id="loginButton" to="/login" className="navLink">Login</LinkConfirm>
                     </LoadingButton>
                 </div>
