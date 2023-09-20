@@ -1,4 +1,5 @@
 export const BACKEND_BASE_URL = "" + process.env.REACT_APP_BACKEND_BASE_URL;
+export const USER_SERVICE_BASE_URL = "" + process.env.REACT_APP_USER_SERVICE_BASE_URL;
 
 export const fontFamilies = [
     "Arial", 

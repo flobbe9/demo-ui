@@ -6,6 +6,7 @@ import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import DocumentBuilder from "./components/documentBuilder/DocumentBuilder";
 import NotFound from "./components/error/NotFound";
+import AccountConfirmed from "./components/AccountConfirmed";
 
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
                     <Routes>
                         <Route path="/" element={<DocumentBuilder />} />
                         {/* <Route path="/login" element={<Login />} /> */}
+                        <Route path="/confirmAccount" element={<AccountConfirmed />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </div>
