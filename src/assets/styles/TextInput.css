@@ -1,0 +1,12 @@
+:root {
+    /* will be set on Page load */
+    --textInputWidth: 0%
+}
+
+.TextInput {
+    border: none;
+    border-bottom: 1px solid black;
+    border-right: 1px solid black; /* Remove this later*/
+    outline: none;
+    width: var(--textInputWidth);
+}

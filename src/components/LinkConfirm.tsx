@@ -5,7 +5,6 @@ import { Link, useLocation } from "react-router-dom";
 /**
  * Custom Link. Only difference is the onClick handler, which confirms page leave if user leaves builder path.
  * 
- * @param param0 
  * @returns react-router-dom Link with confirm function on click
  */
 export default function LinkConfirm(props: {
@@ -34,6 +33,12 @@ export default function LinkConfirm(props: {
 
     
     return (
-        <Link id={props.id} className={props.className} to={props.to} style={props.style} onClick={confirmNavigate}>{props.children}</Link>
+        <Link id={props.id}     
+              className={props.className} 
+              to={props.to} 
+              style={props.style} 
+              onClick={confirmNavigate}>
+            {props.children}
+        </Link>
     );
 }

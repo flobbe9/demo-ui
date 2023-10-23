@@ -1,12 +1,12 @@
 import React from "react";
-import "./styles/Footer.css";
+import "../assets/styles/Footer.css";
 
 
 export default function Footer(props) {
 
     return (
         <div className="Footer">
-            <span className="footerItem">&copy; DocumentBuilder</span>
+            <span className="footerItem">DocumentBuilder</span>
         </div>
     );
 }

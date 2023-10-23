@@ -18,7 +18,8 @@ export default async function sendHttpRequest(url: string, method = "get", body?
     const fetchHeader: FetchHeader = {
         method: method,
         headers: {
-            "Content-Type": contentType
+            "Content-Type": contentType,
+            "charset": "utf-8"
         }
     }
 
@@ -50,6 +51,7 @@ interface FetchHeader {
     method: string,
     headers: {
         "Content-Type": string,
+        "charset": string
     },
     body?: any
 }

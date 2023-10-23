@@ -1,18 +1,15 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./components/Login";
 import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Document from "./components/Document";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
-import DocumentBuilder from "./components/documentBuilder/DocumentBuilder";
-import NotFound from "./components/error/NotFound";
-import AccountConfirmed from "./components/AccountConfirmed";
 
 
 export default function App() {
 
     // use this when backend login is implemented (https://www.baeldung.com/spring-security-csrf)
-    const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+    // const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
 
     return (
         <div className="App">
@@ -21,10 +18,10 @@ export default function App() {
 
                 <div className="content">
                     <Routes>
-                        <Route path="/" element={<DocumentBuilder />} />
+                        <Route path="/" element={<Document />} />
                         {/* <Route path="/login" element={<Login />} /> */}
-                        <Route path="/confirmAccount" element={<AccountConfirmed />} />
-                        <Route path="*" element={<NotFound />} />
+                        {/* <Route path="/confirmAccount" element={<AccountConfirmed />} /> */}
+                        {/* <Route path="*" element={<NotFound />} /> */}
                     </Routes>
                 </div>
 

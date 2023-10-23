@@ -1,5 +1,5 @@
 import React from "react";
-import "./styles/NavBar.css"
+import "../assets/styles/NavBar.css"
 import LinkConfirm from "./LinkConfirm";
 import { LoadingButton } from "@mui/lab";
 import { Link } from "react-router-dom";
