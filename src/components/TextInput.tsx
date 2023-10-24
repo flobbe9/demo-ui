@@ -41,7 +41,6 @@ export default function TextInput(props: {
     }, []);
 
 
-    // TODO: handle left right keys
     function handleKeyDown(event): void {
 
         if (event.key === "Tab")
@@ -138,7 +137,7 @@ export default function TextInput(props: {
 
 
     function handleEnter(event) {
-        pageColumnContext.addPageColumnLine();
+        pageColumnContext.addPageColumnLine("", true);
     }
 
 

@@ -52,13 +52,16 @@ export default function Page(props: {
     }
 
     
-    function createPageColumn(focusOnRender = false, initPageColumnLines?: React.JSX.Element[], nextPage = false): React.JSX.Element {
+    function createPageColumn(focusOnRender = false, 
+                              initPageColumnLines?: React.JSX.Element[], 
+                              nextPage = false, 
+                              index = getCurrentPageColumnIndex()): React.JSX.Element {
 
         const key = uuid();
 
         return <PageColumn key={key}
                            pageIndex={nextPage? props.pageIndex + 1 : props.pageIndex}
-                           pageColumnIndex={getCurrentPageColumnIndex() + 1}
+                           pageColumnIndex={index}
                            focusOnRender={focusOnRender} 
                            initPageColumnLines={initPageColumnLines}/>;
     }
@@ -110,6 +113,6 @@ export default function Page(props: {
 
 
 export const PageContext = createContext({
-    createPageColumn: (focusOnRender?: boolean, initialPageColumnLines?: React.JSX.Element[], nextPage?: boolean): React.JSX.Element => {return <></>},
+    createPageColumn: (focusOnRender?: boolean, initialPageColumnLines?: React.JSX.Element[], nextPage?: boolean, index?: number): React.JSX.Element => {return <></>},
     maxNumTextInputsPerLine: MAX_NUM_TEXTINPUTS_PORTRAIT
 });

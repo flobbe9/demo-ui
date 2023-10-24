@@ -2,7 +2,6 @@ import React, { createContext, useEffect, useState } from "react";
 import "../assets/styles/Document.css";
 import StylePanel from "./StylePanel";
 import Page from "./Page";
-import DefaultProps from "../abstract/DefaultProps";
 import { getDocumentId, getPartFromDocumentId, log, logError, stringToNumber } from "../utils/Utils";
 import { v4 as uuid} from "uuid";
 import $ from "jquery";
@@ -16,7 +15,7 @@ export default function Document(props: {
     children?
 }) {
 
-    const [currentTextInputId, setCurrentTextInputId] = useState(getDocumentId("TextInput", -1, -1, "pageColumnLineKey", "textInputKey"));
+    const [currentTextInputId, setCurrentTextInputId] = useState(getDocumentId("TextInput", -1, 0, "pageColumnLineKey", "textInputKey"));
     const [pages, setPages] = useState(initPages());
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
 
@@ -43,20 +42,20 @@ export default function Document(props: {
     }
 
 
-    function createPage(initialPageColumns?: React.JSX.Element[], focusOnRender = false): React.JSX.Element {
+    function createPage(initialPageColumns?: React.JSX.Element[], focusOnRender = false, index = getCurrentPageIndex() + 1): React.JSX.Element {
 
         const key = uuid();
 
         return <Page key={key} 
-                     pageIndex={getCurrentPageIndex() + 1}
+                     pageIndex={index}
                      initialPageColumns={initialPageColumns}
                      focusOnRender={focusOnRender} />
     }
 
 
-    function addPage(initialPageColumns?: React.JSX.Element[]): void {
+    function addPage(initialPageColumns?: React.JSX.Element[], index = getCurrentPageIndex() + 1): void {
 
-        pages.splice(getCurrentPageIndex() + 1, 0, createPage(initialPageColumns));
+        pages.splice(index, 0, createPage(initialPageColumns, false, index));
 
         setPages([...pages]);
     }
@@ -134,8 +133,8 @@ export const DocumentContext = createContext({
     setCurrentTextInputId: Object(),
     selectTextInput: (str: string) => {},
 
-    createPage: (initialPagesColumns?: React.JSX.Element[]) => {},
-    addPage: (initialPageColumns?: React.JSX.Element[]) => {},
+    createPage: (initialPagesColumns?: React.JSX.Element[], focusOnRender?: boolean, index?: number) => {},
+    addPage: (initialPageColumns?: React.JSX.Element[], index?: number) => {},
     removePage: (index?: number) => {},
     getCurrentPageIndex: () => {},
     getNumPages: Object(),
