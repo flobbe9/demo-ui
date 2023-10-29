@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import "../assets/styles/PageColumnLine.css"; 
 import TextInput from "./TextInput";
 import { DocumentContext } from "./Document";
-import { getDocumentId, getPartFromDocumentId, isNumberFalsy, log, logError } from "../utils/Utils";
+import { getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, getWidthRelativeToWindow, isNumberFalsy, log, logError, stringToNumber } from "../utils/Utils";
 import $ from "jquery";
 import {v4 as uuid} from "uuid";
 import { PageColumnContext } from "./PageColumn";
@@ -19,6 +19,7 @@ export default function PageColumnLine(props: {
     initialTextInputs?: React.JSX.Element[],
     defaultValue?: string,
     focusOnRender?: boolean,
+    cursorAtLastChar?: boolean,
     className?: string,
     style?,
     children?
@@ -33,7 +34,10 @@ export default function PageColumnLine(props: {
         addTextInput: addTextInput,
         removeTextInput: removeTextInput,
         getCurrentTextInputIndex: getCurrentTextInputIndex,
+
         numTextInputsInLine: textInputs.length,
+        getPageColumnLineWidth: getPageColumnLineWidth,
+
         getTextInputElementByIndex: getTextInputElementByIndex,
         getTextInputElementByKey: getTextInputElementByKey,
         getTextInputComponentByIndex: getTextInputComponentByIndex,
@@ -45,9 +49,11 @@ export default function PageColumnLine(props: {
     const pageColumnContext = useContext(PageColumnContext);
 
 
+    // TODO: continue here, this gets called twice on handle tab on second page (not on first)
     useEffect(() => {
         // case: end of line reached
         if (textInputs.length > pageContext.maxNumTextInputsPerLine) {
+            log(thisId)
             const lastTextInput = getTextInputByKey(textInputs[textInputs.length - 1].key!.toString());
             if (!lastTextInput) {
                 logError("Failed to add last text input to new line. 'lastTextInput' is false");
@@ -59,7 +65,7 @@ export default function PageColumnLine(props: {
             // add new line with old value
             // TODO: pass style as well
             const lastTextInputValue = lastTextInput.prop("value");
-            pageColumnContext.addPageColumnLine(lastTextInputValue, false);
+            pageColumnContext.addPageColumnLine(lastTextInputValue, false, props.cursorAtLastChar);
         }
         
         // case: init with existing inputs
@@ -71,11 +77,11 @@ export default function PageColumnLine(props: {
 
     function initComponent(): React.JSX.Element[] {
 
-        return props.initialTextInputs || [createTextInput(props.focusOnRender, props.defaultValue)];
+        return props.initialTextInputs || [createTextInput(props.focusOnRender, props.cursorAtLastChar, props.defaultValue)];
     }
 
 
-    function createTextInput(focusOnRender = false, defaultValue = ""): React.JSX.Element {
+    function createTextInput(focusOnRender = false, cursorAtLastChar = false, defaultValue = ""): React.JSX.Element {
 
         const key = uuid();
 
@@ -85,14 +91,15 @@ export default function PageColumnLine(props: {
                             pageColumnLineKey={props.pageColumnLineKey} 
                             textInputKey={key}
                             focusOnRender={focusOnRender}
+                            cursorAtLastChar={cursorAtLastChar}
                             defaultValue={defaultValue}
                             />
     }
 
 
-    function addTextInput(focusOnRender: boolean, index = getCurrentTextInputIndex() + 1, defaultValue = ""): React.JSX.Element {
+    function addTextInput(focusOnRender: boolean, cursorAtLastChar = false, index = getCurrentTextInputIndex() + 1, defaultValue = ""): React.JSX.Element {
 
-        const newTextInput = createTextInput(focusOnRender, defaultValue);
+        const newTextInput = createTextInput(focusOnRender, cursorAtLastChar, defaultValue);
 
         textInputs.splice(index, 0, newTextInput);
         setTextInputs([...textInputs]);
@@ -194,6 +201,21 @@ export default function PageColumnLine(props: {
 
         return textInput;
     }
+
+
+    function getPageColumnLineWidth(): number {
+
+        let lineWidth = 0;
+
+        // add up text input widths
+        textInputs.forEach(textInputComponent => {
+            const textInput = getTextInputByKey(textInputComponent.key!.toString());
+            if(textInput && textInput.length)
+                lineWidth += getCSSValueAsNumber(textInput.css("width"), 2);
+        });
+
+        return getCSSValueAsNumber(getWidthRelativeToWindow(lineWidth, 0), 1);
+    }
     
 
     return (
@@ -212,10 +234,13 @@ export default function PageColumnLine(props: {
 
 
 export const PageColumnLineContext = createContext({
-    addTextInput: (focusOnRender: boolean, index?: number, defaultValue = ""): React.JSX.Element => {return <></>},
+    addTextInput: (focusOnRender: boolean, cursorAtLastChar?: boolean, index?: number, defaultValue = ""): React.JSX.Element => {return <></>},
     removeTextInput: (index?) => {},
     getCurrentTextInputIndex: (): number => {return 0},
+
     numTextInputsInLine: 1,
+    getPageColumnLineWidth: (): number => {return 0},
+
     getTextInputElementByIndex: (index: number): HTMLInputElement | null => {return null},
     getTextInputElementByKey: (key: string): HTMLInputElement | null => {return null},
     getTextInputComponentByIndex: (index: number): React.JSX.Element | null => {return null},

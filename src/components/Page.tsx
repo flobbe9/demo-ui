@@ -13,8 +13,9 @@ import $ from "jquery";
 // TODO: add initPageColumns method (for all others too) and either create new component or set init array
 export default function Page(props: {
     pageIndex: number,
-    initialPageColumns?: React.JSX.Element[],
-    focusOnRender: boolean,
+    initialPageColumns?: React.JSX.Element[] | null,
+    focusOnRender?: boolean,
+    cursorAtLastChar?: boolean,
     className?: string,
     style?,
     children?
@@ -42,17 +43,17 @@ export default function Page(props: {
 
         // set css variables
         $(":root").attr("style", `--textInputWidth: ${getTextInputWidth()}%`);
-        
     }, [documentContext.orientation, pageColumns]);
 
 
     function initPageColumns(): React.JSX.Element[] {
 
-        return props.initialPageColumns || [createPageColumn(props.focusOnRender)]
+        return props.initialPageColumns || [createPageColumn(props.focusOnRender, props.cursorAtLastChar)]
     }
 
     
     function createPageColumn(focusOnRender = false, 
+                              cursorAtLastChar = false,
                               initPageColumnLines?: React.JSX.Element[], 
                               nextPage = false, 
                               index = getCurrentPageColumnIndex()): React.JSX.Element {
@@ -63,15 +64,17 @@ export default function Page(props: {
                            pageIndex={nextPage? props.pageIndex + 1 : props.pageIndex}
                            pageColumnIndex={index}
                            focusOnRender={focusOnRender} 
+                           cursorAtLastChar={cursorAtLastChar}
                            initPageColumnLines={initPageColumnLines}/>;
     }
 
 
     function addPageColumn(index = getCurrentPageColumnIndex(), 
                            focusOnRender = false,
+                           cursorAtLastChar = false,
                            initialPageColumnLines?: React.JSX.Element[]): void {
 
-        pageColumns.splice(index, 0, createPageColumn(focusOnRender, initialPageColumnLines));
+        pageColumns.splice(index, 0, createPageColumn(focusOnRender, cursorAtLastChar, initialPageColumnLines));
 
         setPageColumns([...pageColumns]);
     }
@@ -113,6 +116,6 @@ export default function Page(props: {
 
 
 export const PageContext = createContext({
-    createPageColumn: (focusOnRender?: boolean, initialPageColumnLines?: React.JSX.Element[], nextPage?: boolean, index?: number): React.JSX.Element => {return <></>},
+    createPageColumn: (focusOnRender?: boolean, cursorAtLastChar?: boolean, initialPageColumnLines?: React.JSX.Element[], nextPage?: boolean, index?: number): React.JSX.Element => {return <></>},
     maxNumTextInputsPerLine: MAX_NUM_TEXTINPUTS_PORTRAIT
 });

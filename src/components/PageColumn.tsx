@@ -14,6 +14,7 @@ export default function PageColumn(props: {
     pageColumnIndex: number;
     initPageColumnLines?: React.JSX.Element[],
     focusOnRender?: boolean;
+    cursorAtLastChar?: boolean,
     className?: string;
     style?;
     children?;
@@ -33,57 +34,35 @@ export default function PageColumn(props: {
     const pageContext = useContext(PageContext);
 
 
-    // TODO: put this into a helper
     // TODO: cover case of new column
     useEffect(() => {
         const currentPageHeight = getCurrentPageHeight();
-        if (!isNumberFalsy(currentPageHeight) && currentPageHeight! > PAGE_HEIGHT) {
-            const lastPageColumnLineComponent = pageColumnLines[pageColumnLines.length - 1];
-            const lastPageColumnLine = $("#" + getDocumentId("PageColumnLine", props.pageIndex, props.pageColumnIndex, lastPageColumnLineComponent.key!.toString()));
-           
-            const lastPageColumnLineComponentCopy = copyPageColumnLine(lastPageColumnLine, true);
-            if (!lastPageColumnLineComponentCopy) 
-                return;
-
-            removePageColumnLine(pageColumnLines.length - 1);
-            
-            // case: is last page
-            if (props.pageIndex === documentContext.getNumPages() - 1) {
-                log("is last " + props.pageIndex)
-                const newPageColumn = pageContext.createPageColumn(false, [lastPageColumnLineComponentCopy], true);
-                documentContext.addPage([newPageColumn], props.pageIndex + 1);
-                
-            // case: is not last page
-            } else {
-                log("is not last " + props.pageIndex)
-                const nextPageColumn = $("#" + getDocumentId("PageColumn", props.pageIndex + 1, props.pageColumnIndex));
-                const nextPageColumnComponentCopy = copyPageColumn(nextPageColumn, lastPageColumnLineComponentCopy, true);
-                if (nextPageColumnComponentCopy) {
-                    documentContext.removePage(props.pageIndex + 1);
-                    documentContext.addPage([nextPageColumnComponentCopy], props.pageIndex + 1);
-                }
-            }
-        }
+        if (!isNumberFalsy(currentPageHeight) && currentPageHeight! > PAGE_HEIGHT) 
+            handlePageColumnLineChange();
+        
     }, [pageColumnLines]);
 
 
     function initPageColumnLines(): React.JSX.Element[] {
 
-        return props.initPageColumnLines || [createPageColumnLine("", props.focusOnRender)];
+        return props.initPageColumnLines || [createPageColumnLine("", props.focusOnRender, props.cursorAtLastChar)];
     }
 
 
     function createPageColumnLine(defaultValue = "",
                                   focusOnRender = false,
+                                  cursorAtLastChar = false,
                                   nextPage = false, 
                                   initialTextInputs?: React.JSX.Element[],
                                   key = uuid()): React.JSX.Element {
 
+                                    log(props.pageIndex)
         return <PageColumnLine key={key}
                                 pageIndex={nextPage ? props.pageIndex + 1 : props.pageIndex} 
                                 pageColumnIndex={props.pageColumnIndex} 
                                 pageColumnLineKey={key}
                                 focusOnRender={focusOnRender}
+                                cursorAtLastChar={cursorAtLastChar}
                                 defaultValue={defaultValue}
                                 initialTextInputs={initialTextInputs} />;
     }
@@ -92,10 +71,12 @@ export default function PageColumn(props: {
     // TODO pass default style as well?
     function addPageColumnLine(defaultValue = "",
                                 focusOnRender = props.focusOnRender,
+                                cursorAtLastChar = false,
+                                nextPage = false,
                                 index = getCurrentPageColumnLineIndex() + 1,
                                 initPageColumnLines?: React.JSX.Element[]): void {
 
-        pageColumnLines.splice(index, 0, createPageColumnLine(defaultValue, focusOnRender, false, initPageColumnLines));
+        pageColumnLines.splice(index, 0, createPageColumnLine(defaultValue, focusOnRender, cursorAtLastChar, nextPage, initPageColumnLines));
 
         setPageColumnLines([...pageColumnLines]);
     }
@@ -121,7 +102,11 @@ export default function PageColumn(props: {
     }
 
     
-    function copyPageColumn(oldPageColumn: JQuery, firstPageColumnLine?: React.JSX.Element, nextPage = false): React.JSX.Element | null {
+    function copyPageColumn(oldPageColumn: JQuery, 
+                            firstPageColumnLine?: React.JSX.Element, 
+                            focusOnRender = false, 
+                            cursorAtLastChar = false,
+                            nextPage = false): React.JSX.Element | null {
 
         if (!oldPageColumn.length) {
             logError("Failed to copy column line. 'oldPageColumn' is falsy");
@@ -133,7 +118,7 @@ export default function PageColumn(props: {
             newPageColumnLines.push(firstPageColumnLine);
 
         Array.from(oldPageColumn.children()).forEach(oldPageColumnLine => {
-            const pageColumnLineCopy = copyPageColumnLine($("#" + oldPageColumnLine.id), nextPage);
+            const pageColumnLineCopy = copyPageColumnLine($("#" + oldPageColumnLine.id), focusOnRender, cursorAtLastChar, nextPage);
 
             if (pageColumnLineCopy) 
                 newPageColumnLines.push(pageColumnLineCopy);
@@ -142,13 +127,16 @@ export default function PageColumn(props: {
                 logWarn("Failed to copy page column. 'pageColumnLineCopy' is falsy");
         });
 
-        const pageColumnCopy = pageContext.createPageColumn(false, newPageColumnLines, nextPage);
+        const pageColumnCopy = pageContext.createPageColumn(false, cursorAtLastChar, newPageColumnLines, nextPage);
 
         return pageColumnCopy || null;
     }
 
 
-    function copyPageColumnLine(oldPageColumnLine: JQuery, nextPage = false): React.JSX.Element | null {
+    function copyPageColumnLine(oldPageColumnLine: JQuery, 
+                                focusOnRender = false, 
+                                cursorAtLastChar = false, 
+                                nextPage = false): React.JSX.Element | null {
 
         if (!oldPageColumnLine.length) {
             logError("Failed to copy column line. 'oldPageColumnLine' is falsy");
@@ -173,12 +161,14 @@ export default function PageColumn(props: {
                                             pageColumnLineKey={pageColumnLineKey} 
                                             textInputKey={textInputKey} 
                                             defaultValue={textInputValue}
+                                            focusOnRender={focusOnRender}
+                                            cursorAtLastChar={cursorAtLastChar}
                                             />;
                 newTextInputs.push(textInputCopy);
             }
         });
 
-        const pageColumnLineCopy = createPageColumnLine("", false, true, newTextInputs, pageColumnLineKey);
+        const pageColumnLineCopy = createPageColumnLine("", false, cursorAtLastChar, true, newTextInputs, pageColumnLineKey);
 
         return pageColumnLineCopy || null;
     }
@@ -215,15 +205,42 @@ export default function PageColumn(props: {
     }
 
 
-    function movePageColumnLineToNewPage(pageColumnLineComponent: React.JSX.Element): void {
-        // get by key
-        // pageColumneLine.prop("id", )
-        // get id
-        // get element
-        // set id
-        // add new page with default
-    }
+    /**
+     * Handles change of {@code pageColumnLine} state, in other words, adding or removing a new line.
+     */
+    function handlePageColumnLineChange(): void {
 
+        const lastPageColumnLineComponent = pageColumnLines[pageColumnLines.length - 1];
+        const lastPageColumnLine = $("#" + getDocumentId("PageColumnLine", props.pageIndex, props.pageColumnIndex, lastPageColumnLineComponent.key!.toString()));
+        
+        // focus on new page if is last line
+        const focusOnNewPage = getCurrentPageColumnLineIndex() + 1 === pageColumnLines.length - 1;
+       
+        // copy this line
+        const lastPageColumnLineComponentCopy = copyPageColumnLine(lastPageColumnLine, focusOnNewPage, true, true);
+        if (!lastPageColumnLineComponentCopy) 
+            return;
+
+        // remove this line
+        removePageColumnLine(pageColumnLines.length - 1);
+        
+        // case: is last page
+        if (props.pageIndex === documentContext.getNumPages() - 1) {
+            // add new page with copied line
+            const newPageColumn = pageContext.createPageColumn(focusOnNewPage, props.cursorAtLastChar, [lastPageColumnLineComponentCopy], true);
+            documentContext.addPage([newPageColumn]);
+            
+        // case: is not last page
+        } else {
+            // replace next page with cpied line as first element
+            const nextPageColumn = $("#" + getDocumentId("PageColumn", props.pageIndex + 1, props.pageColumnIndex));
+            const nextPageColumnComponentCopy = copyPageColumn(nextPageColumn, lastPageColumnLineComponentCopy, false, props.cursorAtLastChar, false);
+            if (nextPageColumnComponentCopy) {
+                documentContext.removePage(props.pageIndex + 1);
+                documentContext.addPage([nextPageColumnComponentCopy]);
+            }
+        }
+    }
 
     return (
         <div id={thisId}
@@ -240,7 +257,12 @@ export default function PageColumn(props: {
 }
 
 export const PageColumnContext = createContext({
-    addPageColumnLine: (defaultValue?: string, focusOnRender?: boolean, index?: number, initialPageColumnLines?: React.JSX.Element[]) => {},
+    addPageColumnLine: (defaultValue?: string, 
+                        focusOnRender?: boolean, 
+                        cursorAtLastChar?: boolean, 
+                        nextPage?: boolean,
+                        index?: number, 
+                        initialPageColumnLines?: React.JSX.Element[]) => {},
     removePageColumnLine: (index?: number) => {},
     getCurrentPageColumnLineIndex: () => {}
 })

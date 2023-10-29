@@ -1,9 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/TextInput.css";
 import $ from "jquery";
 import { PageColumnLineContext } from "./PageColumnLine";
 import { DocumentContext } from "./Document";
-import { logError, getCSSValueAsNumber, getDocumentId, getWidthRelativeToWindow, isBlank, isNumberFalsy, isTextLongerThanInput, moveCursor, log } from "../utils/Utils";
+import { logError, getDocumentId, getWidthRelativeToWindow, isBlank, isNumberFalsy, isTextLongerThanInput, moveCursor, log, isKeyAlphaNumeric } from "../utils/Utils";
 import { PageColumnContext } from "./PageColumn";
 import { PageContext } from "./Page";
 import { getTextInputWidth } from "../utils/GlobalVariables";
@@ -20,6 +20,7 @@ export default function TextInput(props: {
     textInputKey: string;
     defaultValue?: string;
     focusOnRender?: boolean;
+    cursorAtLastChar?: boolean,
     className?: string;
     style?;
 }) {
@@ -32,11 +33,17 @@ export default function TextInput(props: {
     const pageColumnContext = useContext(PageColumnContext);
     const pageColumnLineContext = useContext(PageColumnLineContext);
 
+    // state with num tabs
+    const [widthMultiplicator, setWidthMultiplicator] = useState(1);
+    // on tab, increase
+    // on backspace decrease
+    // on merge, increase
+
 
     useEffect(() => {
         if (props.focusOnRender) {
             documentContext.selectTextInput(thisId);
-            moveCursor(thisId);
+            moveCursor(thisId, props.cursorAtLastChar ? -1 : 0, props.cursorAtLastChar ? -1 : 0);
         }
     }, []);
 
@@ -64,7 +71,7 @@ export default function TextInput(props: {
         else if (event.key === "ArrowUp")
             handleArrowUp(event);
         
-        else
+        else if (isKeyAlphaNumeric(event.keyCode))
             handleNewText(event);
     }
 
@@ -90,7 +97,7 @@ export default function TextInput(props: {
                     if (!lastTextInput) {
                         logError("Failed to add tab.'lastTextInput' is falsy");
                         return;
-                    }   
+                    }
 
                     addTabMoveContent(documentContext.currentTextInputId);
 
@@ -98,9 +105,9 @@ export default function TextInput(props: {
                     // pageColumnContext.addPageColumnLine(lastTextInput.value, false);
                 }
             }
-        } else {
+
+        } else 
             addTabMoveContent(documentContext.currentTextInputId);
-        }
     }
 
 
@@ -111,7 +118,7 @@ export default function TextInput(props: {
 
 
     function handleNewText(event): void {
-        
+
         const currentTextInput = getCurrentTextInput();
         if (!currentTextInput) {
             console.error("Failed to handle new text. Current text input is falsy");
@@ -120,7 +127,7 @@ export default function TextInput(props: {
 
         // if max num reached
         if (isTextLongerThanInput(currentTextInput.prop("id"))) {
-            mergeNextTextInput();
+            mergeNextTextInput(event);
 
             // if is last text input in line
             // append new line
@@ -137,17 +144,33 @@ export default function TextInput(props: {
 
 
     function handleEnter(event) {
-        pageColumnContext.addPageColumnLine("", true);
+
+        const textInput = $("#" + thisId);
+        const cursorPosition = getCursorIndex();
+        if (isNumberFalsy(cursorPosition)) {
+            console.error("Failed to handle key enter event. Falsy cursor position");
+            return;
+        }
+
+        const content = textInput.prop("value");
+
+        // add new line with contentAfterCursor
+        const contentAfterCursor = content.substring(cursorPosition!);
+        pageColumnContext.addPageColumnLine(contentAfterCursor, true, false);
+
+        // remove contentAfterCursor from prev text input
+        const contentBeforeCursor = content.substring(0, cursorPosition!);
+        textInput.prop("value", contentBeforeCursor);
     }
 
 
     function handleClick(event) {
     }
+    
 
-    // TODO: cursor does not move to first position on "select"
     function handleArrowRight(event): void {
 
-        const cursorPosition = getCursorPosition(thisId);
+        const cursorPosition = getCursorIndex();
         if (isNumberFalsy(cursorPosition)) {
             logError("Failed to handle arrowRight event. 'cursorPosition' is falsy");
             return;
@@ -178,7 +201,7 @@ export default function TextInput(props: {
     
     function handleArrowLeft(event) {
 
-        const cursorPosition = getCursorPosition(thisId);
+        const cursorPosition = getCursorIndex();
         if (isNumberFalsy(cursorPosition)) {
             logError("Failed to handle arrowLeft event. 'cursorPosition' is falsy");
             return;
@@ -203,7 +226,7 @@ export default function TextInput(props: {
     // TODO
     function handleArrowUp(event) {
 
-        const cursorPosition = getCursorPosition(thisId);
+        const cursorPosition = getCursorIndex();
         if (isNumberFalsy(cursorPosition)) {
             logError("Failed to handle arrowRight event. 'cursorPosition' is falsy");
             return;
@@ -226,7 +249,7 @@ export default function TextInput(props: {
     // TODO
     function handleArrowDown(event) {
 
-        const cursorPosition = getCursorPosition(thisId);
+        const cursorPosition = getCursorIndex();
         if (isNumberFalsy(cursorPosition)) {
             logError("Failed to handle arrowRight event. 'cursorPosition' is falsy");
             return;
@@ -246,32 +269,11 @@ export default function TextInput(props: {
     }
 
 
-    function addTabMoveContent2(): void {
-
-        if (isLastTextInputInLineBlank()) {
-            pageColumnLineContext.removeTextInput(pageContext.maxNumTextInputsPerLine - 1);
-            addTabMoveContent(documentContext.currentTextInputId);
-
-        } else {
-            // get content and style from last input
-            // const contentLastTextInput = pageColumnLineContext.getTextInputElementByIndex(pageContext.maxNumTextInputsPerLine - 1)?.value;
-
-            // remove last input
-            // pageColumnLineContext.removeTextInput(pageContext.maxNumTextInputsPerLine - 1);
-
-            // move content from last text input into first text input of new line
-            addTabMoveContent(documentContext.currentTextInputId);
-
-            // append new line
-            // pageColumnContext.addPageColumnLine();
-
-            // set content and style of first input to deleted one
-            
-        }
-    }
-
-
-    // rename this
+    /**
+     * Add text input next to given text input, move content in front of cursor to new text input and remove it from given one.
+     * 
+     * @param textInputId of text input to use content from and to append new text input to
+     */
     function addTabMoveContent(textInputId: string) {
 
         const textInput = $("#" + textInputId);
@@ -280,7 +282,7 @@ export default function TextInput(props: {
             return;
         }
 
-        const cursorPosition = getCursorPosition(textInputId);
+        const cursorPosition = getCursorIndex(textInputId);
         if (isNumberFalsy(cursorPosition)) {
             console.error("Failed to add tab and move content. Falsy cursor position");
             return;
@@ -290,7 +292,7 @@ export default function TextInput(props: {
 
         // add text input with contentAfterCursor
         const contentAfterCursor = content.substring(cursorPosition!);
-        pageColumnLineContext.addTextInput(true, pageColumnLineContext.getCurrentTextInputIndex() + 1, contentAfterCursor);
+        pageColumnLineContext.addTextInput(true, false, pageColumnLineContext.getCurrentTextInputIndex() + 1, contentAfterCursor);
 
         // remove contentAfterCursor from prev text input
         const contentBeforeCursor = content.substring(0, cursorPosition!);
@@ -306,14 +308,9 @@ export default function TextInput(props: {
      * @param textInputId
      * @returns char index of value of text input or null
      */
-    function getCursorPosition(textInputId: string): number | null {
+    function getCursorIndex(textInputId = thisId): number | null {
 
         const textInput = $("#" + textInputId);
-
-        if (!textInput.length) {
-            console.error("Failed to get text input with id: " + textInputId);
-            return null;
-        }
 
         const cursorPosition = (textInput.get(0) as HTMLInputElement).selectionStart;
 
@@ -323,6 +320,14 @@ export default function TextInput(props: {
         }
 
         return cursorPosition;
+    }
+
+
+    function getLastSpaceIndex(textInputId = thisId): number {
+
+        const textInput = $("#" + textInputId);
+
+        return textInput.prop("value").lastIndexOf(" ");
     }
 
 
@@ -338,7 +343,7 @@ export default function TextInput(props: {
     }
 
 
-    function mergeNextTextInput() {
+    function mergeNextTextInput(event) {
 
         const firstTextInput = $("#" + thisId);
         if (!firstTextInput) {
@@ -346,10 +351,43 @@ export default function TextInput(props: {
             return;
         }   
         
-        const currentWidth = getCSSValueAsNumber(getWidthRelativeToWindow(firstTextInput.css("width"), 2), 1);
-        firstTextInput.css("width", currentWidth + getTextInputWidth() + "%");
+        // TODO continue here
+        if (isLineFull()) {
+            event.preventDefault();
 
-        // TODO: text longer than window width
+            const textInput = $("#" + thisId);
+            if (!textInput.length) {
+                console.error("Failed to add tab and move content. Falsy id: " + textInput);
+                return;
+            }
+
+            // get content after last space
+            const content = textInput.prop("value");
+            const lastSpaceIndex = getLastSpaceIndex();
+
+            let contentAfterSpace = content + event.key;
+
+            // case: no space
+            if (lastSpaceIndex !== -1)
+                contentAfterSpace = content.substring(lastSpaceIndex + 1) + event.key;
+
+            // TODO: does not include the event key
+
+            // content before last space
+            const contentBeforeSpace = content.substring(0, lastSpaceIndex);
+
+            // clear content after last space
+            textInput.prop("value", contentBeforeSpace);
+
+            // // add new line
+            pageColumnContext.addPageColumnLine(contentAfterSpace, true, true);
+
+        } else {
+            // const currentWidth = getCSSValueAsNumber(getWidthRelativeToWindow(firstTextInput.css("width"), 2), 1);
+            firstTextInput.css("width", (widthMultiplicator + 1) * getTextInputWidth() + "%");
+            
+            setWidthMultiplicator(widthMultiplicator + 1);
+        }
     }
 
 
@@ -402,6 +440,12 @@ export default function TextInput(props: {
         const currentTextInput = $("#" + thisId);
 
         return currentTextInput.length === 0 ? null : currentTextInput;
+    }
+
+
+    function isLineFull(): boolean {
+
+        return Math.ceil(pageColumnLineContext.getPageColumnLineWidth()) === 100;
     }
 
 

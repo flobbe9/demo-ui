@@ -38,37 +38,41 @@ export default function Document(props: {
 
     function initPages(): React.JSX.Element[] {
 
-        return props.initialPages || [createPage()];
+        return props.initialPages || [createPage(null, true)];
     }
 
 
-    function createPage(initialPageColumns?: React.JSX.Element[], focusOnRender = false, index = getCurrentPageIndex() + 1): React.JSX.Element {
+    function createPage(initialPageColumns?: React.JSX.Element[] | null, 
+                        focusOnRender = false, 
+                        cursorAtLastChar = false, 
+                        index = getCurrentPageIndex() + 1): React.JSX.Element {
 
         const key = uuid();
 
         return <Page key={key} 
                      pageIndex={index}
                      initialPageColumns={initialPageColumns}
-                     focusOnRender={focusOnRender} />
+                     focusOnRender={focusOnRender}
+                     cursorAtLastChar={cursorAtLastChar} />
     }
 
 
-    function addPage(initialPageColumns?: React.JSX.Element[], index = getCurrentPageIndex() + 1): void {
+    function addPage(initialPageColumns?: React.JSX.Element[],
+                     focusOnRender = false, 
+                     cursorAtLastChar = false, 
+                     index = getCurrentPageIndex() + 1): void {
 
-        pages.splice(index, 0, createPage(initialPageColumns, false, index));
+        pages.splice(index, 0, createPage(initialPageColumns, focusOnRender, cursorAtLastChar, index));
 
         setPages([...pages]);
     }
     
 
-    /**
+    /** 
      * @param index 
      * @returns 
      */
-    function removePage(index?: number) {
-
-        if (index !== pages.length - 1)
-            return;
+    function removePage(index = getCurrentPageIndex() + 1) {
 
         pages.splice(index, 1);
 
@@ -76,7 +80,6 @@ export default function Document(props: {
     }
 
 
-    // TODO: make this generic
     function getCurrentPageIndex(): number {
 
         const currentPageIndex = getPartFromDocumentId(currentTextInputId, 1);
@@ -133,8 +136,14 @@ export const DocumentContext = createContext({
     setCurrentTextInputId: Object(),
     selectTextInput: (str: string) => {},
 
-    createPage: (initialPagesColumns?: React.JSX.Element[], focusOnRender?: boolean, index?: number) => {},
-    addPage: (initialPageColumns?: React.JSX.Element[], index?: number) => {},
+    createPage: (initialPagesColumns?: React.JSX.Element[] | null, 
+                 focusOnRender?: boolean, 
+                 cursorAtLastChar?: boolean, 
+                 index?: number) => {},
+    addPage: (initialPageColumns?: React.JSX.Element[], 
+              focusOnRender?: boolean, 
+              cursorAtLastChar?: boolean,
+              index?: number) => {},
     removePage: (index?: number) => {},
     getCurrentPageIndex: () => {},
     getNumPages: Object(),

@@ -36,7 +36,7 @@ export function logApiError(message: string, error: Error): void {
 export function stringToNumber(str: string): number {
 
     try {
-        return Number.parseInt(str);
+        return Number.parseFloat(str);
 
     } catch (e) {
         console.error(e);
@@ -152,7 +152,7 @@ export function isTextLongerThanInput(textInputId: string): boolean {
 
     const textInput = $("#" + textInputId);
 
-    const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - 10;
+    const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - 13; // no idea why 13 works, jus leave it like this :D
     const textWidth = getTextWidth(textInput.prop("value"), textInput.css("fontSize"), textInput.css("fontFamily"));
 
     return textInputWidth < textWidth;
@@ -202,7 +202,7 @@ export function getCSSValueAsNumber(cssValue: string, unitDigits: number): numbe
  * @param unitDigits to cut from width in order to get the plain number
  * @returns width in percent relative to window width as string with a '%' appended
  */
-export function getWidthRelativeToWindow(width: string, unitDigits: number): string {
+export function getWidthRelativeToWindow(width: string | number, unitDigits: number): string {
 
     const windowWidth = $(window).width();
     if (!windowWidth) {
@@ -211,9 +211,9 @@ export function getWidthRelativeToWindow(width: string, unitDigits: number): str
     }
 
     // TODO: will this work if one line has not the same width as the window?
-    const widhInPercent = (getCSSValueAsNumber(width, unitDigits) / windowWidth) * 100;
+    const widhInPercent = (getCSSValueAsNumber(width.toString(), unitDigits) / windowWidth) * 100;
 
-    return (Math.round(widhInPercent * 100)) / 100 + "%";
+    return widhInPercent + "%";
 }
 
 
@@ -227,6 +227,17 @@ export function getHeightRelativeToPageHeight(height: string, unitDigits: number
     const heightInPercent = (getCSSValueAsNumber(height, unitDigits) / PAGE_HEIGHT) * 100;
 
     return (Math.round(heightInPercent * 100)) / 100 + "%";
+}
+
+
+export function isKeyAlphaNumeric(keyCode: number): boolean {
+
+    if (isNumberFalsy(keyCode)) {
+        logError("Failed to determine if key is alpha numeric. 'keyCode' is falsy.");
+        return false;
+    }
+
+    return (keyCode >= 48 && keyCode <= 57) || (keyCode >= 65 && keyCode <= 90);
 }
 
 
