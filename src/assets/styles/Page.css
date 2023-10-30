@@ -1,7 +1,14 @@
 .Page {
-    border: 2px solid red;
+    width: 100%;
 }
 
-#page {
-    color: red;
+.headingContainer {
+    display: flex;
+    justify-content: center;
+    margin: 10px;
+    width: 100%;
+}
+
+.columnContainer {
+    display: flex;
 }

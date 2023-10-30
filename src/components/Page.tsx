@@ -1,121 +1,24 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React from "react";
 import "../assets/styles/Page.css";
-import { DocumentContext } from "./Document";
-import PageColumn from "./PageColumn";
-import {v4 as uuid} from "uuid";
-import { getPartFromDocumentId, log, logError, stringToNumber } from "../utils/Utils";
-import { MAX_NUM_TEXTINPUTS_LADNSCAPE, MAX_NUM_TEXTINPUTS_PORTRAIT, getTextInputWidth, setTextInputWidth } from "../utils/GlobalVariables";
-import { Orientation } from "../enums/Orientation";
-import $ from "jquery";
+import Column from "./Column";
+import TextInput from "./TextInput";
 
 
-// TODO: add initialPageColumns[] prop
-// TODO: add initPageColumns method (for all others too) and either create new component or set init array
-export default function Page(props: {
-    pageIndex: number,
-    initialPageColumns?: React.JSX.Element[] | null,
-    focusOnRender?: boolean,
-    cursorAtLastChar?: boolean,
-    className?: string,
-    style?,
-    children?
-}) {
-
-    const thisId = "Page_" + props.pageIndex;
-    const thisClassName = "Page " + props.className;
-    
-    const documentContext = useContext(DocumentContext);
-    
-    const [pageColumns, setPageColumns] = useState(initPageColumns());
-    const [maxNumTextInputsPerLine, setMaxNumTextInputsPerLine] = useState(MAX_NUM_TEXTINPUTS_PORTRAIT);
-    
-    const thisContext = {
-        createPageColumn: createPageColumn,
-        maxNumTextInputsPerLine: maxNumTextInputsPerLine
-    }
-
-
-    useEffect(() => {
-        // TODO: add condition for num page columns, currently assuming 1 PageColumn
-        let maxNumTextInputs = documentContext.orientation === Orientation.PORTRAIT ? MAX_NUM_TEXTINPUTS_PORTRAIT : MAX_NUM_TEXTINPUTS_LADNSCAPE;
-        setMaxNumTextInputsPerLine(maxNumTextInputs);
-        setTextInputWidth(100 / maxNumTextInputs);
-
-        // set css variables
-        $(":root").attr("style", `--textInputWidth: ${getTextInputWidth()}%`);
-    }, [documentContext.orientation, pageColumns]);
-
-
-    function initPageColumns(): React.JSX.Element[] {
-
-        return props.initialPageColumns || [createPageColumn(props.focusOnRender, props.cursorAtLastChar)]
-    }
-
-    
-    function createPageColumn(focusOnRender = false, 
-                              cursorAtLastChar = false,
-                              initPageColumnLines?: React.JSX.Element[], 
-                              nextPage = false, 
-                              index = getCurrentPageColumnIndex()): React.JSX.Element {
-
-        const key = uuid();
-
-        return <PageColumn key={key}
-                           pageIndex={nextPage? props.pageIndex + 1 : props.pageIndex}
-                           pageColumnIndex={index}
-                           focusOnRender={focusOnRender} 
-                           cursorAtLastChar={cursorAtLastChar}
-                           initPageColumnLines={initPageColumnLines}/>;
-    }
-
-
-    function addPageColumn(index = getCurrentPageColumnIndex(), 
-                           focusOnRender = false,
-                           cursorAtLastChar = false,
-                           initialPageColumnLines?: React.JSX.Element[]): void {
-
-        pageColumns.splice(index, 0, createPageColumn(focusOnRender, cursorAtLastChar, initialPageColumnLines));
-
-        setPageColumns([...pageColumns]);
-    }
-
-
-    function removePageColumn(index = getCurrentPageColumnIndex()): void {
-        // TODO: what to do with content?
-
-        pageColumns.splice(index, 1);
-
-        setPageColumns([...pageColumns]);
-    }
-
-
-    function getCurrentPageColumnIndex(): number {
-
-        const currentPageColumnIndex = getPartFromDocumentId(documentContext.currentTextInputId, 2);
-
-        if (typeof currentPageColumnIndex === "string")
-            return stringToNumber(currentPageColumnIndex);
-
-        return currentPageColumnIndex;
-    }
-
+export default function Page(props) {
 
     return (
-        <div id={thisId}
-             className={thisClassName}
-             style={props.style}
-             >
-            <PageContext.Provider value={thisContext}>
-                {pageColumns}
-            </PageContext.Provider>
+        <div id="Page" className="Page">
+            <div className="headingContainer">
+                <TextInput id="heading" />
+            </div>
 
-            {props.children}
+            <div className="columnContainer">
+                <Column />
+
+                {/* <Column /> */}
+                
+                <Column />
+            </div>
         </div>
     )
 }
-
-
-export const PageContext = createContext({
-    createPageColumn: (focusOnRender?: boolean, cursorAtLastChar?: boolean, initialPageColumnLines?: React.JSX.Element[], nextPage?: boolean, index?: number): React.JSX.Element => {return <></>},
-    maxNumTextInputsPerLine: MAX_NUM_TEXTINPUTS_PORTRAIT
-});

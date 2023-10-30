@@ -242,6 +242,29 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 
 
 /**
+ * Display {@code #PopUpWindow} and {@code .overlay}.
+ * 
+ * @param duration fade in / out time in milliseconds
+ */
+export function togglePopUp(duration = 100): void {
+
+    $("#PopUpWindow").fadeToggle(duration);
+    $(".overlay").fadeToggle(duration);
+}
+
+
+/**
+ * Hide {@code #PopUpWindow} and {@code .overlay}.
+ * 
+ * @param duration fade in / out time in milliseconds
+ */
+export function hidePopUp(duration = 100): void {
+
+    $("#PopUpWindow").fadeOut(duration);
+    $(".overlay").fadeOut(duration);
+}
+
+/**
  * Copy of backend object, named the same.
  * 
  * @since 0.0.1
