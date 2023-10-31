@@ -7,11 +7,6 @@ body {
     position: relative;
     min-height: 100vh;
 
-    #popUpWindowContainer {
-        display: flex;
-        justify-content: center;
-    }
-
     .content {
         .overlay {
             background-color: rgb(0, 0, 0, 0.4);
@@ -22,10 +17,12 @@ body {
         }
     }
 
+    /* Buttons */
     .blackButton {
         border-color: black;
         border-radius: 5px;
         text-decoration: none;
+        transition: 0.2s;
     }
     
     .blackButtonContained {
@@ -49,5 +46,45 @@ body {
 
     .buttonSmall {
         padding: 5px 10px 5px 10px;
+    }
+
+    .whiteButton {
+        background-color: white;
+        border: none;
+        border-radius: 5px;
+        color: black;
+        margin-bottom: 10px;
+        outline: none;
+        transition: color 0.2s;
+        
+        &:hover {
+            color: rgb(168, 168, 168);
+        }
+    }
+    
+    .whiteButtonPortrait {
+        height: 140px;
+        width: 100px;
+    }
+
+    .whiteButtonLandscape {
+        height: 100px;
+        width: 140px;
+    }
+
+    .smallIconButton {
+        height: 20px;
+        transition: height 0.2s;
+
+        &:hover {
+            height: 25px;
+        }
+    }
+
+    /* Other */
+    .flexCenter {
+        align-items: center;
+        display: flex;
+        justify-content: center;
     }
 }

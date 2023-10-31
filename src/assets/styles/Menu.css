@@ -9,24 +9,8 @@
     .leftSideBar {
         margin-right: 5vi;
 
-        .leftSideBarButton {
-            background-color: white;
-            border: none;
-            border-radius: 5px;
-            height: 140px;
-            margin-bottom: 10px;
-            outline: none;
-            transition: 0.2s;
-            width: 100px;
-        }
-        
         .newDocumentButton {
-            color: rgb(168, 168, 168);
-            font-size: 30px;
             
-            &:hover {
-                color: black;
-            }
         }
     }
     

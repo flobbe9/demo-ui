@@ -1,4 +1,4 @@
-.PopUpWindow {
+.PopUp {
     display: none;
     height: 50%;
     position: absolute;
@@ -6,10 +6,16 @@
     width: 60%;
     z-index: 1;
     
-    .popUpWindowContainer {
+    .popUpContainer {
         background-color: white;
         border-radius: 5px;
-        padding: 10px;
+        padding: 1vb;
+
+        .header {
+            display: flex;
+            height: 25px;
+            justify-content: right;
+        }
 
         .footer {
             bottom: 1vb;
@@ -17,7 +23,7 @@
             right: 1vb
         }
     }
-        
+
     .customContainer {
         height: 100%;
     }

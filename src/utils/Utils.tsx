@@ -1,3 +1,4 @@
+import React from "react";
 import $ from "jquery";
 import { PAGE_HEIGHT } from "./GlobalVariables";
 
@@ -90,7 +91,7 @@ export function getDocumentId(prefix: string,
  * - \[4]: textInputKey
  * 
  * @param textInputId id of text input
- * @param idPart index of the element in the array resulting from {@code textInputId.split("-")}
+ * @param idPart index of the element in the array resulting from ``` textInputId.split("-")```
  * @returns the given part of the id or -1 if not found
  */
 export function getPartFromDocumentId(textInputId: string, idPart: number): number | string {
@@ -242,27 +243,52 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 
 
 /**
- * Display {@code #PopUpWindow} and {@code .overlay}.
+ * Display ``` #PopUp``` and ``` .overlay```.
  * 
+ * @param setPopUpContent setter of content inside ```#popUpContainer```
  * @param duration fade in / out time in milliseconds
  */
-export function togglePopUp(duration = 100): void {
+export function togglePopUp(setPopUpContent: (content: React.JSX.Element) => void, duration = 100): void {
 
-    $("#PopUpWindow").fadeToggle(duration);
+    $("#PopUp").fadeToggle(duration);
     $(".overlay").fadeToggle(duration);
+
+    resetPopUp(setPopUpContent);
 }
 
 
 /**
- * Hide {@code #PopUpWindow} and {@code .overlay}.
+ * Hide ```#PopUp``` and ``` .overlay```.
  * 
+ * @param setPopUpContent setter of content inside ```#popUpContainer```
  * @param duration fade in / out time in milliseconds
  */
-export function hidePopUp(duration = 100): void {
+export function hidePopUp(setPopUpContent: (content: React.JSX.Element) => void, duration = 100, ): void {
 
-    $("#PopUpWindow").fadeOut(duration);
+    $("#PopUp").fadeOut(duration);
     $(".overlay").fadeOut(duration);
+
+    resetPopUp(setPopUpContent, duration);
 }
+
+
+/**
+ * Set content from ```#popUpContainer``` to ```<></>``` and reset className.
+ * 
+ * @param setPopUpContent setter of content inside ```#popUpContainer```
+ * @param duration milliseconds to wait until reset
+ */
+export function resetPopUp(setPopUpContent: (content: React.JSX.Element) => void, duration = 100): void {
+
+    setTimeout(() => {
+        if ($("#PopUp").css("display") === "none") {
+            const popUpContainer = $("#popUpContainer");
+            setPopUpContent(<></>);
+            popUpContainer.prop("className", "popUpContainer dontHidePopUp")
+        }
+    }, duration + 100);
+}
+
 
 /**
  * Copy of backend object, named the same.

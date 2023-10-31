@@ -1,12 +1,13 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Document from "./components/Document";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import Menu from "./components/Menu";
-import PopUpWindow from "./components/PopUpWindow";
+import PopUp from "./components/PopUp";
 import { hidePopUp, log, togglePopUp } from "./utils/Utils";
+import { Orientation } from "./enums/Orientation";
 
 
 export default function App() {
@@ -15,33 +16,49 @@ export default function App() {
     // const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
 
     const [escapePopUp, setEscapePopUp] = useState(true);
+    const [popUpContent, setPopUpContent] = useState(<></>);
 
+    const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
+
+    // ref for:
+        // orientation
+        // numColumns
+        // columnType
+    // pass refs into url, use in Document
+    
+    const context = {
+        setEscapePopUp: setEscapePopUp,
+        setPopUpContent: setPopUpContent,
+
+        orientation: orientation,
+        setOrientation: setOrientation
+    }
 
     function handleClick(event): void {
 
-        log(event.target.className);
-
-        if (event.target.className !== "popUpWindowContainer" && event.target.id !== "newDocumentButton" && escapePopUp)
-            hidePopUp();
+        if (!event.target.className.includes("dontHidePopUp") && escapePopUp)
+            hidePopUp(setPopUpContent);
     }
 
 
     function handleKeyDown(event): void {
 
         if (event.key === "Escape")
-            hidePopUp();
+            hidePopUp(setPopUpContent);
     }
 
     
     return (
         <div className="App" onKeyDown={handleKeyDown} onClick={handleClick}>
             <BrowserRouter>
-                <AppContext.Provider value={{setEscapePopUp: setEscapePopUp}}>
+                <AppContext.Provider value={context}>
 
                     <NavBar />
 
-                    <div id="popUpWindowContainer">
-                        <PopUpWindow />
+                    <div style={{display: "flex", justifyContent: "center"}}>
+                        <PopUp>
+                            {popUpContent}
+                        </PopUp>
                     </div>
 
                     <div className="content">
@@ -49,7 +66,7 @@ export default function App() {
                         <div className="overlay"></div>
                         <Routes>
                             <Route path="/" element={<Menu />} />
-                            {/* <Route path="/" element={<Document />} /> */}
+                            <Route path="/build" element={<Document />} />
                             {/* <Route path="/login" element={<Login />} /> */}
                             {/* <Route path="/confirmAccount" element={<AccountConfirmed />} /> */}
                             {/* <Route path="*" element={<NotFound />} /> */}
@@ -65,5 +82,9 @@ export default function App() {
 
 
 export const AppContext = createContext({
-    setEscapePopUp: (escapePopUp: boolean) => {}
+    setEscapePopUp: (escapePopUp: boolean) => {},
+    setPopUpContent: (content: React.JSX.Element) => {},
+
+    orientation: Orientation.PORTRAIT,
+    setOrientation: (orientation: Orientation) => {}
 })

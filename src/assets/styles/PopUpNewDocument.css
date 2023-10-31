@@ -1,0 +1,71 @@
+.PopUpNewDocument {
+    height: 100%;
+
+    .body {
+        height: 90%;
+
+        .slideRightButton {
+            left: 1vb;
+            position: absolute;
+        }
+
+        .orientationContainer {
+            height: 25%;
+            position: absolute;
+            width: 60%;
+
+        }
+        .whiteButtonPortrait {
+            border: 1px solid grey;
+            margin-right: 5%;
+
+            &:hover {
+                border-color: rgb(168, 168, 168);
+            }
+        }
+        
+        .whiteButtonLandscape {
+            border: 1px solid grey;
+
+            &:hover {
+                border-color: rgb(168, 168, 168);
+            }
+        }
+
+        .numColumnsContainer {
+            display: none;
+            height: 25%;
+            position: absolute;
+            right: 0;
+            width: 60%;
+        }
+
+        .slideButton {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            position: absolute;
+        }
+
+        .slideButton:disabled {
+            .smallIconButton {
+                opacity: 0.5;
+                pointer-events: none;
+            }
+        }
+
+        .slideRightButton {
+            left: 1vb;
+        }
+
+        .slideLeftButton {
+            right: 1vb;
+        }
+    }
+
+    .footer {
+        bottom: 1vb;
+        position: absolute;
+        right: 1vb
+    }
+}
