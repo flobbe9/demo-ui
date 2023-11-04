@@ -2,7 +2,9 @@ import React, { useContext, useEffect, useState } from "react";
 import "../../assets/styles/PopUpNewDocument.css";
 import { AppContext } from "../../App";
 import { Orientation } from "../../enums/Orientation";
+import RadioButton from "../RadioButton";
 import { log } from "../../utils/Utils";
+import { Link } from "react-router-dom";
 
 
 export default function PopUpNewDocument(props) {
@@ -11,99 +13,81 @@ export default function PopUpNewDocument(props) {
     const id = props.id ? "PopUpNewDocument " + props.id : "PopUpNewDocument";
 
     const [containerIndex, setContainerIndex] = useState(0);
+    const [isContinue, setIsContinue] = useState(false);
+    const [selectedOrientation, setSelectedOrientation] = useState(false);
+    const [selectedNumColumns, setSelectedNumColumns] = useState(false);
+    const [orientationClassName, setOrientationClassName] = useState("whiteButtonPortrait");
 
     const appContext = useContext(AppContext);
 
 
     useEffect(() => {
-        checkSlideButtons();
         
-    }, [containerIndex])
+        if (containerIndex === 0) {
+            if (selectedOrientation)
+                setIsContinue(true);
+
+            else 
+                setIsContinue(false);
+        
+        } else if (containerIndex === 1) {
+            if (selectedNumColumns)
+                setIsContinue(true)
+
+            else 
+                setIsContinue(false);
+        }
+        
+    }, [containerIndex, selectedOrientation, selectedNumColumns]);
 
 
-    function handleSlideRight(event) {
+    useEffect(() => {
+        if (appContext.orientation === Orientation.PORTRAIT.toString())
+            setOrientationClassName("whiteButtonPortrait")
+        
+        else    
+            setOrientationClassName("whiteButtonLandscape");
 
-        const currentContainer = $(getContainerClassByIndex(containerIndex));
-
-        const rightContainerClass = getContainerClassByIndex(containerIndex - 1);
-
-        // case: no container to the right
-        if (rightContainerClass === "")
-            return;
-
-        const rightContainer = $(rightContainerClass);
-
-        // move center to right
-        currentContainer.animate({right: 0}, {duration: 100, easing: "linear"});
-        currentContainer.animate({width: "toggle"}, {duration: 50, easing: "linear"});
-
-        // move left to center after first animation
-        setTimeout(() => {
-            rightContainer.animate({width: "toggle"}, {duration: 50, easing: "linear"});
-            rightContainer.animate({left: "11vi"}, {duration: 100, easing: "linear"});
-            rightContainer.css("display", "flex");
-        }, 150);
-
-        setContainerIndex(containerIndex - 1);
-    }
-
-
-    function handleSlideLeft(event) {
-
-        const currentContainer = $(getContainerClassByIndex(containerIndex));
-
-        const rightContainerClass = getContainerClassByIndex(containerIndex + 1);
-
-        // case: no container to the right
-        if (rightContainerClass === "")
-            return;
-
-        const rightContainer = $(rightContainerClass);
-
-        // move center to left
-        currentContainer.animate({left: 0}, {duration: 100, easing: "linear"});
-        currentContainer.animate({width: "toggle"}, {duration: 50, easing: "linear"});
-
-        // move right to center after first animation
-        setTimeout(() => {
-            rightContainer.animate({width: "toggle"}, {duration: 50, easing: "linear"});
-            rightContainer.animate({right: "11vi"}, {duration: 100, easing: "linear"});
-            rightContainer.css("display", "flex");
-        }, 150);
-
-        setContainerIndex(containerIndex + 1);
-    }
+    }, [appContext.orientation])
 
 
     /**
-     * Disable / enable slide buttons depending on the current ```containerIndex``` state.
+     * Toggle current and next container and update container index state.
+     * 
+     * @param prev if true move to previous container, else move to next one
      */
-    function checkSlideButtons() {
+    function handleNextContainer(prev: boolean): void {
 
-        const slideLeftButton = $(".slideLeftButton");
-        if (getContainerClassByIndex(containerIndex + 1) === "")  
-            slideLeftButton.prop("disabled", true);
-        
-        else 
-            slideLeftButton.prop("disabled", false);
-        
-        const slideRightButton = $(".slideRightButton");
-        if (getContainerClassByIndex(containerIndex - 1) === "") 
-            slideRightButton.prop("disabled", true);
+        const currentContainer = $(getContainerIdByIndex(containerIndex));
 
-        else
-            slideRightButton.prop("disabled", false);
+        const otherContainerClass = getContainerIdByIndex(prev ? containerIndex - 1 : containerIndex + 1);
+
+        // case: no container in given direction
+        if (otherContainerClass === "")
+            return;
+
+        const otherContainer = $(otherContainerClass);
+    
+        // toggle containers
+        currentContainer.toggle();
+        setTimeout(() => {
+            otherContainer.toggle();
+            otherContainer.css("display", "flex");
+        }, 10);
+
+        // update current index
+        setContainerIndex(prev ? containerIndex - 1 : containerIndex + 1);
     }
 
 
-    function getContainerClassByIndex(index: number): string {
+    function getContainerIdByIndex(index: number): string {
 
         switch (index) {
             case 0: 
-                return ".orientationContainer";
+                return "#orientationContainer";
             
             case 1:
-                return ".numColumnsContainer";
+                return "#numColumnsContainer";
 
             default:
                 return "";
@@ -111,47 +95,110 @@ export default function PopUpNewDocument(props) {
     }
 
 
-    // make sub components for:
-        // orientation
-        // num Columns
-        // colum type
+    function handleSelectOrientation(orientation: Orientation): void {
+
+        appContext.setOrientation(orientation);
+        setSelectedOrientation(true);
+    }
+
+
+    function handleSelectNumColumns(numColumns: number): void {
+
+        appContext.setNumColumns(numColumns);
+        setSelectedNumColumns(true);
+    }
+
+
+    const nextButton = <button id="nextButton"
+                                className={"slideButton slideLeftButton blackButton blackButtonContained buttonSmall" + (containerIndex === 1 ? " hidePopUp" : "")}// last container
+                                onClick={() => handleNextContainer(false)}
+                                disabled={!isContinue}>
+                            {/* last container */}
+                            {containerIndex === 1 ? "Fertig" : "Weiter"}
+                        </button>;
 
 
     return (
-        <div id={id} className={className + " dontHidePopUp"}> 
-            <div className="body flexCenter dontHidePopUp">
-                <button onClick={handleSlideRight} className="slideButton slideRightButton dontHidePopUp">
-                    <img src="arrowLeft.png" alt="arrow right" className="smallIconButton dontHidePopUp"/>
-                </button>
-
-                <div className="orientationContainer flexCenter dontHidePopUp">
-                    {/* TODO: make these radio buttons :P */}
-                    <button className="whiteButton whiteButtonPortrait dontHidePopUp"
-                            onClick={() => appContext.setOrientation(Orientation.PORTRAIT)}>
+        <div id={id} className={className}> 
+            <div className="header flexRight">
+                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopUp"/>
+            </div>
+            
+            <div className="body flexCenter">
+                <div id="orientationContainer" className="orientationContainer flexCenter">
+                    <RadioButton id="Portrait"
+                                 className="radioContainer" 
+                                 labelClassName="whiteButton whiteButtonPortrait "
+                                 name="Orientation" 
+                                 handleSelect={() => handleSelectOrientation(Orientation.PORTRAIT)}>
                         Hoch-Format
-                    </button>
-
-                    <button className="whiteButton whiteButtonLandscape dontHidePopUp"
-                            onClick={() => appContext.setOrientation(Orientation.LANDSCAPE)}>
+                    </RadioButton>
+                    
+                    <RadioButton id="Landscape"
+                                 className="radioContainer"
+                                 labelClassName="whiteButton whiteButtonLandscape "
+                                 name="Orientation"
+                                 handleSelect={() => handleSelectOrientation(Orientation.LANDSCAPE)}>
                         Quer-Format
+                    </RadioButton>
+                </div>
+
+                <div id="numColumnsContainer" className="numColumnsContainer flexCenter">
+                    <div className="radioContainer">
+                        <RadioButton id="OneColumn" 
+                                    labelClassName={"whiteButton " + orientationClassName}
+                                    name="NumColumns"
+                                    handleSelect={() => handleSelectNumColumns(1)}>
+                            <div style={{height: "100%"}}>Lorem ipsum</div>
+                        </RadioButton>
+                        <span>1 Spalte</span>
+                    </div>
+
+                    <div className="radioContainer">
+                        <RadioButton id="TwoColumns" 
+                                    labelClassName={"whiteButton " + orientationClassName}
+                                    name="NumColumns"
+                                    handleSelect={() => handleSelectNumColumns(2)}>
+                            <div className="verticalBorderRightDotted" style={{width: "50%"}}>
+                                Lorem ipsum
+                            </div>
+                            <div style={{width: "50%"}}></div>
+                        </RadioButton>
+                        <span>2 Spalten</span>
+                    </div>
+
+                    <div className="radioContainer">
+                        <RadioButton id="ThreeColumns" 
+                                    labelClassName={"whiteButton " + orientationClassName}
+                                    name="NumColumns"
+                                    handleSelect={() => handleSelectNumColumns(3)}>
+                            <div className="verticalBorderRightDotted" style={{width: "33%"}}>
+                                Lorem ipsum
+                            </div>
+                            <div className="verticalBorderRightDotted" style={{width: "33%"}}></div>
+                            <div style={{width: "33%"}}></div>
+                        </RadioButton>
+                        <span>3 Spalten</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="footer">
+                <div className="flexLeft">
+                    <button id="prevButton"
+                            className="slideButton slideRightButton blackButton blackButtonContained buttonSmall"
+                            onClick={() => handleNextContainer(true)}
+                            disabled={containerIndex === 0}>
+                        Zurück
                     </button>
                 </div>
 
-                <div className="numColumnsContainer flexCenter dontHidePopUp">
-                    <button className="whiteButton whiteButtonPortrait dontHidePopUp"
-                            onClick={() => appContext.setOrientation(Orientation.PORTRAIT)}>
-                        Hoch-Format
-                    </button>
-
-                    <button className="whiteButton whiteButtonLandscape dontHidePopUp"
-                            onClick={() => appContext.setOrientation(Orientation.LANDSCAPE)}>
-                        Quer-Format
-                    </button>
+                <div className="flexRight">
+                    {containerIndex === 1 ? // last container
+                        <Link to="/build" className="whiteLink">{nextButton}</Link> : 
+                        nextButton
+                    }       
                 </div>
-
-                <button onClick={handleSlideLeft} className="slideButton slideLeftButton dontHidePopUp">
-                    <img src="arrowRight.png" alt="arrow right" className="smallIconButton dontHidePopUp"/>
-                </button>
             </div>
         </div>
     )

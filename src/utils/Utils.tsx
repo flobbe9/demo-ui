@@ -47,7 +47,6 @@ export function stringToNumber(str: string): number {
 
 
 /**
- * // TODO: make this more generic
  * Concat given params in given order using "-", e.g.:"TextInput-\<number\>-\<number\>-\<number\>-\<string\>_\<string\>_\<string\>_\<string\>_\<string\>".
  * 
  * @param pageIndex 
@@ -284,7 +283,7 @@ export function resetPopUp(setPopUpContent: (content: React.JSX.Element) => void
         if ($("#PopUp").css("display") === "none") {
             const popUpContainer = $("#popUpContainer");
             setPopUpContent(<></>);
-            popUpContainer.prop("className", "popUpContainer dontHidePopUp")
+            popUpContainer.prop("className", "popUpContainer ")
         }
     }, duration + 100);
 }

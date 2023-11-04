@@ -19,11 +19,8 @@ export default function App() {
     const [popUpContent, setPopUpContent] = useState(<></>);
 
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
+    const [numColumns, setNumColumns] = useState(1);
 
-    // ref for:
-        // orientation
-        // numColumns
-        // columnType
     // pass refs into url, use in Document
     
     const context = {
@@ -31,12 +28,16 @@ export default function App() {
         setPopUpContent: setPopUpContent,
 
         orientation: orientation,
-        setOrientation: setOrientation
+        setOrientation: setOrientation,
+
+        numColumns: numColumns,
+        setNumColumns: setNumColumns
     }
+
 
     function handleClick(event): void {
 
-        if (!event.target.className.includes("dontHidePopUp") && escapePopUp)
+        if (event.target.className.includes("hidePopUp") && escapePopUp)
             hidePopUp(setPopUpContent);
     }
 
@@ -55,7 +56,7 @@ export default function App() {
 
                     <NavBar />
 
-                    <div style={{display: "flex", justifyContent: "center"}}>
+                    <div className="flexCenter">
                         <PopUp>
                             {popUpContent}
                         </PopUp>
@@ -63,7 +64,7 @@ export default function App() {
 
                     <div className="content">
                         {/* For blur effect */}
-                        <div className="overlay"></div>
+                        <div className="overlay hidePopUp"></div>
                         <Routes>
                             <Route path="/" element={<Menu />} />
                             <Route path="/build" element={<Document />} />
@@ -86,5 +87,8 @@ export const AppContext = createContext({
     setPopUpContent: (content: React.JSX.Element) => {},
 
     orientation: Orientation.PORTRAIT,
-    setOrientation: (orientation: Orientation) => {}
+    setOrientation: (orientation: Orientation) => {},
+
+    numColumns: 1,
+    setNumColumns: (numColumns: number) => {}
 })

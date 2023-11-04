@@ -23,6 +23,14 @@ body {
         border-radius: 5px;
         text-decoration: none;
         transition: 0.2s;
+
+        &:disabled {
+            color: grey;
+
+            &:hover {
+                background-color: black;
+            }
+        }
     }
     
     .blackButtonContained {
@@ -53,7 +61,6 @@ body {
         border: none;
         border-radius: 5px;
         color: black;
-        margin-bottom: 10px;
         outline: none;
         transition: color 0.2s;
         
@@ -77,7 +84,7 @@ body {
         transition: height 0.2s;
 
         &:hover {
-            height: 25px;
+            height: 28px;
         }
     }
 
@@ -86,5 +93,22 @@ body {
         align-items: center;
         display: flex;
         justify-content: center;
+    }
+
+    .flexLeft {
+        align-items: center;
+        display: flex;
+        justify-content: left;
+    }
+
+    .flexRight {
+        align-items: center;
+        display: flex;
+        justify-content: right;
+    }
+
+    .whiteLink {
+        color: white;
+        text-decoration: none;
     }
 }

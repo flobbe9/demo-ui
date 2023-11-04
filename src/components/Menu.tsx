@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import "../assets/styles/Menu.css";
-import { log, togglePopUp } from "../utils/Utils";
+import { togglePopUp } from "../utils/Utils";
 import {v4 as uuid} from "uuid";
 import { AppContext } from "../App";
 import PopUpNewDocument from "./popUp/PopUpNewDocument";
@@ -48,12 +48,12 @@ export default function Menu(props) {
         <div id={id} className={className}>
             <div className="leftSideBar">
                 <button id="newDocumentButton" 
-                        className="whiteButton whiteButtonPortrait newDocumentButton dontHidePopUp" 
+                        className="whiteButton whiteButtonPortrait newDocumentButton " 
                         onClick={handleNewDocument}>
 
-                    <div className="dontHidePopUp">Neues Dokument</div>
+                    <div className="">Neues Dokument</div>
 
-                    <span className="dontHidePopUp" style={{fontSize: "30px"}}>+</span>
+                    <span className="" style={{fontSize: "30px"}}>+</span>
                 </button>
             </div>
 

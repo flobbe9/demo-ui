@@ -1,43 +1,48 @@
 .PopUpNewDocument {
     height: 100%;
 
+    .header {
+        align-items: flex-start;
+        display: flex;
+        height: 5%;
+    }
+
     .body {
         height: 90%;
 
-        .slideRightButton {
-            left: 1vb;
-            position: absolute;
-        }
-
         .orientationContainer {
-            height: 25%;
+            flex-wrap: wrap;
             position: absolute;
-            width: 60%;
 
-        }
-        .whiteButtonPortrait {
-            border: 1px solid grey;
-            margin-right: 5%;
-
-            &:hover {
-                border-color: rgb(168, 168, 168);
-            }
-        }
-        
-        .whiteButtonLandscape {
-            border: 1px solid grey;
-
-            &:hover {
-                border-color: rgb(168, 168, 168);
-            }
         }
 
         .numColumnsContainer {
             display: none;
-            height: 25%;
-            position: absolute;
-            right: 0;
-            width: 60%;
+            height: 80%;
+            flex-wrap: wrap;
+            overflow: auto;
+            width: 80%;
+
+            .radioContainer {
+                text-align: center;
+
+                .radioLabel {
+                    padding: 0;
+
+                    .radioChildren {
+                        font-size: 9px;
+                    }
+                }
+            }
+
+            .verticalBorderRightDotted {
+                border-right: 1px dashed rgba(128, 128, 128, 0.39);
+                height: 100%;
+            }
+        }
+
+        .radioContainer {
+            margin: 2vb 2vi 2vb 0;
         }
 
         .slideButton {
@@ -47,25 +52,31 @@
             position: absolute;
         }
 
-        .slideButton:disabled {
-            .smallIconButton {
-                opacity: 0.5;
-                pointer-events: none;
-            }
-        }
-
-        .slideRightButton {
-            left: 1vb;
-        }
-
         .slideLeftButton {
             right: 1vb;
         }
     }
 
     .footer {
-        bottom: 1vb;
-        position: absolute;
-        right: 1vb
+        align-items: last baseline;
+        display: flex;
+        height: 5%;
+        width: 100%;
+
+        #prevButton {
+            width: 80px;
+        }
+        
+        #nextButton {
+            width: 80px;
+        }
+
+        .flexLeft {
+            width: 50%;
+        }
+        
+        .flexRight {
+            width: 50%;
+        }
     }
 }

@@ -1,0 +1,32 @@
+.RadioButton {
+    /* margin-right: 2vi; */
+
+    .radioLabel {
+        border: 1px solid grey;
+        padding: 1vi;
+        text-align: center;
+        transition: background-color 0.2s, border-color 0.2s;
+        
+        &:hover {
+            background-color: rgb(245, 245, 245);
+            border-color: rgb(169, 169, 169);
+            color: black;
+        }
+
+        .radioInput {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .radioChildren {
+            height: 100%;
+            width: 100%;
+        }
+    }
+    
+    /* style '.radioLabel' if first child <input/> is checked */
+    .radioLabel:has(> input:checked) {
+        background-color: rgb(245, 245, 245);
+        border-color: aqua;
+    }
+}
