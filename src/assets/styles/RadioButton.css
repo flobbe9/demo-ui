@@ -25,6 +25,7 @@
     }
     
     /* style '.radioLabel' if first child <input/> is checked */
+    /* TODO: this is not supported in all browsers */
     .radioLabel:has(> input:checked) {
         background-color: rgb(245, 245, 245);
         border-color: aqua;

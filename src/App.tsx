@@ -56,13 +56,13 @@ export default function App() {
 
                     <NavBar />
 
-                    <div className="flexCenter">
-                        <PopUp>
-                            {popUpContent}
-                        </PopUp>
-                    </div>
-
                     <div className="content">
+                        <div className="flexCenter">
+                            <PopUp>
+                                {popUpContent}
+                            </PopUp>
+                        </div>
+
                         {/* For blur effect */}
                         <div className="overlay hidePopUp"></div>
                         <Routes>
@@ -75,6 +75,7 @@ export default function App() {
                     </div>
                     
                     <Footer />
+                    
                 </AppContext.Provider>
             </BrowserRouter>
         </div>

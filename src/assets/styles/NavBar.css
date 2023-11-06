@@ -1,5 +1,5 @@
 :root {
-    --marginNavBarInside: 30px;
+    --marginNavBarInside: 10px;
 }
 
 .NavBar {
@@ -8,14 +8,15 @@
     box-shadow: 0 1px 8px -2px black;
     display: flex;
     font-size: 20px;
-    height: 70px;
-    position: sticky;
+    overflow: auto; /* remove this later*/
+    padding: var(--marginNavBarInside);
     top: 0;
     z-index: 2;
     
-    .text-left {
-        display: flex;
+    .textLeft {
         margin-left: var(--marginNavBarInside);
+        min-width: 380px;
+        width: 100%;
     
         .navLink {
             color: black;
@@ -27,10 +28,17 @@
             margin-left: 10px;
         }
     }
+
+    .textCenter {
+        color: rgba(0, 0, 0, 0.486);
+        font-size: 15px;
+        width: 100%;
+    }
         
-    .text-right {
-        position: absolute;
-        right: var(--marginNavBarInside);
+    .textRight {
+        margin-right: var(--marginNavBarInside);
+        min-width: 380px;
+        width: 100%;
     
         .navButton {
             margin-left: 10px;

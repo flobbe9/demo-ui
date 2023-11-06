@@ -36,8 +36,7 @@ export default function Menu(props) {
         appContext.setPopUpContent(<PopUpNewDocument />);
 
         // append classNames to popup
-        const popUpContainerClassName = popUpContainer.prop("className");
-        popUpContainer.prop("className", popUpContainerClassName + " customContainer")
+        popUpContainer.addClass("fullHeightContainer");
         
         // toggle popUp
         togglePopUp(appContext.setPopUpContent);

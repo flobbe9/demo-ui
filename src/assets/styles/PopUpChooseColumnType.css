@@ -1,0 +1,61 @@
+.PopUpChooseColumnType {
+    height: 100%;
+
+    .header {
+        align-items: flex-start;
+        display: flex;
+        height: 5%;
+    }
+
+    .body {
+        height: 85%;
+        overflow: auto;
+
+        .popUpHeading {
+            font-size: 1.4rem;
+        }
+
+        .radioContainer {
+            margin-bottom: 15px;
+
+            .RadioButton {
+                width: 100%;
+                
+                .radioLabel {
+                    border-right: none;
+                    border-bottom: none;
+                    border-top-right-radius: 0;
+                    border-bottom-right-radius: 0;
+                    border-bottom-left-radius: 0;
+                    height: 140px;
+                    max-width: 400px;
+                    width: 80%;
+                    
+                    .radioChildren {
+                        width: 100%;
+                    }
+                    
+                    .mockColumn {
+                        align-items: left;
+                        display: flex;
+                        font-size: 0.8rem;
+                        justify-content: left;
+                        text-align: left;
+                    }
+                    
+                    .mockColumn {
+                        border-right: 1px dashed rgb(179, 179, 179);
+                        height: 100%;
+                        width: 80%;
+                    }
+                }
+            }
+        }
+    }
+
+    .footer {
+        align-items: last baseline;
+        height: 10%;
+        width: 100%;
+    }
+}

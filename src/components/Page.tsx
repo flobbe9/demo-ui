@@ -6,8 +6,12 @@ import TextInput from "./TextInput";
 
 export default function Page(props) {
 
+    // state columns
+    const id = props.id ? "Page" + props.id : "Page";
+    const className = props.className ? "Page " + props.className : "Page";
+
     return (
-        <div id="Page" className="Page">
+        <div id={id} className={className}>
             <div className="headingContainer">
                 <TextInput id="heading" />
             </div>
@@ -15,7 +19,7 @@ export default function Page(props) {
             <div className="columnContainer">
                 <Column />
 
-                {/* <Column /> */}
+                <Column />
                 
                 <Column />
             </div>

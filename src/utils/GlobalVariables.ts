@@ -24,8 +24,8 @@ export const MAX_NUM_TEXTINPUTS_LADNSCAPE = 20;
 
 // TODO: calculate this with padding, margin and border of input
 /** in px, means 24 lines of inputs with a height of 27px (16px fontSize at the moment) */
-// export const PAGE_HEIGHT = 648; // add input padding-top and -bottom to this number
-export const PAGE_HEIGHT = 100; // add input padding-top and -bottom to this number
+export const PAGE_HEIGHT = 648; // add input padding-top and -bottom to this number
+// export const PAGE_HEIGHT = 100; // add input padding-top and -bottom to this number
 
 /** 
  * Width of one text input relative to the windwo width (at the moment). 

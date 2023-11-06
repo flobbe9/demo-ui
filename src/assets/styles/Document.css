@@ -1,3 +1,8 @@
 .Document {
-    border: 3px solid black;
+    height: 100%;
+
+    .pageContainer {
+        padding: 20px;
+        width: 90%;
+    }
 }

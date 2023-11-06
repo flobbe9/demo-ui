@@ -14,6 +14,11 @@
             flex-wrap: wrap;
             position: absolute;
 
+            .radioChildren {
+                align-items: center;
+                display: flex;
+                justify-content: center;
+            }
         }
 
         .numColumnsContainer {
@@ -30,7 +35,10 @@
                     padding: 0;
 
                     .radioChildren {
+                        align-items: center;
+                        display: flex;
                         font-size: 9px;
+                        justify-content: center;
                     }
                 }
             }

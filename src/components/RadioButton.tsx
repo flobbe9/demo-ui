@@ -36,7 +36,7 @@ export default function RadioButton(props: {
                        type="radio" 
                        name={props.name} />
 
-                <div className="radioChildren flexCenter">{props.children}</div>
+                <div className="radioChildren">{props.children}</div>
             </label>
         </div>
     )

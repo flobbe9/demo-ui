@@ -1,5 +1,75 @@
 .Column {
-    border: 1px solid blue;
+    border-right: 1px dashed rgb(194, 194, 194);
+    height: 100%;
+    transition: background-color 0.7s;
     width: 100%;
+
+    .chooseTypeOverlay {
+        color: grey;
+        height: 100%;
+
+        .chooseTypeButton {
+            animation: backgroundPulse 4s infinite;
+            border-radius: 100%;
+            transition: background-color 0.3s;
+            
+            &:hover {
+                animation: none;
+                background-color: rgb(167, 167, 167);
+            }
+            
+            .plusIcon {
+                animation: heightPulse 4s infinite;
+                height: 50px;
+                transition: height 0.3s;
+
+                &:hover {
+                    animation: none;
+                    cursor: pointer;
+                    height: 60px;
+                }
+            }
+        }
+    }
+
+    .paragraphContainer {
+    
+        &.type-0 {
+            .TextInput {
+                margin-left: 40px;
+            }
+        }
+        
+        &.type-1 {
+            .TextInput {
+                margin-left: 20px;
+            }
+        }
+    }
 }
 
+/* hover only if '.hover' class is present */
+.Column.hover:hover {
+    background-color: rgb(219, 219, 219);
+}
+
+
+@keyframes heightPulse {
+    0% {height: 50px}
+
+    30% {height: 50px}
+
+    35% {height: 60px}
+
+    40% {height: 50px}
+}
+
+@keyframes backgroundPulse {
+    0% {background-color: transparent}
+
+    30% {background-color: transparent}
+
+    35% {background-color: rgb(167, 167, 167)}
+
+    40% {background-color: transparent}
+}

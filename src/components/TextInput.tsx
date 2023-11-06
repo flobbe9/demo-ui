@@ -9,8 +9,6 @@ export default function TextInput(props) {
 
 
     return (
-        <div id={id} className={className}>
-            <input type="text"/>
-        </div>
+        <input id={id} className={className} type="text"/>
     )
 }

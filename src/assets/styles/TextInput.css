@@ -1,14 +1,5 @@
-:root {
-    /* will be set on Page load */
-    --textInputWidth: 0%
-}
-
 .TextInput {
-    border: none;
-    border-bottom: 1px solid black;
-    border-right: 1px solid black;
     outline: none;
-    /* width: var(--textInputWidth); */
 }
 
 
@@ -16,10 +7,10 @@
     
 }
 
-#TextInput-1 {
+/* #TextInput-1 {
     margin-left: 40px;
 }
 
 #TextInput-2 {
     margin-left: 80px;
-}
+} */

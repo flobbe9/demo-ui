@@ -128,7 +128,7 @@ export default function PopUpNewDocument(props) {
                 <div id="orientationContainer" className="orientationContainer flexCenter">
                     <RadioButton id="Portrait"
                                  className="radioContainer" 
-                                 labelClassName="whiteButton whiteButtonPortrait "
+                                 labelClassName="whiteButton whiteButtonPortrait"
                                  name="Orientation" 
                                  handleSelect={() => handleSelectOrientation(Orientation.PORTRAIT)}>
                         Hoch-Format
@@ -136,7 +136,7 @@ export default function PopUpNewDocument(props) {
                     
                     <RadioButton id="Landscape"
                                  className="radioContainer"
-                                 labelClassName="whiteButton whiteButtonLandscape "
+                                 labelClassName="whiteButton whiteButtonLandscape"
                                  name="Orientation"
                                  handleSelect={() => handleSelectOrientation(Orientation.LANDSCAPE)}>
                         Quer-Format

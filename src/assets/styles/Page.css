@@ -1,14 +1,21 @@
 .Page {
+    background-color: white;
+    height: 90vh;
+    margin: 20px 0 70px;
+    max-height: 900px;
+    padding: 5vb 5vi;
     width: 100%;
 }
 
 .headingContainer {
-    display: flex;
+    display: flex; 
+    height: 5%;
     justify-content: center;
-    margin: 10px;
+    margin-bottom: 15px;
     width: 100%;
 }
 
 .columnContainer {
     display: flex;
+    height: 90%;
 }
