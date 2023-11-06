@@ -1,6 +1,6 @@
 {
   "name": "vorspiel_frontend",
-  "version": "0.0.6",
+  "version": "0.0.6", 
   "private": true,
   "dependencies": {
     "@mui/lab": "^5.0.0-alpha.143",
