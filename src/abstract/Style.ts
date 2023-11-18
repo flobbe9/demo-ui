@@ -1,5 +1,5 @@
 import { BreakType } from "../enums/Breaktype";
-import { getCSSValueAsNumber, isNumberFalsy, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
+import { getCSSValueAsNumber, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
 
 
 /**
@@ -29,16 +29,7 @@ export function getTextInputStyle(textInput: JQuery): Style {
     // case: textInput falsy
     if (!textInput.length) {
         logError("Failed to get style from text input. 'textInput' is falsy. Returning default style instead");
-        return {
-            fontSize: 16,
-            fontFamily: "Arial",
-            color: "000000",
-            bold: false,
-            italic: false,
-            underline: false,
-            textAlign: "LEFT",
-            breakType: null
-        };
+        return getDefaultStyle();
     }
 
     return {
@@ -66,4 +57,19 @@ function isTextInputBold(textInput: JQuery): boolean {
 
     // case: is string
     return fontWeight.toLowerCase() === "bold";
+}
+
+
+export function getDefaultStyle(): Style {
+
+    return {
+        fontSize: 14,
+        fontFamily: "Arial",
+        color: "000000",
+        bold: false,
+        italic: false,
+        underline: false,
+        textAlign: "LEFT",
+        breakType: null
+    };
 }

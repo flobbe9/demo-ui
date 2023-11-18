@@ -24,10 +24,6 @@ export default function NavBar(props) {
                     </Link>
                 </div>
 
-                <div className="textCenter flexCenter">
-                    Dokument1.docx
-                </div>
-
                 <div className="textRight flexRight">
                     <LoadingButton disabled={true} className="blackButton blackButtonOutlined navButton" variant="outlined">
                         Registrieren

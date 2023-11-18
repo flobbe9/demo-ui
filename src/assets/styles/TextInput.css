@@ -1,16 +1,15 @@
-.TextInput {
-    outline: none;
+.textInputContainer {
+    .TextInput {
+        font-family: 'Calibri';
+        font-size: 14px;
+        border: none;
+        border-bottom: 1px dashed grey;
+        margin: 0 3px 1px 3px;
+        outline: none;
+        width: 100%;
+        
+        &:focus {
+            border-bottom-color: aqua;
+        }
+    }
 }
-
-
-#TextInput-0 {
-    
-}
-
-/* #TextInput-1 {
-    margin-left: 40px;
-}
-
-#TextInput-2 {
-    margin-left: 80px;
-} */

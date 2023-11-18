@@ -1,0 +1,9 @@
+.ControlBar {
+    display: flex;
+    margin-top: 5px;
+    width: 100%;
+
+    .flexCenter {
+        width: 100%;
+    }
+}

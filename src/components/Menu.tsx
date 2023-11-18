@@ -1,6 +1,6 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/Menu.css";
-import { togglePopUp } from "../utils/Utils";
+import { hidePopUp, togglePopUp } from "../utils/Utils";
 import {v4 as uuid} from "uuid";
 import { AppContext } from "../App";
 import PopUpNewDocument from "./popUp/PopUpNewDocument";
@@ -14,6 +14,11 @@ export default function Menu(props) {
     const [savedDocuments, setSavedDocuments] = useState(initSavedDocuments());
 
     const appContext = useContext(AppContext);
+
+
+    useEffect(() => {
+        hidePopUp(appContext.setPopUpContent);
+    }, [])
 
 
     // TODO: fetch saved documents from backend
@@ -36,7 +41,7 @@ export default function Menu(props) {
         appContext.setPopUpContent(<PopUpNewDocument />);
 
         // append classNames to popup
-        popUpContainer.addClass("fullHeightContainer");
+        popUpContainer.addClass("largeHeightContainer");
         
         // toggle popUp
         togglePopUp(appContext.setPopUpContent);

@@ -1,43 +1,68 @@
-import BasicParagraph from "../abstract/BasicParagraphs";
-import DocumentWrapper from "../abstract/DocumentWrapper";
-import Style, { getTextInputStyle } from "../abstract/Style";
+import BasicParagraph, { getDefaultBasicParagraph } from "../abstract/BasicParagraphs";
+import { getTextInputStyle } from "../abstract/Style";
 import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
-import { BACKEND_BASE_URL } from "../utils/GlobalVariables";
-import { getDocumentId, getPartFromDocumentId, isBlank, log, logWarn, stringToNumber } from "../utils/Utils";
-import sendHttpRequest from "../utils/fetch/fetch";
+import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT } from "../utils/GlobalVariables";
+import { downloadFileByUrl, getDocumentId, getPartFromDocumentId, isBlank, logWarn, stringToNumber } from "../utils/Utils";
+import fetchJson from "../utils/fetch/fetch";
+
+const documentBuilderMapping = "/api/documentBuilder";
+
+// TODO: remember to add empty line after table (in case of column break)
 
 
-export async function buildDocument(orientation: Orientation, numColumns: number) {
-
-    const body = buildDocumentWrapper(orientation, numColumns);
-
-    const jsonResponse = await sendHttpRequest(BACKEND_BASE_URL + "/api/documentBuilder/createDocument", "post", body);
+/**
+ * Send request to backend to download document either as pdf or docx file.
+ *  
+ * @param pdf if true, a pdf file is returned by backend
+ */
+export async function downloadDocument(pdf: boolean) {
     
-    log(jsonResponse)
+    // TODO: replace file name
+    const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf + "&fileName=Document1.docx";
+
+    downloadFileByUrl(url);
 }
 
 
-function buildDocumentWrapper(orientation: Orientation, numColumns: number): DocumentWrapper {
+/**
+ * Iterate document, collect all ```BasicParagraph```s and send build request to backend.
+ * 
+ * @param orientation of the document
+ * @param numColumns number of columns in the document
+ */
+export async function buildDocument(orientation: Orientation, numColumns: number) {
 
-    return {
-        content: buildContent(),
+    const body =  {
+        content: buildContent(numColumns),
         tableConfig: null,
         landscape: orientation === Orientation.LANDSCAPE,
         numColumns: numColumns
     }
+
+    fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/createDocument", "post", body);
 }
 
-function buildContent(): (BasicParagraph | null)[] {
+
+/**
+ * Iterate all ```<Column />``` elements in ```<Document />``` and map text and style to array of ```BasicParagraph```s.<p>
+ * 
+ * Add default ```BasicParagraph``` at start and end for header and footer (currently empty).
+ * 
+ * @param numColumns number of columns in document
+ * @returns array of all ```BasicParagraph```s in document
+ */
+function buildContent(numColumns: number): BasicParagraph[] {
 
     const columns = $(".Column");
 
-    const content: (BasicParagraph | null)[] = [];
+    const content: BasicParagraph[] = [];
 
-    // header
-    content.push(null);
+    // header (none)
+    content.push(getDefaultBasicParagraph());
 
     // heading
+    // TODO: figure out how to seperate heading from column
     const heading = $(".heading");
     const headingText = getTextInputContent(heading);
     if (!isBlank(headingText))
@@ -49,20 +74,26 @@ function buildContent(): (BasicParagraph | null)[] {
         const pageIndex = stringToNumber(getPartFromDocumentId(columnId, 1));
         const columnIndex = stringToNumber(getPartFromDocumentId(columnId, 2));
 
-        buildColumn(pageIndex, columnIndex, content);
+        buildColumn(pageIndex, columnIndex, content, numColumns);
     });
     
     // footer (none)
-    content.push(null);
+    content.push(getDefaultBasicParagraph());
 
     return content;
 }
 
 
-// TODO: what if column is empty, will column break work?
-function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps: (BasicParagraph | null)[]) {
-
-    log("Starting to build column...");
+/**
+ * Iterate ```<TextInput />``` elements of column and add text and style as ```BasicParagraph``` to given ```allBasicParagraphs```.
+ * 
+ * @param pageIndex index of page of column to iterate
+ * @param columnIndex index of column to iterate
+ * @param allBasicParagrahps array of all ```BasicParagraphs``` collected so far
+ * @param numColumns number of columns in document
+ * @see BasicParagraph
+ */
+function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps: BasicParagraph[], numColumns: number): void {
 
     const columnId = getDocumentId("Column", pageIndex, "", columnIndex);
     const columnTextInputs = $("#" + columnId + " .TextInput");
@@ -70,7 +101,7 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
     // case: no text inputs yet
     if (!columnTextInputs.length) {
         logWarn("Failed to build column. No text inputs rendered yet. 'columnId': " + columnId);
-        return [];
+        return;
     }
 
     // iterate text inputs
@@ -78,19 +109,16 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
         const textInputId = textInputElement.id;
         const textInput = $("#" + textInputId);
 
-        const text = getTextInputContent(textInput);
-
-        // case: no text
+        let text = getTextInputContent(textInput);
         if (isBlank(text))
-            allBasicParagrahps.push(null);
+            text = DEFAULT_BASIC_PARAGRAPH_TEXT;
 
-        // case: normal paragraph
-        else
-            allBasicParagrahps.push({text: text, style: getTextInputStyle(textInput)})
+        allBasicParagrahps.push({text: text, style: getTextInputStyle(textInput)})
     });
 
-    // add column break
-    addColumnBreakAtColumnEnd(allBasicParagrahps);
+    // case: is not very last column
+    if (!(isLastPage(columnId) && isLastColumn(columnId, numColumns)))
+        addColumnBreak(allBasicParagrahps);
 }
 
 
@@ -116,13 +144,42 @@ function getTextInputContent(textInput: JQuery): string {
 }
 
 
-function addColumnBreakAtColumnEnd(basicParagraphs: (BasicParagraph | null)[]): void {
+/**
+ * Add column break at last ```BasicParagraph``` of given list.
+ * 
+ * @param basicParagraphs array of ```BasicParagraph```s added so far
+ */
+function addColumnBreak(basicParagraphs: BasicParagraph[]): void {
 
-    for (let i = basicParagraphs.length - 1; i >= 0; i--) {
-        const basicParagraph = basicParagraphs[i];
-        if (basicParagraph) {
-            basicParagraph.style.breakType = BreakType.COLUMN;
-            return;
-        }
+    const basicParagraph = basicParagraphs[basicParagraphs.length - 1];
+    if (!basicParagraph) {
+        logWarn("Failed to column break. 'basicParagraph' is falsy");
+        return;
     }
+    basicParagraph.style.breakType = BreakType.COLUMN;
+}
+
+
+/**
+ * @param documentId any id formatted like ```"Prefix_pageIndex_columnIndex"...```
+ * @returns true if page of ```documentId``` is last of document
+ */
+function isLastPage(documentId: string): boolean {
+
+    const pageIndex = stringToNumber(getPartFromDocumentId(documentId, 1));
+
+    return $("#Page_" + (pageIndex + 1)).length === 0;
+}
+
+
+/**
+ * @param documentId any id formatted like ```"Prefix_pageIndex_columnIndex"...```
+ * @param numColumns number of columns in document
+ * @returns true if column of ```documentId``` is on it's page
+ */
+function isLastColumn(documentId: string, numColumns: number): boolean {
+
+    const columnIndex = getPartFromDocumentId(documentId, 2);
+
+    return stringToNumber(columnIndex) === numColumns - 1;
 }

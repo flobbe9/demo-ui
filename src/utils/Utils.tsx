@@ -1,6 +1,6 @@
 import React from "react";
 import $ from "jquery";
-import { PAGE_HEIGHT } from "./GlobalVariables";
+import { ApiExceptionFormat } from "../abstract/ApiExceptionFormat";
 
 
 export function log(text?: any): void {
@@ -23,13 +23,13 @@ export function logError(text?: any): void {
 
 export function logApiResponse(error: ApiExceptionFormat): void {
 
-    console.error(error.error + ": " + error.message);
+    logError(error.error + ": " + error.message);
 }
 
 
 export function logApiError(message: string, error: Error): void {
     
-    console.error(message + ". " + error.message);
+    logError(message + ". " + error.message);
 }
 
 
@@ -40,67 +40,76 @@ export function stringToNumber(str: string): number {
         return Number.parseFloat(str);
 
     } catch (e) {
-        console.error(e);
+        logError(e);
         return -1;
     }
 }
 
 
 /**
- * Concat given params in given order using "-", e.g.:"TextInput-\<number\>-\<number\>-\<number\>-\<string\>_\<string\>_\<string\>_\<string\>_\<string\>".
+ * Concat given params in given order using "_".
  * 
- * @param pageIndex 
- * @param pageColumnIndex 
- * @param pageColumnLineKey 
- * @param textInputKey 
- * @returns textInput id as string containing all params, valid or not
+ * @param pageIndex index of page
+ * @param customId any string to append to end of id
+ * @param paragraphIndex index of paragraph
+ * @param textInputIndex index of text input
+ * @param columnIndex index of column
+ * @returns id as string containing all params, valid or not
  */
 export function getDocumentId(prefix: string,
-                                    pageIndex: number, 
-                                    pageColumnIndex: number, 
-                                    pageColumnLineKey?: string, 
-                                    textInputKey?: string): string {
+                                pageIndex: number,
+                                customId?: string | number,
+                                columnIndex?: number,
+                                paragraphIndex?: number,
+                                textInputIndex?: number): string {
 
-    let id = prefix + "_" + pageIndex + "_" + pageColumnIndex;
+    let id = prefix + "_" + pageIndex;
 
-    if (pageColumnLineKey)
-        id += "_" + pageColumnLineKey;
+    if (!isNumberFalsy(columnIndex))
+        id += "_" + columnIndex;
 
-    if (textInputKey)
-        id += "_" + textInputKey
+    if (!isNumberFalsy(paragraphIndex))
+        id += "_" + paragraphIndex;
+
+    if (!isNumberFalsy(textInputIndex))
+        id += "_" + textInputIndex;
+    
+    if (customId)
+        id += "_" + customId;
 
     // this check does not work
-    if (!prefix || isNumberFalsy(pageIndex) || isNumberFalsy(pageColumnIndex))
-        console.error("Failed to create text input id: " + id);
+    if (!prefix || isNumberFalsy(pageIndex))
+        logError("Failed to create text input id: " + id);
         
     return id;
 }
 
 
 /**
- * TODO
- * Split given id using "-" and expect array like ['TextInput', '\<number\>', '\<number\>', '\<number\>', '\<string\>_\<string\>_\<string\>_\<string\>_\<string\>']. <p>
+ * Split given id using "_" and expect array like ```["Page", 1, 3]```. <p>
  * 
- * Each element of the array is considered an idPart. So idPart = 4 would return the '\<string\>_...' element of the array.<p>
+ * Each element of the array is considered an idPart. So ```idPart = 2``` would return ```3```. <p>
  * 
  * IdParts: <p>
- * - \[1]: pageIndex
- * - \[2]: pageColumnIndex
- * - \[3]: pageColumnLineIndex (key?)
- * - \[4]: textInputKey
+ * - ```[0]```: prefix
+ * - ```[1]```: pageIndex
+ * - ```[2]```: columnIndex (optional in id)
+ * - ```[3]```: paragraphIndex (optional in id)
+ * - ```[4]```: textInputIndex (optional in id)
+ * - ```[length - 1]```: customIdPart (optional in id, always last)
  * 
- * @param textInputId id of text input
- * @param idPart index of the element in the array resulting from ``` textInputId.split("-")```
+ * @param id id of text input
+ * @param idPart index of the element in the array resulting from ``` id.split("_")```
  * @returns the given part of the id or -1 if not found
  */
-export function getPartFromDocumentId(textInputId: string, idPart: number): number | string {
+export function getPartFromDocumentId(id: string, idPart: number): string {
 
-    if (idPart < 1 || idPart > 4 || !textInputId) {
-        console.error("Failed to get index part from text input id. 'textInputId': " + textInputId + " 'idPart': " + idPart);
-        return -1;
+    if (idPart < 0 || idPart > 3 || !id) {
+        logError("Failed to get index part from text input id. 'id': " + id + " 'idPart': " + idPart);
+        return "";
     }
         
-    const arr = textInputId.split("_");
+    const arr = id.split("_");
 
     return arr[idPart];
 }
@@ -115,7 +124,7 @@ export function isNumberFalsy(num: number | null | undefined): boolean {
 export function isBlank(str: string): boolean {
 
     if (!str && str !== "") {
-        console.error("Falsy input str: " + str);
+        logError("Falsy input str: " + str);
         return false;
     }
 
@@ -146,7 +155,7 @@ export function moveCursor(textInputId: string, start = 0, end = 0): void {
 export function isTextLongerThanInput(textInputId: string): boolean {
 
     if (!textInputId) {
-        console.error("Failed to determine 'scrollLeft'. Text input id falsy");
+        logError("Failed to determine 'scrollLeft'. Text input id falsy");
         return false;
     }
 
@@ -189,7 +198,7 @@ export function getCSSValueAsNumber(cssValue: string, unitDigits: number): numbe
 
     const length = cssValue.length;
     if (unitDigits >= length)
-        console.error("Failed to get css value as number. 'unitDigits' too long");
+        logError("Failed to get css value as number. 'unitDigits' too long or 'cssValue' too short");
 
     const endIndex = cssValue.length - unitDigits;
 
@@ -206,7 +215,7 @@ export function getWidthRelativeToWindow(width: string | number, unitDigits: num
 
     const windowWidth = $(window).width();
     if (!windowWidth) {
-        console.error("Failed to get width in percent. 'windowWidth' is falsy");
+        logError("Failed to get width in percent. 'windowWidth' is falsy");
         return "";
     }
 
@@ -214,19 +223,6 @@ export function getWidthRelativeToWindow(width: string | number, unitDigits: num
     const widhInPercent = (getCSSValueAsNumber(width.toString(), unitDigits) / windowWidth) * 100;
 
     return widhInPercent + "%";
-}
-
-
-/**
- * @param height css value as string, possibly with unit appended
- * @param unitDigits to cut from height in order to get the plain number
- * @returns height in percent relative to {@link PAGE_HEIGHT} as string with a '%' appended
- */
-export function getHeightRelativeToPageHeight(height: string, unitDigits: number): string {
-
-    const heightInPercent = (getCSSValueAsNumber(height, unitDigits) / PAGE_HEIGHT) * 100;
-
-    return (Math.round(heightInPercent * 100)) / 100 + "%";
 }
 
 
@@ -290,13 +286,75 @@ export function resetPopUp(setPopUpContent: (content: React.JSX.Element) => void
 
 
 /**
- * Copy of backend object, named the same.
- * 
- * @since 0.0.1
+ * @param rgb string formatted like ```rgb(0, 0, 0)```
+ * @returns hex string with '#' prepended
  */
-interface ApiExceptionFormat {
-    status: number,
-    error: string,
-    message: string,
-    path: string
+export function rgbStringToHex(rgb: string): string {
+
+    rgb = rgb.replace("rgb(", "");
+    rgb = rgb.replace(")", "");
+
+    const rgbArr = rgb.split(",");
+
+    return rgbNumbersToHex(stringToNumber(rgbArr[0]), 
+                           stringToNumber(rgbArr[1]), 
+                           stringToNumber(rgbArr[2]));
+}
+
+
+/**
+ * @param r red
+ * @param g green
+ * @param b blue
+ * @returns hex string with '#' prepended
+ */
+function rgbNumbersToHex(r: number, g: number, b: number) {
+
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+  
+/**
+ * @param hex string
+ * @returns ```[23, 14, 45]``` like ```[r, g, b]```
+ */
+function hexToRgb(hex: string) {
+
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+    return result ? result.map(i => parseInt(i, 16)).slice(1) : null
+}
+
+
+/**
+ * @param key name of the cookie
+ * @returns the cookie value as string
+ */
+function getCookie(key: string): string {
+
+    return document.cookie.split('; ').filter(row => row.startsWith(key)).map(c=>c.split('=')[1])[0];
+}
+
+
+/**
+ * Create a hidden ```<a href="url" download></a>``` element, click it and remove it from the dom afterwards.
+ * 
+ * @param url to make the download request to
+ */
+export function downloadFileByUrl(url: string) {
+
+    if (!url) {
+        logWarn("Failed to download file by url. 'url' is falsy");
+        return;
+    }
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', url);
+    
+    linkElement.style.display = 'none';
+    document.body.appendChild(linkElement);
+  
+    linkElement.click();
+  
+    document.body.removeChild(linkElement);
 }

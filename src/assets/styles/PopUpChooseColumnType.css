@@ -16,7 +16,7 @@
         }
 
         .radioContainer {
-            margin-bottom: 15px;
+            margin-bottom: 30px;
 
             .RadioButton {
                 width: 100%;
@@ -27,27 +27,58 @@
                     border-top-right-radius: 0;
                     border-bottom-right-radius: 0;
                     border-bottom-left-radius: 0;
-                    height: 140px;
+                    height: 160px;
                     max-width: 400px;
-                    width: 80%;
                     
                     .radioChildren {
-                        width: 100%;
-                    }
-                    
-                    .mockColumn {
-                        align-items: left;
-                        display: flex;
-                        font-size: 0.8rem;
-                        justify-content: left;
-                        text-align: left;
-                    }
-                    
-                    .mockColumn {
                         border-right: 1px dashed rgb(179, 179, 179);
-                        height: 100%;
+                        font-size: 0.8rem;
+                        overflow: hidden;
+                        padding-right: 1vi;
                         width: 80%;
+
+                        .oneMockTab {
+                            margin-left: 30px;
+                        }
+
+                        .twoMockTabs {
+                            margin-left: 60px;
+                        }
+
+                        .threeMockTabs {
+                            margin-left: 90px;
+                        }
+
+                        .mockTable {
+                            border: 1px solid black;
+                            border-bottom: none;
+                            width: 100%;
+
+                            .mockRow {
+                                border: 1px solid black;
+
+                                .mockCell {
+                                    border: 1px solid black;
+                                }
+
+                                .mockCellThreeCols {
+                                    width: 33%;
+                                }
+
+                                .mockCellTwoCols {
+                                    width: 50%;
+                                }
+                            }
+                        }
                     }
+                }
+
+                .whiteButtonLandscape {
+                    width: 80%;
+                }
+
+                .whiteButtonPortrait {
+                    width: 60%;
                 }
             }
         }

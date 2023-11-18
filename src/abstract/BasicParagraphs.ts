@@ -1,4 +1,5 @@
-import Style from "./Style";
+import { DEFAULT_BASIC_PARAGRAPH_TEXT } from "../utils/GlobalVariables";
+import Style, { getDefaultStyle } from "./Style";
 
 
 /**
@@ -9,4 +10,13 @@ import Style from "./Style";
 export default interface BasicParagraph {
     text: string,
     style: Style
+}
+
+
+export function getDefaultBasicParagraph(): BasicParagraph {
+    
+    return {
+        text: DEFAULT_BASIC_PARAGRAPH_TEXT,
+        style: getDefaultStyle()
+    }
 }

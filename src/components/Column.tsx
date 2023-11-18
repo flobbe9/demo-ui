@@ -1,31 +1,56 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import "../assets/styles/Column.css";
-import { log, togglePopUp } from "../utils/Utils";
+import { getDocumentId, log, togglePopUp } from "../utils/Utils";
 import Paragraph from "./Paragraph";
-import { PAGE_HEIGHT } from "../utils/GlobalVariables";
 import { AppContext } from "../App";
 import PopUpChooseColumnType from "./popUp/PopUpChoosColumnType";
+import {v4 as uuid} from "uuid";
+import ColumnTypeConfig from "../utils/ColumnTypeConfig";
 
 
-export default function Column(props) {
+export default function Column(props: {
+    pageIndex: number,
+    columnIndex: number,
+    id?: string,
+    className?: string
+}) {
 
-    const id = props.id ? "Column" + props.id : "Column";
+    const id = getDocumentId("Column", props.pageIndex, props.id, props.columnIndex);
     const className = props.className ? "Column " + props.className : "Column";
 
     const appContext = useContext(AppContext);
+    
+    const [columnType, setColumnType] = useState(1);
+    const [columnTypeConfig, setColumnTypeConfig] = useState(new ColumnTypeConfig(1, false));
+    const [paragraphs, setParagraphs] = useState([<div key={uuid()}></div>]);
+    
+    const context = {
+        columnType: columnType,
+        setColumnType: setColumnType,
+        columnTypeConfig: columnTypeConfig,
+        setColumnTypeConfig: setColumnTypeConfig
+    }
 
 
-    useEffect(() => {
-        // TODO: remove border-right of outer most column, or add left border for first column
-    }, []);
+    function initParagraphs(): React.JSX.Element[] {
+
+        // TODO: figure out fontSize
+        const paragraphs: React.JSX.Element[] = [];
+
+        for (let i = 0; i < columnTypeConfig.getNumParagraphs(appContext.orientation, 14); i++) 
+            paragraphs.push(<Paragraph key={uuid()}
+                                        pageIndex={props.pageIndex}
+                                        columnIndex={props.columnIndex} 
+                                        paragraphIndex={i} />)
+
+        return paragraphs;
+    }
 
 
     function handlePopUpToggle(event): void {
 
-        shutDownColumnAnimations();
-
         // configure popup
-        appContext.setPopUpContent(<PopUpChooseColumnType handleSelect={handleChooseType} />)
+        appContext.setPopUpContent(<PopUpChooseColumnType handleSelect={handleSelectType} handleSubmit={handleTypeSubmit} />)
         $(".popUpContainer").addClass("fullHeightContainer")
 
         // toggle
@@ -39,43 +64,51 @@ export default function Column(props) {
         $(".chooseTypeButton").css("animation", "none");
         $(".plusIcon").css("animation", "none");
         
-        // TODO: remove this on type select column background
-        const column = $(".Column");
+        // column hover
+        const column = $("#" + id);
         column.prop("className", column.prop("className").replace("hover", ""))
     }
 
 
-    function handleChooseType(): void {
+    function handleSelectType(columnType: number): void {
 
+        setColumnType(columnType);
+        // set config by columnType
+    }
+    
+    
+    function handleTypeSubmit(): void {
+        
+        $("#" + id + " .chooseTypeOverlay").hide();
+        $("#" + id + " .paragraphContainer").show();
+
+        shutDownColumnAnimations();
+        setParagraphs(initParagraphs());
     }
 
-    // state paragraphs
-    // state type
-        // 1
-            //
 
+    // TODO: lines are not blurred
     return (
         <div id={id} className={className + " hover"}>
-            <div className="chooseTypeOverlay flexCenter">
-                <div className="chooseTypeButton flexCenter" title="Spalten Typ auswählen" onClick={handlePopUpToggle}>
-                    <img className="plusIcon" src="plusIcon.png" alt="plus icon" />
+            <ColumnContext.Provider value={context}>
+                <div className="chooseTypeOverlay flexCenter" onClick={handlePopUpToggle}>
+                    <div className="chooseTypeButton flexCenter" title="Spalten Typ auswählen">
+                        <img className="plusIcon" src="plusIcon.png" alt="plus icon" />
+                    </div>
                 </div>
-            </div>
 
-            
-            <div className="paragraphContainer">
-                {/* <Paragraph />
-                <Paragraph />
-                <Paragraph /> */}
-            </div>
+                <div className={"paragraphContainer columnType-" + columnType}>
+                    {paragraphs}
+                </div>
+            </ColumnContext.Provider>
         </div>
     )
 }
 
 
-// type:
-    // num paragraphs
-    // num inputs per paragraph
-    // text align
-    // num tabs in front of input
-    // table
+export const ColumnContext = createContext({
+    columnType: 1,
+    setColumnType: (columnType: number) => {},
+    columnTypeConfig: new ColumnTypeConfig(1, false),
+    setColumnTypeConfig: (columnTypeConfig: ColumnTypeConfig) => {}
+});

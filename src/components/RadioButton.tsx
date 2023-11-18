@@ -1,20 +1,23 @@
 import React from "react";
 import "../assets/styles/RadioButton.css";
+import { log } from "../utils/Utils";
 
 
 export default function RadioButton(props: {
     id: string,
     name: string,
-    handleSelect,
+    handleSelect?: Function,
     className?: string,
     labelClassName?: string,
+    childrenClassName?: string,
     children?,
     style?
 }) {
 
     const id ="RadioButton" + props.id;
     const className = props.className ? "RadioButton " + props.className : "RadioButton";
-    const labelClassName = props.labelClassName ? "radioLabel flexCenter " + props.labelClassName : "radioLabel flexCenter";
+    const labelClassName = props.labelClassName ? "radioLabel " + props.labelClassName : "radioLabel";
+    const childrenClassName = props.childrenClassName ? "radioChildren " + props.childrenClassName : "radioChildren";
 
 
     /**
@@ -24,7 +27,8 @@ export default function RadioButton(props: {
 
         $("#" + id).children().find("input").prop("checked", true);
 
-        props.handleSelect();
+        if (props.handleSelect)
+            props.handleSelect();
     }
 
 
@@ -36,7 +40,7 @@ export default function RadioButton(props: {
                        type="radio" 
                        name={props.name} />
 
-                <div className="radioChildren">{props.children}</div>
+                <div className={childrenClassName}>{props.children}</div>
             </label>
         </div>
     )

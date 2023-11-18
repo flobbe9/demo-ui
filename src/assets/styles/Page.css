@@ -1,21 +1,38 @@
 .Page {
     background-color: white;
-    height: 90vh;
+    padding: 3vi;
     margin: 20px 0 70px;
-    max-height: 900px;
-    padding: 5vb 5vi;
-    width: 100%;
+    
+    /* .headingContainer {
+        display: flex; 
+        height: 5%;
+        justify-content: center;
+        margin-bottom: 15px;
+        width: 100%;
+
+        .heading {
+            height: fit-content;
+            outline: none;
+        }
+    } */
+    
+    .columnContainer {
+        position: relative;
+        display: flex;
+        /* height: 94%; */
+        height: 100%;
+    }
 }
 
-.headingContainer {
-    display: flex; 
-    height: 5%;
-    justify-content: center;
-    margin-bottom: 15px;
-    width: 100%;
+.pagePortrait {
+    height: 230vh;
+    max-height: 1250px;
+    max-width: 1000px;
+    width: 80%;
 }
 
-.columnContainer {
-    display: flex;
-    height: 90%;
+.pageLandscape {
+    height: 50vh;
+    min-height: 900px;
+    width: 100%;
 }

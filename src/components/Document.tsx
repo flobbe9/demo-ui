@@ -4,6 +4,8 @@ import Page from "./Page";
 import { hidePopUp, log } from "../utils/Utils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
+import { buildDocument, downloadDocument } from "../builder/Builder";
+import ControlBar from "./ControlBar";
 
 
 export default function Document(props) {
@@ -26,17 +28,23 @@ export default function Document(props) {
     }, []);
 
 
+    // TODO: add controll bar above style panel
     return (
         <div id={id} className={className}>
+            <ControlBar />
+
             <StylePanel />
 
-            <div className="flexCenter">
-                <div className="pageContainer">
-                    <Page />
-
-                    <Page />
+            <div className="pageContainer">
+                <div className="flexCenter">
+                    <Page pageIndex={0}/>
+                </div>
+                <div className="flexCenter">
+                    <Page pageIndex={1}/>
                 </div>
             </div>
+
+
         </div>
     )
 }

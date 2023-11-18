@@ -1,8 +1,8 @@
 .PopUp {
     display: none;
-    height: 50vh;
+    height: 70vh;
     position: fixed;
-    top: 20%;
+    top: 15%;
     width: 60%;
     z-index: 1;
     
@@ -14,5 +14,13 @@
 
     .fullHeightContainer {
         height: 100%;
+    }
+
+    .largeHeightContainer {
+        height: 75%;
+    }
+
+    .halfHeightContainer {
+        height: 50%;
     }
 }

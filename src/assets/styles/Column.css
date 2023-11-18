@@ -9,7 +9,7 @@
         height: 100%;
 
         .chooseTypeButton {
-            animation: backgroundPulse 4s infinite;
+            /* animation: backgroundPulse 4s infinite; */
             border-radius: 100%;
             transition: background-color 0.3s;
             
@@ -19,7 +19,7 @@
             }
             
             .plusIcon {
-                animation: heightPulse 4s infinite;
+                /* animation: heightPulse 4s infinite; */
                 height: 50px;
                 transition: height 0.3s;
 
@@ -33,17 +33,87 @@
     }
 
     .paragraphContainer {
+        display: none;
     
-        &.type-0 {
-            .TextInput {
-                margin-left: 40px;
+        &.columnType-1 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+
+                    .TextInput {
+                        border-left: 1px solid;
+                        text-align: left;
+                        width: 100%;
+
+                        &:focus {
+                            border-left-color: aqua;
+                        }
+                    }
+                }
             }
         }
         
-        &.type-1 {
-            .TextInput {
-                margin-left: 20px;
+        &.columnType-2 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+                    justify-content: center;
+
+                    .TextInput {
+                        text-align: center;
+                    }
+                }
             }
+        }
+
+        &.columnType-3 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+                    justify-content: right;
+
+                    .TextInput {
+                        border-right: 1px solid black;
+                        text-align: right;
+
+                        &:focus {
+                            border-right-color: aqua;
+                        }
+                    }
+                }
+            }
+        }
+        
+        &.columnType-4 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+                    justify-content: left;
+
+                    .TextInput {
+                        /* margin-left: 20px; */
+                        text-align: left;
+                    }
+                }
+            }
+        }
+
+        &.columnType-5 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+                    justify-content: left;
+
+                    .TextInput {
+                        /* margin-left: 20px; */
+                        text-align: left;
+                    }
+                }
+            }
+        }
+
+        &.columnType-6 {
+
         }
     }
 }
