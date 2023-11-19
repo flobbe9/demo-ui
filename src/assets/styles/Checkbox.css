@@ -1,9 +1,7 @@
-.RadioButton {
-    /* margin-right: 2vi; */
+.Checkbox {
 
-    .radioLabel {
+    .checkboxLabel {
         border: 1px solid grey;
-        padding: 1vi;
         transition: background-color 0.2s, border-color 0.2s;
         
         &:hover {
@@ -11,19 +9,20 @@
             /* border-color: rgb(169, 169, 169); */
             color: black;
         }
+    }
 
-        .radioInput {
-            opacity: 0;
-            position: absolute;
-        }
-        
-        .radioChildren {
-            height: 100%;
-            width: 100%;
-        }
+    .checkboxInput {
+        opacity: 0;
+        position: absolute;
+
     }
     
-    .radioInputChecked {
+    .checkboxChildren {
+        height: 100%;
+        width: 100%;
+    }
+
+    .checkboxInputChecked {
         background-color: rgb(245, 245, 245);
         border-color: aqua;
     }

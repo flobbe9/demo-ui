@@ -37,8 +37,13 @@ export default function App() {
 
     function handleClick(event): void {
 
+        // popup
         if (event.target.className.includes("hidePopUp") && escapePopUp)
             hidePopUp(setPopUpContent);
+
+        // select options
+        if (!event.target.className.includes("dontHideSelect")) 
+            $(".selectOptionsBox").slideUp(100, "linear");
     }
 
 

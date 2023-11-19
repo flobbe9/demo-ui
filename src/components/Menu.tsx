@@ -3,7 +3,7 @@ import "../assets/styles/Menu.css";
 import { hidePopUp, togglePopUp } from "../utils/Utils";
 import {v4 as uuid} from "uuid";
 import { AppContext } from "../App";
-import PopUpNewDocument from "./popUp/PopUpNewDocument";
+import PopUpNewDocument from "./popUps/PopUpNewDocument";
 
 
 export default function Menu(props) {

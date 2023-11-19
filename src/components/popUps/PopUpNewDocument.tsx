@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import "../../assets/styles/PopUpNewDocument.css";
 import { AppContext } from "../../App";
 import { Orientation } from "../../enums/Orientation";
-import RadioButton from "../RadioButton";
+import RadioButton from "../helpers/RadioButton";
 import { log } from "../../utils/Utils";
 import { Link } from "react-router-dom";
 

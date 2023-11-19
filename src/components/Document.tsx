@@ -28,7 +28,6 @@ export default function Document(props) {
     }, []);
 
 
-    // TODO: add controll bar above style panel
     return (
         <div id={id} className={className}>
             <ControlBar />

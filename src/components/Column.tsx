@@ -3,7 +3,7 @@ import "../assets/styles/Column.css";
 import { getDocumentId, log, togglePopUp } from "../utils/Utils";
 import Paragraph from "./Paragraph";
 import { AppContext } from "../App";
-import PopUpChooseColumnType from "./popUp/PopUpChoosColumnType";
+import PopUpChooseColumnType from "./popUps/PopUpChoosColumnType";
 import {v4 as uuid} from "uuid";
 import ColumnTypeConfig from "../utils/ColumnTypeConfig";
 
@@ -61,7 +61,7 @@ export default function Column(props: {
     function shutDownColumnAnimations(): void {
 
         // plus icon
-        $(".chooseTypeButton").css("animation", "none");
+        $(".plusIconBackground").css("animation", "none");
         $(".plusIcon").css("animation", "none");
         
         // column hover
@@ -73,13 +73,13 @@ export default function Column(props: {
     function handleSelectType(columnType: number): void {
 
         setColumnType(columnType);
-        // set config by columnType
+        // TODO: set config by columnType
     }
     
     
     function handleTypeSubmit(): void {
         
-        $("#" + id + " .chooseTypeOverlay").hide();
+        $("#" + id + " .columnOverlay").hide();
         $("#" + id + " .paragraphContainer").show();
 
         shutDownColumnAnimations();
@@ -87,13 +87,14 @@ export default function Column(props: {
     }
 
 
-    // TODO: lines are not blurred
     return (
         <div id={id} className={className + " hover"}>
             <ColumnContext.Provider value={context}>
-                <div className="chooseTypeOverlay flexCenter" onClick={handlePopUpToggle}>
-                    <div className="chooseTypeButton flexCenter" title="Spalten Typ auswählen">
-                        <img className="plusIcon" src="plusIcon.png" alt="plus icon" />
+                <div className="columnOverlay flexCenter" onClick={handlePopUpToggle}>
+                    <div className="plusIconBackgroundContainer flexCenter">
+                        <div className="plusIconBackground flexCenter" title="Spalten Typ auswählen">
+                            <img className="plusIcon" src="plusIcon.png" alt="plus icon" />
+                        </div>
                     </div>
                 </div>
 

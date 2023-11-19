@@ -1,6 +1,6 @@
 import React from "react";
-import "../assets/styles/RadioButton.css";
-import { log } from "../utils/Utils";
+import "../../assets/styles/RadioButton.css";
+import { log } from "../../utils/Utils";
 
 
 export default function RadioButton(props: {
@@ -14,7 +14,7 @@ export default function RadioButton(props: {
     style?
 }) {
 
-    const id ="RadioButton" + props.id;
+    const id = "RadioButton" + props.id;
     const className = props.className ? "RadioButton " + props.className : "RadioButton";
     const labelClassName = props.labelClassName ? "radioLabel " + props.labelClassName : "radioLabel";
     const childrenClassName = props.childrenClassName ? "radioChildren " + props.childrenClassName : "radioChildren";
@@ -25,10 +25,33 @@ export default function RadioButton(props: {
      */
     function handleClick(event) {
 
+        // select
         $("#" + id).children().find("input").prop("checked", true);
 
+        // call handler
         if (props.handleSelect)
             props.handleSelect();
+
+        // toggle style
+        toggleRadioStyle();
+    }
+
+
+    function toggleRadioStyle(): void {
+
+        // iterate all radio buttons
+        Array.from($(".RadioButton")).forEach(radioButtonElement => {
+            const radioButtonId = radioButtonElement.id;
+            const radioButton = $("#" + radioButtonId);
+
+            // case: this radio button
+            if (id === radioButtonId)
+                radioButton.children(".radioLabel").addClass("radioInputChecked");
+
+            // case: any other radio button
+            else 
+                radioButton.children(".radioLabel").removeClass("radioInputChecked");
+        })
     }
 
 
@@ -38,7 +61,8 @@ export default function RadioButton(props: {
                 <input id={"radioInput" + props.id} 
                        className="radioInput " 
                        type="radio" 
-                       name={props.name} />
+                       name={props.name} 
+                       />
 
                 <div className={childrenClassName}>{props.children}</div>
             </label>

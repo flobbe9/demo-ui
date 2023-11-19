@@ -1,0 +1,48 @@
+:root {
+    --selectWidth: 0px; /** Is set on component render */
+}
+
+.Select {
+    width: var(--selectWidth);
+
+    .selectBox {
+        border: 1px solid grey;
+        border-radius: 3px;
+        min-height: 33px;
+        padding: 0 4px;
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: rgb(245, 245, 245);
+            cursor: default;
+        }
+
+        .selectLabel {
+            width: 90%;
+        }
+
+        .arrowDownIcon {
+            height: 13px;
+        }
+    }
+
+    .selectOptionsBox {
+        background-color: white;
+        border: 1px solid grey;
+        border-radius: 3px;;
+        display: none;
+        padding: 4px;
+        position: fixed;
+        width: var(--selectWidth);
+        
+        & option {
+            border-radius: 3px;
+            overflow: hidden;
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: rgb(185, 185, 185);
+            }
+        }
+    }
+}

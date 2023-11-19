@@ -1,5 +1,17 @@
 .StylePanel {
-    border: 1px solid grey;
-
+    background-color: white;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 3px 8px -2px rgb(155, 155, 155);
     height: 100px;
+
+    .sectionContainer {
+        height: 100%;
+
+        /* ColorPicker */
+        .colorChildren {
+            text-decoration: underline;
+            text-decoration-thickness: 3px;
+        }
+    }
 }

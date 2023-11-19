@@ -1,32 +1,41 @@
+:root {
+    --plusIconHoverSize: 60px
+}
+
 .Column {
     border-right: 1px dashed rgb(194, 194, 194);
     height: 100%;
     transition: background-color 0.7s;
     width: 100%;
 
-    .chooseTypeOverlay {
+    .columnOverlay {
         color: grey;
         height: 100%;
 
-        .chooseTypeButton {
-            /* animation: backgroundPulse 4s infinite; */
-            border-radius: 100%;
-            transition: background-color 0.3s;
-            
-            &:hover {
-                animation: none;
-                background-color: rgb(167, 167, 167);
-            }
-            
-            .plusIcon {
-                /* animation: heightPulse 4s infinite; */
-                height: 50px;
-                transition: height 0.3s;
+        .plusIconBackgroundContainer {
+            height: var(--plusIconHoverSize);
+            width: var(--plusIconHoverSize);
 
+            .plusIconBackground {
+                /* animation: backgroundPulse 4s infinite; */
+                border-radius: 100%;
+                transition: background-color 0.3s;
+                
                 &:hover {
                     animation: none;
-                    cursor: pointer;
-                    height: 60px;
+                    background-color: rgb(167, 167, 167);
+                }
+                
+                .plusIcon {
+                    /* animation: heightPulse 4s infinite; */
+                    height: 50px;
+                    transition: height 0.3s;
+                    
+                    &:hover {
+                        animation: none;
+                        cursor: pointer;
+                        height: var(--plusIconHoverSize);
+                    }
                 }
             }
         }

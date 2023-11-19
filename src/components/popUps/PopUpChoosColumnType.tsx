@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../../assets/styles/PopUpChooseColumnType.css";
-import RadioButton from "../RadioButton";
+import RadioButton from "../helpers/RadioButton";
 import { AppContext } from "../../App";
 import { ColumnContext } from "../Column";
 import { hidePopUp, log } from "../../utils/Utils";
@@ -27,6 +27,7 @@ export default function PopUpChooseColumnType(props:{
 
     function handleKeyDown(event): void {
 
+        // TODO: this does not work
         if (event.key === "Enter") {
             props.handleSubmit();
             hidePopUp(appContext.setPopUpContent);

@@ -1,7 +1,6 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import "../assets/styles/TextInput.css"; 
-import { getDocumentId, log } from "../utils/Utils";
-import { ColumnContext } from "./Column";
+import { getDocumentId } from "../utils/Utils";
 
 
 export default function TextInput(props: {
@@ -15,11 +14,6 @@ export default function TextInput(props: {
 
     const id = getDocumentId("TextInput", props.pageIndex, props.id, props.columnIndex, props.paragraphIndex, props.textInputIndex);
     const className = props.className ? "TextInput " + props.className : "TextInput";
-
-    const columnContext = useContext(ColumnContext);
-
-    // TODO: make key enter focus the next input
-
 
     return (
         <div className={"textInputContainer"}>
