@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Document from "./components/Document";
+import Document from "./components/document/Document";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import Menu from "./components/Menu";
 import PopUp from "./components/PopUp";
 import { hidePopUp, log, togglePopUp } from "./utils/Utils";
 import { Orientation } from "./enums/Orientation";
+import Style, { getDefaultStyle } from "./abstract/Style";
 
 
 export default function App() {
@@ -21,18 +22,28 @@ export default function App() {
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
 
-    // pass refs into url, use in Document
-    
+    const [selectedTextInputId, setSelectedTextInputId] = useState("");
+    const [selectedTextInputStyle, setSelectedTextInputStyle] = useState(getDefaultStyle());
+
     const context = {
         setEscapePopUp: setEscapePopUp,
         setPopUpContent: setPopUpContent,
 
         orientation: orientation,
         setOrientation: setOrientation,
-
         numColumns: numColumns,
-        setNumColumns: setNumColumns
+        setNumColumns: setNumColumns,
+
+        selectedTextInputId: selectedTextInputId,
+        setSelectedTextInputId: setSelectedTextInputId,
+        selectedTextInputStyle: selectedTextInputStyle,
+        setSelectedTextInputStyle: setSelectedTextInputStyle
     }
+
+
+    useEffect(() => {
+
+    }, [selectedTextInputStyle])
 
 
     function handleClick(event): void {
@@ -94,7 +105,11 @@ export const AppContext = createContext({
 
     orientation: Orientation.PORTRAIT,
     setOrientation: (orientation: Orientation) => {},
-
     numColumns: 1,
-    setNumColumns: (numColumns: number) => {}
+    setNumColumns: (numColumns: number) => {},
+
+    selectedTextInputId: "",
+    setSelectedTextInputId: (id: string) => {},
+    selectedTextInputStyle: getDefaultStyle(),
+    setSelectedTextInputStyle: (style: Style) => {}
 })

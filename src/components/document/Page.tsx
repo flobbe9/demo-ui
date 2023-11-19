@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
-import "../assets/styles/Page.css";
+import "../../assets/styles/Page.css";
 import Column from "./Column";
 import TextInput from "./TextInput";
-import { AppContext } from "../App";
-import { getDocumentId, getPartFromDocumentId, log } from "../utils/Utils";
+import { AppContext } from "../../App";
+import { getDocumentId, getPartFromDocumentId, log } from "../../utils/Utils";
 import {v4 as uuid} from "uuid";
 
 

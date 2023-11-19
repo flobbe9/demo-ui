@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/Select.css"
 import { log } from "../../utils/Utils";
 
 
 export default function Select(props: {
+    id: string, 
     width: string,
     handleSelect?,
-    id: string, 
     className?: string,
     children?
 }) {
@@ -17,12 +17,15 @@ export default function Select(props: {
     const [selectedOption, setSelectedOption] = useState("");
 
 
+
     useEffect(() => {
         // set component width
-        document.documentElement.style.setProperty("--selectWidth", props.width);
+        const thisSelect = $("#" + id);
+        thisSelect.css("width", props.width)
+        thisSelect.children(".selectOptionsBox").css("width", props.width)
 
         initOptions();
-    }, [])
+    }, []);
 
 
     /**
@@ -34,12 +37,11 @@ export default function Select(props: {
         Array.from($("#" + id).children(".selectOptionsBox")
                               .find("option"))
                               .forEach((option, i) => {
-                                // dontHideSelect
-                                if (!option.className.includes("dontHideSelect"))
-                                    option.className += " dontHideSelect"
+                                // option title
+                                option.title = option.value;
 
-                                // onclick
-                                option.onclick = () => handleClickOption(option);
+                                // handle click
+                                option.onclick = () => handleClickOption(option.value);
 
                                 // set default
                                 if (i === 0) 
@@ -48,17 +50,10 @@ export default function Select(props: {
     }
 
 
-    function handleClickOption(option: HTMLOptionElement): void {
+    function handleClickOption(value: string): void {
 
         // update label
-        setSelectedOption(option.value);
-
-        // handle select
-        if (props.handleSelect)
-            props.handleSelect(selectedOption);
-        
-        // hide options
-        toggleOptionsBox();
+        setSelectedOption(value);
     }
 
 
@@ -71,8 +66,9 @@ export default function Select(props: {
     return (
         <div id={id} className={className + " dontHideSelect"}>
             <div className="selectBox flexLeft dontHideSelect" onClick={toggleOptionsBox}>
-                <span className="selectLabel dontMarkText dontHideSelect">{selectedOption}</span>
-                <img className="arrowDownIcon dontHideSelect" src="arrowDown.png" alt="arrow down" />
+                {/* <option> somehow solves the overflow problem xd */}
+                <option className="selectLabel dontMarkText dontHideSelect" title={selectedOption}>{selectedOption}</option>
+                <img className="arrowDownIcon dontHideSelect dontMarkText" src="arrowDown.png" alt="arrow down" />
             </div>
 
             <div className="selectOptionsBox dontMarkText dontHideSelect">

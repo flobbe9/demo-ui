@@ -19,7 +19,7 @@ export default function NavBar(props) {
         <div id={id} className={className + " flexCenter"}>
                 <div className="textLeft flexLeft">
                     <Link className="navLink" to="/">
-                        <img src="/favicon.png" alt="" height="60px" width="65px"/>
+                        <img className="dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
                         <span className="navHeading">DocumentBuilder</span>
                     </Link>
                 </div>

@@ -1,13 +1,14 @@
 import React, { useContext, useEffect } from "react";
-import "../assets/styles/Document.css";
+import "../../assets/styles/Document.css";
 import Page from "./Page";
-import { hidePopUp, log } from "../utils/Utils";
-import { AppContext } from "../App";
+import { confirmPageUnload, hidePopUp, log } from "../../utils/Utils";
+import { AppContext } from "../../App";
 import StylePanel from "./StylePanel";
-import { buildDocument, downloadDocument } from "../builder/Builder";
-import ControlBar from "./ControlBar";
+import { buildDocument, downloadDocument } from "../../builder/Builder";
+import ControlBar from "../ControlBar";
 
 
+// TODO: how to cache document?
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -17,14 +18,11 @@ export default function Document(props) {
 
 
     useEffect(() => {
-        // TODO: confirm page leave, use PopUp.tsx
+        // confirmPageUnload();
 
         hidePopUp(appContext.setPopUpContent);
 
-        // set document name
-        $(".NavBar .textCenter").css("display", "flex");
-
-        return () => {$(".NavBar .textCenter").css("display", "none")}
+        // TODO: confirm url change
     }, []);
 
 

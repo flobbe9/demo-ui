@@ -1,5 +1,5 @@
 import { BreakType } from "../enums/Breaktype";
-import { getCSSValueAsNumber, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
+import { getCSSValueAsNumber, log, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
 
 
 /**
@@ -8,6 +8,7 @@ import { getCSSValueAsNumber, logError, rgbStringToHex, stringToNumber } from ".
  * @since 0.0.6
  */
 export default interface Style {
+
     fontSize: number,
     fontFamily: string,
     /** as hexa deciaml WITHOUT the '#' appended */
@@ -38,25 +39,32 @@ export function getTextInputStyle(textInput: JQuery): Style {
         color: rgbStringToHex(textInput.css("color")).replace("#", ""),
         bold: isTextInputBold(textInput),
         italic: textInput.css("fontStyle") === "italic",
-        underline: textInput.css("textDecoration") === "underline",
+        underline: textInput.css("textDecoration").includes("underline"),
         textAlign: textInput.css("textAlign").toUpperCase(),
         breakType: null
     }
 }
 
 
-function isTextInputBold(textInput: JQuery): boolean {
+/**
+ * @param textInput to apply style to
+ * @param style to apply
+ */
+export function applyTextInputStyle(textInput: JQuery, style: Style): void {
 
-    const fontWeight = textInput.css("fontWeight");
-
-    // case: is number
-    if (!Number.isNaN(fontWeight)) {
-        const fontWeightNumber = stringToNumber(fontWeight);
-        return fontWeightNumber >= 700; 
+    // case: textInput falsy
+    if (!textInput.length) {
+        logError("Failed to apply style to text input. 'textInput' is falsy");
+        return;
     }
 
-    // case: is string
-    return fontWeight.toLowerCase() === "bold";
+    textInput.css("fontSize", style.fontSize);
+    textInput.css("fontFamily", style.fontFamily);
+    textInput.css("color", style.color);
+    textInput.css("fontWeight", style.bold ? "bold" : "normal");
+    textInput.css("fontStyle", style.italic ? "italic" : "normal");
+    textInput.css("textDecoration", style.underline ? "underline" : "none");
+    textInput.css("textAlign", style.textAlign);
 }
 
 
@@ -72,4 +80,19 @@ export function getDefaultStyle(): Style {
         textAlign: "LEFT",
         breakType: null
     };
+}
+
+
+function isTextInputBold(textInput: JQuery): boolean {
+
+    const fontWeight = textInput.css("fontWeight");
+
+    // case: is number
+    if (!Number.isNaN(fontWeight)) {
+        const fontWeightNumber = stringToNumber(fontWeight);
+        return fontWeightNumber >= 700; 
+    }
+
+    // case: is string
+    return fontWeight.toLowerCase() === "bold";
 }

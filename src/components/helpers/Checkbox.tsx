@@ -30,7 +30,7 @@ export default function Checkbox(props: {
 
         // call handler
         if (props.handleSelect)
-            props.handleSelect();
+            props.handleSelect(!checked);
     }
 
 

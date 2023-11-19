@@ -2,6 +2,8 @@ import React, { useContext } from "react";
 import "../assets/styles/ControlBar.css";
 import { buildDocument, downloadDocument } from "../builder/Builder";
 import { AppContext } from "../App";
+import { log } from "../utils/Utils";
+import { LoadingButton } from "@mui/lab";
 
 
 export default function ControlBar(props) {
@@ -12,6 +14,15 @@ export default function ControlBar(props) {
     const appContext = useContext(AppContext);
 
 
+    async function buildAndDownloadDocument(): Promise<void> {
+
+        const buildResponse = await buildDocument(appContext.orientation, appContext.numColumns);
+
+        if (buildResponse.status === 200)
+            downloadDocument(false);
+    }
+
+
     return (
         <div id={id} className={className}>
             <div className="flexCenter">
@@ -19,8 +30,13 @@ export default function ControlBar(props) {
             </div>
 
             <div className="flexRight">
-                <button onClick={() => buildDocument(appContext.orientation, appContext.numColumns)}>Build</button>
-                <button onClick={() => downloadDocument(false)}>download</button>
+                <LoadingButton 
+                            onClick={buildAndDownloadDocument}
+                            className="blackButton blackButtonContained" 
+                            variant="contained"
+                            >
+                        Download
+                </LoadingButton>                
             </div>
         </div>
     )

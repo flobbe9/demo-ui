@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
-import "../assets/styles/Paragraph.css";
+import "../../assets/styles/Paragraph.css";
 import TextInput from "./TextInput";
-import { getDocumentId, log } from "../utils/Utils";
+import { getDocumentId, log } from "../../utils/Utils";
 import {v4 as uuid} from "uuid";
 import { ColumnContext } from "./Column";
-import { AppContext } from "../App";
-import { Orientation } from "../enums/Orientation";
+import { AppContext } from "../../App";
+import { Orientation } from "../../enums/Orientation";
 
 
 export default function Paragraph(props: {

@@ -1,6 +1,5 @@
 .ColorPicker {
     .colorLabel {
-        background-color: rgb(207, 207, 207);
         border: 1px solid grey;
         border-radius: 3px;
         height: 30px;
@@ -9,7 +8,7 @@
         width: 30px;
                 
         &:hover {
-            background-color: rgb(153, 153, 153);
+            background-color: rgb(245, 245, 245);
             color: black;
         }
 

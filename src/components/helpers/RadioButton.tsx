@@ -6,6 +6,7 @@ import { log } from "../../utils/Utils";
 export default function RadioButton(props: {
     id: string,
     name: string,
+    title?: string,
     handleSelect?: Function,
     className?: string,
     labelClassName?: string,
@@ -56,7 +57,7 @@ export default function RadioButton(props: {
 
 
     return (
-        <div id={id} className={className} onClick={handleClick} style={props.style}>
+        <div id={id} className={className} onClick={handleClick} style={props.style} title={props.title}>
             <label className={labelClassName} htmlFor={props.name}>
                 <input id={"radioInput" + props.id} 
                        className="radioInput " 

@@ -1,5 +1,5 @@
 import React from "react"
-import "../assets/styles/StylePanelSection.css";
+import "../../assets/styles/StylePanelSection.css";
 
 
 export default function StylePanelSection(props: {

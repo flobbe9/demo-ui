@@ -5,9 +5,9 @@ import { log } from "../../utils/Utils";
 
 export default function ColorPicker(props: {
     id: string,
+    className?: string,
     handleSelect?,
     children?,
-    className?: string,
 }) {
 
     const id = props.id ? "ColorPicker" + props.id : "ColorPicker";
@@ -34,7 +34,7 @@ export default function ColorPicker(props: {
 
 
     return (
-        <div id={id} className={className} onClick={handleClick}>
+        <div id={id} className={className} onClick={handleClick} title={color}>
             <label className="colorLabel" htmlFor="">
                 <div className="colorChildren flexCenter">{props.children}</div>
                 

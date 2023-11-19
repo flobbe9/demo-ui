@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import "../../assets/styles/PopUpChooseColumnType.css";
 import RadioButton from "../helpers/RadioButton";
 import { AppContext } from "../../App";
-import { ColumnContext } from "../Column";
+import { ColumnContext } from "../document/Column";
 import { hidePopUp, log } from "../../utils/Utils";
 
 
@@ -37,7 +37,7 @@ export default function PopUpChooseColumnType(props:{
     return (
         <div id={id} className={className} style={props.style}>
             <div className="header flexRight">
-                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopUp"/>
+                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopUp dontMarkText"/>
             </div>
 
             <div className="body">
@@ -48,7 +48,7 @@ export default function PopUpChooseColumnType(props:{
                     <RadioButton id={"Type1"} 
                                     className="flexCenter"
                                     labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textLeft"}
+                                    childrenClassName={"textLeft dontMarkText"}
                                     name={"ColumnType"} 
                                     handleSelect={() => props.handleSelect(1)}>
                         Lorem ipsum <br />
@@ -65,7 +65,7 @@ export default function PopUpChooseColumnType(props:{
                     <RadioButton id={"Type2"} 
                                     className="flexCenter"
                                     labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textCenter"}
+                                    childrenClassName={"textCenter dontMarkText"}
                                     name={"ColumnType"}
                                     handleSelect={() => props.handleSelect(2)}>
                         Lorem ipsum <br />
@@ -82,7 +82,7 @@ export default function PopUpChooseColumnType(props:{
                     <RadioButton id={"Type3"} 
                                     className="flexCenter"
                                     labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textRight"}
+                                    childrenClassName={"textRight dontMarkText"}
                                     name={"ColumnType"}
                                     handleSelect={() => props.handleSelect(3)}>
                         Lorem ipsum <br />
@@ -99,7 +99,7 @@ export default function PopUpChooseColumnType(props:{
                     <RadioButton id={"Type4"} 
                                     className="flexCenter"
                                     labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textLeft"}
+                                    childrenClassName={"textLeft dontMarkText"}
                                     name={"ColumnType"}
                                     handleSelect={() => props.handleSelect(4)}>
                         <div>Lorem ipsum</div>
@@ -117,7 +117,7 @@ export default function PopUpChooseColumnType(props:{
                     <RadioButton id={"Type5"} 
                                     className="flexCenter"
                                     labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textLeft"}
+                                    childrenClassName={"textLeft dontMarkText"}
                                     name={"ColumnType"}
                                     handleSelect={() => props.handleSelect(5)}>
                         <div>Lorem ipsum</div>
@@ -135,6 +135,7 @@ export default function PopUpChooseColumnType(props:{
                     <RadioButton id={"Type6"} 
                                     className="flexCenter"
                                     labelClassName={"whiteButton " + orientationClassName}
+                                    childrenClassName="dontMarkText"
                                     name={"ColumnType"}
                                     handleSelect={() => props.handleSelect(6)}>
                         <table className="mockTable">
@@ -164,6 +165,7 @@ export default function PopUpChooseColumnType(props:{
                     <RadioButton id={"Type7"} 
                                     className="flexCenter"
                                     labelClassName={"whiteButton " + orientationClassName}
+                                    childrenClassName="dontMarkText"
                                     name={"ColumnType"}
                                     handleSelect={() => props.handleSelect(7)}>
                         <table className="mockTable">
@@ -197,6 +199,7 @@ export default function PopUpChooseColumnType(props:{
                     <RadioButton id={"Type8"} 
                                     className="flexCenter"
                                     labelClassName={"whiteButton " + orientationClassName}
+                                    childrenClassName="dontMarkText"
                                     name={"ColumnType"}
                                     handleSelect={() => props.handleSelect(8)}>
                         <table className="mockTable">

@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState } from "react";
-import "../assets/styles/Column.css";
-import { getDocumentId, log, togglePopUp } from "../utils/Utils";
+import "../../assets/styles/Column.css";
+import { getDocumentId, log, togglePopUp } from "../../utils/Utils";
 import Paragraph from "./Paragraph";
-import { AppContext } from "../App";
-import PopUpChooseColumnType from "./popUps/PopUpChoosColumnType";
+import { AppContext } from "../../App";
+import PopUpChooseColumnType from "../popUps/PopUpChoosColumnType";
 import {v4 as uuid} from "uuid";
-import ColumnTypeConfig from "../utils/ColumnTypeConfig";
+import ColumnTypeConfig from "../../utils/ColumnTypeConfig";
 
 
 export default function Column(props: {
@@ -90,10 +90,10 @@ export default function Column(props: {
     return (
         <div id={id} className={className + " hover"}>
             <ColumnContext.Provider value={context}>
-                <div className="columnOverlay flexCenter" onClick={handlePopUpToggle}>
+                <div className="columnOverlay flexCenter" onClick={handlePopUpToggle} title="Spalten Typ auswählen">
                     <div className="plusIconBackgroundContainer flexCenter">
-                        <div className="plusIconBackground flexCenter" title="Spalten Typ auswählen">
-                            <img className="plusIcon" src="plusIcon.png" alt="plus icon" />
+                        <div className="plusIconBackground flexCenter">
+                            <img className="plusIcon dontMarkText" src="plusIcon.png" alt="plus icon" />
                         </div>
                     </div>
                 </div>

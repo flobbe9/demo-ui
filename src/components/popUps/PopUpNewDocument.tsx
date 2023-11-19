@@ -121,7 +121,7 @@ export default function PopUpNewDocument(props) {
     return (
         <div id={id} className={className}> 
             <div className="header flexRight">
-                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopUp"/>
+                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopUp dontMarkText"/>
             </div>
             
             <div className="body flexCenter">

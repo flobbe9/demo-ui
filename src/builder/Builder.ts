@@ -3,7 +3,7 @@ import { getTextInputStyle } from "../abstract/Style";
 import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
 import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT } from "../utils/GlobalVariables";
-import { downloadFileByUrl, getDocumentId, getPartFromDocumentId, isBlank, logWarn, stringToNumber } from "../utils/Utils";
+import { downloadFileByUrl, getDocumentId, getPartFromDocumentId, isBlank, log, logWarn, stringToNumber } from "../utils/Utils";
 import fetchJson from "../utils/fetch/fetch";
 
 const documentBuilderMapping = "/api/documentBuilder";
@@ -31,7 +31,7 @@ export async function downloadDocument(pdf: boolean) {
  * @param orientation of the document
  * @param numColumns number of columns in the document
  */
-export async function buildDocument(orientation: Orientation, numColumns: number) {
+export async function buildDocument(orientation: Orientation, numColumns: number): Promise<any> {
 
     const body =  {
         content: buildContent(numColumns),
@@ -40,7 +40,7 @@ export async function buildDocument(orientation: Orientation, numColumns: number
         numColumns: numColumns
     }
 
-    fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/createDocument", "post", body);
+    return await fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/createDocument", "post", body);
 }
 
 
