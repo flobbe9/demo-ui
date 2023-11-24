@@ -35,7 +35,7 @@ export function getTextInputStyle(textInput: JQuery): Style {
 
     return {
         fontSize: getCSSValueAsNumber(textInput.css("fontSize"), 2),
-        fontFamily: textInput.css("fontFamily"),
+        fontFamily: textInput.css("fontFamily").replaceAll("\"", ""),
         color: rgbStringToHex(textInput.css("color")).replace("#", ""),
         bold: isTextInputBold(textInput),
         italic: textInput.css("fontStyle") === "italic",
@@ -72,7 +72,7 @@ export function getDefaultStyle(): Style {
 
     return {
         fontSize: 14,
-        fontFamily: "Arial",
+        fontFamily: "Calibri",
         color: "000000",
         bold: false,
         italic: false,

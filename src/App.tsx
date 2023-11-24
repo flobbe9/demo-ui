@@ -41,11 +41,6 @@ export default function App() {
     }
 
 
-    useEffect(() => {
-
-    }, [selectedTextInputStyle])
-
-
     function handleClick(event): void {
 
         // popup

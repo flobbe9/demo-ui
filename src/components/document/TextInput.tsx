@@ -29,6 +29,8 @@ export default function TextInput(props: {
 
     function handleFocus(event): void {
 
+        appContext.setSelectedTextInputStyle(getTextInputStyle($("#" + id)));
+
         appContext.setSelectedTextInputId(id);
     }
 

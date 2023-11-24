@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import "../../assets/styles/Column.css";
 import { getDocumentId, log, togglePopUp } from "../../utils/Utils";
 import Paragraph from "./Paragraph";
@@ -50,8 +50,10 @@ export default function Column(props: {
     function handlePopUpToggle(event): void {
 
         // configure popup
-        appContext.setPopUpContent(<PopUpChooseColumnType handleSelect={handleSelectType} handleSubmit={handleTypeSubmit} />)
-        $(".popUpContainer").addClass("fullHeightContainer")
+        appContext.setPopUpContent(<PopUpChooseColumnType handleSelect={handleSelectType}
+                                                          handleSubmit={handleTypeSubmit}
+                                                          columnType={columnType} />)
+        $(".popUpContainer").addClass("fullHeightContainer");
 
         // toggle
         togglePopUp(appContext.setPopUpContent);
@@ -72,8 +74,8 @@ export default function Column(props: {
 
     function handleSelectType(columnType: number): void {
 
-        setColumnType(columnType);
         // TODO: set config by columnType
+        setColumnType(columnType);
     }
     
     

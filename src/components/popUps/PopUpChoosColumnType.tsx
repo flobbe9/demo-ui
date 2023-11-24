@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import "../../assets/styles/PopUpChooseColumnType.css";
 import RadioButton from "../helpers/RadioButton";
 import { AppContext } from "../../App";
@@ -7,8 +7,10 @@ import { hidePopUp, log } from "../../utils/Utils";
 
 
 // TODO: escape key does not work
+// TODO: continue here, columnType changes with delay
 export default function PopUpChooseColumnType(props:{
     handleSelect,
+    columnType: number,
     handleSubmit,
     id?,
     className?,
@@ -23,6 +25,14 @@ export default function PopUpChooseColumnType(props:{
     const columnContext = useContext(ColumnContext);
     
     const [orientationClassName, setOrientationClassName] = useState(appContext.orientation === "portrait" ? "whiteButtonPortrait" : "whiteButtonLandscape");
+    const [columnType, setColumnType] = useState(props.columnType);
+
+
+    function handleSelect(columnType: number): void {
+        
+        setColumnType(columnType);
+        props.handleSelect(columnType);
+    }
 
 
     function handleKeyDown(event): void {
@@ -50,7 +60,10 @@ export default function PopUpChooseColumnType(props:{
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName={"textLeft dontMarkText"}
                                     name={"ColumnType"} 
-                                    handleSelect={() => props.handleSelect(1)}>
+                                    value={1}
+                                    radioGroupValue={columnType}
+                                    handleSelect={handleSelect}
+                                    >
                         Lorem ipsum <br />
                         dolor sit <br />
                         amet consectetur <br />
@@ -67,7 +80,10 @@ export default function PopUpChooseColumnType(props:{
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName={"textCenter dontMarkText"}
                                     name={"ColumnType"}
-                                    handleSelect={() => props.handleSelect(2)}>
+                                    value={2}
+                                    radioGroupValue={columnType}
+                                    handleSelect={handleSelect}
+                                    >
                         Lorem ipsum <br />
                         dolor sit <br />
                         amet consectetur <br />
@@ -84,7 +100,10 @@ export default function PopUpChooseColumnType(props:{
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName={"textRight dontMarkText"}
                                     name={"ColumnType"}
-                                    handleSelect={() => props.handleSelect(3)}>
+                                    value={3}
+                                    radioGroupValue={columnType}
+                                    handleSelect={handleSelect}
+                                    >
                         Lorem ipsum <br />
                         dolor sit <br />
                         amet consectetur <br />
@@ -101,7 +120,10 @@ export default function PopUpChooseColumnType(props:{
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName={"textLeft dontMarkText"}
                                     name={"ColumnType"}
-                                    handleSelect={() => props.handleSelect(4)}>
+                                    value={4}
+                                    radioGroupValue={columnType}
+                                    handleSelect={handleSelect}
+                                    >
                         <div>Lorem ipsum</div>
                             <div className="oneMockTab">dolor sit</div>
                                 <div className="twoMockTabs">amet consectetur</div><br />
@@ -119,7 +141,10 @@ export default function PopUpChooseColumnType(props:{
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName={"textLeft dontMarkText"}
                                     name={"ColumnType"}
-                                    handleSelect={() => props.handleSelect(5)}>
+                                    value={5}
+                                    radioGroupValue={columnType}
+                                    handleSelect={handleSelect}
+                                    >
                         <div>Lorem ipsum</div>
                             <div className="oneMockTab">dolor sit</div>
                                 <div className="twoMockTabs">amet consectetur</div>
@@ -137,7 +162,10 @@ export default function PopUpChooseColumnType(props:{
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName="dontMarkText"
                                     name={"ColumnType"}
-                                    handleSelect={() => props.handleSelect(6)}>
+                                    value={6}
+                                    radioGroupValue={columnType}
+                                    handleSelect={handleSelect}
+                                    >
                         <table className="mockTable">
                             <tbody>
                                 <tr className="mockRow">
@@ -167,7 +195,10 @@ export default function PopUpChooseColumnType(props:{
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName="dontMarkText"
                                     name={"ColumnType"}
-                                    handleSelect={() => props.handleSelect(7)}>
+                                    value={7}
+                                    radioGroupValue={columnType}
+                                    handleSelect={handleSelect}
+                                    >
                         <table className="mockTable">
                             <tbody>
                                 <tr className="mockRow">
@@ -201,7 +232,10 @@ export default function PopUpChooseColumnType(props:{
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName="dontMarkText"
                                     name={"ColumnType"}
-                                    handleSelect={() => props.handleSelect(8)}>
+                                    value={8}
+                                    radioGroupValue={columnType}
+                                    handleSelect={handleSelect}
+                                    >
                         <table className="mockTable">
                             <tbody>
                                 <tr className="mockRow">

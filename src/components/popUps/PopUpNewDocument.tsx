@@ -22,7 +22,6 @@ export default function PopUpNewDocument(props) {
 
 
     useEffect(() => {
-        
         if (containerIndex === 0) {
             if (selectedOrientation)
                 setIsContinue(true);
@@ -111,8 +110,7 @@ export default function PopUpNewDocument(props) {
 
     const nextButton = <button id="nextButton"
                                 className={"slideButton slideLeftButton blackButton blackButtonContained buttonSmall" + (containerIndex === 1 ? " hidePopUp" : "")}// last container
-                                onClick={() => handleNextContainer(false)}
-                                disabled={!isContinue}>
+                                onClick={() => handleNextContainer(false)}>
                             {/* last container */}
                             {containerIndex === 1 ? "Fertig" : "Weiter"}
                         </button>;
@@ -130,7 +128,10 @@ export default function PopUpNewDocument(props) {
                                  className="radioContainer" 
                                  labelClassName="whiteButton whiteButtonPortrait"
                                  name="Orientation" 
-                                 handleSelect={() => handleSelectOrientation(Orientation.PORTRAIT)}>
+                                 value={Orientation.PORTRAIT}
+                                 radioGroupValue={appContext.orientation}
+                                 handleSelect={(value: Orientation) => handleSelectOrientation(value)}
+                                 >
                         Hoch-Format
                     </RadioButton>
                     
@@ -138,7 +139,10 @@ export default function PopUpNewDocument(props) {
                                  className="radioContainer"
                                  labelClassName="whiteButton whiteButtonLandscape"
                                  name="Orientation"
-                                 handleSelect={() => handleSelectOrientation(Orientation.LANDSCAPE)}>
+                                 value={Orientation.LANDSCAPE}
+                                 radioGroupValue={appContext.orientation}
+                                 handleSelect={(value: Orientation) => handleSelectOrientation(value)}
+                                 >
                         Quer-Format
                     </RadioButton>
                 </div>
@@ -148,7 +152,10 @@ export default function PopUpNewDocument(props) {
                         <RadioButton id="OneColumn" 
                                     labelClassName={"whiteButton " + orientationClassName}
                                     name="NumColumns"
-                                    handleSelect={() => handleSelectNumColumns(1)}>
+                                    value={1}
+                                    radioGroupValue={appContext.numColumns}
+                                    handleSelect={(value: number) => handleSelectNumColumns(value)}
+                                    >
                             <div style={{height: "100%"}}>Lorem ipsum</div>
                         </RadioButton>
                         <span>1 Spalte</span>
@@ -158,7 +165,10 @@ export default function PopUpNewDocument(props) {
                         <RadioButton id="TwoColumns" 
                                     labelClassName={"whiteButton " + orientationClassName}
                                     name="NumColumns"
-                                    handleSelect={() => handleSelectNumColumns(2)}>
+                                    value={2}
+                                    radioGroupValue={appContext.numColumns}
+                                    handleSelect={(value: number) => handleSelectNumColumns(value)}
+                                    >
                             <div className="verticalBorderRightDotted" style={{width: "50%"}}>
                                 Lorem ipsum
                             </div>
@@ -171,7 +181,10 @@ export default function PopUpNewDocument(props) {
                         <RadioButton id="ThreeColumns" 
                                     labelClassName={"whiteButton " + orientationClassName}
                                     name="NumColumns"
-                                    handleSelect={() => handleSelectNumColumns(3)}>
+                                    value={3}
+                                    radioGroupValue={appContext.numColumns}
+                                    handleSelect={(value: number) => handleSelectNumColumns(value)}
+                                    >
                             <div className="verticalBorderRightDotted" style={{width: "33%"}}>
                                 Lorem ipsum
                             </div>

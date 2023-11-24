@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import "../../assets/styles/Select.css"
 import { log } from "../../utils/Utils";
 
@@ -6,6 +6,7 @@ import { log } from "../../utils/Utils";
 export default function Select(props: {
     id: string, 
     width: string,
+    selectedValue: string,
     handleSelect?,
     className?: string,
     children?
@@ -14,47 +15,13 @@ export default function Select(props: {
     const id = "Select" + props.id;
     const className = props.className ? "Select " + props.className : "Select";
 
-    const [selectedOption, setSelectedOption] = useState("");
-
-
 
     useEffect(() => {
         // set component width
         const thisSelect = $("#" + id);
         thisSelect.css("width", props.width)
-        thisSelect.children(".selectOptionsBox").css("width", props.width)
-
-        initOptions();
+        thisSelect.children(".selectOptionsBox").css("width", props.width);
     }, []);
-
-
-    /**
-     * Add class and event listener for all ```<option>``` elements. Use first ```<option>``` element in array
-     * as default. 
-     */
-    function initOptions(): void {
-
-        Array.from($("#" + id).children(".selectOptionsBox")
-                              .find("option"))
-                              .forEach((option, i) => {
-                                // option title
-                                option.title = option.value;
-
-                                // handle click
-                                option.onclick = () => handleClickOption(option.value);
-
-                                // set default
-                                if (i === 0) 
-                                    setSelectedOption(option.value)
-                              });
-    }
-
-
-    function handleClickOption(value: string): void {
-
-        // update label
-        setSelectedOption(value);
-    }
 
 
     function toggleOptionsBox(): void {
@@ -67,7 +34,7 @@ export default function Select(props: {
         <div id={id} className={className + " dontHideSelect"}>
             <div className="selectBox flexLeft dontHideSelect" onClick={toggleOptionsBox}>
                 {/* <option> somehow solves the overflow problem xd */}
-                <option className="selectLabel dontMarkText dontHideSelect" title={selectedOption}>{selectedOption}</option>
+                <option className="selectLabel dontMarkText dontHideSelect" title={props.selectedValue}>{props.selectedValue}</option>
                 <img className="arrowDownIcon dontHideSelect dontMarkText" src="arrowDown.png" alt="arrow down" />
             </div>
 
