@@ -3,6 +3,7 @@ import "../../assets/styles/LoadingButton.css";
 import { isBooleanFalsy, log } from "../../utils/Utils";
 
 
+// TODO: make generic button, reuse it for loading effect
 export default function LoadingButton(props: {
     id: string,
     color: string,
@@ -93,15 +94,16 @@ export default function LoadingButton(props: {
     }, [disabled])
     
 
+    // TODO: clean this up
     async function handleClick(event): Promise<void> {
 
         animateOverlay();
 
         if (props.handleClick && !disabled) {
             setDisabled(true);
-            const children = $("#loadingButtonChildren" + props.id);
-            children.children().remove();
-            children.append(createSpinner())
+            const buttonChildren = $("#loadingButtonChildren" + props.id);
+            buttonChildren.text("");
+            buttonChildren.append(createSpinner())
             await props.handleClick();
             setDisabled(false);
         }
@@ -112,7 +114,8 @@ export default function LoadingButton(props: {
     function createSpinner(): HTMLElement {
 
         const spinner = document.createElement("i");
-        spinner.className = "fa-solid fa-spinner-third";
+        spinner.className = "fa-solid fa-spinner rotating";
+        spinner.style.animation = "spin";
 
         return spinner;
     }
