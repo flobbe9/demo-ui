@@ -9,9 +9,10 @@ export default function LoadingButton(props: {
     backgroundColor: string,
     hoverBackgroundColor: string,
     clickBackgroundColor: string,
+    border?: string,
     width?: string,
     padding?: string,
-    handleClick?,
+    handleClick?: () => Promise<any>,
     disabled?: boolean,
     rendered?: boolean,
     className?: string
@@ -20,10 +21,22 @@ export default function LoadingButton(props: {
 }) {
 
     const id = props.id ? "LoadingButton" + props.id : "LoadingButton";
-    const className = props.className ? "LoadingButton " + props.className : "LoadingButton";
 
     const [rendered, setRendered] = useState(isBooleanFalsy(props.rendered) ? true : props.rendered);
     const [disabled, setDisabled] = useState(isBooleanFalsy(props.disabled) ? false : props.disabled);
+    const [className, setClassName] = useState("LoadingButton");
+
+
+    useEffect(() => {
+        if (props.className)
+            appendClassName(props.className);
+
+        if (!rendered)
+            appendClassName("hidden");
+
+        if (disabled)
+            appendClassName("disabledButton");
+    }, [])
 
 
     // set styles
@@ -34,6 +47,8 @@ export default function LoadingButton(props: {
 
         // button
         thisButton.css("backgroundColor", props.backgroundColor);
+        if (props.border)
+            thisButton.css("border", props.border);
         handleHover();
 
         // children
@@ -55,47 +70,81 @@ export default function LoadingButton(props: {
     }, []);
 
 
-    // rendered
     useEffect(() => {
-        handleRender();
+        handleRender(props.rendered);
 
     }, [props.rendered]);
 
-
-    // disabled
     useEffect(() => {
-        setDisabled(props.disabled);
+        handleRender(rendered);
+
+    }, [rendered]);
+
+
+    useEffect(() => {
+        handleDisabled(props.disabled);
 
     }, [props.disabled]);
 
 
-    // submit
-    function handleClick(event): void {
+    useEffect(() => {
+        handleDisabled(disabled);
+
+    }, [disabled])
+    
+
+    async function handleClick(event): Promise<void> {
 
         animateOverlay();
 
-        if (props.handleClick && !disabled)
-            props.handleClick();
+        if (props.handleClick && !disabled) {
+            setDisabled(true);
+            const children = $("#loadingButtonChildren" + props.id);
+            children.children().remove();
+            children.append(createSpinner())
+            await props.handleClick();
+            setDisabled(false);
+        }
     }
 
 
-    function handleRender(): void {
+    // TODO: spinner does not work
+    function createSpinner(): HTMLElement {
 
-        const thisButton = $("#" + id);
+        const spinner = document.createElement("i");
+        spinner.className = "fa-solid fa-spinner-third";
 
-        if (!isBooleanFalsy(props.rendered))
-            setRendered(props.rendered);
+        return spinner;
+    }
 
-        // update class
-        if (!rendered)
-            thisButton.addClass("hidden");
-        else
-            thisButton.removeClass("hidden");
+
+    function handleDisabled(disabled: boolean | undefined): void {
+
+        // case: prop not set
+        if (isBooleanFalsy(disabled))
+            return;
+
+        setDisabled(disabled);
+
+        toggleClassName("disabledButton", disabled!);
+    }
+
+
+    function handleRender(rendered: boolean | undefined): void {
+
+        // case: prop not set
+        if (isBooleanFalsy(rendered))
+            return;
+
+        setRendered(rendered);
+
+        toggleClassName("hidden", rendered!);
     }
 
 
     function handleHover(): void {
 
+        // TODO: does not work
         if (disabled)
             return;
 
@@ -114,11 +163,29 @@ export default function LoadingButton(props: {
         overlay.animate({width: "toggle", opacity: 0.3}, 100, "swing", 
             () => overlay.fadeOut(200, "swing"));
     }
+
+    
+    function appendClassName(clazzName: string): void {
+
+        setClassName(className + " " + clazzName);
+    }
+
+
+    function removeClassName(clazzName: string): void {
+
+        setClassName(className.replace(clazzName, ""));
+    }
+
+    
+    function toggleClassName(clazzName: string, addClazz: boolean): void {
+
+        addClazz ? appendClassName(clazzName) : removeClassName(clazzName);
+    }
     
 
     return (
         <button id={id} 
-                className={className + (rendered ? "" : " hidden")}
+                className={className}
                 style={props.style}
                 disabled={disabled} 
                 onClick={handleClick}>

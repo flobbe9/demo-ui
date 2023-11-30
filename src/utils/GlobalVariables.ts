@@ -135,3 +135,9 @@ export const TABLE_CONFIG: Readonly<Record<number, {numColumns: number, startInd
         startIndex: 1
     }
 }
+
+
+export function isMobileWidth(): boolean {
+
+    return document.documentElement.clientWidth < 800;
+}

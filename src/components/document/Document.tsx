@@ -28,7 +28,7 @@ export default function Document(props) {
 
     return (
         <div id={id} className={className}>
-            <ControlBar />
+            {/* <ControlBar /> */}
 
             <StylePanel />
 

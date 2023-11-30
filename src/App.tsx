@@ -43,13 +43,16 @@ export default function App() {
 
     function handleClick(event): void {
 
-        // popup
+        // hide popup
         if (event.target.className.includes("hidePopUp") && escapePopUp)
             hidePopUp(setPopUpContent);
 
-        // select options
+        // hide select options
         if (!event.target.className.includes("dontHideSelect")) 
             $(".selectOptionsBox").slideUp(100, "linear");
+
+        if (!event.target.className.includes("dontHideNavSectionRightMobile")) 
+            $(".navSectionRightMobile").slideUp(200);
     }
 
 
@@ -67,15 +70,14 @@ export default function App() {
 
                     <NavBar />
 
+                    <div className="overlay hidePopUp"></div>
+
                     <div className="content">
                         <div className="flexCenter">
-                            <PopUp>
-                                {popUpContent}
-                            </PopUp>
+                            <PopUp>{popUpContent}</PopUp>
                         </div>
 
                         {/* For blur effect */}
-                        <div className="overlay hidePopUp"></div>
                         <Routes>
                             <Route path="/" element={<Menu />} />
                             <Route path="/build" element={<Document />} />

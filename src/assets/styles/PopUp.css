@@ -10,6 +10,19 @@
         background-color: white;
         border-radius: 5px;
         padding: 2%;
+        width: 100%;
+    }
+
+    .fullWidthContainer {
+        width: 100%;
+    }
+
+    .largeWidthContainer {
+        width: 75%;
+    }
+
+    .halfWidthContainer {
+        width: 50%;
     }
 
     .fullHeightContainer {

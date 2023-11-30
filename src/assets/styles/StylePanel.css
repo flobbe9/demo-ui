@@ -2,8 +2,10 @@
     background-color: white;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    box-shadow: 0 3px 8px -2px rgb(155, 155, 155);
-    height: 100px;
+    box-shadow: 0 7px 8px -2px rgb(155, 155, 155);
+    height: 120px;
+    padding-top: 10px;
+    /* margin-top: 20px; */
 
     .sectionContainer {
         height: 100%;

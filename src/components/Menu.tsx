@@ -42,7 +42,7 @@ export default function Menu(props) {
         appContext.setPopUpContent(<PopUpNewDocument />);
 
         // append classNames to popup
-        popUpContainer.addClass("largeHeightContainer");
+        popUpContainer.addClass("largeHeightContainer largeWidthContainer");
         
         // toggle popUp
         togglePopUp(appContext.setPopUpContent);

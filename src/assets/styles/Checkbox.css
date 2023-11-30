@@ -2,13 +2,7 @@
 
     .checkboxLabel {
         border: 1px solid grey;
-        transition: background-color 0.2s, border-color 0.2s;
-        
-        &:hover {
-            background-color: rgb(245, 245, 245);
-            /* border-color: rgb(169, 169, 169); */
-            color: black;
-        }
+        transition: background-color 0.2s, border 0.2s
     }
 
     .checkboxInput {
@@ -20,10 +14,5 @@
     .checkboxChildren {
         height: 100%;
         width: 100%;
-    }
-
-    .checkboxInputChecked {
-        background-color: rgb(245, 245, 245);
-        border-color: aqua;
     }
 }

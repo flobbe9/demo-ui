@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import "../../assets/styles/StylePanel.css";
 import StylePanelSection from "./StylePanelSection";
 import Checkbox from "../helpers/Checkbox";
@@ -6,6 +6,7 @@ import Select from "../helpers/Select";
 import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../../App";
 import RadioButton from "../helpers/RadioButton";
+import { log } from "../../utils/Utils";
 
 
 export default function StylePanel(props) {
@@ -66,10 +67,10 @@ export default function StylePanel(props) {
 
 
     return (
-        <div id={id} className={className}>
+        <div id={id} className={className + " flexCenter"}>
             <div className="sectionContainer flexLeft">
                 <StylePanelSection hideRightBorder={false}>
-                    <div className="flexLeft">
+                    <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
                                 width="150px" 
                                 handleSelect={handleFontFamilySelect}
@@ -81,7 +82,7 @@ export default function StylePanel(props) {
                         </Select>
                     </div>
 
-                    <div className="flexLeft">
+                    <div className="flexLeft" style={{height: "50%"}}>
                         <Checkbox id="Bold" 
                                   handleSelect={handleBoldSelect}
                                   checked={appContext.selectedTextInputStyle.bold}
@@ -93,19 +94,23 @@ export default function StylePanel(props) {
                         <Checkbox id="Italic" 
                                   handleSelect={handleItalicSelect}
                                   checked={appContext.selectedTextInputStyle.italic}
+                                  hoverBackgroundColor="rgb(245, 245, 245)"
+                                  checkedBackgroundColor="rgb(200, 200, 200)"
                                   ><i title="Kursiv">K</i></Checkbox>
 
-                        <ColorPicker id="StylePanelColor" 
-                                     handleSelect={handleColorSelect} 
-                                     color={appContext.selectedTextInputStyle.color}
-                                     toggleStyle={toggleColorPickerStyle}
-                                     >
-                            <span className="dontMarkText">A</span>
-                        </ColorPicker>
+                        <div className="flexRight" style={{width: "100%"}}>
+                            <ColorPicker id="StylePanelColor" 
+                                        handleSelect={handleColorSelect} 
+                                        color={appContext.selectedTextInputStyle.color}
+                                        toggleStyle={toggleColorPickerStyle}
+                                        >
+                                <span className="dontMarkText">A</span>
+                            </ColorPicker>
+                        </div>
                     </div>
                 </StylePanelSection>
 
-                <StylePanelSection buttonContainerClassName="flexLeft" hideRightBorder={false}>
+                <StylePanelSection buttonContainerClassName="flexLeft" hideRightBorder={true}>
                     <RadioButton id={"Left"} 
                                  childrenClassName="flexCenter" 
                                  name={"TextAlign"} 

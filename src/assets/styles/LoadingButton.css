@@ -13,6 +13,10 @@
         cursor: pointer;
     }
 
+    &:disabled {
+        cursor: default;
+    }
+
     .loadingButtonOverlay {
         opacity: 0;
         position: absolute;

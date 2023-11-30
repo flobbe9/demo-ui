@@ -16,7 +16,7 @@ export default function PopUp(props) {
     // TODO: handle Enter
 
     return (
-        <div id={id} className={className}>
+        <div id={id} className={className + " flexCenter"}>
             <div id="popUpContainer" className="popUpContainer">
                 {props.children}
             </div>

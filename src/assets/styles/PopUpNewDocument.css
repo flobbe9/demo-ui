@@ -27,7 +27,6 @@
             height: 80%;
             flex-wrap: wrap;
             overflow: auto;
-            width: 80%;
 
             .radioContainer {
                 text-align: center;
@@ -51,7 +50,7 @@
         }
 
         .radioContainer {
-            margin: 2vb 2vi 2vb 0;
+            margin: 2vb 1vi 2vb 1vi;
         }
 
         .slideButton {

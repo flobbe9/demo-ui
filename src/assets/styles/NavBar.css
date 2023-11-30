@@ -5,18 +5,16 @@
 .NavBar {
     align-items: center;
     background-color: bisque;
-    box-shadow: 0 1px 8px -2px black;
+    box-shadow: 0 1px 8px -2px white;
     display: flex;
     font-size: 20px;
-    overflow: auto; /* remove this later*/
+    overflow: auto;
     padding: var(--marginNavBarInside);
-    top: 0;
-    z-index: 2;
+    /* position: relative; */
     
-    .textLeft {
+    .navSectionLeft {
         margin-left: var(--marginNavBarInside);
-        min-width: 380px;
-        width: 100%;
+        width: 33%;
     
         .navLink {
             color: black;
@@ -29,20 +27,21 @@
         }
     }
 
-    .textCenter {
+    .navSectionCenter {
         color: rgba(0, 0, 0, 0.486);
         font-size: 15px;
-        width: 100%;
+        overflow: auto;
+        width: 33%;
     }
         
-    .textRight {
+    .navSectionRight {
         margin-right: var(--marginNavBarInside);
-        min-width: 380px;
-        width: 100%;
-    
+        width: 33%;
+
+        
         .navButton {
             margin-left: 10px;
-    
+            
             .navLink {
                 color: bisque;
                 text-decoration: none;
@@ -52,9 +51,24 @@
         .navButton:focus {
             outline: none;
         }
-
+        
         #loginButton {
             color: bisque;
+        }
+
+        .navSectionRightMobile {
+            border-radius: 5px;
+            background-color: black;
+            color: white;
+            padding: 10px 0;
+            position: absolute;
+            right: calc(var(--marginNavBarInside) * 2);
+            width: 150px;
+
+            .navSectionRightMobileItem {
+                border-radius: 3px;
+                padding: 5px 15px;
+            }
         }
     }
 }
