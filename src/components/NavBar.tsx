@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "../assets/styles/NavBar.css"
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../utils/Utils";
 import LoadingButton from "./helpers/LoadingButton";
 import { isMobileWidth } from "../utils/GlobalVariables";
@@ -75,7 +76,7 @@ export default function NavBar(props) {
                                 disabled={true}
                                 >
                                 Registrieren
-                                </LoadingButton>
+                    </LoadingButton>
                                 
                     <LoadingButton 
                                 id={"Login"}
@@ -84,8 +85,7 @@ export default function NavBar(props) {
                                 hoverBackgroundColor={"rgb(60, 60, 60)"} 
                                 clickBackgroundColor={"rgb(200, 200, 200)"}
                                 padding="5px 15px"
-                                disabled={false}
-                                handleClick={() => new Promise((res) => setTimeout(() => res(log("timeout finsihed")), 3000))}
+                                disabled={true}
                                 >
                                 Login
                     </LoadingButton>
@@ -93,7 +93,9 @@ export default function NavBar(props) {
 
                 {/* TODO: add functionality */}
                 <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile">
-                    <div id="navSectionRightMobileItem-1" className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" onClick={handleClickMobileItem}>
+                    <div id="navSectionRightMobileItem-1" 
+                         className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
+                         onClick={handleClickMobileItem}>
                         Register
                     </div>
 

@@ -123,7 +123,7 @@ export default function PopUpNewDocument(props) {
             </div>
             
             <div className="body flexCenter">
-                <div id="orientationContainer" className="orientationContainer flexCenter">
+                <div id="orientationContainer" className="orientationContainer flexCenter dontMarkText">
                     <RadioButton id="Portrait"
                                  className="radioContainer" 
                                  labelClassName="whiteButton whiteButtonPortrait"
@@ -147,7 +147,7 @@ export default function PopUpNewDocument(props) {
                     </RadioButton>
                 </div>
 
-                <div id="numColumnsContainer" className="numColumnsContainer flexCenter">
+                <div id="numColumnsContainer" className="numColumnsContainer flexCenter dontMarkText">
                     <div className="radioContainer">
                         <RadioButton id="OneColumn" 
                                     labelClassName={"whiteButton " + orientationClassName}

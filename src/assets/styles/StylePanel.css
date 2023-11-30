@@ -4,8 +4,7 @@
     border-bottom-right-radius: 5px;
     box-shadow: 0 7px 8px -2px rgb(155, 155, 155);
     height: 120px;
-    padding-top: 10px;
-    /* margin-top: 20px; */
+    padding-bottom: 10px;
 
     .sectionContainer {
         height: 100%;

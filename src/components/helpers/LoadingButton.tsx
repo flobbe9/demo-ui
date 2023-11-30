@@ -3,7 +3,7 @@ import "../../assets/styles/LoadingButton.css";
 import { isBooleanFalsy, log } from "../../utils/Utils";
 
 
-// TODO: make generic button, reuse it for loading effect
+// TODO: try to replace some jquery calls with useref
 export default function LoadingButton(props: {
     id: string,
     color: string,
@@ -13,7 +13,8 @@ export default function LoadingButton(props: {
     border?: string,
     width?: string,
     padding?: string,
-    handleClick?: () => Promise<any>,
+    handlePromise?: () => Promise<any>,
+    handleClick?,
     disabled?: boolean,
     rendered?: boolean,
     className?: string
@@ -27,8 +28,45 @@ export default function LoadingButton(props: {
     const [disabled, setDisabled] = useState(isBooleanFalsy(props.disabled) ? false : props.disabled);
     const [className, setClassName] = useState("LoadingButton");
 
+    const buttonRef = useRef(null);
+    const buttonChildrenRef = useRef(null);
+    const buttonOverlayRef = useRef(null);
+
 
     useEffect(() => {
+        initStyles();
+
+        initClassNames();
+
+    }, [])
+
+
+    useEffect(() => {
+        updateRendered(props.rendered);
+
+    }, [props.rendered]);
+
+
+    useEffect(() => {
+        updateRendered(rendered);
+
+    }, [rendered]);
+
+
+    useEffect(() => {
+        updateDisabled(props.disabled);
+
+    }, [props.disabled]);
+
+
+    useEffect(() => {
+        updateDisabled(disabled);
+
+    }, [disabled]);
+
+
+    function initClassNames(): void {
+
         if (props.className)
             appendClassName(props.className);
 
@@ -37,91 +75,94 @@ export default function LoadingButton(props: {
 
         if (disabled)
             appendClassName("disabledButton");
-    }, [])
+    }
 
+    
+    function initStyles(): void {
 
-    // set styles
-    useEffect(() => {
-        const thisButton = $("#" + id);
-        const children = $("#loadingButtonChildren" + props.id);
-        const overlay = $("#loadingButtonOverlay" + props.id);
+        const button = $(buttonRef.current!);
+        const children = $(buttonChildrenRef.current!);
+        const overlay = $(buttonOverlayRef.current!);
 
-        // button
-        thisButton.css("backgroundColor", props.backgroundColor);
-        if (props.border)
-            thisButton.css("border", props.border);
-        handleHover();
+        button.css("backgroundColor", props.backgroundColor);
+        button.css("border", props.border || "");
 
-        // children
         children.css("color", props.color);
-        if (props.width)
-            children.css("width", props.width);
+        children.css("width", props.width || "");
+        children.css("padding", props.padding || "");
 
-        if (props.padding)
-            children.css("padding", props.padding);
-
-        // overlay
         overlay.css("color", props.color);
         overlay.css("backgroundColor", props.clickBackgroundColor);
-        if (props.width)
-            overlay.css("width", props.width);
-
-        if (props.padding)
-            overlay.css("padding", props.padding);
-    }, []);
-
-
-    useEffect(() => {
-        handleRender(props.rendered);
-
-    }, [props.rendered]);
-
-    useEffect(() => {
-        handleRender(rendered);
-
-    }, [rendered]);
-
-
-    useEffect(() => {
-        handleDisabled(props.disabled);
-
-    }, [props.disabled]);
-
-
-    useEffect(() => {
-        handleDisabled(disabled);
-
-    }, [disabled])
-    
-
-    // TODO: clean this up
-    async function handleClick(event): Promise<void> {
-
-        animateOverlay();
-
-        if (props.handleClick && !disabled) {
-            setDisabled(true);
-            const buttonChildren = $("#loadingButtonChildren" + props.id);
-            buttonChildren.text("");
-            buttonChildren.append(createSpinner())
-            await props.handleClick();
-            setDisabled(false);
-        }
+        overlay.css("width", props.width || "");
+        overlay.css("padding", props.padding || "");
     }
 
 
-    // TODO: spinner does not work
+    /**
+     * Wont do anything if button is disabled. Animates click and promise callback if present or if not present normal 
+     * click callback (promise callback is prioritised). Will never call both.
+     */
+    function handleClick(event): void {
+
+        if (disabled)
+            return;
+        
+        animateOverlay();
+
+        // case: loading button
+        if (props.handlePromise) 
+            handlePromiseAnimation();
+        
+        // case: normal button
+        else if (props.handleClick)
+            props.handleClick();
+    }
+
+
+    /**
+     * Add spinner icon and remove button content, await promise ```props.handlePromise```, then reset button styles. <p>
+     * 
+     * Button will be disabled during promise call.
+     */
+    async function handlePromiseAnimation(): Promise<void> {
+
+        setDisabled(true);
+
+        const buttonChildren = $(buttonChildrenRef.current!);
+        const buttonWidth = buttonChildren.css("width");
+        const buttonHeight = buttonChildren.css("height");
+        const buttonText = buttonChildren.text();
+
+        // remove children
+        buttonChildren.text("");
+        // keep size
+        buttonChildren.css("width", buttonWidth);
+        buttonChildren.css("height", buttonHeight);
+        // add spinner
+        const spinner = createSpinner()
+        buttonChildren.append(spinner);
+
+        await props.handlePromise!();
+
+        // remove spinner
+        spinner.remove();
+        // add back children
+        buttonChildren.text(buttonText);
+        
+        setDisabled(false);
+    }
+
+
     function createSpinner(): HTMLElement {
 
         const spinner = document.createElement("i");
-        spinner.className = "fa-solid fa-spinner rotating";
-        spinner.style.animation = "spin";
+        spinner.className = "fa-solid fa-circle-notch rotating";
 
         return spinner;
     }
 
 
-    function handleDisabled(disabled: boolean | undefined): void {
+    function updateDisabled(disabled: boolean | undefined): void {
 
         // case: prop not set
         if (isBooleanFalsy(disabled))
@@ -133,7 +174,7 @@ export default function LoadingButton(props: {
     }
 
 
-    function handleRender(rendered: boolean | undefined): void {
+    function updateRendered(rendered: boolean | undefined): void {
 
         // case: prop not set
         if (isBooleanFalsy(rendered))
@@ -145,22 +186,25 @@ export default function LoadingButton(props: {
     }
 
 
-    function handleHover(): void {
+    function handleMouseOver(event): void {
 
-        // TODO: does not work
         if (disabled)
             return;
 
-        const thisButton = $("#" + id);
-        
-        thisButton.on("mouseover", () => thisButton.css("backgroundColor", props.hoverBackgroundColor));
-        thisButton.on("mouseout", () => thisButton.css("backgroundColor", props.backgroundColor))
+        $(buttonRef).css("backgroundColor", props.hoverBackgroundColor)
     }
 
 
+    function handleMouseOut(event): void {
+
+        $(buttonRef).css("backgroundColor", props.backgroundColor)
+    }
+
+
+    // TODO: doe not work properly on first click
     function animateOverlay(): void {
 
-        const overlay = $("#loadingButtonOverlay" + props.id);
+        const overlay = $(buttonOverlayRef.current!);
 
         overlay.hide();
         overlay.animate({width: "toggle", opacity: 0.3}, 100, "swing", 
@@ -180,23 +224,31 @@ export default function LoadingButton(props: {
     }
 
     
-    function toggleClassName(clazzName: string, addClazz: boolean): void {
+    function toggleClassName(clazzName: string, isAdd: boolean): void {
 
-        addClazz ? appendClassName(clazzName) : removeClassName(clazzName);
+        isAdd ? appendClassName(clazzName) : removeClassName(clazzName);
     }
     
 
     return (
         <button id={id} 
                 className={className}
+                ref={buttonRef}
                 style={props.style}
                 disabled={disabled} 
-                onClick={handleClick}>
+                onClick={handleClick}
+                onMouseOver={handleMouseOver}
+                onMouseOut={handleMouseOut}>
             {/* hidden */}
-            <div id={"loadingButtonOverlay" + props.id} className="loadingButtonOverlay loadingButtonChildren">{props.children}</div>
+            <div className="loadingButtonOverlay loadingButtonChildren" ref={buttonOverlayRef}
+                 >
+                    {props.children}</div>
 
             {/* visible */}
-            <div id={"loadingButtonChildren" + props.id} className="loadingButtonChildren">{props.children}</div>
+            <div className="loadingButtonChildren" ref={buttonChildrenRef}
+                 >
+                {props.children}
+            </div>
         </button>
     )
 }

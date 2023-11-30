@@ -244,7 +244,7 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 
 
 /**
- * Display ``` #PopUp``` and ``` .overlay```.
+ * Display ``` #PopUp``` and ``` .appOverlay```.
  * 
  * @param setPopUpContent setter of content inside ```#popUpContainer```
  * @param duration fade in / out time in milliseconds
@@ -252,14 +252,14 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 export function togglePopUp(setPopUpContent: (content: React.JSX.Element) => void, duration = 100): void {
 
     $("#PopUp").fadeToggle(duration);
-    $(".overlay").fadeToggle(duration);
+    $(".appOverlay").fadeToggle(duration);
 
     resetPopUp(setPopUpContent);
 }
 
 
 /**
- * Hide ```#PopUp``` and ``` .overlay```.
+ * Hide ```#PopUp``` and ``` .appOverlay```.
  * 
  * @param setPopUpContent setter of content inside ```#popUpContainer```
  * @param duration fade in / out time in milliseconds
@@ -267,7 +267,7 @@ export function togglePopUp(setPopUpContent: (content: React.JSX.Element) => voi
 export function hidePopUp(setPopUpContent: (content: React.JSX.Element) => void, duration = 100, ): void {
 
     $("#PopUp").fadeOut(duration);
-    $(".overlay").fadeOut(duration);
+    $(".appOverlay").fadeOut(duration);
 
     resetPopUp(setPopUpContent, duration);
 }

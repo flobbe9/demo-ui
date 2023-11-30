@@ -5,12 +5,11 @@
 .NavBar {
     align-items: center;
     background-color: bisque;
-    box-shadow: 0 1px 8px -2px white;
+    box-shadow: 0 1px 5px -2px black;
     display: flex;
     font-size: 20px;
     overflow: auto;
     padding: var(--marginNavBarInside);
-    /* position: relative; */
     
     .navSectionLeft {
         margin-left: var(--marginNavBarInside);

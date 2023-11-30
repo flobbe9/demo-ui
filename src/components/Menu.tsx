@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/Menu.css";
-import { hidePopUp, togglePopUp } from "../utils/Utils";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { hidePopUp, log, togglePopUp } from "../utils/Utils";
 import {v4 as uuid} from "uuid";
 import { AppContext } from "../App";
 import PopUpNewDocument from "./popUps/PopUpNewDocument";
-import LoadingButton from "./helpers/LoadingButton";
 
 
 export default function Menu(props) {
@@ -19,7 +19,9 @@ export default function Menu(props) {
 
     useEffect(() => {
         hidePopUp(appContext.setPopUpContent);
-    }, [])
+
+        $(".App").css("backgroundColor", "rgb(228, 228, 228)")
+    }, []);
 
 
     // TODO: fetch saved documents from backend

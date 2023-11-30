@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Document from "./components/document/Document";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
@@ -24,6 +24,8 @@ export default function App() {
 
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
     const [selectedTextInputStyle, setSelectedTextInputStyle] = useState(getDefaultStyle());
+
+    const appRef = useRef(null);
 
     const context = {
         setEscapePopUp: setEscapePopUp,
@@ -64,20 +66,19 @@ export default function App() {
 
     
     return (
-        <div className="App" onKeyDown={handleKeyDown} onClick={handleClick}>
+        <div className="App" ref={appRef} onKeyDown={handleKeyDown} onClick={handleClick}>
             <BrowserRouter>
                 <AppContext.Provider value={context}>
 
                     <NavBar />
 
-                    <div className="overlay hidePopUp"></div>
+                    <div className="appOverlay hidePopUp"></div>
 
                     <div className="content">
                         <div className="flexCenter">
                             <PopUp>{popUpContent}</PopUp>
                         </div>
 
-                        {/* For blur effect */}
                         <Routes>
                             <Route path="/" element={<Menu />} />
                             <Route path="/build" element={<Document />} />
