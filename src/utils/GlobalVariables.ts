@@ -115,3 +115,23 @@ function getNumLinesPerColumnLandscapeByFontSize(fontSize: number): number {
 
     return numLinesLandscape[0][fontSize];
 }
+
+
+/**
+ * Defines the number of columns and the start index for each column type involving a table. Object key is the 
+ * column type.
+ */
+export const TABLE_CONFIG: Readonly<Record<number, {numColumns: number, startIndex: number}>> = {
+    6: {
+        numColumns: 1,
+        startIndex: 1
+    },
+    7: {
+        numColumns: 2,
+        startIndex: 1
+    },
+    8: {
+        numColumns: 3,
+        startIndex: 1
+    }
+}

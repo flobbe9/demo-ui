@@ -7,7 +7,7 @@ import { Link, useLocation } from "react-router-dom";
  * 
  * @returns react-router-dom Link with confirm function on click
  */
-export default function LinkConfirm(props: {
+export default function LeaveConfirmLink(props: {
     id?,
     className?, 
     style?,

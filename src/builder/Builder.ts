@@ -1,8 +1,10 @@
 import BasicParagraph, { getDefaultBasicParagraph } from "../abstract/BasicParagraphs";
+import DocumentWrapper from "../abstract/DocumentWrapper";
 import { getTextInputStyle } from "../abstract/Style";
+import TableConfig from "../abstract/TableConfig";
 import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
-import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT } from "../utils/GlobalVariables";
+import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, TABLE_CONFIG } from "../utils/GlobalVariables";
 import { downloadFileByUrl, getDocumentId, getPartFromDocumentId, isBlank, log, logWarn, stringToNumber } from "../utils/Utils";
 import fetchJson from "../utils/fetch/fetch";
 
@@ -33,12 +35,17 @@ export async function downloadDocument(pdf: boolean) {
  */
 export async function buildDocument(orientation: Orientation, numColumns: number): Promise<any> {
 
-    const body =  {
+    const body: DocumentWrapper =  {
         content: buildContent(numColumns),
         tableConfig: null,
         landscape: orientation === Orientation.LANDSCAPE,
         numColumns: numColumns
     }
+
+    // case: is table
+    // TODO: figure out columnType... during column iteration?
+    // if (isTable(columnType)) 
+    //     body.tableConfig = getTableConfig(columnType);
 
     return await fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/createDocument", "post", body);
 }
@@ -182,4 +189,28 @@ function isLastColumn(documentId: string, numColumns: number): boolean {
     const columnIndex = getPartFromDocumentId(documentId, 2);
 
     return stringToNumber(columnIndex) === numColumns - 1;
+}
+
+
+/**
+ * @param columnType type of column
+ * @returns true if this column is a table
+ */
+function isTable(columnType: number): boolean {
+
+    return columnType === 6 ||
+           columnType === 7 ||
+           columnType === 8;
+}
+
+
+function getTableConfig(columnType: number): TableConfig {
+
+    const numRows = 10;// TODO
+
+    return {
+        numColumns: TABLE_CONFIG[columnType].numColumns,
+        numRows: 0, // iterate and count
+        startIndex: TABLE_CONFIG[columnType].startIndex
+    };
 }

@@ -6,6 +6,5 @@
 export default interface TableConfig {
     numColumns: number,
     numRows: number,
-    startIndex: number,
-    endIndex: number,
+    startIndex: number
 }

@@ -121,6 +121,12 @@ export function isNumberFalsy(num: number | null | undefined): boolean {
 }
 
 
+export function isBooleanFalsy(bool: boolean | null | undefined) {
+
+    return bool === undefined || bool === null;
+}
+
+
 export function isBlank(str: string): boolean {
 
     if (!str && str !== "") {

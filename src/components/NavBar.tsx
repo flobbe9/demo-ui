@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "../assets/styles/NavBar.css"
-import LinkConfirm from "./LinkConfirm";
-import { LoadingButton } from "@mui/lab";
 import { Link, useParams } from "react-router-dom";
 import { log } from "../utils/Utils";
+import LoadingButton from "./helpers/LoadingButton";
 
 
 export default function NavBar(props) {
@@ -25,12 +24,27 @@ export default function NavBar(props) {
                 </div>
 
                 <div className="textRight flexRight">
-                    <LoadingButton disabled={true} className="blackButton blackButtonOutlined navButton" variant="outlined">
+                    <LoadingButton 
+                                id={"Register"}
+                                style={{marginRight: "5px"}}
+                                color={"white"} 
+                                backgroundColor={"black"} 
+                                hoverBackgroundColor={"rgb(60, 60, 60)"} 
+                                clickBackgroundColor={"rgb(200, 200, 200)"}
+                                padding="5px 15px"
+                                >
                         Registrieren
                     </LoadingButton>
 
-                    <LoadingButton disabled={true} className="blackButton blackButtonContained navButton" variant="contained" >
-                        <LinkConfirm id="loginButton" to="/login" className="navLink">Login</LinkConfirm>
+                    <LoadingButton 
+                                id={"Login"}
+                                color={"white"} 
+                                backgroundColor={"black"} 
+                                hoverBackgroundColor={"rgb(60, 60, 60)"} 
+                                clickBackgroundColor={"rgb(200, 200, 200)"}
+                                padding="5px 15px"
+                                >
+                        Login
                     </LoadingButton>
                 </div>
         </div>

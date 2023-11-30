@@ -24,8 +24,10 @@ export default function RadioButton(props: {
 
 
     return (
-        <div id={id} className={className} onClick={() => props.handleSelect(props.value)} style={props.style} title={props.title}>
-            <label className={labelClassName + (props.value === props.radioGroupValue ? " radioInputChecked" : "")} htmlFor={props.name}>
+        <div id={id} className={className} style={props.style} title={props.title}>
+            <label className={labelClassName + (props.value === props.radioGroupValue ? " radioInputChecked" : "")} 
+                   htmlFor={props.name}
+                   onClick={() => props.handleSelect(props.value)}>
                 <input id={"radioInput" + props.id} 
                        className="radioInput " 
                        type="radio" 

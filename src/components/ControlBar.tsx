@@ -3,7 +3,6 @@ import "../assets/styles/ControlBar.css";
 import { buildDocument, downloadDocument } from "../builder/Builder";
 import { AppContext } from "../App";
 import { log } from "../utils/Utils";
-import { LoadingButton } from "@mui/lab";
 
 
 export default function ControlBar(props) {
@@ -30,13 +29,13 @@ export default function ControlBar(props) {
             </div>
 
             <div className="flexRight">
-                <LoadingButton 
+                {/* <LoadingButton 
                             onClick={buildAndDownloadDocument}
                             className="blackButton blackButtonContained" 
                             variant="contained"
                             >
                         Download
-                </LoadingButton>                
+                </LoadingButton>                 */}
             </div>
         </div>
     )

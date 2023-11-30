@@ -4,6 +4,7 @@ import { hidePopUp, togglePopUp } from "../utils/Utils";
 import {v4 as uuid} from "uuid";
 import { AppContext } from "../App";
 import PopUpNewDocument from "./popUps/PopUpNewDocument";
+import LoadingButton from "./helpers/LoadingButton";
 
 
 export default function Menu(props) {
@@ -63,6 +64,9 @@ export default function Menu(props) {
 
             <div className="rightSideBar">
                 {savedDocuments}
+                {/* <LoadingButton disabled={false} className="blackButton blackButtonOutlined navButton">
+                    Registrieren
+                </LoadingButton> */}
             </div>
         </div>
     )

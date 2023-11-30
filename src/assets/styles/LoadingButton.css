@@ -1,0 +1,24 @@
+.LoadingButton {
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px 0px rgb(151, 151, 151);
+    padding: 0;
+    transition: background-color 0.2s;
+
+    &:focus {
+        outline: none;
+    }
+
+    &:hover {
+        cursor: pointer;
+    }
+
+    .loadingButtonOverlay {
+        opacity: 0;
+        position: absolute;
+    }
+
+    .loadingButtonChildren {
+        padding: 10px;
+    }
+}
