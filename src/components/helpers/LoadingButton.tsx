@@ -3,7 +3,6 @@ import "../../assets/styles/LoadingButton.css";
 import { isBooleanFalsy, log } from "../../utils/Utils";
 
 
-// TODO: try to replace some jquery calls with useref
 export default function LoadingButton(props: {
     id: string,
     color: string,

@@ -21,6 +21,7 @@ export default function RadioButton(props: {
     className?: string,
     labelClassName?: string,
     childrenClassName?: string,
+    disabled?: boolean,
     children?,
     style?
 }) {
@@ -32,6 +33,10 @@ export default function RadioButton(props: {
     const childrenClassName = props.childrenClassName ? "radioChildren " + props.childrenClassName : "radioChildren";
 
     const [checked, setChecked] = useState(props.value === props.radioGroupValue);
+    const [disabled, setDisabled] = useState(props.disabled);
+
+    // TODO: continue here (not sure what I was doing though)
+    // const 
 
     const checkedStyle:React.CSSProperties = {
         borderColor: "aqua"
@@ -40,17 +45,46 @@ export default function RadioButton(props: {
 
     // set prop styles
     useEffect(() => {
+        initStyles();
+
+    }, []);
+
+
+    // handle select
+    useEffect(() => {
+        handleValueChange();
+
+    }, [props.radioGroupValue]);
+
+
+    useEffect(() => {
+        setDisabled(props.disabled);
+
+    }, [props.disabled]);
+
+
+    function initStyles(): void {
+
         const radioLabel = $("#" + labelClassName + props.id);
 
         radioLabel.css("color", props.color || "");
         radioLabel.css("backgroundColor", props.backgroundColor || "");
         if (props.border)
             radioLabel.css("border", props.border);
-    }, []);
+    }
 
 
-    // handle select
-    useEffect(() => {
+    function handleSelect(event): void {
+
+        if (disabled)
+            return;
+
+        props.handleSelect(props.value)
+    }
+
+
+    function handleValueChange(): void {
+
         const checked = props.value === props.radioGroupValue;
         setChecked(checked);
 
@@ -60,11 +94,13 @@ export default function RadioButton(props: {
         
         else 
             label.css("backgroundColor", props.backgroundColor || "");
-
-    }, [props.radioGroupValue]);
+    }
 
 
     function handleMouseOver(): void {
+
+        if (disabled)
+            return;
 
         if (!checked)
             $("#" + labelId).css("backgroundColor", props.hoverBackgroundColor || "");
@@ -82,7 +118,7 @@ export default function RadioButton(props: {
             <label id={labelClassName + props.id} className={labelClassName} 
                    htmlFor={props.name}
                    style={checked ? checkedStyle : {}}
-                   onClick={() => props.handleSelect(props.value)}
+                   onClick={handleSelect}
                    onMouseOver={handleMouseOver}
                    onMouseOut={handleMouseOut}>
                 <input id={"radioInput" + props.id} 
@@ -90,6 +126,7 @@ export default function RadioButton(props: {
                        type="radio" 
                        name={props.name} 
                        checked={checked}
+                       disabled={disabled}
                        readOnly
                        />
 

@@ -8,6 +8,7 @@
 
     .sectionContainer {
         height: 100%;
+        transition: opacity 0.2s;
 
         /* ColorPicker */
         .colorChildren {

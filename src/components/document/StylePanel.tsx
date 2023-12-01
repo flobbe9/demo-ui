@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/StylePanel.css";
 import StylePanelSection from "./StylePanelSection";
 import Checkbox from "../helpers/Checkbox";
@@ -14,7 +14,20 @@ export default function StylePanel(props) {
     const id = props.id ? "StylePanel" + props.id : "StylePanel";
     const className = props.className ? "StylePanel " + props.className : "StylePanel";
 
+    // state disabled
+    const [disabled, setDisabled] = useState(true);
+
+    const stylePanelRef = useRef(null);
+    const sectionContainerRef = useRef(null);
+
     const appContext = useContext(AppContext);
+
+
+    useEffect(() => {
+        if (appContext.selectedTextInputId !== "")
+            setDisabled(false);
+        
+    }, [appContext.selectedTextInputId]);
 
 
     function handleFontFamilySelect(fontFamily: string): void {
@@ -67,14 +80,16 @@ export default function StylePanel(props) {
 
 
     return (
-        <div id={id} className={className + " flexCenter"}>
-            <div className="sectionContainer flexLeft">
+        <div id={id} className={className + " flexCenter"} ref={stylePanelRef}>
+            <div className={"sectionContainer flexLeft" + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
                 <StylePanelSection hideRightBorder={false}>
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
                                 width="150px" 
                                 handleSelect={handleFontFamilySelect}
-                                selectedValue={appContext.selectedTextInputStyle.fontFamily}>
+                                selectedValue={appContext.selectedTextInputStyle.fontFamily}
+                                disabled={disabled}
+                                >
                             <option onClick={() => handleFontFamilySelect("Arial")} title="Arial" value="Arial">Arial</option>
                             <option onClick={() => handleFontFamilySelect("Calibri")} title="Calibri" value="Calibri">Calibri</option>
                             <option onClick={() => handleFontFamilySelect("Times New Roman")} title="Times New Roman" value="Times New Roman">Times New Roman</option>
@@ -86,16 +101,26 @@ export default function StylePanel(props) {
                         <Checkbox id="Bold" 
                                   handleSelect={handleBoldSelect}
                                   checked={appContext.selectedTextInputStyle.bold}
+                                  hoverBackgroundColor="rgb(245, 245, 245)"
+                                  backgroundColor="white"
+                                  checkedBackgroundColor="rgb(200, 200, 200)"
+                                  disabled={disabled}
                                   ><strong title="Fett">F</strong></Checkbox>
                         <Checkbox id="Underline" 
                                   handleSelect={handleUnderlineSelect}
                                   checked={appContext.selectedTextInputStyle.underline}
+                                  hoverBackgroundColor="rgb(245, 245, 245)"
+                                  backgroundColor="white"
+                                  checkedBackgroundColor="rgb(200, 200, 200)"
+                                  disabled={disabled}
                                   ><u title="Unterstrichen">U</u></Checkbox>
                         <Checkbox id="Italic" 
                                   handleSelect={handleItalicSelect}
                                   checked={appContext.selectedTextInputStyle.italic}
                                   hoverBackgroundColor="rgb(245, 245, 245)"
+                                  backgroundColor="white"
                                   checkedBackgroundColor="rgb(200, 200, 200)"
+                                  disabled={disabled}
                                   ><i title="Kursiv">K</i></Checkbox>
 
                         <div className="flexRight" style={{width: "100%"}}>
@@ -103,6 +128,9 @@ export default function StylePanel(props) {
                                         handleSelect={handleColorSelect} 
                                         color={appContext.selectedTextInputStyle.color}
                                         toggleStyle={toggleColorPickerStyle}
+                                        hoverBackgroundColor="rgb(245, 245, 245)"
+                                        backgroundColor="white"
+                                        disabled={disabled}
                                         >
                                 <span className="dontMarkText">A</span>
                             </ColorPicker>
@@ -118,6 +146,9 @@ export default function StylePanel(props) {
                                  radioGroupValue={appContext.selectedTextInputStyle.textAlign}
                                  handleSelect={handleTextAlignSelect}
                                  title="Linksbündig" 
+                                 hoverBackgroundColor="rgb(245, 245, 245)"
+                                 checkedBackgroundColor="rgb(200, 200, 200)"
+                                 disabled={disabled}
                                  >L</RadioButton>
                     <RadioButton id={"Center"} 
                                  childrenClassName="flexCenter" 
@@ -126,6 +157,9 @@ export default function StylePanel(props) {
                                  radioGroupValue={appContext.selectedTextInputStyle.textAlign}
                                  handleSelect={handleTextAlignSelect}
                                  title="Zentriert" 
+                                 hoverBackgroundColor="rgb(245, 245, 245)"
+                                 checkedBackgroundColor="rgb(200, 200, 200)"
+                                 disabled={disabled}
                                  >M</RadioButton>
                     <RadioButton id={"Right"} 
                                  childrenClassName="flexCenter" 
@@ -134,6 +168,9 @@ export default function StylePanel(props) {
                                  radioGroupValue={appContext.selectedTextInputStyle.textAlign}
                                  handleSelect={handleTextAlignSelect}
                                  title="Rechtsbündig" 
+                                 hoverBackgroundColor="rgb(245, 245, 245)"
+                                 checkedBackgroundColor="rgb(200, 200, 200)"
+                                 disabled={disabled}
                                  >R</RadioButton>
                 </StylePanelSection>
             </div>

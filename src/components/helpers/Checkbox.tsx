@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/Checkbox.css"
 
 
@@ -6,14 +6,15 @@ import "../../assets/styles/Checkbox.css"
 export default function Checkbox(props: {
     id: string, 
     checked: boolean,
-
+    
     color?: string,
     backgroundColor?: string,
     hoverBackgroundColor?: string,
     checkedBackgroundColor?: string,
     border?: string,
-
+    
     className?: string,
+    disabled?: boolean,
     handleSelect,
     children?
 }) {
@@ -21,7 +22,10 @@ export default function Checkbox(props: {
     const id = "Checkbox" + props.id;
     const className = props.className ? "Checkbox " + props.className : "Checkbox";
 
-    const [checked, setChecked] = useState(props.checked)
+    const [checked, setChecked] = useState(props.checked);
+    const [disabled, setDisabled] = useState(props.disabled);
+
+    const labelRef = useRef(null);
 
     const labelClassName = "checkboxLabel";
     const labelId = labelClassName + props.id;
@@ -32,19 +36,15 @@ export default function Checkbox(props: {
     
 
     useEffect(() => {
-        const label = $("#" + labelId);;
+        initStyles();
 
-        label.css("color", props.color || "");
-        label.css("backgroundColor", props.backgroundColor || "");
-        label.css("border", props.border || "");
-        
     }, []);
     
     
     useEffect(() => {
         setChecked(props.checked);
 
-        const label = $("#" + labelId);
+        const label = $(labelRef.current!);
         if (props.checked)
             label.css("backgroundColor", props.checkedBackgroundColor || "");
         
@@ -54,23 +54,59 @@ export default function Checkbox(props: {
     }, [props.checked]);
 
 
+    useEffect(() => {
+        setDisabled(props.disabled);
+
+    }, [props.disabled]);
+
+
+    function initStyles(): void {
+
+        if (disabled)
+            return;
+
+        const label = $(labelRef.current!);
+
+        label.css("color", props.color || "");
+        label.css("backgroundColor", props.backgroundColor || "");
+        label.css("border", props.border || "");
+    }
+
+
+    function handleSelect(event): void {
+
+        if (disabled)
+            return;
+
+        props.handleSelect(!checked);
+    }
+
+
     function handleMouseOver(): void {
 
+        if (disabled)
+            return;
+
+        const label = $(labelRef.current!);
+
         if (!checked)
-            $("#" + labelId).css("backgroundColor", props.hoverBackgroundColor || "");
+            label.css("backgroundColor", props.hoverBackgroundColor || "");
     }
 
     function handleMouseOut(): void {
 
+        const label = $(labelRef.current!);
+
         if (!checked)
-            $("#" + labelId).css("backgroundColor", props.backgroundColor || "");
+            label.css("backgroundColor", props.backgroundColor || "");
     }
     
 
     return (
-        <div id={id} className={className} onClick={() => props.handleSelect(!checked)}>
+        <div id={id} className={className} onClick={handleSelect}>
             <label id={labelId} 
                    className={labelClassName} 
+                   ref={labelRef}
                    htmlFor={id} 
                    style={checked ? checkedStyle : {}}
                    onMouseOver={handleMouseOver}
@@ -80,7 +116,8 @@ export default function Checkbox(props: {
                        className="checkboxInput" 
                        type="checkbox"
                        readOnly
-                       checked={checked} />
+                       checked={checked} 
+                       disabled={disabled}/>
 
                 <div className="checkboxChildren dontMarkText flexCenter">
                     {props.children}

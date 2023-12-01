@@ -7,15 +7,6 @@
         transition: background-color 0.2s;
         width: 30px;
                 
-        &:hover {
-            /* background white */
-            background-color: rgb(245, 245, 245);
-            color: black;
-
-            /* background-color: rgb(150, 150, 150); */
-            /* color: white; */
-        }
-
         .colorInput {
             height: 5px;
             opacity: 0;

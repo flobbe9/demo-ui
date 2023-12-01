@@ -9,6 +9,7 @@ export default function Select(props: {
     selectedValue: string,
     handleSelect?,
     className?: string,
+    disabled?: boolean,
     children?
 }) {
 

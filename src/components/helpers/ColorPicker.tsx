@@ -1,22 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/ColorPicker.css";
 import { log } from "../../utils/Utils";
 
 
-// TODO: add flexible styles like other buttons
-// TODO: test
 export default function ColorPicker(props: {
     id: string,
     color: string,
     handleSelect,
     toggleStyle: (color: string) => void,
+
+    hoverBackgroundColor?: string,
+    backgroundColor?: string,
+    border?: string,
+    childrenColor?: string
+
     className?: string,
+    disabled?: boolean,
     children?,
     style?
 }) {
 
     const id = props.id ? "ColorPicker" + props.id : "ColorPicker";
     const className = props.className ? "ColorPicker " + props.className : "ColorPicker";
+
+    const buttonRef = useRef(null);
+    const labelRef = useRef(null);
+    const childrenRef = useRef(null);
+
+
+    useEffect(() => {
+        initStyles();
+
+    }, [])
 
 
     useEffect(() => {
@@ -25,16 +40,53 @@ export default function ColorPicker(props: {
     }, [props.color]);
 
 
+    function initStyles(): void {
+
+        const label = $(labelRef.current!);
+        const children = $(childrenRef.current!);
+
+        label.css("border", props.border || "");
+
+        children.css("color", props.childrenColor || "");
+    }
+
+
     function handleClick() {
 
-        $("#" + id).children().find(".colorInput").trigger("click");
+        $(buttonRef).children().find(".colorInput").trigger("click");
+    }
+
+
+    function handleMouseOver(): void {
+        
+        const label = $(labelRef.current!);
+
+        label.css("backgroundColor", props.hoverBackgroundColor || "");
+    }
+
+
+    function handleMouseOut(): void {
+
+        const label = $(labelRef.current!);
+
+        label.css("backgroundColor", props.backgroundColor || "");
     }
 
 
     return (
-        <div id={id} className={className} onClick={handleClick} title={props.color} style={props.style}>
-            <label className="colorLabel" htmlFor={"colorInput" + props.id}>
-                <div className="colorChildren flexCenter">{props.children}</div>
+        <div id={id} 
+             className={className} 
+             ref={buttonRef}
+             onClick={handleClick} 
+             title={props.color} 
+             style={props.style}
+             >
+            <label className="colorLabel"
+                   ref={labelRef} 
+                   htmlFor={"colorInput" + props.id}
+                   onMouseOver={handleMouseOver}
+                   onMouseOut={handleMouseOut}>
+                <div className="colorChildren flexCenter" ref={childrenRef}>{props.children}</div>
                 
                 <input id={"colorInput" + props.id} 
                        className="colorInput" 

@@ -164,6 +164,11 @@ label {
         -o-animation: rotating 2s linear infinite;
         animation: rotating 2s linear infinite;
     }
+
+    .disabled {
+        opacity: 0.3;
+        cursor: default;
+    }
 }
 
 
