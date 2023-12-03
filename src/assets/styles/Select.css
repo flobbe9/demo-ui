@@ -8,11 +8,6 @@
         padding: 0 4px;
         transition: background-color 0.2s;
 
-        &:hover {
-            background-color: rgb(245, 245, 245);
-            cursor: default;
-        }
-
         .selectLabel {
             overflow: hidden;
             margin-right: 5px;

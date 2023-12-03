@@ -19,6 +19,11 @@
             color: black;
             padding-right: 20px;
             text-decoration: none;
+            transition: opacity 0.2s;
+            
+            &:hover {
+                opacity: 0.5;
+            }
         }
 
         .navHeading {
@@ -63,6 +68,7 @@
             position: absolute;
             right: calc(var(--marginNavBarInside) * 2);
             width: 150px;
+            z-index: 2;
 
             .navSectionRightMobileItem {
                 border-radius: 3px;

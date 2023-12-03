@@ -1,42 +1,43 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/Checkbox.css"
+import { SELECTED_STYLE } from "../../utils/GlobalVariables";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { log } from "../../utils/Utils";
 
 
 // TODO: test
 export default function Checkbox(props: {
     id: string, 
     checked: boolean,
+    handleSelect,
     
-    color?: string,
-    backgroundColor?: string,
     hoverBackgroundColor?: string,
     checkedBackgroundColor?: string,
-    border?: string,
+
+    componentStyle?: React.CSSProperties,
+    boxStyle?: React.CSSProperties,
+    childrenStyle?: React.CSSProperties,
     
     className?: string,
+    onMouseDown?: (event) => void,
     disabled?: boolean,
-    handleSelect,
     children?
 }) {
 
     const id = "Checkbox" + props.id;
     const className = props.className ? "Checkbox " + props.className : "Checkbox";
-
-    const [checked, setChecked] = useState(props.checked);
-    const [disabled, setDisabled] = useState(props.disabled);
-
-    const labelRef = useRef(null);
-
     const labelClassName = "checkboxLabel";
     const labelId = labelClassName + props.id;
 
-    const checkedStyle:React.CSSProperties = {
-        borderColor: "aqua"
-    }
-    
+    const [checked, setChecked] = useState(props.checked);
+    const [disabled, setDisabled] = useState(props.disabled);
+    const [boxStyle, setBoxStyle] = useState<React.CSSProperties>();
+
+    const labelRef = useRef(null);
+
 
     useEffect(() => {
-        initStyles();
+        setBoxStyle(props.boxStyle || {});
 
     }, []);
     
@@ -45,11 +46,11 @@ export default function Checkbox(props: {
         setChecked(props.checked);
 
         const label = $(labelRef.current!);
-        if (props.checked)
+        if (props.checked) 
             label.css("backgroundColor", props.checkedBackgroundColor || "");
-        
+
         else 
-            label.css("backgroundColor", props.backgroundColor || "");
+            label.css("backgroundColor", props.boxStyle?.backgroundColor || "");
 
     }, [props.checked]);
 
@@ -58,19 +59,6 @@ export default function Checkbox(props: {
         setDisabled(props.disabled);
 
     }, [props.disabled]);
-
-
-    function initStyles(): void {
-
-        if (disabled)
-            return;
-
-        const label = $(labelRef.current!);
-
-        label.css("color", props.color || "");
-        label.css("backgroundColor", props.backgroundColor || "");
-        label.css("border", props.border || "");
-    }
 
 
     function handleSelect(event): void {
@@ -93,24 +81,33 @@ export default function Checkbox(props: {
             label.css("backgroundColor", props.hoverBackgroundColor || "");
     }
 
+    
     function handleMouseOut(): void {
 
         const label = $(labelRef.current!);
 
         if (!checked)
-            label.css("backgroundColor", props.backgroundColor || "");
+            label.css("backgroundColor", props.boxStyle?.backgroundColor || "");
+    }
+
+
+    function handleMouseDown(event): void {
+
+        if (props.onMouseDown)
+            props.onMouseDown(event);
     }
     
 
     return (
-        <div id={id} className={className} onClick={handleSelect}>
+        <div id={id} className={className} style={props.componentStyle} onClick={handleSelect}>
             <label id={labelId} 
                    className={labelClassName} 
                    ref={labelRef}
+                   style={checked ? {...boxStyle, ...SELECTED_STYLE} : boxStyle}
                    htmlFor={id} 
-                   style={checked ? checkedStyle : {}}
                    onMouseOver={handleMouseOver}
                    onMouseOut={handleMouseOut}
+                   onMouseDown={handleMouseDown}
                    >
                 <input id={"checkboxInput" + props.id}  
                        className="checkboxInput" 
@@ -119,7 +116,7 @@ export default function Checkbox(props: {
                        checked={checked} 
                        disabled={disabled}/>
 
-                <div className="checkboxChildren dontMarkText flexCenter">
+                <div className="checkboxChildren dontMarkText flexCenter" style={props.childrenStyle}>
                     {props.children}
                 </div>
             </label>

@@ -7,6 +7,14 @@
 
     .leftSideBar {
         margin-right: 5vi;
+
+        #newDocumentButton {
+            transition: color 0.2s;
+
+            &:hover {
+                color: rgb(168, 168, 168);
+            }
+        }
     }
     
     .rightSideBar {

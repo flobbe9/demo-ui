@@ -1,6 +1,7 @@
 import React from "react";
 import $ from "jquery";
 import { ApiExceptionFormat } from "../abstract/ApiExceptionFormat";
+import { SPACES_PER_TAB, Side, TAB_UNICODE_ESCAPED } from "./GlobalVariables";
 
 
 export function log(text?: any): void {
@@ -156,19 +157,21 @@ export function moveCursor(textInputId: string, start = 0, end = 0): void {
 
 /**
  * @param textInputId id of text input to compare text width to
+ * @param inputOverhead amount of pixels of input's width that should not be considered for calculation, i.e. padding or border.
+ * @param testChars string that is not part of input value but should be included in value when calculating value's width
  * @returns true if width of text is greater than width of input - 10
  */
-export function isTextLongerThanInput(textInputId: string): boolean {
+export function isTextLongerThanInput(textInputId: string, inputOverhead: number, testChars = ""): boolean {
 
     if (!textInputId) {
-        logError("Failed to determine 'scrollLeft'. Text input id falsy");
+        logError("Failed to determine text input length. 'textInputId' is falsy");
         return false;
     }
 
     const textInput = $("#" + textInputId);
 
-    const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - 13; // no idea why 13 works, jus leave it like this :D
-    const textWidth = getTextWidth(textInput.prop("value"), textInput.css("fontSize"), textInput.css("fontFamily"));
+    const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - inputOverhead;
+    const textWidth = getTextWidth(textInput.prop("value") + testChars, textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
 
     return textInputWidth < textWidth;
 }
@@ -176,21 +179,60 @@ export function isTextLongerThanInput(textInputId: string): boolean {
 
 /**
  * @param text to measure
- * @param fontSize of text
+ * @param fontSize of text, unit should be included
  * @param fontFamily of text
- * @returns width of text
+ * @param fontWeight of text, default is "norml"
+ * @returns width of text in unit of fontSize
  */
-export function getTextWidth(text: string, fontSize: string, fontFamily: string): number { 
+export function getTextWidth(text: string, fontSize: string, fontFamily: string, fontWeight = "normal"): number { 
      
-    const font = fontSize + " " + fontFamily;
+    const font = fontWeight + " " + fontSize + " " + fontFamily;
     
     const canvas = document.createElement("canvas"); 
     const context = canvas.getContext("2d")!; 
     context.font = font; 
-    const width = context.measureText(text).width; 
 
+    // replace tab unicode with equivalent amount of spaces
+    text = text.replaceAll(TAB_UNICODE_ESCAPED, getTabSpaces());
+
+    const width = context.measureText(text).width;
+    
     return width;
 } 
+
+
+/**
+ * @returns a string with {@link SPACES_PER_TAB} amount of white space chars
+ */
+export function getTabSpaces(): string {
+
+    let spaceChars = "";
+    for (let i = 0; i < SPACES_PER_TAB; i++) 
+        spaceChars += " "
+
+    return spaceChars;
+}
+
+
+/**
+ * Insert given ```insertionString``` into given ```targetString``` after given index.
+ * 
+ * I.e: ```insertString("Hello", "X", 1)``` would return ```HXello```.
+ * 
+ * @param targetString string to insert another string into
+ * @param insertionString string to insert 
+ * @param insertionIndex index in ```targetString``` to insert into, i.e ```insertionIndex = 0``` would insert at the start
+ * @returns result string, does not alter ```targetString```
+ */
+export function insertString(targetString: string, insertionString: string, insertionIndex: number): string {
+
+    let leftHalft = targetString.substring(0, insertionIndex);
+    const rightHalf = targetString.substring(insertionIndex);
+
+    leftHalft += insertionString;
+
+    return leftHalft + rightHalf;
+}
 
 
 /**
@@ -232,6 +274,10 @@ export function getWidthRelativeToWindow(width: string | number, unitDigits: num
 }
 
 
+/**
+ * @param keyCode code of the key e.g ```65``` for letter 'A'
+ * @returns true if key would use space inside a text input. Includes 'Tab' and 'Space'
+ */
 export function isKeyAlphaNumeric(keyCode: number): boolean {
 
     if (isNumberFalsy(keyCode)) {
@@ -239,7 +285,10 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
         return false;
     }
 
-    return (keyCode >= 48 && keyCode <= 57) || (keyCode >= 65 && keyCode <= 90);
+    return (keyCode >= 48 && keyCode <= 57) || // numbers
+           (keyCode >= 65 && keyCode <= 90) || // letters
+           keyCode === 32 || // "Space"
+           keyCode === 9; // "Tab"
 }
 
 
@@ -376,4 +425,52 @@ export function confirmPageUnload(): void {
         event.preventDefault();
         event.returnValue = "";
     });
+}
+
+
+/**
+ * Animate the css "border-```borderSide```-color" attribute of given element.
+ * 
+ * @param element to flash the border of
+ * @param borderSide side of the border. Possible values are: "top", "right", "left", "bottom"
+ * @param flashColor color of border to use for flash effect
+ * @param endColor color of border to fall back on
+ * @param holdTime time in ms that the border stays in given flashColor
+ * @return promise that resolves once animation is finished
+ */
+export function flashBorder(element: JQuery,
+                            borderSide: Side, 
+                            flashColor: string, 
+                            endColor: string,
+                            holdTime = 1000): any {
+
+    if (!element.length) {
+        logWarn("flashBorder() failed")
+        return;
+    }
+
+    const borderAttr = "border-" + borderSide + "-color";
+
+    return new Promise((res, rej) => {
+        element.animate({[borderAttr]: flashColor}, 100, () => 
+            setTimeout(() => res(element.animate({[borderAttr]: endColor}, 100)), holdTime))
+    });
+}
+
+
+export function getOppositeSide(side: Side): Side {
+
+    if (side === "right")
+        return "left";
+
+    if (side === "left") 
+        return "right";
+
+    if (side === "top") 
+        return "bottom";
+
+    if (side === "bottom") 
+        return "top";
+
+    return "none";
 }

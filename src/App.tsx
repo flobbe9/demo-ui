@@ -6,7 +6,7 @@ import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import Menu from "./components/Menu";
 import PopUp from "./components/PopUp";
-import { hidePopUp, log, togglePopUp } from "./utils/Utils";
+import { hidePopUp, isBlank, log, togglePopUp } from "./utils/Utils";
 import { Orientation } from "./enums/Orientation";
 import Style, { getDefaultStyle } from "./abstract/Style";
 
@@ -25,6 +25,8 @@ export default function App() {
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
     const [selectedTextInputStyle, setSelectedTextInputStyle] = useState(getDefaultStyle());
 
+    const [keyCombinationActive, setKeyCombinationActive] = useState(false);
+
     const appRef = useRef(null);
 
     const context = {
@@ -39,8 +41,18 @@ export default function App() {
         selectedTextInputId: selectedTextInputId,
         setSelectedTextInputId: setSelectedTextInputId,
         selectedTextInputStyle: selectedTextInputStyle,
-        setSelectedTextInputStyle: setSelectedTextInputStyle
+        setSelectedTextInputStyle: setSelectedTextInputStyle,
+        focusSelectedTextInput: focusSelectedTextInput,
+
+        keyCombinationActive: keyCombinationActive
     }
+
+
+    useEffect(() => {
+        document.addEventListener("keydown", (event) => handleGlobalKeyDown(event));
+        document.addEventListener("keyup", (event) => handleGlobalKeyUp(event));
+
+    }, []);
 
 
     function handleClick(event): void {
@@ -51,22 +63,54 @@ export default function App() {
 
         // hide select options
         if (!event.target.className.includes("dontHideSelect")) 
-            $(".selectOptionsBox").slideUp(100, "linear");
+            hideSelectOptions();
 
+        // hide nav menu mobile
         if (!event.target.className.includes("dontHideNavSectionRightMobile")) 
             $(".navSectionRightMobile").slideUp(200);
     }
 
 
-    function handleKeyDown(event): void {
+    function handleGlobalKeyDown(event): void {
 
-        if (event.key === "Escape")
+        if (event.key === "Escape") 
             hidePopUp(setPopUpContent);
+
+        if (event.key === "Control")
+            setKeyCombinationActive(true);
+    }
+
+
+    function handleGlobalKeyUp(event): void {
+
+        if (event.key === "Control")
+            setKeyCombinationActive(false);
+    }
+
+
+    function focusSelectedTextInput(): void {
+        
+        // case: no textinput id selected yet
+        if (isBlank(selectedTextInputId))
+            return;
+
+        $("#" + selectedTextInputId).trigger("focus");
+    }
+
+
+    function hideSelectOptions(): void {
+
+        const selectOptionsBox = $(".selectOptionsBox");
+
+        if (selectOptionsBox.css("display") !== "none") {
+            selectOptionsBox.slideUp(100, "linear");
+            focusSelectedTextInput();
+        }
     }
 
     
     return (
-        <div className="App" ref={appRef} onKeyDown={handleKeyDown} onClick={handleClick}>
+        <div className="App" ref={appRef} onClick={handleClick}>
             <BrowserRouter>
                 <AppContext.Provider value={context}>
 
@@ -109,5 +153,8 @@ export const AppContext = createContext({
     selectedTextInputId: "",
     setSelectedTextInputId: (id: string) => {},
     selectedTextInputStyle: getDefaultStyle(),
-    setSelectedTextInputStyle: (style: Style) => {}
+    setSelectedTextInputStyle: (style: Style) => {},
+    focusSelectedTextInput: () => {},
+
+    keyCombinationActive: false
 })

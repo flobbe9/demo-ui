@@ -7,6 +7,7 @@ import { getDocumentId, getPartFromDocumentId, log } from "../../utils/Utils";
 import {v4 as uuid} from "uuid";
 
 
+// TODO: consider page width, compare with word
 export default function Page(props: {
     pageIndex: number,
     id?: string,

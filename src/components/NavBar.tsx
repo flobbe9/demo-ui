@@ -51,7 +51,7 @@ export default function NavBar(props) {
         <div id={id} className={className}>
             <div className="navSectionLeft textLeft flexLeft">
                 <Link className="navLink" to="/">
-                    <img className="dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
+                    <img className="navImage dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
                     <span className="navHeading">DocumentBuilder</span>
                 </Link>
             </div>

@@ -5,6 +5,14 @@
         align-items: flex-start;
         display: flex;
         height: 5%;
+
+        .smallIconButton {
+            transition: opacity 0.2s;
+            &:hover {
+                cursor: pointer;
+                opacity: 0.5;
+            }
+        }
     }
 
     .body {
@@ -29,7 +37,7 @@
                     border-bottom-left-radius: 0;
                     height: 160px;
                     max-width: 400px;
-                    
+
                     .radioChildren {
                         border-right: 1px dashed rgb(179, 179, 179);
                         font-size: 0.8rem;

@@ -3,7 +3,7 @@ import "../../assets/styles/PopUpNewDocument.css";
 import { AppContext } from "../../App";
 import { Orientation } from "../../enums/Orientation";
 import RadioButton from "../helpers/RadioButton";
-import { log } from "../../utils/Utils";
+import { hidePopUp, log } from "../../utils/Utils";
 import { Link } from "react-router-dom";
 
 
@@ -131,6 +131,8 @@ export default function PopUpNewDocument(props) {
                                  value={Orientation.PORTRAIT}
                                  radioGroupValue={appContext.orientation}
                                  handleSelect={(value: Orientation) => handleSelectOrientation(value)}
+                                 checkedBackgroundColor="rgb(230, 230, 230)"
+                                 hoverBackgroundColor="rgb(245, 245, 245)"
                                  >
                         Hoch-Format
                     </RadioButton>
@@ -142,6 +144,8 @@ export default function PopUpNewDocument(props) {
                                  value={Orientation.LANDSCAPE}
                                  radioGroupValue={appContext.orientation}
                                  handleSelect={(value: Orientation) => handleSelectOrientation(value)}
+                                 checkedBackgroundColor="rgb(230, 230, 230)"
+                                 hoverBackgroundColor="rgb(245, 245, 245)"
                                  >
                         Quer-Format
                     </RadioButton>
@@ -155,6 +159,8 @@ export default function PopUpNewDocument(props) {
                                     value={1}
                                     radioGroupValue={appContext.numColumns}
                                     handleSelect={(value: number) => handleSelectNumColumns(value)}
+                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                             <div style={{height: "100%"}}>Lorem ipsum</div>
                         </RadioButton>
@@ -168,6 +174,8 @@ export default function PopUpNewDocument(props) {
                                     value={2}
                                     radioGroupValue={appContext.numColumns}
                                     handleSelect={(value: number) => handleSelectNumColumns(value)}
+                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                             <div className="verticalBorderRightDotted" style={{width: "50%"}}>
                                 Lorem ipsum
@@ -184,6 +192,8 @@ export default function PopUpNewDocument(props) {
                                     value={3}
                                     radioGroupValue={appContext.numColumns}
                                     handleSelect={(value: number) => handleSelectNumColumns(value)}
+                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                             <div className="verticalBorderRightDotted" style={{width: "33%"}}>
                                 Lorem ipsum
@@ -207,9 +217,9 @@ export default function PopUpNewDocument(props) {
                 </div>
 
                 <div className="flexRight">
-                    {containerIndex === 1 ? // last container
-                        <Link to="/build" className="whiteLink">{nextButton}</Link> : 
-                        nextButton
+                    {/* case: last container */}
+                    {containerIndex === 1 ? 
+                        <Link to="/build" className="whiteLink">{nextButton}</Link> : nextButton
                     }       
                 </div>
             </div>

@@ -5,6 +5,9 @@
     box-shadow: 0 7px 8px -2px rgb(155, 155, 155);
     height: 120px;
     padding-bottom: 10px;
+    position: sticky;
+    top: 0;
+    
 
     .sectionContainer {
         height: 100%;

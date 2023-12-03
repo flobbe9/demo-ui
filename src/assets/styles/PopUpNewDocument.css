@@ -5,6 +5,14 @@
         align-items: flex-start;
         display: flex;
         height: 5%;
+
+        .smallIconButton {
+            transition: opacity 0.2s;
+            &:hover {
+                cursor: pointer;
+                opacity: 0.5;
+            }
+        }
     }
 
     .body {

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "../../assets/styles/PopUpChooseColumnType.css";
 import RadioButton from "../helpers/RadioButton";
 import { AppContext } from "../../App";
@@ -28,6 +28,13 @@ export default function PopUpChooseColumnType(props:{
     const [columnType, setColumnType] = useState(props.columnType);
 
 
+    useEffect(() => {
+        document.addEventListener("keydown", handleKeyDown)
+
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [])
+
+
     function handleSelect(columnType: number): void {
         
         setColumnType(columnType);
@@ -37,7 +44,6 @@ export default function PopUpChooseColumnType(props:{
 
     function handleKeyDown(event): void {
 
-        // TODO: this does not work
         if (event.key === "Enter") {
             props.handleSubmit();
             hidePopUp(appContext.setPopUpContent);
@@ -63,6 +69,8 @@ export default function PopUpChooseColumnType(props:{
                                     value={1}
                                     radioGroupValue={columnType}
                                     handleSelect={handleSelect}
+                                    checkedBackgroundColor="rgb(240, 240, 240)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                         Lorem ipsum <br />
                         dolor sit <br />
@@ -83,6 +91,8 @@ export default function PopUpChooseColumnType(props:{
                                     value={2}
                                     radioGroupValue={columnType}
                                     handleSelect={handleSelect}
+                                    checkedBackgroundColor="rgb(240, 240, 240)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                         Lorem ipsum <br />
                         dolor sit <br />
@@ -103,6 +113,8 @@ export default function PopUpChooseColumnType(props:{
                                     value={3}
                                     radioGroupValue={columnType}
                                     handleSelect={handleSelect}
+                                    checkedBackgroundColor="rgb(240, 240, 240)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                         Lorem ipsum <br />
                         dolor sit <br />
@@ -123,6 +135,8 @@ export default function PopUpChooseColumnType(props:{
                                     value={4}
                                     radioGroupValue={columnType}
                                     handleSelect={handleSelect}
+                                    checkedBackgroundColor="rgb(240, 240, 240)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                         <div>Lorem ipsum</div>
                             <div className="oneMockTab">dolor sit</div>
@@ -144,6 +158,8 @@ export default function PopUpChooseColumnType(props:{
                                     value={5}
                                     radioGroupValue={columnType}
                                     handleSelect={handleSelect}
+                                    checkedBackgroundColor="rgb(240, 240, 240)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                         <div>Lorem ipsum</div>
                             <div className="oneMockTab">dolor sit</div>
@@ -165,6 +181,8 @@ export default function PopUpChooseColumnType(props:{
                                     value={6}
                                     radioGroupValue={columnType}
                                     handleSelect={handleSelect}
+                                    checkedBackgroundColor="rgb(240, 240, 240)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                         <table className="mockTable">
                             <tbody>
@@ -198,6 +216,8 @@ export default function PopUpChooseColumnType(props:{
                                     value={7}
                                     radioGroupValue={columnType}
                                     handleSelect={handleSelect}
+                                    checkedBackgroundColor="rgb(240, 240, 240)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                         <table className="mockTable">
                             <tbody>
@@ -235,6 +255,8 @@ export default function PopUpChooseColumnType(props:{
                                     value={8}
                                     radioGroupValue={columnType}
                                     handleSelect={handleSelect}
+                                    checkedBackgroundColor="rgb(240, 240, 240)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                         <table className="mockTable">
                             <tbody>
@@ -268,11 +290,9 @@ export default function PopUpChooseColumnType(props:{
                 </div>
             </div>
 
-            {/* TODO: disable button if nothing is selected */}
-            {/* TODO: submit on enter */}
+            {/* TODO: focus on submit */}
             <div className="footer flexRight">
-                <button id="prevButton"
-                        className="slideButton slideRightButton blackButton blackButtonContained buttonSmall hidePopUp"
+                <button className="blackButton blackButtonContained buttonMedium hidePopUp"
                         onClick={props.handleSubmit}>
                     OK
                 </button>

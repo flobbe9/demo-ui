@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/RadioButton.css";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../../utils/Utils";
+import { SELECTED_STYLE } from "../../utils/GlobalVariables";
 
 
-// TODO: test
 export default function RadioButton(props: {
     id: string,
     name: string,
@@ -11,11 +12,12 @@ export default function RadioButton(props: {
     radioGroupValue: any,
     handleSelect: Function,
     
-    color?: string,
-    backgroundColor?: string,
     hoverBackgroundColor?: string,
     checkedBackgroundColor?: string,
-    border?: string,
+
+    componentStyle?: React.CSSProperties,
+    boxStyle?: React.CSSProperties,
+    childrenStyle?: React.CSSProperties,
 
     title?: string,
     className?: string,
@@ -34,18 +36,14 @@ export default function RadioButton(props: {
 
     const [checked, setChecked] = useState(props.value === props.radioGroupValue);
     const [disabled, setDisabled] = useState(props.disabled);
+    const [boxStyle, setBoxStyle] = useState<React.CSSProperties>();
 
-    // TODO: continue here (not sure what I was doing though)
-    // const 
-
-    const checkedStyle:React.CSSProperties = {
-        borderColor: "aqua"
-    }
+    const boxRef = useRef(null);
 
 
     // set prop styles
     useEffect(() => {
-        initStyles();
+        setBoxStyle(props.boxStyle || {});
 
     }, []);
 
@@ -63,17 +61,6 @@ export default function RadioButton(props: {
     }, [props.disabled]);
 
 
-    function initStyles(): void {
-
-        const radioLabel = $("#" + labelClassName + props.id);
-
-        radioLabel.css("color", props.color || "");
-        radioLabel.css("backgroundColor", props.backgroundColor || "");
-        if (props.border)
-            radioLabel.css("border", props.border);
-    }
-
-
     function handleSelect(event): void {
 
         if (disabled)
@@ -88,12 +75,12 @@ export default function RadioButton(props: {
         const checked = props.value === props.radioGroupValue;
         setChecked(checked);
 
-        const label = $("#" + labelId);
+        const label = $(boxRef.current!);
         if (checked)
             label.css("backgroundColor", props.checkedBackgroundColor || "");
         
         else 
-            label.css("backgroundColor", props.backgroundColor || "");
+            label.css("backgroundColor", props.boxStyle?.backgroundColor || "");
     }
 
 
@@ -103,21 +90,24 @@ export default function RadioButton(props: {
             return;
 
         if (!checked)
-            $("#" + labelId).css("backgroundColor", props.hoverBackgroundColor || "");
+            $(boxRef.current!).css("backgroundColor", props.hoverBackgroundColor || "");
     }
+
 
     function handleMouseOut(): void {
 
         if (!checked)
-            $("#" + labelId).css("backgroundColor", props.backgroundColor || "");
+            $(boxRef.current!).css("backgroundColor", props.boxStyle?.backgroundColor || "");
     }
 
 
     return (
-        <div id={id} className={className} style={props.style} title={props.title}>
-            <label id={labelClassName + props.id} className={labelClassName} 
+        <div id={id} className={className} style={props.componentStyle} title={props.title}>
+            <label id={labelId} 
+                   className={labelClassName}
+                   ref={boxRef}
                    htmlFor={props.name}
-                   style={checked ? checkedStyle : {}}
+                   style={checked ? {...boxStyle, ...SELECTED_STYLE} : boxStyle}
                    onClick={handleSelect}
                    onMouseOver={handleMouseOver}
                    onMouseOut={handleMouseOut}>
@@ -130,7 +120,7 @@ export default function RadioButton(props: {
                        readOnly
                        />
 
-                <div className={childrenClassName}>{props.children}</div>
+                <div className={childrenClassName} style={props.childrenStyle}>{props.children}</div>
             </label>
         </div>
     )

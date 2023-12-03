@@ -27,7 +27,7 @@
                 }
                 
                 .plusIcon {
-                    /* animation: heightPulse 4s infinite; */
+                    /* animation: heightPulse 3s infinite; */
                     height: 50px;
                     transition: height 0.3s;
                     
@@ -50,13 +50,8 @@
                     display: flex;
 
                     .TextInput {
-                        border-left: 1px solid;
                         text-align: left;
                         width: 100%;
-
-                        &:focus {
-                            border-left-color: aqua;
-                        }
                     }
                 }
             }
@@ -84,10 +79,6 @@
                     .TextInput {
                         border-right: 1px solid black;
                         text-align: right;
-
-                        &:focus {
-                            border-right-color: aqua;
-                        }
                     }
                 }
             }

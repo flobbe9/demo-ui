@@ -10,9 +10,10 @@ export default function ColorPicker(props: {
     toggleStyle: (color: string) => void,
 
     hoverBackgroundColor?: string,
-    backgroundColor?: string,
-    border?: string,
-    childrenColor?: string
+
+    componentStyle?: React.CSSProperties,
+    boxStyle?: React.CSSProperties,
+    childrenStyle?: React.CSSProperties,
 
     className?: string,
     disabled?: boolean,
@@ -23,15 +24,11 @@ export default function ColorPicker(props: {
     const id = props.id ? "ColorPicker" + props.id : "ColorPicker";
     const className = props.className ? "ColorPicker " + props.className : "ColorPicker";
 
-    const buttonRef = useRef(null);
-    const labelRef = useRef(null);
+    const [disabled, setDisabled] = useState(props.disabled);
+
+    const componentRef = useRef(null);
+    const boxRef = useRef(null);
     const childrenRef = useRef(null);
-
-
-    useEffect(() => {
-        initStyles();
-
-    }, [])
 
 
     useEffect(() => {
@@ -40,26 +37,36 @@ export default function ColorPicker(props: {
     }, [props.color]);
 
 
-    function initStyles(): void {
+    useEffect(() => {
+        setDisabled(props.disabled);
 
-        const label = $(labelRef.current!);
-        const children = $(childrenRef.current!);
+    }, [props.disabled])
 
-        label.css("border", props.border || "");
 
-        children.css("color", props.childrenColor || "");
+    function handleChange(event): void {
+
+        if (disabled)
+            return;
+
+        props.handleSelect(event.target.value)
     }
 
 
-    function handleClick() {
+    function handleClick(): void {
 
-        $(buttonRef).children().find(".colorInput").trigger("click");
+        if (disabled)
+            return;
+
+        $(componentRef).children().find(".colorInput").trigger("click");
     }
 
 
     function handleMouseOver(): void {
-        
-        const label = $(labelRef.current!);
+
+        if (disabled)
+            return;
+
+        const label = $(boxRef.current!);
 
         label.css("backgroundColor", props.hoverBackgroundColor || "");
     }
@@ -67,33 +74,43 @@ export default function ColorPicker(props: {
 
     function handleMouseOut(): void {
 
-        const label = $(labelRef.current!);
+        if (disabled)
+            return;
 
-        label.css("backgroundColor", props.backgroundColor || "");
+        const label = $(boxRef.current!);
+
+        label.css("backgroundColor", props.boxStyle?.backgroundColor || "");
     }
 
 
     return (
         <div id={id} 
              className={className} 
-             ref={buttonRef}
+             ref={componentRef}
              onClick={handleClick} 
              title={props.color} 
-             style={props.style}
+             style={props.componentStyle}
              >
             <label className="colorLabel"
-                   ref={labelRef} 
+                   ref={boxRef} 
+                   style={props.boxStyle}
                    htmlFor={"colorInput" + props.id}
                    onMouseOver={handleMouseOver}
                    onMouseOut={handleMouseOut}>
-                <div className="colorChildren flexCenter" ref={childrenRef}>{props.children}</div>
+                <div className="colorChildren flexCenter" 
+                     ref={childrenRef}
+                     style={props.childrenStyle}
+                     >
+                    {props.children}
+                </div>
                 
                 <input id={"colorInput" + props.id} 
                        className="colorInput" 
                        type="color"
                        list="selfPalette" 
                        value={prependHashTag(props.color)}
-                       onChange={(event) => props.handleSelect(event.target.value)}
+                       onChange={handleChange}
+                       onClick={(event) => disabled ? event.preventDefault() : {}}
                        />
             </label>
         </div>

@@ -14,7 +14,9 @@ export const fontFamilies = [
     "Garamond",
     "Courier New",
     "Brush Script MT"
-]
+];
+
+export type Side = "top" | "right" | "left" | "bottom" | "none";
 
 export const DEFAULT_BASIC_PARAGRAPH_TEXT = " ";
 
@@ -117,6 +119,14 @@ function getNumLinesPerColumnLandscapeByFontSize(fontSize: number): number {
 }
 
 
+export const MAX_NUM_TABS = 12;
+
+export const SPACES_PER_TAB = 8;
+
+export const TAB_UNICODE = "0x09";
+export const TAB_UNICODE_ESCAPED = "\x09";
+
+
 /**
  * Defines the number of columns and the start index for each column type involving a table. Object key is the 
  * column type.
@@ -140,4 +150,9 @@ export const TABLE_CONFIG: Readonly<Record<number, {numColumns: number, startInd
 export function isMobileWidth(): boolean {
 
     return document.documentElement.clientWidth < 800;
+}
+
+
+export const SELECTED_STYLE:React.CSSProperties = {
+    borderColor: "aqua"
 }
