@@ -1,25 +1,23 @@
 import React from "react";
-import "../assets/styles/PopUp.css";
+import "../assets/styles/Popup.css";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { log } from "../utils/Utils";
 
 
-export default function PopUp(props) {
+export default function Popup(props: {
+    className?: string,
+    children?,
 
-    const id = props.id ? "PopUp" + props.id : "PopUp";
-    const className = props.className ? "PopUp " + props.className : "PopUp";
+    height?: "half" | "large" | "full",
+    width?: "half" | "large" | "full",
+}) {
 
-    // state isDisplayed
-    
-    // onhide
-        // clean up className
-        // clean up content
-
-    // TODO: handle Enter
+    const className = "Popup " + (props.height? (props.height + "Height ") : " ") + 
+                                 (props.width? (props.width + "Width ") : " ");
 
     return (
-        <div id={id} className={className + " flexCenter hidePopUp"}>
-            <div id="popUpContainer" className="popUpContainer">
-                {props.children}
-            </div>
+        <div id={"Popup"} className={className}>
+            {props.children}
         </div>
     )
 }

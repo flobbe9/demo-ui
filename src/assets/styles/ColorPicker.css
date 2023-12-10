@@ -6,6 +6,10 @@
         padding: 3px;
         transition: background-color 0.2s;
         width: 30px;
+
+        &:hover {
+            cursor: pointer;
+        }
                 
         .colorInput {
             height: 5px;

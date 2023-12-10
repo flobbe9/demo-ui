@@ -21,7 +21,8 @@ export default function Checkbox(props: {
     className?: string,
     onMouseDown?: (event) => void,
     disabled?: boolean,
-    children?
+    children?,
+    title?: string
 }) {
 
     const id = "Checkbox" + props.id;
@@ -34,6 +35,8 @@ export default function Checkbox(props: {
     const [boxStyle, setBoxStyle] = useState<React.CSSProperties>();
 
     const labelRef = useRef(null);
+    const inputRef = useRef(null);
+    const childrenRef = useRef(null);
 
 
     useEffect(() => {
@@ -58,7 +61,28 @@ export default function Checkbox(props: {
     useEffect(() => {
         setDisabled(props.disabled);
 
+        handleDisabledChange(props.disabled!);
+
     }, [props.disabled]);
+
+
+    function handleDisabledChange(disabled: boolean): void {
+
+        if (disabled) {
+            $(labelRef.current!).css("cursor", "inherit");
+            $(childrenRef.current!).css("cursor", "inherit");
+            $(inputRef.current!).css("cursor", "inherit");
+            $(labelRef.current!).css("opacity", 0.5);
+
+        } else {
+            $(labelRef.current!).css("cursor", "pointer");
+            $(childrenRef.current!).css("cursor", "pointer");
+            $(inputRef.current!).css("cursor", "pointer");
+            $(labelRef.current!).css("opacity", 1);
+        }
+    }
+
+
 
 
     function handleSelect(event): void {
@@ -99,7 +123,7 @@ export default function Checkbox(props: {
     
 
     return (
-        <div id={id} className={className} style={props.componentStyle} onClick={handleSelect}>
+        <div id={id} className={className} style={props.componentStyle} onClick={handleSelect} title={props.title}>
             <label id={labelId} 
                    className={labelClassName} 
                    ref={labelRef}
@@ -108,15 +132,18 @@ export default function Checkbox(props: {
                    onMouseOver={handleMouseOver}
                    onMouseOut={handleMouseOut}
                    onMouseDown={handleMouseDown}
+                   title={props.title}
                    >
                 <input id={"checkboxInput" + props.id}  
+                       ref={inputRef}
                        className="checkboxInput" 
                        type="checkbox"
                        readOnly
                        checked={checked} 
-                       disabled={disabled}/>
+                       disabled={disabled}
+                       />
 
-                <div className="checkboxChildren dontMarkText flexCenter" style={props.childrenStyle}>
+                <div className="checkboxChildren dontMarkText flexCenter" ref={childrenRef} style={props.childrenStyle}>
                     {props.children}
                 </div>
             </label>

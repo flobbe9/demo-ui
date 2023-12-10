@@ -3,6 +3,7 @@ import "../../assets/styles/PopUpNewDocument.css";
 import { AppContext } from "../../App";
 import { Orientation } from "../../enums/Orientation";
 import RadioButton from "../helpers/RadioButton";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { hidePopUp, log } from "../../utils/Utils";
 import { Link } from "react-router-dom";
 
@@ -164,7 +165,7 @@ export default function PopUpNewDocument(props) {
                                     >
                             <div style={{height: "100%"}}>Lorem ipsum</div>
                         </RadioButton>
-                        <span>1 Spalte</span>
+                        <span>1 Spalte / Seite</span>
                     </div>
 
                     <div className="radioContainer">
@@ -182,7 +183,7 @@ export default function PopUpNewDocument(props) {
                             </div>
                             <div style={{width: "50%"}}></div>
                         </RadioButton>
-                        <span>2 Spalten</span>
+                        <span>2 Spalten / Seite</span>
                     </div>
 
                     <div className="radioContainer">
@@ -201,7 +202,7 @@ export default function PopUpNewDocument(props) {
                             <div className="verticalBorderRightDotted" style={{width: "33%"}}></div>
                             <div style={{width: "33%"}}></div>
                         </RadioButton>
-                        <span>3 Spalten</span>
+                        <span>3 Spalten / Seite</span>
                     </div>
                 </div>
             </div>

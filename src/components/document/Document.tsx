@@ -9,6 +9,7 @@ import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
 
 
 // TODO: how to cache document?
+// TODO: fontsize looks smaller in frontend
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -28,7 +29,7 @@ export default function Document(props) {
     useEffect(() => {
         // confirmPageUnload();
 
-        hidePopUp(appContext.setPopUpContent);
+        hidePopUp(appContext.setPopupContent);
 
         $(".App").css("backgroundColor", "white");
 
@@ -44,7 +45,6 @@ export default function Document(props) {
     /**
      * Add {@link TAB_UNICODE_ESCAPED} to ```selectedTextInput```. Prevent any keydown event.
      */
-    // TODO: add correct num of tabs
     function handleTab(event): void {
 
         event.preventDefault();   
@@ -62,7 +62,7 @@ export default function Document(props) {
         selectedTextInput.prop("value", newInputValue);
 
         // move cursor to end of tab
-        moveCursor(appContext.selectedTextInputId, cursorIndex + 1, cursorIndex + 1)
+        moveCursor(appContext.selectedTextInputId, cursorIndex + 2, cursorIndex + 2)
     }
 
 

@@ -5,10 +5,11 @@ import Document from "./components/document/Document";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import Menu from "./components/Menu";
-import PopUp from "./components/PopUp";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { hidePopUp, isBlank, log, togglePopUp } from "./utils/Utils";
 import { Orientation } from "./enums/Orientation";
 import Style, { getDefaultStyle } from "./abstract/Style";
+import PopupContainer from "./components/PopupContainer";
 
 
 export default function App() {
@@ -17,7 +18,7 @@ export default function App() {
     // const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
 
     const [escapePopUp, setEscapePopUp] = useState(true);
-    const [popUpContent, setPopUpContent] = useState(<></>);
+    const [popupContent, setPopupContent] = useState(<></>);
 
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
@@ -31,7 +32,7 @@ export default function App() {
 
     const context = {
         setEscapePopUp: setEscapePopUp,
-        setPopUpContent: setPopUpContent,
+        setPopupContent: setPopupContent,
 
         orientation: orientation,
         setOrientation: setOrientation,
@@ -59,7 +60,7 @@ export default function App() {
 
         // hide popup
         if (event.target.className.includes("hidePopUp") && escapePopUp)
-            hidePopUp(setPopUpContent);
+            hidePopUp(setPopupContent);
 
         // hide select options
         if (!event.target.className.includes("dontHideSelect")) 
@@ -74,7 +75,7 @@ export default function App() {
     function handleGlobalKeyDown(event): void {
 
         if (event.key === "Escape") 
-            hidePopUp(setPopUpContent);
+            hidePopUp(setPopupContent);
 
         if (event.key === "Control")
             setKeyCombinationActive(true);
@@ -100,12 +101,20 @@ export default function App() {
 
     function hideSelectOptions(): void {
 
-        const selectOptionsBox = $(".selectOptionsBox");
+        const selectOptionsBoxes = $(".selectOptionsBox");
 
-        if (selectOptionsBox.css("display") !== "none") {
-            selectOptionsBox.slideUp(100, "linear");
-            focusSelectedTextInput();
-        }
+        // iterate all select option boxes
+        Array.from(selectOptionsBoxes).forEach(selectOptionsBoxElement => {
+            if (!selectOptionsBoxElement)
+                return;
+
+            // hide if not hidden already
+            const selectOptionsBox = $("#" + selectOptionsBoxElement.id);
+            if (selectOptionsBox.css("display") !== "none") {
+                selectOptionsBox.slideUp(100, "linear");
+                focusSelectedTextInput();
+            }
+        })
     }
 
     
@@ -120,7 +129,7 @@ export default function App() {
 
                     <div className="content">
                         <div className="flexCenter">
-                            <PopUp>{popUpContent}</PopUp>
+                            <PopupContainer>{popupContent}</PopupContainer>
                         </div>
 
                         <Routes>
@@ -143,7 +152,7 @@ export default function App() {
 
 export const AppContext = createContext({
     setEscapePopUp: (escapePopUp: boolean) => {},
-    setPopUpContent: (content: React.JSX.Element) => {},
+    setPopupContent: (content: React.JSX.Element) => {},
 
     orientation: Orientation.PORTRAIT,
     setOrientation: (orientation: Orientation) => {},

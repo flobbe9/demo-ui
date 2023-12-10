@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
-import { getDocumentId, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, moveCursor } from "../../utils/Utils";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { getDocumentId, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex } from "../../utils/Utils";
 import { AppContext } from "../../App";
 import { applyTextInputStyle, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
+import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
 
 
 // TODO: 
@@ -31,6 +33,8 @@ export default function TextInput(props: {
     useEffect(() => {
         if (props.className)
             setClassName(className + " " + props.className);
+
+        applyTextInputStyle($(inputRef.current!), appContext.selectedTextInputStyle)
 
     }, []);
 
@@ -94,6 +98,9 @@ export default function TextInput(props: {
 
         if (event.key === "ArrowUp")
             focusPrevTextInput(event);
+
+        if (event.key === "Backspace")
+            handleBackspace(event);
     }
 
 
@@ -124,6 +131,25 @@ export default function TextInput(props: {
         // move cursor to end of text
         const lastCharIndex = prevTextInput.prop("value").length;
         moveCursor(prevTextInput.prop("id"), lastCharIndex, lastCharIndex);
+    }
+
+
+    function handleBackspace(event): void {
+
+        // dont prevent default here!!
+
+        const input = $(inputRef.current!);
+        const value: string = input.prop("value");
+        
+        const cursorIndex = input.prop("selectionStart");
+        const charsInFrontOfCursor = value.charAt(cursorIndex - 1) + value.charAt(cursorIndex - 2);
+
+        // case: remove tab
+        if (charsInFrontOfCursor === TAB_UNICODE_ESCAPED) {
+            // remove one of two unicodes
+            let newValue = replaceAtIndex(value, "", cursorIndex - 2);
+            input.prop("value", newValue);
+        }
     }
 
 

@@ -1,39 +1,6 @@
-.PopUp {
-    display: none;
-    height: 70vh;
-    position: fixed;
-    top: 15%;
-    width: 60%;
-    z-index: 2;
-    
-    .popUpContainer {
-        background-color: white;
-        border-radius: 5px;
-        padding: 2%;
-        width: 100%;
-    }
-
-    .fullWidthContainer {
-        width: 100%;
-    }
-
-    .largeWidthContainer {
-        width: 75%;
-    }
-
-    .halfWidthContainer {
-        width: 50%;
-    }
-
-    .fullHeightContainer {
-        height: 100%;
-    }
-
-    .largeHeightContainer {
-        height: 75%;
-    }
-
-    .halfHeightContainer {
-        height: 50%;
-    }
+.Popup {
+    background-color: white;
+    border-radius: 5px;
+    padding: 2%;
+    width: 100%;
 }

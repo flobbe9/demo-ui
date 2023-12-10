@@ -4,7 +4,8 @@ import "../assets/styles/Menu.css";
 import { hidePopUp, log, togglePopUp } from "../utils/Utils";
 import {v4 as uuid} from "uuid";
 import { AppContext } from "../App";
-import PopUpNewDocument from "./popUps/PopUpNewDocument";
+import PopUpNewDocument from "./popups/PopUpNewDocument";
+import Popup from "./Popup";
 
 
 export default function Menu(props) {
@@ -18,7 +19,7 @@ export default function Menu(props) {
 
 
     useEffect(() => {
-        hidePopUp(appContext.setPopUpContent);
+        hidePopUp(appContext.setPopupContent);
 
         $(".App").css("backgroundColor", "rgb(228, 228, 228)")
     }, []);
@@ -36,18 +37,16 @@ export default function Menu(props) {
 
     function handleNewDocument(event: any): void {
 
-        const popUpContainer =  $("#popUpContainer");
-        if (!popUpContainer.length)
-            return;
+        // define popup
+        appContext.setPopupContent(
+            <Popup width="large"
+                    height="large">
+                <PopUpNewDocument />
+            </Popup>
+        );
 
-        // append child to popup
-        appContext.setPopUpContent(<PopUpNewDocument />);
-
-        // append classNames to popup
-        popUpContainer.addClass("largeHeightContainer largeWidthContainer");
-        
-        // toggle popUp
-        togglePopUp(appContext.setPopUpContent);
+        // toggle popup
+        togglePopUp(appContext.setPopupContent);
     }
 
 

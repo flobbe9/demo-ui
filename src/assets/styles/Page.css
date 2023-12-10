@@ -1,6 +1,5 @@
 .Page {
     background-color: white;
-    padding: 3vi;
     margin: 20px 0 70px;
     
     /* .headingContainer {
@@ -26,12 +25,13 @@
 .pagePortrait {
     height: 205vh;
     max-height: 1160px;
-    max-width: 1000px;
-    width: 80%;
+    padding: 33px;
+    width: 685px !important;
 }
 
 .pageLandscape {
     height: 47vh;
     min-height: 830px;
-    width: 100%;
+    padding: 28px;
+    width: 1030px;
 }

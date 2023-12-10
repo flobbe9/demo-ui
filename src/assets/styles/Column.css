@@ -121,6 +121,7 @@
 /* hover only if '.hover' class is present */
 .Column.hover:hover {
     background-color: rgb(219, 219, 219);
+    cursor: pointer;
 }
 
 

@@ -118,13 +118,17 @@ function getNumLinesPerColumnLandscapeByFontSize(fontSize: number): number {
     return numLinesLandscape[0][fontSize];
 }
 
+const WsPerLineLandscapeFontSize14 = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";
+const WsPerLinePortraitFontSize14 = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"; // 19px in browser
+
 
 export const MAX_NUM_TABS = 12;
 
 export const SPACES_PER_TAB = 8;
 
 export const TAB_UNICODE = "0x09";
-export const TAB_UNICODE_ESCAPED = "\x09";
+export const SINGLE_TAB_UNICODE_ESCAPED = "\x09";
+export const TAB_UNICODE_ESCAPED = "\x09\x09";
 
 
 /**
@@ -153,6 +157,6 @@ export function isMobileWidth(): boolean {
 }
 
 
-export const SELECTED_STYLE:React.CSSProperties = {
-    borderColor: "aqua"
+export const SELECTED_STYLE: React.CSSProperties = {
+    borderColor: "rgba(0, 255, 255, 0.527)" // kind of aqua
 }

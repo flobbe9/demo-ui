@@ -1,21 +1,6 @@
-.PopUpChooseColumnType {
+.PopupHeadingConfig {
     height: 100%;
     overflow: visible;
-
-    .header {
-        align-items: flex-start;
-        display: flex;
-        height: 5%;
-
-        .smallIconButton {
-            transition: opacity 0.2s;
-
-            &:hover {
-                cursor: pointer;
-                opacity: 0.5;
-            }
-        }
-    }
 
     .body {
         height: 85%;

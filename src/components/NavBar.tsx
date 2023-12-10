@@ -3,7 +3,7 @@ import "../assets/styles/NavBar.css"
 import { Link } from "react-router-dom";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../utils/Utils";
-import LoadingButton from "./helpers/LoadingButton";
+import LoadingButton from "./helpers/Button";
 import { isMobileWidth } from "../utils/GlobalVariables";
 
 
@@ -66,28 +66,30 @@ export default function NavBar(props) {
                 <div className="navSectionRightDesktop">
                     <LoadingButton 
                                 id={"Register"}
-                                style={{marginRight: "15px"}}
-                                color={"black"} 
-                                backgroundColor={"transparent"} 
-                                border={"1px solid black"}
-                                hoverBackgroundColor={"rgb(255, 241, 223)"} 
-                                clickBackgroundColor={"rgb(200, 200, 200)"}
-                                padding="5px 15px"
+                                boxStyle={{
+                                    backgroundColor: "transparent", 
+                                    border: "1px solid black", 
+                                    marginRight: "15px", 
+                                }}
+                                hoverBackgroundColor={"rgb(255, 238, 214)"} 
+                                clickBackgroundColor={"rgb(180, 180, 180)"}
                                 disabled={true}
                                 >
-                                Registrieren
+                        Registrieren
                     </LoadingButton>
                                 
                     <LoadingButton 
                                 id={"Login"}
-                                color={"white"} 
-                                backgroundColor={"black"} 
+                                boxStyle={{
+                                    backgroundColor: "black",
+                                    color: "bisque", 
+                                }}
+                                childrenStyle={{width: "100px"}}
                                 hoverBackgroundColor={"rgb(60, 60, 60)"} 
                                 clickBackgroundColor={"rgb(200, 200, 200)"}
-                                padding="5px 15px"
                                 disabled={true}
                                 >
-                                Login
+                        Login
                     </LoadingButton>
                 </div>
 

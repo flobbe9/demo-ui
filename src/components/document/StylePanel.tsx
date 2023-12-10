@@ -7,12 +7,18 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashBorder, isBlank, isTextLongerThanInput, log, logWarn } from "../../utils/Utils";
+import { flashBorder, getCSSValueAsNumber, isBlank, isTextLongerThanInput, log, logWarn, togglePopUp } from "../../utils/Utils";
 import { DocumentContext } from "./Document";
+import Button from "../helpers/Button";
+import PopupHeadingConfig from "../popups/PopupHeadingConfig";
+import Popup from "../Popup";
 
 
 // TODO: add key combinations for most buttons
     // set title to combination
+
+// TODO: dimensions in mobile mode
+// TODO: select is bad
 export default function StylePanel(props) {
 
     const id = props.id ? "StylePanel" + props.id : "StylePanel";
@@ -41,6 +47,16 @@ export default function StylePanel(props) {
         appContext.selectedTextInputStyle.fontFamily = fontFamily;
         appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
     }
+
+
+    function handleFontSizeSelect(fontSize: string): void {
+
+        appContext.focusSelectedTextInput();
+
+        appContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
+        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+    }
+
 
 
     function handleBoldSelect(bold: boolean): void {
@@ -104,23 +120,78 @@ export default function StylePanel(props) {
     }
 
 
+    function handleHeadingClick(event): void {
+
+        // configure popup
+        appContext.setPopupContent(
+            <Popup height="large"
+                    width="full">
+                <PopupHeadingConfig handleSelect={() => {}}/>
+            </Popup>
+        );
+
+        // toggle
+        togglePopUp(appContext.setPopupContent);
+    }
+
+
     return (
         <div id={id} className={className + " flexCenter"} ref={stylePanelRef}>
             <div className={"sectionContainer flexLeft" + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
                 <StylePanelSection hideRightBorder={false}>
+                    <h6 className="textCenter">Spalte</h6>
+                    <div className="flexCenter">
+                        <Select id="FontSize"
+                                label={appContext.selectedTextInputStyle.fontSize.toString()}
+                                disabled={disabled}
+                                hoverBackgroundColor="rgb(245, 245, 245)"
+                                className="mr-3"
+                                boxStyle={{borderColor: "rgb(200, 200, 200)", width: "50px"}}
+                                optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", width: "50px"}}
+                                handleSelect={handleFontSizeSelect}
+                                title="Schriftgröße"
+                                >
+                            <option value="10px">10</option>
+                            <option value="11px">11</option>
+                            <option value="12px">12</option>
+                            <option value="14px">14</option>
+                            <option value="16px">16</option>
+                            <option value="18px">18</option>
+                            <option value="20px">20</option>
+                        </Select>
+
+                        <Button id={"HeadingConfig"}
+                                handleClick={handleHeadingClick}
+                                hoverBackgroundColor="rgb(245, 245, 245)"
+                                clickBackgroundColor="rgb(200, 200, 200)"
+                                boxStyle={{
+                                    border: "1px solid rgb(200, 200, 200)",
+                                    borderRadius: "3px",
+                                    boxShadow: "none",
+                                }}
+                                >
+                            <div style={{fontSize: "16px"}}>Überschrift</div>
+                            <div style={{fontSize: "12px"}}>Überschrift</div>
+                        </Button>
+                    </div>
+                </StylePanelSection>
+                
+                <StylePanelSection hideRightBorder={false}>
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
-                                handleSelect={handleFontFamilySelect}
-                                selectedValue={appContext.selectedTextInputStyle.fontFamily}
+                                label={appContext.selectedTextInputStyle.fontFamily}
                                 disabled={disabled}
                                 hoverBackgroundColor="rgb(245, 245, 245)"
                                 componentStyle={{width: "150px"}}
-                                optionsBoxStyle={{width: "150px"}}
+                                optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", width: "150px"}}
+                                boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                handleSelect={handleFontFamilySelect}
+                                title="Schriftart"
                                 >
-                            <option onClick={() => handleFontFamilySelect("Arial")} title="Arial" value="Arial">Arial</option>
-                            <option onClick={() => handleFontFamilySelect("Calibri")} title="Calibri" value="Calibri">Calibri</option>
-                            <option onClick={() => handleFontFamilySelect("Times New Roman")} title="Times New Roman" value="Times New Roman">Times New Roman</option>
-                            <option onClick={() => handleFontFamilySelect("Sans Serif Collection")} title="Sans Serif Collection" value="Sans Serif Collection">Sans Serif Collection</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Calibri">Calibri</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Sans Serif Collection">Sans Serif Collection</option>
                         </Select>
                     </div>
 
@@ -129,25 +200,31 @@ export default function StylePanel(props) {
                                   handleSelect={handleBoldSelect}
                                   checked={appContext.selectedTextInputStyle.bold}
                                   hoverBackgroundColor="rgb(245, 245, 245)"
-                                  checkedBackgroundColor="rgb(200, 200, 200)"
+                                  checkedBackgroundColor="rgb(230, 230, 230)"
                                   disabled={disabled}
+                                  boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                  title="Fett"
                                   >
-                            <strong title="Fett">F</strong>
+                            <strong>F</strong>
                         </Checkbox>
                         <Checkbox id="Underline" 
                                   handleSelect={handleUnderlineSelect}
                                   checked={appContext.selectedTextInputStyle.underline}
                                   hoverBackgroundColor="rgb(245, 245, 245)"
-                                  checkedBackgroundColor="rgb(200, 200, 200)"
+                                  checkedBackgroundColor="rgb(230, 230, 230)"
                                   disabled={disabled}
-                                  ><u title="Unterstrichen">U</u></Checkbox>
+                                  boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                  title="Unterstrichen"
+                                  ><u>U</u></Checkbox>
                         <Checkbox id="Italic" 
                                   handleSelect={handleItalicSelect}
                                   checked={appContext.selectedTextInputStyle.italic}
                                   hoverBackgroundColor="rgb(245, 245, 245)"
-                                  checkedBackgroundColor="rgb(200, 200, 200)"
+                                  checkedBackgroundColor="rgb(230, 230, 230)"
                                   disabled={disabled}
-                                  ><i title="Kursiv">K</i></Checkbox>
+                                  boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                  title="Kursiv"
+                                  ><i>K</i></Checkbox>
 
                         <div className="flexRight" style={{width: "100%"}}>
                             <ColorPicker id="StylePanelColor" 
@@ -156,6 +233,7 @@ export default function StylePanel(props) {
                                         toggleStyle={toggleColorPickerStyle}
                                         hoverBackgroundColor="rgb(245, 245, 245)"
                                         disabled={disabled}
+                                        boxStyle={{borderColor: "rgb(200, 200, 200)"}}
                                         >
                                 <span className="dontMarkText">A</span>
                             </ColorPicker>
@@ -165,47 +243,67 @@ export default function StylePanel(props) {
 
                 <StylePanelSection buttonContainerClassName="flexLeft" hideRightBorder={false}>
                     <RadioButton id={"Left"} 
-                                 childrenClassName="flexCenter" 
+                                 childrenClassName="flexCenter dontMarkText" 
                                  name={"TextAlign"} 
                                  value="LEFT"
                                  radioGroupValue={appContext.selectedTextInputStyle.textAlign}
                                  handleSelect={handleTextAlignSelect}
                                  title="Linksbündig" 
                                  hoverBackgroundColor="rgb(245, 245, 245)"
-                                 checkedBackgroundColor="rgb(200, 200, 200)"
+                                 checkedBackgroundColor="rgb(230, 230, 230)"
+                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
                                  disabled={disabled}
-                                 >L</RadioButton>
+                                 >
+                        L
+                    </RadioButton>
                     <RadioButton id={"Center"} 
-                                 childrenClassName="flexCenter" 
+                                 childrenClassName="flexCenter dontMarkText" 
                                  name={"TextAlign"} 
                                  value="CENTER"
                                  radioGroupValue={appContext.selectedTextInputStyle.textAlign}
                                  handleSelect={handleTextAlignSelect}
                                  title="Zentriert" 
                                  hoverBackgroundColor="rgb(245, 245, 245)"
-                                 checkedBackgroundColor="rgb(200, 200, 200)"
+                                 checkedBackgroundColor="rgb(230, 230, 230)"
+                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
                                  disabled={disabled}
-                                 >M</RadioButton>
+                                 >
+                        M
+                    </RadioButton>
                     <RadioButton id={"Right"} 
-                                 childrenClassName="flexCenter" 
+                                 childrenClassName="flexCenter dontMarkText" 
                                  name={"TextAlign"} 
                                  value="RIGHT"
                                  radioGroupValue={appContext.selectedTextInputStyle.textAlign}
                                  handleSelect={handleTextAlignSelect}
                                  title="Rechtsbündig" 
                                  hoverBackgroundColor="rgb(245, 245, 245)"
-                                 checkedBackgroundColor="rgb(200, 200, 200)"
+                                 checkedBackgroundColor="rgb(230, 230, 230)"
+                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
                                  disabled={disabled}
-                                 >R</RadioButton>
+                                 >
+                        R
+                    </RadioButton>
                 </StylePanelSection>
 
-                <StylePanelSection hideRightBorder={true}>
-                    <button onClick={handleTab} disabled={disabled}>
-                        <p>Einrückung (Tab)</p>
-                        {/* TODO: replace this icon with actual tab icon */}
-                        <i className="fa-solid fa-arrows-turn-right fa-2xl"></i>
-                        <p></p>
-                    </button>
+                <StylePanelSection hideRightBorder={true}
+                                   buttonContainerClassName="flexCenter"
+                                   >
+                    <Button id={"Tab"} 
+                            hoverBackgroundColor="rgb(245, 245, 245)"
+                            clickBackgroundColor="rgb(200, 200, 200)"
+                            disabled={disabled} 
+                            handleClick={handleTab}
+                            title="Tab"
+                            boxStyle={{
+                                border: "1px solid rgb(200, 200, 200)",
+                                borderRadius: "3px",
+                                boxShadow: "none"
+                            }}
+                            >
+                        <div>Einrückung</div>
+                        <img src="tab_copy_2.png" alt="Tab key icon" title="Einrückung (Tab)" height={30} width={40}/>
+                    </Button>
                 </StylePanelSection>
             </div>
         </div>

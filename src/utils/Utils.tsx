@@ -293,49 +293,47 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 
 
 /**
- * Display ``` #PopUp``` and ``` .appOverlay```.
+ * Display ``` #PopupContainer``` and ``` .appOverlay```.
  * 
- * @param setPopUpContent setter of content inside ```#popUpContainer```
+ * @param setPopupContent setter of content inside ```#PopUpContainer```
  * @param duration fade in / out time in milliseconds
  */
-export function togglePopUp(setPopUpContent: (content: React.JSX.Element) => void, duration = 100): void {
+export function togglePopUp(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
 
-    $("#PopUp").fadeToggle(duration);
+    $("#PopupContainer").fadeToggle(duration);
     $(".appOverlay").fadeToggle(duration);
 
-    resetPopUp(setPopUpContent);
+    resetPopUp(setPopupContent);
 }
 
 
 /**
- * Hide ```#PopUp``` and ``` .appOverlay```.
+ * Hide ```#PopupContainer``` and ``` .appOverlay```.
  * 
- * @param setPopUpContent setter of content inside ```#popUpContainer```
+ * @param setPopupContent setter of content inside ```#PopUpContainer```
  * @param duration fade in / out time in milliseconds
  */
-export function hidePopUp(setPopUpContent: (content: React.JSX.Element) => void, duration = 100, ): void {
+export function hidePopUp(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
 
-    $("#PopUp").fadeOut(duration);
+    $("#PopupContainer").fadeOut(duration);
     $(".appOverlay").fadeOut(duration);
 
-    resetPopUp(setPopUpContent, duration);
+    resetPopUp(setPopupContent, duration);
 }
 
 
 /**
- * Set content from ```#popUpContainer``` to ```<></>``` and reset className.
+ * Set content from ```#PopUpContainer``` to ```<></>``` and reset className.
  * 
- * @param setPopUpContent setter of content inside ```#popUpContainer```
+ * @param setPopupContent setter of content inside ```#PopUpContainer```
  * @param duration milliseconds to wait until reset
  */
-export function resetPopUp(setPopUpContent: (content: React.JSX.Element) => void, duration = 100): void {
+export function resetPopUp(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
 
     setTimeout(() => {
-        if ($("#PopUp").css("display") === "none") {
-            const popUpContainer = $("#popUpContainer");
-            setPopUpContent(<></>);
-            popUpContainer.prop("className", "popUpContainer ")
-        }
+        if ($("#PopupContainer").css("display") === "none") 
+            setPopupContent(<></>);
+        
     }, duration + 100);
 }
 
@@ -474,3 +472,42 @@ export function getOppositeSide(side: Side): Side {
 
     return "none";
 }
+
+
+/**
+ * @param str string to replace a char in
+ * @param replacement string to use as replacement
+ * @param startIndex of chars to replace in ```str```
+ * @param endIndex of chars to replace in ```str``` (not included)
+ * @returns string with replacement at given position (does not alter ```str```)
+ */
+export function replaceAtIndex(str: string, replacement: string, startIndex: number, endIndex = startIndex + 1): string {
+
+    const charsBeforeIndex = str.substring(0, startIndex);
+    const charsBehindIndex = str.substring(endIndex);
+
+    return charsBeforeIndex + replacement + charsBehindIndex;
+}
+
+
+// TODO: does not work
+// /**
+//  * @param keyName of event key to trigger (i.e. 'A' or 'Backspace')
+//  * @param eventTargetId id of the html element to trigger the event on
+//  */
+// export function triggerKeyEvent(keyName: string, eventTargetId: string): void {
+
+//     if (isBlank(eventTargetId)) {
+//         logWarn("Failed to trigger key event for key code " + keyName + ". 'eventTargetId' is blank");
+//         return;
+//     }
+
+//     if (isBlank(keyName)) {
+//         logWarn("Failed to trigger key event for key code " + keyName + ". 'keyName' is blank");
+//         return;
+//     }
+
+//     const event = $.Event('keydown');
+//     event.key = keyName;
+//     $("#" + eventTargetId).trigger(event);
+// }

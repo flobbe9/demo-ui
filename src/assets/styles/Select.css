@@ -1,5 +1,5 @@
 .Select {
-    width: 100px; /** will be changed on render*/ 
+    position: relative;
 
     .selectBox {
         border: 1px solid grey;
@@ -7,6 +7,10 @@
         min-height: 33px;
         padding: 0 4px;
         transition: background-color 0.2s;
+        
+        &:hover {
+            cursor: pointer;
+        }
 
         .selectLabel {
             overflow: hidden;
@@ -26,7 +30,6 @@
         display: none;
         padding: 4px;
         position: absolute;
-        width: 100px; /** will be changed on render*/ 
         
         & option {
             border-radius: 3px;
@@ -35,6 +38,7 @@
 
             &:hover {
                 background-color: rgb(185, 185, 185);
+                cursor: pointer;
             }
         }
     }

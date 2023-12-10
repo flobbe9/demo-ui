@@ -3,9 +3,10 @@ import "../../assets/styles/Column.css";
 import { getDocumentId, log, togglePopUp } from "../../utils/Utils";
 import Paragraph from "./Paragraph";
 import { AppContext } from "../../App";
-import PopUpChooseColumnType from "../popUps/PopUpChoosColumnType";
+import PopUpChooseColumnType from "../popups/PopUpChoosColumnType";
 import {v4 as uuid} from "uuid";
 import ColumnTypeConfig from "../../utils/ColumnTypeConfig";
+import Popup from "../Popup";
 
 
 export default function Column(props: {
@@ -49,14 +50,18 @@ export default function Column(props: {
 
     function handlePopUpToggle(event): void {
 
-        // configure popup
-        appContext.setPopUpContent(<PopUpChooseColumnType handleSelect={handleSelectType}
-                                                          handleSubmit={handleTypeSubmit}
-                                                          columnType={columnType} />)
-        $(".popUpContainer").addClass("fullHeightContainer");
+        // define popup
+        appContext.setPopupContent(
+            <Popup width="full"
+                   height="full">
+                <PopUpChooseColumnType handleSelect={handleSelectType}
+                                        handleSubmit={handleTypeSubmit}
+                                        columnType={columnType} />
+            </Popup>
+        );
 
         // toggle
-        togglePopUp(appContext.setPopUpContent);
+        togglePopUp(appContext.setPopupContent);
     }
 
 

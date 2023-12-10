@@ -3,11 +3,10 @@ import "../../assets/styles/PopUpChooseColumnType.css";
 import RadioButton from "../helpers/RadioButton";
 import { AppContext } from "../../App";
 import { ColumnContext } from "../document/Column";
-import { hidePopUp, log } from "../../utils/Utils";
+import { getCSSValueAsNumber, hidePopUp, log } from "../../utils/Utils";
+import Select from "../helpers/Select";
 
 
-// TODO: escape key does not work
-// TODO: continue here, columnType changes with delay
 export default function PopUpChooseColumnType(props:{
     handleSelect,
     columnType: number,
@@ -26,6 +25,8 @@ export default function PopUpChooseColumnType(props:{
     
     const [orientationClassName, setOrientationClassName] = useState(appContext.orientation === "portrait" ? "whiteButtonPortrait" : "whiteButtonLandscape");
     const [columnType, setColumnType] = useState(props.columnType);
+
+    const [fontSizeHeading, setFontSizeHeading] = useState("14px");
 
 
     useEffect(() => {
@@ -46,8 +47,15 @@ export default function PopUpChooseColumnType(props:{
 
         if (event.key === "Enter") {
             props.handleSubmit();
-            hidePopUp(appContext.setPopUpContent);
+            hidePopUp(appContext.setPopupContent);
         }
+    }
+
+    
+    function handleFontSizeSelect(fontSize: number): void {
+
+        appContext.selectedTextInputStyle.fontSize = fontSize;
+        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
     }
 
     return (
@@ -57,236 +65,111 @@ export default function PopUpChooseColumnType(props:{
             </div>
 
             <div className="body">
-                <span className="flexCenter popUpHeading">Spalten Muster</span>
-                <br />
+                <h2 className="textCenter">Spalte</h2><br />
 
                 <div className="radioContainer textCenter">
-                    <RadioButton id={"Type1"} 
-                                    className="flexCenter"
-                                    labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textLeft dontMarkText"}
-                                    name={"ColumnType"} 
-                                    value={1}
-                                    radioGroupValue={columnType}
-                                    handleSelect={handleSelect}
-                                    checkedBackgroundColor="rgb(240, 240, 240)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    >
-                        Lorem ipsum <br />
-                        dolor sit <br />
-                        amet consectetur <br />
-                        adipisicing elit. <br />
-                        Maxime mollitia <br />
-                        ...
-                    </RadioButton>
-                    Linksbündig
-                </div>
+                    {/* <div>
+                        <h5>Textgröße</h5>
+                        <Select id={"HeadingFontSize"} 
+                                value={getCSSValueAsNumber(fontSizeHeading, 2).toString()}
+                                className="flexCenter mb-5"
+                                >
+                            <option value="10px" onClick={() => setFontSizeHeading("10px")}>10</option>
+                            <option value="11px" onClick={() => setFontSizeHeading("11px")}>11</option>
+                            <option value="12px" onClick={() => setFontSizeHeading("12px")}>12</option>
+                            <option value="14px" onClick={() => setFontSizeHeading("14px")}>14</option>
+                            <option value="16px" onClick={() => setFontSizeHeading("16px")}>16</option>
+                            <option value="18px" onClick={() => setFontSizeHeading("18px")}>18</option>
+                            <option value="20px" onClick={() => setFontSizeHeading("20px")}>20</option>
+                        </Select>
+                    </div> */}
 
-                <div className="radioContainer textCenter">
-                    <RadioButton id={"Type2"} 
-                                    className="flexCenter"
-                                    labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textCenter dontMarkText"}
-                                    name={"ColumnType"}
-                                    value={2}
-                                    radioGroupValue={columnType}
-                                    handleSelect={handleSelect}
-                                    checkedBackgroundColor="rgb(240, 240, 240)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                    <div>
+                        <h5>Überschrift</h5>
+                        <div className="flexLeft">
+                            <RadioButton id={"1Heading"} 
+                                            className="mb-3"
+                                            labelClassName={"whiteButton " + orientationClassName}
+                                            childrenClassName={"textLeft dontMarkText flexCenter"}
+                                            name={"NumHeadings"} 
+                                            value={1}
+                                            radioGroupValue={columnType}
+                                            handleSelect={handleSelect}
+                                            checkedBackgroundColor="rgb(240, 240, 240)"
+                                            hoverBackgroundColor="rgb(245, 245, 245)"
+                                            childrenStyle={{
+                                                alignItems: "start",
+                                                fontSize: fontSizeHeading
+                                            }}
+                                            >
+                                <div className="textCenter">
+                                    <p style={{fontSize: "20px"}}>Überschrift 1</p>
+                                    <p>...</p>
+                                    <p>...</p>
+                                </div>
+                            </RadioButton>
+                            <Select id={"HeadingFontSize"} 
+                                    label={getCSSValueAsNumber(fontSizeHeading, 2).toString()}
+                                    className="flexCenter mb-5"
                                     >
-                        Lorem ipsum <br />
-                        dolor sit <br />
-                        amet consectetur <br />
-                        adipisicing elit. <br />
-                        Maxime mollitia <br />
-                        ...
-                    </RadioButton>
-                    Zentriert
-                </div>
+                                <option value="10px" onClick={() => setFontSizeHeading("10px")}>10</option>
+                                <option value="11px" onClick={() => setFontSizeHeading("11px")}>11</option>
+                                <option value="12px" onClick={() => setFontSizeHeading("12px")}>12</option>
+                                <option value="14px" onClick={() => setFontSizeHeading("14px")}>14</option>
+                                <option value="16px" onClick={() => setFontSizeHeading("16px")}>16</option>
+                                <option value="18px" onClick={() => setFontSizeHeading("18px")}>18</option>
+                                <option value="20px" onClick={() => setFontSizeHeading("20px")}>20</option>
+                            </Select>
+                        </div>
 
-                <div className="radioContainer textCenter">
-                    <RadioButton id={"Type3"} 
-                                    className="flexCenter"
-                                    labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textRight dontMarkText"}
-                                    name={"ColumnType"}
-                                    value={3}
-                                    radioGroupValue={columnType}
-                                    handleSelect={handleSelect}
-                                    checkedBackgroundColor="rgb(240, 240, 240)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    >
-                        Lorem ipsum <br />
-                        dolor sit <br />
-                        amet consectetur <br />
-                        adipisicing elit. <br />
-                        Maxime mollitia <br />
-                        ...
-                    </RadioButton>
-                    Rechtsbündig
-                </div>
+                        <div className="flexLeft">
+                            <RadioButton id={"2Heading"} 
+                                            className="flexCenter mb-3"
+                                            labelClassName={"whiteButton " + orientationClassName}
+                                            childrenClassName={"textLeft dontMarkText flexCenter"}
+                                            name={"NumHeadings"} 
+                                            value={2}
+                                            radioGroupValue={columnType}
+                                            handleSelect={handleSelect}
+                                            checkedBackgroundColor="rgb(240, 240, 240)"
+                                            hoverBackgroundColor="rgb(245, 245, 245)"
+                                            childrenStyle={{
+                                                alignItems: "start",
+                                                fontSize: fontSizeHeading
+                                            }}
+                                            >
+                                <div className="textCenter">
+                                    <p style={{fontSize: "20px"}}>Überschrift 1</p>
+                                    <p style={{fontSize: "16px"}}>Überschrift 2</p>
+                                    <p>...</p>
+                                    <p>...</p>
+                                </div>
+                            </RadioButton>
+                        </div>
 
-                <div className="radioContainer textCenter">
-                    <RadioButton id={"Type4"} 
-                                    className="flexCenter"
-                                    labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textLeft dontMarkText"}
-                                    name={"ColumnType"}
-                                    value={4}
-                                    radioGroupValue={columnType}
-                                    handleSelect={handleSelect}
-                                    checkedBackgroundColor="rgb(240, 240, 240)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    >
-                        <div>Lorem ipsum</div>
-                            <div className="oneMockTab">dolor sit</div>
-                                <div className="twoMockTabs">amet consectetur</div><br />
-
-                        <div >adipisicing elit.</div>
-                            <div className="oneMockTab">Maxime mollitia</div>
-                                <div className="twoMockTabs">...</div>
-                    </RadioButton>
-                    Eingerückt, 3er Gruppen
-                </div>
-
-                <div className="radioContainer textCenter">
-                    <RadioButton id={"Type5"} 
-                                    className="flexCenter"
-                                    labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName={"textLeft dontMarkText"}
-                                    name={"ColumnType"}
-                                    value={5}
-                                    radioGroupValue={columnType}
-                                    handleSelect={handleSelect}
-                                    checkedBackgroundColor="rgb(240, 240, 240)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    >
-                        <div>Lorem ipsum</div>
-                            <div className="oneMockTab">dolor sit</div>
-                                <div className="twoMockTabs">amet consectetur</div>
-                                    <div className="threeMockTabs">adipisicing elit</div><br />
-
-                            <div>Maxime mollitia</div>
-                                <div className="oneMockTab">...</div>
-                    </RadioButton>
-                    Eingerückt, 4er Gruppen
-                </div>
-
-                <div className="radioContainer textCenter">
-                    <RadioButton id={"Type6"} 
-                                    className="flexCenter"
-                                    labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName="dontMarkText"
-                                    name={"ColumnType"}
-                                    value={6}
-                                    radioGroupValue={columnType}
-                                    handleSelect={handleSelect}
-                                    checkedBackgroundColor="rgb(240, 240, 240)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    >
-                        <table className="mockTable">
-                            <tbody>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellThreeCols">Lorem ipsum dolor</td>
-                                </tr>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellThreeCols">sit amet consectetur</td>
-                                </tr>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellThreeCols">adipisicing elit. Maxime</td>
-                                </tr>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellThreeCols">molestiae quas vel</td>
-                                </tr>
-                                <tr>
-                                    <td>...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </RadioButton>
-                    Tabelle 1 Spalte
-                </div>
-                
-                <div className="radioContainer textCenter">
-                    <RadioButton id={"Type7"} 
-                                    className="flexCenter"
-                                    labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName="dontMarkText"
-                                    name={"ColumnType"}
-                                    value={7}
-                                    radioGroupValue={columnType}
-                                    handleSelect={handleSelect}
-                                    checkedBackgroundColor="rgb(240, 240, 240)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    >
-                        <table className="mockTable">
-                            <tbody>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellTwoCols">Lorem ipsum</td>
-                                    <td className="mockCell mockCellTwoCols">dolor sit</td>
-                                </tr>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellTwoCols">amet consectetur</td>
-                                    <td className="mockCell mockCellTwoCols">adipisicing elit.</td>
-                                </tr>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellTwoCols">Maxime molestiae</td>
-                                    <td className="mockCell mockCellTwoCols">quas vel</td>
-                                </tr>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellTwoCols">sint commodi</td>
-                                    <td className="mockCell mockCellTwoCols">repudiandae consequuntur</td>
-                                </tr>
-                                <tr>
-                                    <td>...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </RadioButton>
-                    Tabelle 2 Spalten
-                </div>
-
-                <div className="radioContainer textCenter">
-                    <RadioButton id={"Type8"} 
-                                    className="flexCenter"
-                                    labelClassName={"whiteButton " + orientationClassName}
-                                    childrenClassName="dontMarkText"
-                                    name={"ColumnType"}
-                                    value={8}
-                                    radioGroupValue={columnType}
-                                    handleSelect={handleSelect}
-                                    checkedBackgroundColor="rgb(240, 240, 240)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    >
-                        <table className="mockTable">
-                            <tbody>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellThreeCols">Lorem</td>
-                                    <td className="mockCell mockCellThreeCols">ipsum  </td>
-                                    <td className="mockCell mockCellThreeCols">dolor</td>
-                                </tr>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellThreeCols">sit</td>
-                                    <td className="mockCell mockCellThreeCols">amet</td>
-                                    <td className="mockCell mockCellThreeCols">consectetur </td>
-                                </tr>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellThreeCols">adipisicing</td>
-                                    <td className="mockCell mockCellThreeCols">elit.</td>
-                                    <td className="mockCell mockCellThreeCols">Maxime</td>
-                                </tr>
-                                <tr className="mockRow">
-                                    <td className="mockCell mockCellThreeCols">molestiae </td>
-                                    <td className="mockCell mockCellThreeCols">quas</td>
-                                    <td className="mockCell mockCellThreeCols">vel</td>
-                                </tr>
-                                <tr>
-                                    <td>...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </RadioButton>
-                    Tabelle 3 Spalten
+                        <RadioButton id={"3Heading"} 
+                                        className="flexCenter mb-3"
+                                        labelClassName={"whiteButton " + orientationClassName}
+                                        childrenClassName={"textLeft dontMarkText flexCenter"}
+                                        name={"NumHeadings"} 
+                                        value={3}
+                                        radioGroupValue={columnType}
+                                        handleSelect={handleSelect}
+                                        checkedBackgroundColor="rgb(240, 240, 240)"
+                                        hoverBackgroundColor="rgb(245, 245, 245)"
+                                        childrenStyle={{
+                                            alignItems: "start",
+                                            fontSize: fontSizeHeading
+                                        }}
+                                        >
+                            <div className="textCenter">
+                                <p style={{fontSize: "20px"}}>Überschrift 1</p>
+                                <p style={{fontSize: "16px"}}>Überschrift 2</p>
+                                <p style={{fontSize: "12px"}}>Überschrift 3</p>
+                                <p>...</p>
+                            </div>
+                        </RadioButton>
+                    </div>
                 </div>
             </div>
 

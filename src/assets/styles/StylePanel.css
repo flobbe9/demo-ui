@@ -25,5 +25,10 @@
             margin-right: 5px;
             width: 30px;
         }
+
+        /* select menu icon */
+        .arrowDownIcon {
+            opacity: 0.5;
+        }
     }
 }

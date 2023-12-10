@@ -39,6 +39,8 @@ export default function RadioButton(props: {
     const [boxStyle, setBoxStyle] = useState<React.CSSProperties>();
 
     const boxRef = useRef(null);
+    const inputRef = useRef(null);
+    const childrenRef = useRef(null);
 
 
     // set prop styles
@@ -58,7 +60,27 @@ export default function RadioButton(props: {
     useEffect(() => {
         setDisabled(props.disabled);
 
+        handleDisabledChange(props.disabled!);
+
     }, [props.disabled]);
+
+
+    function handleDisabledChange(disabled: boolean): void {
+
+        if (disabled) {
+            $(boxRef.current!).css("cursor", "inherit");
+            $(childrenRef.current!).css("cursor", "inherit");
+            $(inputRef.current!).css("cursor", "inherit");
+            $(boxRef.current!).css("opacity", 0.5);
+
+        } else {
+            $(boxRef.current!).css("cursor", "pointer");
+            $(childrenRef.current!).css("cursor", "pointer");
+            $(inputRef.current!).css("cursor", "pointer");
+            $(boxRef.current!).css("opacity", 1);
+        }
+    }
+
 
 
     function handleSelect(event): void {
@@ -110,8 +132,11 @@ export default function RadioButton(props: {
                    style={checked ? {...boxStyle, ...SELECTED_STYLE} : boxStyle}
                    onClick={handleSelect}
                    onMouseOver={handleMouseOver}
-                   onMouseOut={handleMouseOut}>
+                   onMouseOut={handleMouseOut}
+                   title={props.title}
+                   >
                 <input id={"radioInput" + props.id} 
+                       ref={inputRef}
                        className="radioInput " 
                        type="radio" 
                        name={props.name} 
@@ -120,7 +145,7 @@ export default function RadioButton(props: {
                        readOnly
                        />
 
-                <div className={childrenClassName} style={props.childrenStyle}>{props.children}</div>
+                <div className={childrenClassName} ref={childrenRef} style={props.childrenStyle}>{props.children}</div>
             </label>
         </div>
     )

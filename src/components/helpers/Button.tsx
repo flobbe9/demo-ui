@@ -1,31 +1,36 @@
 import React, { useEffect, useRef, useState } from "react";
-import "../../assets/styles/LoadingButton.css";
+import "../../assets/styles/Button.css";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { isBooleanFalsy, log } from "../../utils/Utils";
 
 
-export default function LoadingButton(props: {
+/**
+ * 
+ * @param props test
+ * @returns 
+ */
+export default function Button(props: {
     id: string,
-    color: string,
-    backgroundColor: string,
-    hoverBackgroundColor: string,
-    clickBackgroundColor: string,
-    border?: string,
-    width?: string,
-    padding?: string,
+
+    hoverBackgroundColor?: string,
+    clickBackgroundColor?: string,
+    boxStyle?: React.CSSProperties,
+    childrenStyle?: React.CSSProperties,
+
     handlePromise?: () => Promise<any>,
     handleClick?,
     disabled?: boolean,
     rendered?: boolean,
     className?: string
     children?,
-    style?
+    title?: string
 }) {
 
-    const id = props.id ? "LoadingButton" + props.id : "LoadingButton";
+    const id = props.id ? "Button" + props.id : "Button";
 
     const [rendered, setRendered] = useState(isBooleanFalsy(props.rendered) ? true : props.rendered);
     const [disabled, setDisabled] = useState(isBooleanFalsy(props.disabled) ? false : props.disabled);
-    const [className, setClassName] = useState("LoadingButton");
+    const [className, setClassName] = useState("Button");
 
     const buttonRef = useRef(null);
     const buttonChildrenRef = useRef(null);
@@ -33,7 +38,7 @@ export default function LoadingButton(props: {
 
 
     useEffect(() => {
-        initStyles();
+        $(buttonOverlayRef.current!).css("backgroundColor", props.clickBackgroundColor || "transparent");
 
         initClassNames();
 
@@ -77,26 +82,6 @@ export default function LoadingButton(props: {
     }
 
     
-    function initStyles(): void {
-
-        const button = $(buttonRef.current!);
-        const children = $(buttonChildrenRef.current!);
-        const overlay = $(buttonOverlayRef.current!);
-
-        button.css("backgroundColor", props.backgroundColor);
-        button.css("border", props.border || "");
-
-        children.css("color", props.color);
-        children.css("width", props.width || "");
-        children.css("padding", props.padding || "");
-
-        overlay.css("color", props.color);
-        overlay.css("backgroundColor", props.clickBackgroundColor);
-        overlay.css("width", props.width || "");
-        overlay.css("padding", props.padding || "");
-    }
-
-
     /**
      * Wont do anything if button is disabled. Animates click and promise callback if present or if not present normal 
      * click callback (promise callback is prioritised). Will never call both.
@@ -114,7 +99,7 @@ export default function LoadingButton(props: {
         
         // case: normal button
         else if (props.handleClick)
-            props.handleClick();
+            props.handleClick(event);
     }
 
 
@@ -190,24 +175,26 @@ export default function LoadingButton(props: {
         if (disabled)
             return;
 
-        $(buttonRef).css("backgroundColor", props.hoverBackgroundColor)
+        $(buttonRef.current!).css("backgroundColor", props.hoverBackgroundColor || "white");
     }
 
 
     function handleMouseOut(event): void {
 
-        $(buttonRef).css("backgroundColor", props.backgroundColor)
+        $(buttonRef.current!).css("backgroundColor", props.boxStyle?.backgroundColor || "white")
     }
 
 
-    // TODO: doe not work properly on first click
     function animateOverlay(): void {
 
         const overlay = $(buttonOverlayRef.current!);
 
         overlay.hide();
-        overlay.animate({width: "toggle", opacity: 0.3}, 100, "swing", 
-            () => overlay.fadeOut(200, "swing"));
+
+        // animate in three steps
+        overlay.animate({opacity: 0.3}, 100, "swing",
+            () => overlay.animate({width: "toggle"}, 100, "swing", 
+                () => overlay.fadeOut(200, "swing")));
     }
 
     
@@ -232,20 +219,21 @@ export default function LoadingButton(props: {
     return (
         <button id={id} 
                 className={className}
+                style={props.boxStyle}
                 ref={buttonRef}
-                style={props.style}
                 disabled={disabled} 
                 onClick={handleClick}
                 onMouseOver={handleMouseOver}
-                onMouseOut={handleMouseOut}>
+                onMouseOut={handleMouseOut}
+                title={props.title}
+                >
             {/* hidden */}
-            <div className="loadingButtonOverlay loadingButtonChildren" ref={buttonOverlayRef}
-                 >
-                    {props.children}</div>
+            <div className="buttonOverlay buttonChildren" ref={buttonOverlayRef} style={props.childrenStyle}>
+                <div className="hiddenChildren">{props.children}</div>
+            </div>
 
             {/* visible */}
-            <div className="loadingButtonChildren" ref={buttonChildrenRef}
-                 >
+            <div className="buttonChildren" ref={buttonChildrenRef} style={props.childrenStyle}>
                 {props.children}
             </div>
         </button>
