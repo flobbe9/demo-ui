@@ -42,7 +42,7 @@
     }
 
     .paragraphContainer {
-        display: none;
+        /* display: none; */
     
         &.columnType-1 {
             .Paragraph {

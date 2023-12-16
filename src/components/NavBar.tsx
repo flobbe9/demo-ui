@@ -52,7 +52,7 @@ export default function NavBar(props) {
             <div className="navSectionLeft textLeft flexLeft">
                 <Link className="navLink" to="/">
                     <img className="navImage dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
-                    <span className="navHeading">DocumentBuilder</span>
+                    <span className="navHeading ml-0 ml-sm-3">DocumentBuilder</span>
                 </Link>
             </div>
 
@@ -94,6 +94,7 @@ export default function NavBar(props) {
                 </div>
 
                 {/* TODO: add functionality */}
+                {/* mobile menu */}
                 <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile">
                     <div id="navSectionRightMobileItem-1" 
                          className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 

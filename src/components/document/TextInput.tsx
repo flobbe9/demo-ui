@@ -1,17 +1,20 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex } from "../../utils/Utils";
+import { getCSSValueAsNumber, getDocumentId, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex } from "../../utils/Utils";
 import { AppContext } from "../../App";
-import { applyTextInputStyle, getTextInputStyle } from "../../abstract/Style";
+import Style, { StyleProp, applyTextInputStyle, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
 import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
+import { ColumnContext } from "./Column";
 
 
 // TODO: 
     // mark multiple lines, style all, tab all, break all (mousemove event)
     // strg a
     // strg c / strg v(?)
+
+// TODO: minimize use effect calls
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
@@ -28,70 +31,64 @@ export default function TextInput(props: {
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
+    const columnContext = useContext(ColumnContext);
 
 
     useEffect(() => {
         if (props.className)
             setClassName(className + " " + props.className);
 
-        applyTextInputStyle($(inputRef.current!), appContext.selectedTextInputStyle)
+        initTextInputStyle();
 
     }, []);
 
 
-    // on selected text input id change
     useEffect(() => {
-        // case: focuese this 
-        if (appContext.selectedTextInputId === id)
-            setClassName(className + " textInputFocus");
-    
-        // case: no focus
-        else
-            setClassName(className.replace("textInputFocus", ""));
+        if (appContext.selectedTextInputId !== id) 
+            appContext.unFocusTextInput(id);
+        
     }, [appContext.selectedTextInputId]);
 
 
-    // on selected text input style change
     useEffect(() => {
-        // case: focus
-        if (id === appContext.selectedTextInputId) 
-            applyTextInputStyle($("#" + id), appContext.selectedTextInputStyle);
+        if (id === appContext.selectedTextInputId)
+            appContext.focusTextInput(id, false);
 
     }, [appContext.selectedTextInputStyle]);
 
 
-    function handleFocus(event): void {
+    function initTextInputStyle(): void {
 
-        const thisTextInput = $("#" + id);
-        
-        thisTextInput.addClass("textInputFocus");
+        const style = appContext.selectedTextInputStyle;
+        const headingState = documentContext.getHeadingStateByTextInputId(id);
 
-        appContext.setSelectedTextInputId(id);
+        // set font size of heading or body
+        style.fontSize = getCSSValueAsNumber(headingState ? headingState[0] : documentContext.columnFontSize, 2);
 
-        appContext.setSelectedTextInputStyle(getTextInputStyle(thisTextInput));
+        applyTextInputStyle(id, style);
     }
 
 
     function handleKeyDown(event): void {
 
         // char that was just typed
-        let testChars = event.key === "Tab" ? getTabSpaces() : event.key;
+        let typedChar = event.key === "Tab" ? getTabSpaces() : event.key;
 
-        // case: text too long when including test chars
-        if (isTextLongerThanInput(appContext.selectedTextInputId, documentContext.getTextInputOverhead(), testChars) && 
+        // case: text too long when including typed char
+        if (isTextLongerThanInput(appContext.selectedTextInputId, documentContext.getTextInputOverhead(), typedChar) && 
             isKeyAlphaNumeric(event.keyCode) &&
-            !appContext.keyCombinationActive) {
+            appContext.pressedKey === "") {
 
             event.preventDefault();
             documentContext.handleTextLongerThanLine(id);
             return;
         }
 
-        if (event.key === "Tab")
-            documentContext.handleTab(event);
-
+        if (event.key === "Tab") 
+            handleTab(event);
+        
         if (event.key === "Enter")
-            focusNextTextInput(true);
+            focusNextTextInput(true, ["fontSize"]);
 
         if (event.key === "ArrowDown")
             focusNextTextInput(false);
@@ -104,16 +101,61 @@ export default function TextInput(props: {
     }
 
 
-    function focusNextTextInput(copyStyles: boolean): void {
+    function handleMouseDown(event): void {
+        
+        columnContext.updateColumnStates(id);
+
+        if (appContext.selectedTextInputId !== id) 
+            appContext.focusTextInput(id);
+    }
+
+
+    function handleTab(event): void {
+
+        if (appContext.pressedKey === "Shift") {
+            event.preventDefault();
+            handleBackspace(event);
+
+        } else 
+            documentContext.handleTab(event);
+    }
+
+
+    /**
+     * @param copyStyles if true, all styles of selected text input will be copied to next text input
+     * @param stylePropsToOverride style props to override the selected style props with if ```copyStyles```is true
+     */
+    function focusNextTextInput(copyStyles: boolean, stylePropsToOverride?: StyleProp[]): void {
 
         const nextTextInput = documentContext.getNextTextInput(id);
         if (nextTextInput) {
-            nextTextInput.trigger("focus");
+            // case: next text input blank
+            if (copyStyles && isBlank(nextTextInput.prop("value"))) {
+                // copy style
+                appContext.setSelectedTextInputStyle(getTextInputStyle($("#" + id)), mapTextInputStyleAsTouple(nextTextInput, stylePropsToOverride));
+                appContext.focusTextInput(nextTextInput.prop("id"), false);
 
-            // copy style if blank
-            if (copyStyles && isBlank(nextTextInput.prop("value")))  
-                appContext.setSelectedTextInputStyle(getTextInputStyle($("#" + id)));
+            // case: next text input not blank
+            } else 
+                appContext.focusTextInput(nextTextInput.prop("id"), true);
         }
+    }
+
+
+    /**
+     * @param textInput which the style is taken from
+     * @param styleProperties to map, if not present all style props of text input are used
+     * @returns an array of touples i.e. ```[["fontSize", "16px"], "color", "black"]
+     */
+    function mapTextInputStyleAsTouple(textInput: JQuery, styleProperties?: StyleProp[]): [StyleProp, string][] {
+
+        const textInputStyle = getTextInputStyle(textInput);
+
+        if (styleProperties) 
+            return styleProperties.map(styleProp => [styleProp, textInputStyle[styleProp.toString()]])
+        
+        return Object.entries(textInputStyle)
+                     .map(([key, value]) => [key as StyleProp, value]);
     }
 
 
@@ -126,7 +168,7 @@ export default function TextInput(props: {
             return;
 
         event.preventDefault();
-        prevTextInput.trigger("focus");
+        appContext.focusTextInput(prevTextInput.prop("id"), true);
 
         // move cursor to end of text
         const lastCharIndex = prevTextInput.prop("value").length;
@@ -134,10 +176,11 @@ export default function TextInput(props: {
     }
 
 
+    /**
+     * Remove tab unicodes
+     */
     function handleBackspace(event): void {
-
-        // dont prevent default here!!
-
+        
         const input = $(inputRef.current!);
         const value: string = input.prop("value");
         
@@ -146,10 +189,38 @@ export default function TextInput(props: {
 
         // case: remove tab
         if (charsInFrontOfCursor === TAB_UNICODE_ESCAPED) {
+            event.preventDefault();
+
             // remove one of two unicodes
-            let newValue = replaceAtIndex(value, "", cursorIndex - 2);
+            let newValue = replaceAtIndex(value, "", cursorIndex - 2, cursorIndex);
             input.prop("value", newValue);
         }
+    }
+
+
+    /**
+     * @returns true if no chars are found in any text input of selected column, else false (Tabs and spaces don't count as chars here)
+     */
+    function isSelectedColumnEmpty(): boolean {
+
+        const selectedColumnId = documentContext.getSelectedColumnId();
+        if (isBlank(selectedColumnId))
+            return true;
+
+        const columnTextInputs = $("#" + selectedColumnId + " .TextInput");
+
+        let isEmpty = true;
+        
+        Array.from(columnTextInputs).forEach(textInputElement => {
+            const textInput = textInputElement as HTMLInputElement;
+
+            if (!isBlank(textInput.value)) {
+                isEmpty = false;
+                return;
+            }
+        });
+
+        return isEmpty;
     }
 
 
@@ -160,8 +231,9 @@ export default function TextInput(props: {
                    className={className} 
                    ref={inputRef} 
                    type="text" 
-                   onFocus={handleFocus}
+                   onMouseDown={handleMouseDown}
                    onKeyDown={handleKeyDown}
+                   onKeyUp={() => documentContext.setIsSelectedColumnEmpty(isSelectedColumnEmpty())}
                    />
         </div>
     )

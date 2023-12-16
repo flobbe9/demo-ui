@@ -6,16 +6,22 @@
         border-radius: 3px;
         min-height: 33px;
         padding: 0 4px;
-        transition: background-color 0.2s;
+        position: relative;
+        transition: background-color 0.2s, opacity 0.2s;
         
         &:hover {
             cursor: pointer;
         }
 
+        &.disabled {
+            cursor: default;
+        }
+
         .selectLabel {
+            margin-right: 3px;
             overflow: hidden;
-            margin-right: 5px;
-            width: 90%;
+            white-space: nowrap;
+            width: 100%;
         }
 
         .arrowDownIcon {
@@ -30,6 +36,8 @@
         display: none;
         padding: 4px;
         position: absolute;
+        text-align: left;
+        z-index: 2;
         
         & option {
             border-radius: 3px;

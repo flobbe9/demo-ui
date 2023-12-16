@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import "../../assets/styles/Document.css";
 import Page from "./Page";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashBorder, getCSSValueAsNumber, getTabSpaces, getTextWidth, hidePopUp, insertString, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, logWarn, moveCursor } from "../../utils/Utils";
+import { flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, getTabSpaces, getTextWidth, hidePopUp, insertString, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
 import { AppContext } from "../../App";
 import StylePanel from "./StylePanel";
 import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
@@ -16,13 +16,38 @@ export default function Document(props) {
     const className = props.className ? "Document " + props.className : "Document";
 
     const appContext = useContext(AppContext);
+    
+    const [columnFontSize, setColumnFontSize] = useState(appContext.selectedTextInputStyle.fontSize + "px");
+    const [renderColumn, setRenderColumn] = useState(false);
+
+    // TODO: make this generic sothat adding headings is easier, ColumnTypeConfig?
+    const [columnHeading1FontSize, setColumnHeading1FontSize] = useState(appContext.selectedTextInputStyle.fontSize + "px");
+    const [columnHeading2FontSize, setColumnHeading2FontSize] = useState(appContext.selectedTextInputStyle.fontSize + "px");
+    const [columnHeading3FontSize, setColumnHeading3FontSize] = useState(appContext.selectedTextInputStyle.fontSize + "px");
+
+    const [isSelectedColumnEmpty, setIsSelectedColumnEmpty] = useState(true);
 
     const context = {
-        handleTab: handleTab,
-        handleTextLongerThanLine: handleTextLongerThanLine,
-        getTextInputOverhead: getTextInputOverhead,
-        getNextTextInput: getNextTextInput,
-        getPrevTextInput: getPrevTextInput
+        handleTab,
+        handleTextLongerThanLine,
+        getTextInputOverhead,
+        getNextTextInput,
+        getPrevTextInput,
+        getSelectedColumnId,
+        getColumnIdByTextInputId,
+        columnFontSize,
+        setColumnFontSize,
+        renderColumn,
+        setRenderColumn,
+        columnHeading1FontSize,
+        setColumnHeading1FontSize,
+        columnHeading2FontSize,
+        setColumnHeading2FontSize, 
+        columnHeading3FontSize,
+        setColumnHeading3FontSize,
+        getHeadingStateByTextInputId,
+        isSelectedColumnEmpty,
+        setIsSelectedColumnEmpty
     }
 
 
@@ -35,11 +60,6 @@ export default function Document(props) {
 
         // TODO: confirm url change
     }, []);
-
-
-    useEffect(() => {
-
-    }, [appContext.selectedTextInputId])
 
 
     /**
@@ -124,27 +144,98 @@ export default function Document(props) {
      */
     function getPrevTextInput(textInputId: string): JQuery | null {
 
-            // case: blank text input id
-            if (isBlank(textInputId))
-                return null;
-    
-            const textInput = $("#" + textInputId);
-    
-            // case: falsy text input
-            if (!textInput.length) {
-                logWarn("hasTextIinputNextLine() failed. 'textInput' not present");
-                return null;
-            }
-    
-            const allTextInputs = $(".TextInput");
-            const index = allTextInputs.index(textInput);
-    
-            // case: has no next text input
-            if (index === 0)
-                return null;
-    
-            return $(allTextInputs.get(index - 1)!);
+        // case: blank text input id
+        if (isBlank(textInputId))
+            return null;
+
+        const textInput = $("#" + textInputId);
+
+        // case: falsy text input
+        if (!textInput.length) {
+            logWarn("hasTextIinputNextLine() failed. 'textInput' not present");
+            return null;
         }
+
+        const allTextInputs = $(".TextInput");
+        const index = allTextInputs.index(textInput);
+
+        // case: has no next text input
+        if (index === 0)
+            return null;
+
+        return $(allTextInputs.get(index - 1)!);
+    }
+
+
+    function getSelectedColumnId(): string {
+
+        return getColumnIdByTextInputId(appContext.selectedTextInputId);
+    }
+
+
+    function getColumnIdByTextInputId(textInputId: string): string {
+
+        // case: no text input selected yet
+        if (isBlank(textInputId)) 
+            return "";
+
+        // find first three text inputs
+        const pageIndex = getPartFromDocumentId(textInputId, 1);
+        const columnIndex = getPartFromDocumentId(textInputId, 2);
+
+        return getDocumentId("Column", stringToNumber(pageIndex), "", stringToNumber(columnIndex));
+    }
+
+
+    function getHeadingStateByTextInputId(textInputId: string): [string, (fontSize: string) => void] | null {
+
+        const textInputIndex = getTextInputIndex(textInputId);
+
+        // case: textInputId falsy
+        if (textInputIndex === -1) {
+            logWarn("'getHeadingStateByTextInputId' failed.");
+            return null;
+        }
+
+        switch (textInputIndex) {
+            case 0: 
+                if (!isBlank(columnHeading1FontSize))
+                    return [columnHeading1FontSize, setColumnHeading1FontSize];
+                break;
+
+            case 1: 
+                if (!isBlank(columnHeading2FontSize))
+                    return [columnHeading2FontSize, setColumnHeading2FontSize];
+                break;
+
+            case 2: 
+                if (!isBlank(columnHeading3FontSize))
+                    return [columnHeading3FontSize, setColumnHeading3FontSize];
+                break;
+        }
+
+        return null;
+    }
+
+
+    function getTextInputIndex(textInputId: string): number {
+
+        if (isBlank(textInputId)) {
+            logWarn("'getTextInputIndex' failed. 'textInputId' cannot be blank");
+            return -1;
+        }
+
+        const textInput = $("#" + textInputId);
+        if (!textInput.length) {
+            logWarn("'getTextInputIndex' failed. 'textInput' length is 0");
+            return -1;
+        }
+
+        const columnId = getColumnIdByTextInputId(textInputId);
+        const columnTextInputs = $("#" + columnId + " .TextInput")
+
+        return Array.from(columnTextInputs).indexOf(textInput.get(0)!);
+    }
 
 
     return (
@@ -173,5 +264,24 @@ export const DocumentContext = createContext({
     handleTextLongerThanLine: (iputId: string) => {},
     getTextInputOverhead: (): number => {return 0},
     getNextTextInput: (inputId: string): JQuery | null => {return null},
-    getPrevTextInput: (inputId: string): JQuery | null => {return null}
+    getPrevTextInput: (inputId: string): JQuery | null => {return null},
+    getSelectedColumnId: (): string => {return ""},
+    getColumnIdByTextInputId: (textInputId: string): string => {return ""},
+
+    columnFontSize: "-1px",
+    setColumnFontSize: (columnFontSize: string) => {},
+    isSelectedColumnEmpty: true,
+    setIsSelectedColumnEmpty: (isEmpty: boolean) => {},
+
+    renderColumn: false,
+    setRenderColumn: (renderColumn: boolean) => {},
+
+    columnHeading1FontSize: "",
+    setColumnHeading1FontSize: (headingFontSize: string) => {},
+    columnHeading2FontSize: "",
+    setColumnHeading2FontSize: (headingFontSize: string) => {},
+    columnHeading3FontSize: "",
+    setColumnHeading3FontSize: (headingFontSize: string) => {},
+
+    getHeadingStateByTextInputId: (textInputId: string): [string, (fontSize: string) => void] | null => {return null}
 })

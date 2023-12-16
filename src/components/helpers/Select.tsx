@@ -3,12 +3,17 @@ import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../../utils/Utils";
 import { AppContext } from "../../App";
+import { DocumentContext } from "../document/Document";
+import { isMobileWidth } from "../../utils/GlobalVariables";
 
 
 export default function Select(props: {
     id: string, 
     label: string,
-    handleSelect,
+    /** the value prop of the selected <option /> tag will be passed as param */
+    handleSelect: (value: any) => void, 
+    /** [option value, option label] */
+    options: [string, string][],
     
     hoverBackgroundColor?: string,
     
@@ -18,7 +23,7 @@ export default function Select(props: {
     
     className?: string,
     disabled?: boolean,
-    children?,
+    children?: React.JSX.Element[],
     title?: string
 }) {
 
@@ -35,11 +40,13 @@ export default function Select(props: {
 
 
     useEffect(() => {
+        if (isMobileWidth())
+            $(boxRef.current!).css("width", "100%");
+    
         // place optionsBox exactly below selectBox and use same dimensions
         $(optionsBoxRef.current!).css("top", $(boxRef.current!).css("height"));
         $(optionsBoxRef.current!).css("width", $(boxRef.current!).css("width"));
 
-        initOptionTags();
     }, []);
 
 
@@ -48,35 +55,18 @@ export default function Select(props: {
 
         handleDisabledChange(props.disabled!);
 
-
     }, [props.disabled]);
-
-
-    /**
-     * Set initial properties for option tags inside selectOptionsBox.
-     */
-    function initOptionTags(): void {
-
-        // iterate option tags in options box
-        Array.from($(optionsBoxRef.current!).find("option"))
-            .forEach(optionTag => {
-                // add select handler
-                optionTag.addEventListener("click", () => props.handleSelect(optionTag.value));
-                // add title
-                optionTag.title = props.label;
-        });
-    }
 
 
     function handleDisabledChange(disabled: boolean): void {
 
         if (disabled) {
-            $(boxRef.current!).css("cursor", "inherit");
-            $(boxRef.current!).css("opacity", 0.5);
+            $(componentRef.current!).addClass("disabled");
+            $(boxRef.current!).addClass("disabled");
 
         } else {
-            $(boxRef.current!).css("cursor", "pointer");
-            $(boxRef.current!).css("opacity", 1);
+            $(componentRef.current!).removeClass("disabled");
+            $(boxRef.current!).removeClass("disabled");
         }
     }
 
@@ -84,8 +74,6 @@ export default function Select(props: {
     function handleClick(event): void {
 
         toggleOptionsBox();
-
-        appContext.focusSelectedTextInput();
     }
 
 
@@ -120,6 +108,8 @@ export default function Select(props: {
              style={props.componentStyle}
              title={props.title}
              >
+
+            {/* selected option box */}
             <div className="selectBox flexLeft dontHideSelect" 
                  ref={boxRef} 
                  style={props.boxStyle}
@@ -128,12 +118,28 @@ export default function Select(props: {
                  onMouseOut={handleMouseOut}
                  >
                 {/* <option> somehow solves the overflow problem xd */}
-                <option className="selectLabel dontMarkText dontHideSelect" title={props.label}>{props.label}</option>
+                {/* TODO: stop changing width, use overflow */}
+                <div className="selectLabel dontMarkText dontHideSelect" title={props.label}>{props.label}</div>
                 <img className="arrowDownIcon dontHideSelect dontMarkText" src="arrowDown.png" alt="arrow down" />
             </div>
 
-            <div id={"selectOptionsBox" + props.id} className="selectOptionsBox dontMarkText dontHideSelect" ref={optionsBoxRef} style={props.optionsBoxStyle}>
-                {props.children}
+            {/* all options box */}
+            <div id={"selectOptionsBox" + props.id} 
+                 className="selectOptionsBox dontMarkText dontHideSelect" 
+                 ref={optionsBoxRef} 
+                 style={props.optionsBoxStyle}
+                 >
+                {// map options 
+                    Array.from(props.options).map(([value, label], i) => {
+                        return <option  key={i}
+                                        value={value}
+                                        title={label}
+                                        onClick={() => props.handleSelect(value)}
+                                        >
+                                    {label}
+                                </option>
+                    })
+                }
             </div>
         </div>
     )

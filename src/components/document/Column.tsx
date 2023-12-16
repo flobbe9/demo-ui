@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import "../../assets/styles/Column.css";
-import { getDocumentId, log, togglePopUp } from "../../utils/Utils";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { getCSSValueAsNumber, getDocumentId, isBlank, log, togglePopUp } from "../../utils/Utils";
 import Paragraph from "./Paragraph";
 import { AppContext } from "../../App";
 import PopUpChooseColumnType from "../popups/PopUpChoosColumnType";
 import {v4 as uuid} from "uuid";
-import ColumnTypeConfig from "../../utils/ColumnTypeConfig";
 import Popup from "../Popup";
+import { DocumentContext } from "./Document";
+import { NUM_HEADINGS_PER_COLUMN, getNumLinesPerColumn } from "../../utils/GlobalVariables";
+import { Orientation } from "../../enums/Orientation";
 
 
 export default function Column(props: {
@@ -20,25 +23,45 @@ export default function Column(props: {
     const className = props.className ? "Column " + props.className : "Column";
 
     const appContext = useContext(AppContext);
+    const documentContext = useContext(DocumentContext);
     
     const [columnType, setColumnType] = useState(1);
-    const [columnTypeConfig, setColumnTypeConfig] = useState(new ColumnTypeConfig(1, false));
+    const [numLinesPerParagraph, setNumLinesPerParagraph] = useState(1);
     const [paragraphs, setParagraphs] = useState([<div key={uuid()}></div>]);
     
     const context = {
-        columnType: columnType,
-        setColumnType: setColumnType,
-        columnTypeConfig: columnTypeConfig,
-        setColumnTypeConfig: setColumnTypeConfig
+        columnType,
+        setColumnType,
+        updateColumnStates,
+        numLinesPerParagraph,
+        setNumLinesPerParagraph
     }
 
 
-    function initParagraphs(): React.JSX.Element[] {
+    useEffect(() => {
+        setParagraphs(initParagraphs(appContext.selectedTextInputStyle.fontSize));
 
-        // TODO: figure out fontSize
+    }, []);
+
+
+    useEffect(() => {
+        // case: rerender this column for font size changes
+        if (documentContext.renderColumn && documentContext.getSelectedColumnId() === id) {
+            setParagraphs(initParagraphs(documentContext.columnFontSize));
+            documentContext.setRenderColumn(false);
+        }
+
+    }, [documentContext.columnFontSize]);
+
+
+    function initParagraphs(fontSize: string | number): React.JSX.Element[] {
+
         const paragraphs: React.JSX.Element[] = [];
+        const numParagraphs =  getNumParagraphs(appContext.orientation, 
+                                                getCSSValueAsNumber(fontSize, 2),
+                                                getHeadingFontSizes());
 
-        for (let i = 0; i < columnTypeConfig.getNumParagraphs(appContext.orientation, 14); i++) 
+        for (let i = 0; i < numParagraphs; i++) 
             paragraphs.push(<Paragraph key={uuid()}
                                         pageIndex={props.pageIndex}
                                         columnIndex={props.columnIndex} 
@@ -48,12 +71,50 @@ export default function Column(props: {
     }
 
 
+    /**
+     * @returns array of font sizes of headings of this column (ascending from first heading to last). 
+     *          Uses hardcoded values from ```<Document />```
+     */
+    function getHeadingFontSizes(): number[] {
+
+        return [
+            getCSSValueAsNumber(documentContext.columnHeading1FontSize, 2),
+            getCSSValueAsNumber(documentContext.columnHeading2FontSize, 2),
+            getCSSValueAsNumber(documentContext.columnHeading3FontSize, 2)
+        ];
+    }
+
+
+    /**
+     * Update column font size and render method state in ```<Document />```.
+     */
+    function updateColumnStates(newTextInputId: string): void {
+
+        const selectedColumnId = documentContext.getSelectedColumnId();
+        const newSelectedColumnId = documentContext.getColumnIdByTextInputId(newTextInputId);
+
+        if (!isBlank(selectedColumnId) && !isBlank(newSelectedColumnId)) {
+            const columnTextInputs = $("#" + id + " .paragraphContainer .Paragraph .TextInput");
+
+            // case: column contains non-heading inputs
+            if (columnTextInputs.length >= NUM_HEADINGS_PER_COLUMN) {
+                const columnFontSize = columnTextInputs.get(3)!.style.fontSize;
+
+                // case: column fontSize has changed
+                if (documentContext.columnFontSize !== columnFontSize) {
+                    documentContext.setRenderColumn(false);
+                    documentContext.setColumnFontSize(columnFontSize);
+                }
+            }
+        }
+    }
+
+
     function handlePopUpToggle(event): void {
 
         // define popup
         appContext.setPopupContent(
-            <Popup width="full"
-                   height="full">
+            <Popup width="full" height="full">
                 <PopUpChooseColumnType handleSelect={handleSelectType}
                                         handleSubmit={handleTypeSubmit}
                                         columnType={columnType} />
@@ -90,20 +151,67 @@ export default function Column(props: {
         $("#" + id + " .paragraphContainer").show();
 
         shutDownColumnAnimations();
-        setParagraphs(initParagraphs());
+        setParagraphs(initParagraphs(appContext.selectedTextInputStyle.fontSize));
+    }
+
+        
+    /**
+     * Calculate the number of paragraphs that can fit inside this column, considering the fontSize of the column,
+     * the {@link Orientation} of the page and the numLinesPerParagraph.
+     * 
+     * @param orientation of the page
+     * @param columnFontSize of all lines of this column except headings
+     * @returns number of paragraphs that fit inside this column
+     * @see getNumLinesPerColumn
+     */
+    function getNumParagraphs(orientation: Orientation, columnFontSize: number, headingFontSizes: (string | number)[]): number {
+
+        const numLinesPerColumn = calculateNumLinesPerColumn(orientation, columnFontSize, headingFontSizes);
+        const numParagraphs = numLinesPerColumn / numLinesPerParagraph;
+
+        return Math.floor(numParagraphs);
+    }
+
+
+    /**
+     * @param orientation of the page
+     * @param columnFontSize font size of all lines in column except headings
+     * @param headingFontSizes array of font sizes of headings (ascending from first heading to last)
+     * @returns number of lines that can fit inside 1 column including headings
+     */
+    function calculateNumLinesPerColumn(orientation: Orientation, columnFontSize: number, headingFontSizes: (string | number)[]): number {
+
+        // add up heading font sizes
+        let sumHeadingFontSizes = 0;
+        headingFontSizes.forEach(fontSize => sumHeadingFontSizes += getCSSValueAsNumber(fontSize, 2));
+        sumHeadingFontSizes = sumHeadingFontSizes / headingFontSizes.length;
+        
+        // decide whether to add or subtract lines
+        const subtractLines: boolean = sumHeadingFontSizes > columnFontSize;  
+
+        // get num lines to add or subtract
+        let numLinesToChange = 0;
+        if (subtractLines) 
+            numLinesToChange = Math.round((sumHeadingFontSizes % columnFontSize) / (columnFontSize / 2));
+
+        else
+            numLinesToChange = Math.round((columnFontSize % sumHeadingFontSizes) / (columnFontSize / 2));
+        
+        return subtractLines ? getNumLinesPerColumn(orientation, columnFontSize) - numLinesToChange :
+                               getNumLinesPerColumn(orientation, columnFontSize) + numLinesToChange;
     }
 
 
     return (
-        <div id={id} className={className + " hover"}>
+        <div id={id} className={className}>
             <ColumnContext.Provider value={context}>
-                <div className="columnOverlay flexCenter" onClick={handlePopUpToggle} title="Spalten Typ auswählen">
+                {/* <div className="columnOverlay flexCenter" onClick={handlePopUpToggle} title="Spalten Typ auswählen">
                     <div className="plusIconBackgroundContainer flexCenter">
                         <div className="plusIconBackground flexCenter">
                             <img className="plusIcon dontMarkText" src="plusIcon.png" alt="plus icon" />
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 <div className={"paragraphContainer columnType-" + columnType}>
                     {paragraphs}
@@ -117,6 +225,7 @@ export default function Column(props: {
 export const ColumnContext = createContext({
     columnType: 1,
     setColumnType: (columnType: number) => {},
-    columnTypeConfig: new ColumnTypeConfig(1, false),
-    setColumnTypeConfig: (columnTypeConfig: ColumnTypeConfig) => {}
+    updateColumnStates: (newTextInputId: string) => {},
+    numLinesPerParagraph: 1,
+    setNumLinesPerParagraph: (numLines: number) => {}
 });

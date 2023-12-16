@@ -1,8 +1,8 @@
 .Checkbox {
-
+    
     .checkboxLabel {
         border: 1px solid grey;
-        transition: background-color 0.2s, border 0.2s;
+        transition: background-color 0.2s, border 0.2s, opacity 0.2s;
 
         &:hover {
             cursor: pointer;

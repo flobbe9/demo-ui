@@ -242,7 +242,10 @@ export function insertString(targetString: string, insertionString: string, inse
  * @param unitDigits number of digigts to cut of cssValue string
  * @returns substring of cssValue parsed to number or NaN if parsing failed
  */
-export function getCSSValueAsNumber(cssValue: string, unitDigits: number): number {
+export function getCSSValueAsNumber(cssValue: string | number, unitDigits: number): number {
+
+    if (typeof cssValue === "number")
+        return cssValue;
 
     const length = cssValue.length;
     if (unitDigits >= length)

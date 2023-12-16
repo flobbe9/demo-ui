@@ -20,10 +20,9 @@ export type Side = "top" | "right" | "left" | "bottom" | "none";
 
 export const DEFAULT_BASIC_PARAGRAPH_TEXT = " ";
 
-export const TAB_SYMBOL = "//TAB";
-
 export const NO_TEXT_INPUT_SELECTED = "Wähle zuerst ein Texteingabefeld aus.";
 
+export const NUM_HEADINGS_PER_COLUMN = 3;
 
 /** 
  * Width of one text input relative to the wirndwo width (at the moment). 
@@ -124,7 +123,7 @@ const WsPerLinePortraitFontSize14 = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"; // 1
 
 export const MAX_NUM_TABS = 12;
 
-export const SPACES_PER_TAB = 8;
+export const SPACES_PER_TAB = 16;
 
 export const TAB_UNICODE = "0x09";
 export const SINGLE_TAB_UNICODE_ESCAPED = "\x09";

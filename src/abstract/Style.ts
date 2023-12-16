@@ -1,6 +1,6 @@
 import { BreakType } from "../enums/Breaktype";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, log, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
+import { getCSSValueAsNumber, isBlank, log, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
 
 
 /**
@@ -24,7 +24,7 @@ export default interface Style {
 /**
  * Defines all properties one {@link Style} object can have (as defined in backend)
  */
-export type StyleProp = "fontSize" | "fontFamily" | "color" | "bold" | "italic" | "underline" | "textAlign" | "breakType";
+export type StyleProp = keyof Style;
 
 
 /**
@@ -53,45 +53,32 @@ export function getTextInputStyle(textInput: JQuery<any>): Style {
 
 
 /**
- * @param textInput to apply style to
+ * @param textInputId id of text input to apply style to
  * @param style to apply
- * @param excludedStyleProps array of style props to not apply
  * @see Style
  * @see StyleProp
  */
-export function applyTextInputStyle(textInput: JQuery, style: Style, excludedStyleProps: StyleProp[] = []): void {
+export function applyTextInputStyle(textInputId: string, style: Style): void {
 
     // case: textInput falsy
-    if (!textInput.length) {
+    if (isBlank(textInputId)) {
         logError("Failed to apply style to text input. 'textInput' is falsy");
         return;
     }
 
+    const textInput = $("#" + textInputId);
+
     // prepend "#" if hex color
     const color = isRGB(style.color) ? style.color : prependHashTag(style.color);
 
-    if (!excludedStyleProps.includes("fontSize"))
-        textInput.css("fontSize", style.fontSize);
-
-    if (!excludedStyleProps.includes("fontFamily"))
-        textInput.css("fontFamily", style.fontFamily);
-
-    if (!excludedStyleProps.includes("color"))
-        textInput.css("color", color);
-
-    if (!excludedStyleProps.includes("bold"))
-        textInput.css("fontWeight", style.bold ? "bold" : "normal");
-
-    if (!excludedStyleProps.includes("italic"))
-        textInput.css("fontStyle", style.italic ? "italic" : "normal");
-
-    if (!excludedStyleProps.includes("underline"))
-        textInput.css("textDecoration", style.underline ? "underline" : "none");
-
-    if (!excludedStyleProps.includes("textAlign"))
-        textInput.css("textAlign", style.textAlign);
+    textInput.css("fontSize", appendUnit(style.fontSize, "px"));
+    textInput.css("fontFamily", style.fontFamily);
+    textInput.css("color", color);
+    textInput.css("fontWeight", style.bold ? "bold" : "normal");
+    textInput.css("fontStyle", style.italic ? "italic" : "normal");
+    textInput.css("textDecoration", style.underline ? "underline" : "none");
+    textInput.css("textAlign", style.textAlign);
 }
-
 
 export function getDefaultStyle(): Style {
 
@@ -132,6 +119,14 @@ function prependHashTag(str: string): string {
     const firstChar = str.charAt(0);
 
     return firstChar === "#" ? str : "#" + str;
+}
+
+
+function appendUnit(str: string | number, unit: string): string {
+
+    str = str.toString();
+
+    return str.includes(unit) ? str : str + unit;
 }
 
 

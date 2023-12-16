@@ -68,19 +68,18 @@ export default function RadioButton(props: {
     function handleDisabledChange(disabled: boolean): void {
 
         if (disabled) {
-            $(boxRef.current!).css("cursor", "inherit");
-            $(childrenRef.current!).css("cursor", "inherit");
-            $(inputRef.current!).css("cursor", "inherit");
-            $(boxRef.current!).css("opacity", 0.5);
+            $(boxRef.current!).addClass("disabled");
+            $(childrenRef.current!).addClass("disabled");
+            $(inputRef.current!).addClass("disabled");
+            $(boxRef.current!).addClass("disabled");
 
         } else {
-            $(boxRef.current!).css("cursor", "pointer");
-            $(childrenRef.current!).css("cursor", "pointer");
-            $(inputRef.current!).css("cursor", "pointer");
-            $(boxRef.current!).css("opacity", 1);
+            $(boxRef.current!).removeClass("disabled");
+            $(childrenRef.current!).removeClass("disabled");
+            $(inputRef.current!).removeClass("disabled");
+            $(boxRef.current!).removeClass("disabled");
         }
     }
-
 
 
     function handleSelect(event): void {

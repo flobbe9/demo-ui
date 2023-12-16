@@ -28,6 +28,7 @@ export default function ColorPicker(props: {
 
     const componentRef = useRef(null);
     const boxRef = useRef(null);
+    const inputRef = useRef(null);
     const childrenRef = useRef(null);
 
 
@@ -40,7 +41,26 @@ export default function ColorPicker(props: {
     useEffect(() => {
         setDisabled(props.disabled);
 
+        handleDisabledChange(props.disabled!);
+
     }, [props.disabled])
+
+
+    function handleDisabledChange(disabled: boolean): void {
+
+        if (disabled) {
+            $(boxRef.current!).addClass("disabled");
+            $(childrenRef.current!).addClass("disabled");
+            $(inputRef.current!).addClass("disabled");
+            $(boxRef.current!).addClass("disabled");
+
+        } else {
+            $(boxRef.current!).removeClass("disabled");
+            $(childrenRef.current!).removeClass("disabled");
+            $(inputRef.current!).removeClass("disabled");
+            $(boxRef.current!).removeClass("disabled");
+        }
+    }
 
 
     function handleChange(event): void {
@@ -106,6 +126,7 @@ export default function ColorPicker(props: {
                 
                 <input id={"colorInput" + props.id} 
                        className="colorInput" 
+                       ref={inputRef}
                        type="color"
                        list="selfPalette" 
                        value={prependHashTag(props.color)}

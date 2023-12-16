@@ -25,10 +25,6 @@
                 opacity: 0.5;
             }
         }
-
-        .navHeading {
-            margin-left: 10px;
-        }
     }
 
     .navSectionCenter {
@@ -42,7 +38,6 @@
         margin-right: var(--marginNavBarInside);
         width: 33%;
 
-        
         .navButton {
             margin-left: 10px;
             
