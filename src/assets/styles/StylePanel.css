@@ -3,15 +3,16 @@
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
     box-shadow: 0 7px 8px -2px rgb(155, 155, 155);
-    height: 120px;
+    min-height: 120px;
     padding-bottom: 10px;
     position: sticky;
     top: 0;
-    
 
     .sectionContainer {
         height: 100%;
         transition: opacity 0.2s;
+        max-width: 100vi;
+        min-width: 80vi;
 
         /* ColorPicker */
         .colorChildren {
@@ -29,6 +30,10 @@
         /* select menu icon */
         .arrowDownIcon {
             opacity: 0.5;
+        }
+
+        .warnIcon {
+
         }
     }
 }

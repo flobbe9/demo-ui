@@ -51,12 +51,6 @@ export default function PopUpChooseColumnType(props:{
         }
     }
 
-    
-    function handleFontSizeSelect(fontSize: number): void {
-
-        appContext.selectedTextInputStyle.fontSize = fontSize;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
-    }
 
     return (
         <div id={id} className={className} style={props.style}>
@@ -108,7 +102,7 @@ export default function PopUpChooseColumnType(props:{
                                     <p>...</p>
                                 </div>
                             </RadioButton>
-                            <Select id={"HeadingFontSize"} 
+                            {/* <Select id={"HeadingFontSize"} 
                                     label={getCSSValueAsNumber(fontSizeHeading, 2).toString()}
                                     className="flexCenter mb-5"
                                     >
@@ -119,7 +113,7 @@ export default function PopUpChooseColumnType(props:{
                                 <option value="16px" onClick={() => setFontSizeHeading("16px")}>16</option>
                                 <option value="18px" onClick={() => setFontSizeHeading("18px")}>18</option>
                                 <option value="20px" onClick={() => setFontSizeHeading("20px")}>20</option>
-                            </Select>
+                            </Select> */}
                         </div>
 
                         <div className="flexLeft">

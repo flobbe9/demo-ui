@@ -7,7 +7,9 @@ export default function StylePanelSection(props: {
     id?: string,
     className?: string,
     buttonContainerClassName?: string,
-    children?
+    componentStyle?: React.CSSProperties
+    buttonContainerStyle?: React.CSSProperties,
+    children?,
 }) {
 
     const id = props.id ? "StylePanelSection" + props.id : "StylePanelSection";
@@ -17,8 +19,8 @@ export default function StylePanelSection(props: {
 
 
     return (
-        <div id={id} className={className}>
-            <div className={buttonContainerClassName}>
+        <div id={id} className={className} style={props.componentStyle}>
+            <div className={buttonContainerClassName} style={props.buttonContainerStyle}>
                 {props.children}
             </div>
         </div>

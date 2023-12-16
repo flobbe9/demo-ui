@@ -27,10 +27,10 @@ export default function Button(props: {
 }) {
 
     const id = props.id ? "Button" + props.id : "Button";
+    const className = "Button " + props.className || "";
 
     const [rendered, setRendered] = useState(isBooleanFalsy(props.rendered) ? true : props.rendered);
     const [disabled, setDisabled] = useState(isBooleanFalsy(props.disabled) ? false : props.disabled);
-    const [className, setClassName] = useState("Button");
 
     const buttonRef = useRef(null);
     const buttonChildrenRef = useRef(null);
@@ -39,8 +39,6 @@ export default function Button(props: {
 
     useEffect(() => {
         $(buttonOverlayRef.current!).css("backgroundColor", props.clickBackgroundColor || "transparent");
-
-        initClassNames();
 
     }, [])
 
@@ -52,34 +50,9 @@ export default function Button(props: {
 
 
     useEffect(() => {
-        updateRendered(rendered);
-
-    }, [rendered]);
-
-
-    useEffect(() => {
         updateDisabled(props.disabled);
 
     }, [props.disabled]);
-
-
-    useEffect(() => {
-        updateDisabled(disabled);
-
-    }, [disabled]);
-
-
-    function initClassNames(): void {
-
-        if (props.className)
-            appendClassName(props.className);
-
-        if (!rendered)
-            appendClassName("hidden");
-
-        if (disabled)
-            appendClassName("disabledButton");
-    }
 
     
     /**
@@ -153,8 +126,6 @@ export default function Button(props: {
             return;
 
         setDisabled(disabled);
-
-        toggleClassName("disabledButton", disabled!);
     }
 
 
@@ -165,8 +136,6 @@ export default function Button(props: {
             return;
 
         setRendered(rendered);
-
-        toggleClassName("hidden", rendered!);
     }
 
 
@@ -198,27 +167,9 @@ export default function Button(props: {
     }
 
     
-    function appendClassName(clazzName: string): void {
-
-        setClassName(className + " " + clazzName);
-    }
-
-
-    function removeClassName(clazzName: string): void {
-
-        setClassName(className.replace(clazzName, ""));
-    }
-
-    
-    function toggleClassName(clazzName: string, isAdd: boolean): void {
-
-        isAdd ? appendClassName(clazzName) : removeClassName(clazzName);
-    }
-    
-
     return (
         <button id={id} 
-                className={className}
+                className={className + (disabled ? " disabledButton" : "") + (rendered ? "" : "hidden")}
                 style={props.boxStyle}
                 ref={buttonRef}
                 disabled={disabled} 

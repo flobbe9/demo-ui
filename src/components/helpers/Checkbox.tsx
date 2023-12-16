@@ -69,20 +69,16 @@ export default function Checkbox(props: {
     function handleDisabledChange(disabled: boolean): void {
 
         if (disabled) {
-            $(labelRef.current!).css("cursor", "inherit");
-            $(childrenRef.current!).css("cursor", "inherit");
-            $(inputRef.current!).css("cursor", "inherit");
-            $(labelRef.current!).css("opacity", 0.5);
+            $(labelRef.current!).addClass("disabled");
+            $(childrenRef.current!).addClass("disabled");
+            $(inputRef.current!).addClass("disabled");
 
         } else {
-            $(labelRef.current!).css("cursor", "pointer");
-            $(childrenRef.current!).css("cursor", "pointer");
-            $(inputRef.current!).css("cursor", "pointer");
-            $(labelRef.current!).css("opacity", 1);
+            $(labelRef.current!).removeClass("disabled");
+            $(childrenRef.current!).removeClass("disabled");
+            $(inputRef.current!).removeClass("disabled");
         }
     }
-
-
 
 
     function handleSelect(event): void {
