@@ -20,8 +20,9 @@ export default function TextInput(props: {
     columnIndex: number,
     paragraphIndex: number,
     textInputIndex: number,
+    key?: string | number
     id?: string | number,
-    className?: string
+    className?: string,
 }) {
 
     const id = getDocumentId("TextInput", props.pageIndex, props.id, props.columnIndex, props.paragraphIndex, props.textInputIndex);
@@ -203,7 +204,7 @@ export default function TextInput(props: {
      */
     function isSelectedColumnEmpty(): boolean {
 
-        const selectedColumnId = documentContext.getSelectedColumnId();
+        const selectedColumnId = appContext.getSelectedColumnId();
         if (isBlank(selectedColumnId))
             return true;
 

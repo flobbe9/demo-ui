@@ -33,8 +33,6 @@ export default function Document(props) {
         getTextInputOverhead,
         getNextTextInput,
         getPrevTextInput,
-        getSelectedColumnId,
-        getColumnIdByTextInputId,
         columnFontSize,
         setColumnFontSize,
         renderColumn,
@@ -167,26 +165,6 @@ export default function Document(props) {
     }
 
 
-    function getSelectedColumnId(): string {
-
-        return getColumnIdByTextInputId(appContext.selectedTextInputId);
-    }
-
-
-    function getColumnIdByTextInputId(textInputId: string): string {
-
-        // case: no text input selected yet
-        if (isBlank(textInputId)) 
-            return "";
-
-        // find first three text inputs
-        const pageIndex = getPartFromDocumentId(textInputId, 1);
-        const columnIndex = getPartFromDocumentId(textInputId, 2);
-
-        return getDocumentId("Column", stringToNumber(pageIndex), "", stringToNumber(columnIndex));
-    }
-
-
     function getHeadingStateByTextInputId(textInputId: string): [string, (fontSize: string) => void] | null {
 
         const textInputIndex = getTextInputIndex(textInputId);
@@ -231,8 +209,8 @@ export default function Document(props) {
             return -1;
         }
 
-        const columnId = getColumnIdByTextInputId(textInputId);
-        const columnTextInputs = $("#" + columnId + " .TextInput")
+        const columnId = appContext.getColumnIdByTextInputId(textInputId);
+        const columnTextInputs = $("#" + columnId + " .TextInput");
 
         return Array.from(columnTextInputs).indexOf(textInput.get(0)!);
     }
@@ -265,8 +243,6 @@ export const DocumentContext = createContext({
     getTextInputOverhead: (): number => {return 0},
     getNextTextInput: (inputId: string): JQuery | null => {return null},
     getPrevTextInput: (inputId: string): JQuery | null => {return null},
-    getSelectedColumnId: (): string => {return ""},
-    getColumnIdByTextInputId: (textInputId: string): string => {return ""},
 
     columnFontSize: "-1px",
     setColumnFontSize: (columnFontSize: string) => {},

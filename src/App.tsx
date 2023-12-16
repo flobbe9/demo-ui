@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Document from "./components/document/Document";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import Menu from "./components/Menu";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hidePopUp, isBlank, log, togglePopUp } from "./utils/Utils";
+import { getDocumentId, getPartFromDocumentId, hidePopUp, isBlank, log, stringToNumber } from "./utils/Utils";
 import { Orientation } from "./enums/Orientation";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "./abstract/Style";
 import PopupContainer from "./components/PopupContainer";
@@ -38,6 +38,8 @@ export default function App() {
         setOrientation: setOrientation,
         numColumns: numColumns,
         setNumColumns: setNumColumns,
+        getSelectedColumnId,
+        getColumnIdByTextInputId,
 
         selectedTextInputId: selectedTextInputId,
         setSelectedTextInputId: setSelectedTextInputId,
@@ -70,6 +72,26 @@ export default function App() {
         
         setSelectedTextInputStyleState(style);
     }
+    
+
+    function getSelectedColumnId(): string {
+
+        return getColumnIdByTextInputId(selectedTextInputId);
+    }
+
+
+    function getColumnIdByTextInputId(textInputId: string): string {
+
+        // case: no text input selected yet
+        if (isBlank(textInputId))
+            return "";
+
+        const pageIndex = getPartFromDocumentId(textInputId, 1);
+        const columnIndex = getPartFromDocumentId(textInputId, 2);
+
+        return getDocumentId("Column", stringToNumber(pageIndex), "", stringToNumber(columnIndex));
+    }
+
 
 
     function handleClick(event): void {
@@ -246,6 +268,8 @@ export const AppContext = createContext({
     setOrientation: (orientation: Orientation) => {},
     numColumns: 1,
     setNumColumns: (numColumns: number) => {},
+    getSelectedColumnId: (): string => {return ""},
+    getColumnIdByTextInputId: (textInputId: string): string => {return ""},
 
     selectedTextInputId: "",
     setSelectedTextInputId: (id: string) => {},

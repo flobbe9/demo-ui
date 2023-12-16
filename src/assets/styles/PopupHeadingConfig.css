@@ -4,6 +4,7 @@
 
     .smallIconButton {
         transition: opacity 0.2s;
+
         &:hover {
             cursor: pointer;
             opacity: 0.5;
@@ -12,7 +13,25 @@
 
     .body {
         height: 85%;
-        overflow: auto;
+        /* overflow: auto; */
+
+        .headingContainer {
+            .heading {
+                width: 50%;
+            }
+
+            .heading1 {
+                font-size: 30px;
+            }
+
+            .heading2 {
+                font-size: 25px;
+            }
+
+            .heading3 {
+                font-size: 20px;
+            }
+        }
 
         .radioContainer {
             margin-bottom: 70px;

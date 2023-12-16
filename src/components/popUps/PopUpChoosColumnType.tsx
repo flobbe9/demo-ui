@@ -2,9 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import "../../assets/styles/PopUpChooseColumnType.css";
 import RadioButton from "../helpers/RadioButton";
 import { AppContext } from "../../App";
-import { ColumnContext } from "../document/Column";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getCSSValueAsNumber, hidePopUp, log } from "../../utils/Utils";
-import Select from "../helpers/Select";
 
 
 export default function PopUpChooseColumnType(props:{
@@ -21,7 +20,6 @@ export default function PopUpChooseColumnType(props:{
     const className = props.className ? "PopUpChooseColumnType " + props.className : "PopUpChooseColumnType";
 
     const appContext = useContext(AppContext);
-    const columnContext = useContext(ColumnContext);
     
     const [orientationClassName, setOrientationClassName] = useState(appContext.orientation === "portrait" ? "whiteButtonPortrait" : "whiteButtonLandscape");
     const [columnType, setColumnType] = useState(props.columnType);

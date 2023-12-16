@@ -5,7 +5,6 @@ import { getCSSValueAsNumber, getDocumentId, isBlank, log, togglePopUp } from ".
 import Paragraph from "./Paragraph";
 import { AppContext } from "../../App";
 import PopUpChooseColumnType from "../popups/PopUpChoosColumnType";
-import {v4 as uuid} from "uuid";
 import Popup from "../Popup";
 import { DocumentContext } from "./Document";
 import { NUM_HEADINGS_PER_COLUMN, getNumLinesPerColumn } from "../../utils/GlobalVariables";
@@ -15,6 +14,7 @@ import { Orientation } from "../../enums/Orientation";
 export default function Column(props: {
     pageIndex: number,
     columnIndex: number,
+    key?: string | number,
     id?: string,
     className?: string
 }) {
@@ -27,7 +27,7 @@ export default function Column(props: {
     
     const [columnType, setColumnType] = useState(1);
     const [numLinesPerParagraph, setNumLinesPerParagraph] = useState(1);
-    const [paragraphs, setParagraphs] = useState([<div key={uuid()}></div>]);
+    const [paragraphs, setParagraphs] = useState([<div key={0}></div>]);
     
     const context = {
         columnType,
@@ -46,7 +46,7 @@ export default function Column(props: {
 
     useEffect(() => {
         // case: rerender this column for font size changes
-        if (documentContext.renderColumn && documentContext.getSelectedColumnId() === id) {
+        if (documentContext.renderColumn && appContext.getSelectedColumnId() === id) {
             setParagraphs(initParagraphs(documentContext.columnFontSize));
             documentContext.setRenderColumn(false);
         }
@@ -62,7 +62,7 @@ export default function Column(props: {
                                                 getHeadingFontSizes());
 
         for (let i = 0; i < numParagraphs; i++) 
-            paragraphs.push(<Paragraph key={uuid()}
+            paragraphs.push(<Paragraph key={i}
                                         pageIndex={props.pageIndex}
                                         columnIndex={props.columnIndex} 
                                         paragraphIndex={i} />)
@@ -90,14 +90,14 @@ export default function Column(props: {
      */
     function updateColumnStates(newTextInputId: string): void {
 
-        const selectedColumnId = documentContext.getSelectedColumnId();
-        const newSelectedColumnId = documentContext.getColumnIdByTextInputId(newTextInputId);
+        const selectedColumnId = appContext.getSelectedColumnId();
+        const newSelectedColumnId = appContext.getColumnIdByTextInputId(newTextInputId);
 
         if (!isBlank(selectedColumnId) && !isBlank(newSelectedColumnId)) {
             const columnTextInputs = $("#" + id + " .paragraphContainer .Paragraph .TextInput");
 
             // case: column contains non-heading inputs
-            if (columnTextInputs.length >= NUM_HEADINGS_PER_COLUMN) {
+            if (columnTextInputs.length > NUM_HEADINGS_PER_COLUMN) {
                 const columnFontSize = columnTextInputs.get(3)!.style.fontSize;
 
                 // case: column fontSize has changed
@@ -105,6 +105,21 @@ export default function Column(props: {
                     documentContext.setRenderColumn(false);
                     documentContext.setColumnFontSize(columnFontSize);
                 }
+            }
+
+            // update heading states
+            if (columnTextInputs.length) {
+                const columnHeading1FontSize = columnTextInputs.get(0)!.style.fontSize;
+                if (documentContext.columnHeading1FontSize !== columnHeading1FontSize)
+                    documentContext.setColumnHeading1FontSize(columnHeading1FontSize);
+
+                const columnHeading2FontSize = columnTextInputs.get(1)!.style.fontSize;
+                if (documentContext.columnHeading2FontSize !== columnHeading2FontSize)
+                    documentContext.setColumnHeading2FontSize(columnHeading2FontSize);
+
+                const columnHeading3FontSize = columnTextInputs.get(2)!.style.fontSize;
+                if (documentContext.columnHeading3FontSize !== columnHeading3FontSize)
+                    documentContext.setColumnHeading3FontSize(columnHeading3FontSize);
             }
         }
     }

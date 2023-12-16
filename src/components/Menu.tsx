@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/Menu.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { hidePopUp, log, togglePopUp } from "../utils/Utils";
-import {v4 as uuid} from "uuid";
 import { AppContext } from "../App";
 import PopUpNewDocument from "./popups/PopUpNewDocument";
 import Popup from "./Popup";
@@ -28,8 +27,8 @@ export default function Menu(props) {
     // TODO: fetch saved documents from backend
     function initSavedDocuments(): React.JSX.Element[] {
 
-        const temp1 = <div key={uuid()} className="savedDocument">File 1</div>;
-        const temp2 = <div key={uuid()} className="savedDocument">File 2</div>;
+        const temp1 = <div key={0} className="savedDocument">File 1</div>;
+        const temp2 = <div key={1} className="savedDocument">File 2</div>;
 
         return [temp1, temp2];
     }

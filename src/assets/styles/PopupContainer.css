@@ -15,7 +15,7 @@
         width: 75%;
     }
 
-    .halfWidth {
+    .smallWidth {
         max-width: 400px;
         width: 50%;
     }
@@ -29,8 +29,8 @@
         height: 75%;
     }
 
-    .halfHeight {
+    .smallHeight {
         max-height: 400px;
-        height: 50%;
+        height: 300px;
     }
 }

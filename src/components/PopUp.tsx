@@ -8,8 +8,8 @@ export default function Popup(props: {
     className?: string,
     children?,
 
-    height?: "half" | "large" | "full",
-    width?: "half" | "large" | "full",
+    height?: "small" | "large" | "full",
+    width?: "small" | "large" | "full",
 }) {
 
     const className = "Popup " + (props.height? (props.height + "Height ") : " ") + 

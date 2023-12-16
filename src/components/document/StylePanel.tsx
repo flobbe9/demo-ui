@@ -12,8 +12,6 @@ import { DocumentContext } from "./Document";
 import Button from "../helpers/Button";
 import PopupHeadingConfig from "../popups/PopupHeadingConfig";
 import Popup from "../Popup";
-import { applyTextInputStyle, getDefaultStyle } from "../../abstract/Style";
-import { isMobileWidth } from "../../utils/GlobalVariables";
 import WarnIcon from "../helpers/WarnIcon";
 
 
@@ -25,17 +23,17 @@ export default function StylePanel(props) {
     const id = props.id ? "StylePanel" + props.id : "StylePanel";
     const className = props.className ? "StylePanel " + props.className : "StylePanel";
 
+    const appContext = useContext(AppContext);
+    const documentContext = useContext(DocumentContext);
+
     const [disabled, setDisabled] = useState(true);
 
-    const [fontSizeHeading1, setFontSizeHeading1] = useState("14px");
-    const [fontSizeHeading2, setFontSizeHeading2] = useState("14px");
-    const [fontSizeHeading3, setFontSizeHeading3] = useState("14px");
+    const [fontSizeHeading1, setFontSizeHeading1] = useState(documentContext.columnHeading1FontSize);
+    const [fontSizeHeading2, setFontSizeHeading2] = useState(documentContext.columnHeading2FontSize);
+    const [fontSizeHeading3, setFontSizeHeading3] = useState(documentContext.columnHeading3FontSize);
 
     const stylePanelRef = useRef(null);
     const sectionContainerRef = useRef(null);
-
-    const appContext = useContext(AppContext);
-    const documentContext = useContext(DocumentContext);
 
 
     useEffect(() => {
@@ -57,7 +55,7 @@ export default function StylePanel(props) {
      */
     function setHeadingFontSize(): void {
 
-        const columnId = documentContext.getSelectedColumnId();
+        const columnId = appContext.getSelectedColumnId();
         // case: no text input selected yet
         if (isBlank(columnId))
             return;
@@ -88,7 +86,7 @@ export default function StylePanel(props) {
 
     function handleFontSizeSelect(fontSize: string): void {
 
-        const selectedColumnId = documentContext.getSelectedColumnId();
+        const selectedColumnId = appContext.getSelectedColumnId();
 
         if (isBlank(selectedColumnId))
             return;
@@ -151,7 +149,7 @@ export default function StylePanel(props) {
 
         // configure popup
         appContext.setPopupContent(
-            <Popup height="large" width="full">
+            <Popup height="small" width="large">
                 <PopupHeadingConfig handleSelect={() => {}}
                                     fontSizeHeading1={fontSizeHeading1}
                                     fontSizeHeading2={fontSizeHeading2}
@@ -237,7 +235,7 @@ export default function StylePanel(props) {
                                         borderRadius: "3px",
                                         boxShadow: "none",
                                     }}
-                                    disabled={disabled}
+                                    disabled={disabled || !documentContext.isSelectedColumnEmpty}
                                     >
                                 <div style={{fontSize: "16px"}}>Überschrift</div>
                                 <div style={{fontSize: "12px"}}>Überschrift</div>
