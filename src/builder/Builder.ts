@@ -37,13 +37,13 @@ export async function buildDocument(orientation: Orientation, numColumns: number
 
     const body: DocumentWrapper =  {
         content: buildContent(numColumns),
-        tableConfig: null,
+        tableConfigs: [],
         landscape: orientation === Orientation.LANDSCAPE,
         numColumns: numColumns
     }
 
+    // TODO
     // case: is table
-    // TODO: figure out columnType... during column iteration?
     // if (isTable(columnType)) 
     //     body.tableConfig = getTableConfig(columnType);
 

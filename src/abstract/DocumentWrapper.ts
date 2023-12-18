@@ -9,7 +9,7 @@ import TableConfig from "./TableConfig";
  */
 export default interface DocumentWrapper {
     content: (BasicParagraph | null)[],
-    tableConfig: TableConfig | null,
+    tableConfigs: TableConfig[],
     landscape: boolean,
     numColumns: number
 }

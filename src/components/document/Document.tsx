@@ -6,6 +6,7 @@ import { flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId,
 import { AppContext } from "../../App";
 import StylePanel from "./StylePanel";
 import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
+import ControlBar from "../ControlBar";
 
 
 // TODO: how to cache document?
@@ -21,9 +22,10 @@ export default function Document(props) {
     const [renderColumn, setRenderColumn] = useState(false);
 
     // TODO: make this generic sothat adding headings is easier, ColumnTypeConfig?
-    const [columnHeading1FontSize, setColumnHeading1FontSize] = useState(appContext.selectedTextInputStyle.fontSize + "px");
-    const [columnHeading2FontSize, setColumnHeading2FontSize] = useState(appContext.selectedTextInputStyle.fontSize + "px");
-    const [columnHeading3FontSize, setColumnHeading3FontSize] = useState(appContext.selectedTextInputStyle.fontSize + "px");
+    // TODO: render this with empty string or something
+    const [columnHeading1FontSize, setColumnHeading1FontSize] = useState("");
+    const [columnHeading2FontSize, setColumnHeading2FontSize] = useState("");
+    const [columnHeading3FontSize, setColumnHeading3FontSize] = useState("");
 
     const [isSelectedColumnEmpty, setIsSelectedColumnEmpty] = useState(true);
 
@@ -218,7 +220,7 @@ export default function Document(props) {
 
     return (
         <div id={id} className={className}>
-            {/* <ControlBar /> */}
+            <ControlBar />
 
             <DocumentContext.Provider value={context}>
                 <StylePanel />

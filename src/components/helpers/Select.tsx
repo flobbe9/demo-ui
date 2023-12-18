@@ -3,7 +3,6 @@ import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../../utils/Utils";
 import { AppContext } from "../../App";
-import { DocumentContext } from "../document/Document";
 import { isMobileWidth } from "../../utils/GlobalVariables";
 
 

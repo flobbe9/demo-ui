@@ -10,14 +10,15 @@ import RadioButton from "../helpers/RadioButton";
 import { flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, togglePopUp } from "../../utils/Utils";
 import { DocumentContext } from "./Document";
 import Button from "../helpers/Button";
-import PopupHeadingConfig from "../popups/PopupHeadingConfig";
-import Popup from "../Popup";
 import WarnIcon from "../helpers/WarnIcon";
+import PopupHeadingConfig from "../popUps/PopupHeadingConfig";
+import Popup from "../Popup";
 
 
 // TODO: add key combinations for most buttons
     // set title to combination
 
+// TODO: decrease margin top in small mode
 export default function StylePanel(props) {
 
     const id = props.id ? "StylePanel" + props.id : "StylePanel";
@@ -86,9 +87,7 @@ export default function StylePanel(props) {
 
     function handleFontSizeSelect(fontSize: string): void {
 
-        const selectedColumnId = appContext.getSelectedColumnId();
-
-        if (isBlank(selectedColumnId))
+        if (isBlank(appContext.getSelectedColumnId()))
             return;
 
         documentContext.setRenderColumn(true);
@@ -201,7 +200,7 @@ export default function StylePanel(props) {
                                 showPopUpOnHover={true}
                                 title="Schriftgöße ändern"
                             >
-                                Um die Schriftgröße zu verändern, lösche allen Text in der Spalte
+                                Um die Schriftgröße zu verändern, lösche allen Text in der Spalte.
                             </WarnIcon>
 
                             <Select id="FontSize"

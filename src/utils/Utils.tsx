@@ -4,21 +4,41 @@ import { ApiExceptionFormat } from "../abstract/ApiExceptionFormat";
 import { SPACES_PER_TAB, Side, TAB_UNICODE_ESCAPED } from "./GlobalVariables";
 
 
-export function log(text?: any): void {
+export function log(text?: any, debug = false): void {
 
-    console.log(text);
+    if (!debug) {
+        console.log(text);
+        return;
+    }
+
+    try {
+        throw Error(text);
+        
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 
 export function logWarn(text?: any): void {
 
-    console.warn(text);
+    try {
+        throw Error(text);
+        
+    } catch (e) {
+        console.warn(e);
+    }
 }
 
 
 export function logError(text?: any): void {
 
-    console.error(text);
+    try {
+        throw Error(text);
+        
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 
@@ -32,7 +52,6 @@ export function logApiError(message: string, error: Error): void {
     
     logError(message + ". " + error.message);
 }
-
 
 
 export function stringToNumber(str: string): number {
@@ -155,6 +174,19 @@ export function moveCursor(textInputId: string, start = 0, end = 0): void {
 }
 
 
+export function getCursorIndex(textInputId: string): number {
+
+    const textInput = $("#" + textInputId);
+    
+    if (!textInput.length) {
+        console.warn("Failed to get cursor index for text input with id: " + textInputId);
+        return - 1;
+    }
+
+    return textInput.prop("selectionStart");
+}
+
+
 /**
  * @param textInputId id of text input to compare text width to
  * @param inputOverhead amount of pixels of input's width that should not be considered for calculation, i.e. padding or border.
@@ -249,7 +281,7 @@ export function getCSSValueAsNumber(cssValue: string | number, unitDigits: numbe
 
     const length = cssValue.length;
     if (unitDigits >= length)
-        logError("Failed to get css value as number. 'unitDigits' too long or 'cssValue' too short");
+        logError("Failed to get css value as number. 'unitDigits' (" + unitDigits + ") too long or 'cssValue' (" + cssValue + ") too short.");
 
     const endIndex = cssValue.length - unitDigits;
 

@@ -12,6 +12,24 @@ import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputSty
 import PopupContainer from "./components/PopupContainer";
 
 
+/**
+ * Document is structured like 
+ * ```
+ *  <Document>
+ *      <StylePanel />
+ * 
+ *      <Page>
+ *          <Column>
+ *              <Paragraph>
+ *                  <TextInput />
+ *              </ Paragraph>
+ *          </ Column>
+ *      </ Page>
+ *  </ Document>
+ * ```
+ * @returns any content of this website
+ * @since 0.0.1
+ */
 export default function App() {
 
     // use this when backend login is implemented (https://www.baeldung.com/spring-security-csrf)

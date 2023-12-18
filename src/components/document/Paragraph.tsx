@@ -1,9 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import "../../assets/styles/Paragraph.css";
 import TextInput from "./TextInput";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getDocumentId, log } from "../../utils/Utils";
 import { ColumnContext } from "./Column";
+import { NUM_HEADINGS_PER_COLUMN } from "../../utils/GlobalVariables";
 
 
 export default function Paragraph(props: {
@@ -21,7 +22,7 @@ export default function Paragraph(props: {
     const columnContext = useContext(ColumnContext);
 
     const [textInputs, setTextInputs] = useState(initTextInputs());
-    
+
 
     function initTextInputs(): React.JSX.Element[] {
 
@@ -34,7 +35,9 @@ export default function Paragraph(props: {
                                         pageIndex={props.pageIndex}
                                         columnIndex={props.columnIndex}
                                         paragraphIndex={props.paragraphIndex}
-                                        textInputIndex={i} />)
+                                        textInputIndex={i} 
+                                        isHeading={i < NUM_HEADINGS_PER_COLUMN}
+                            />)
 
         return textInputs;
     }

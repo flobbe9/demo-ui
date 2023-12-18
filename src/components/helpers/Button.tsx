@@ -31,6 +31,7 @@ export default function Button(props: {
 
     const [rendered, setRendered] = useState(isBooleanFalsy(props.rendered) ? true : props.rendered);
     const [disabled, setDisabled] = useState(isBooleanFalsy(props.disabled) ? false : props.disabled);
+    const [initialBackgroundColor, setInitialBackgroundColor] = useState("");
 
     const buttonRef = useRef(null);
     const buttonChildrenRef = useRef(null);
@@ -40,6 +41,7 @@ export default function Button(props: {
     useEffect(() => {
         $(buttonOverlayRef.current!).css("backgroundColor", props.clickBackgroundColor || "transparent");
 
+        setInitialBackgroundColor($(buttonRef.current!).css("backgroundColor"));
     }, [])
 
 
@@ -144,13 +146,13 @@ export default function Button(props: {
         if (disabled)
             return;
 
-        $(buttonRef.current!).css("backgroundColor", props.hoverBackgroundColor || "white");
+        $(buttonRef.current!).css("backgroundColor", props.hoverBackgroundColor || initialBackgroundColor);
     }
 
 
     function handleMouseOut(event): void {
 
-        $(buttonRef.current!).css("backgroundColor", props.boxStyle?.backgroundColor || "white")
+        $(buttonRef.current!).css("backgroundColor", props.boxStyle?.backgroundColor || initialBackgroundColor)
     }
 
 

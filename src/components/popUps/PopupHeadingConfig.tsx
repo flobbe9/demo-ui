@@ -93,7 +93,7 @@ export default function PopupHeadingConfig(props:{
                 <div className="headingContainer flexCenter mb-3">
                     <div className="heading heading1" style={{
                         fontSize: fontSizeHeading1
-                    }}>Überschrift</div>
+                    }}>Überschrift 1</div>
 
                     <Select id={"Heading1FontSize"}
                             label={getCSSValueAsNumber(fontSizeHeading1, 2).toString()}
@@ -116,7 +116,7 @@ export default function PopupHeadingConfig(props:{
                 <div className="headingContainer flexCenter mb-3">
                     <div className="heading heading1" style={{
                         fontSize: fontSizeHeading2
-                    }}>Überschrift</div>
+                    }}>Überschrift 2</div>
 
                     <Select id={"Heading2FontSize"}
                             label={getCSSValueAsNumber(fontSizeHeading2, 2).toString()}
@@ -139,7 +139,7 @@ export default function PopupHeadingConfig(props:{
                 <div className="headingContainer flexCenter">
                     <div className="heading heading1" style={{
                         fontSize: fontSizeHeading3
-                    }}>Überschrift</div>
+                    }}>Überschrift 3</div>
 
                     <Select id={"Heading3FontSize"}
                             label={getCSSValueAsNumber(fontSizeHeading3, 2).toString()}

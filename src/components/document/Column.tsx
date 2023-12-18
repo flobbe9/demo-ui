@@ -4,8 +4,6 @@ import "../../assets/styles/Column.css";
 import { getCSSValueAsNumber, getDocumentId, isBlank, log, togglePopUp } from "../../utils/Utils";
 import Paragraph from "./Paragraph";
 import { AppContext } from "../../App";
-import PopUpChooseColumnType from "../popups/PopUpChoosColumnType";
-import Popup from "../Popup";
 import { DocumentContext } from "./Document";
 import { NUM_HEADINGS_PER_COLUMN, getNumLinesPerColumn } from "../../utils/GlobalVariables";
 import { Orientation } from "../../enums/Orientation";
@@ -57,9 +55,7 @@ export default function Column(props: {
     function initParagraphs(fontSize: string | number): React.JSX.Element[] {
 
         const paragraphs: React.JSX.Element[] = [];
-        const numParagraphs =  getNumParagraphs(appContext.orientation, 
-                                                getCSSValueAsNumber(fontSize, 2),
-                                                getHeadingFontSizes());
+        const numParagraphs = getNumParagraphs(appContext.orientation, getCSSValueAsNumber(fontSize, 2), getHeadingFontSizes());
 
         for (let i = 0; i < numParagraphs; i++) 
             paragraphs.push(<Paragraph key={i}
@@ -78,9 +74,12 @@ export default function Column(props: {
     function getHeadingFontSizes(): number[] {
 
         return [
-            getCSSValueAsNumber(documentContext.columnHeading1FontSize, 2),
-            getCSSValueAsNumber(documentContext.columnHeading2FontSize, 2),
-            getCSSValueAsNumber(documentContext.columnHeading3FontSize, 2)
+            isBlank(documentContext.columnHeading1FontSize) ? appContext.selectedTextInputStyle.fontSize : 
+                                                              getCSSValueAsNumber(documentContext.columnHeading1FontSize, 2),
+            isBlank(documentContext.columnHeading2FontSize) ? appContext.selectedTextInputStyle.fontSize : 
+                                                              getCSSValueAsNumber(documentContext.columnHeading2FontSize, 2),
+            isBlank(documentContext.columnHeading3FontSize) ? appContext.selectedTextInputStyle.fontSize : 
+                                                              getCSSValueAsNumber(documentContext.columnHeading3FontSize, 2),
         ];
     }
 
@@ -122,22 +121,6 @@ export default function Column(props: {
                     documentContext.setColumnHeading3FontSize(columnHeading3FontSize);
             }
         }
-    }
-
-
-    function handlePopUpToggle(event): void {
-
-        // define popup
-        appContext.setPopupContent(
-            <Popup width="full" height="full">
-                <PopUpChooseColumnType handleSelect={handleSelectType}
-                                        handleSubmit={handleTypeSubmit}
-                                        columnType={columnType} />
-            </Popup>
-        );
-
-        // toggle
-        togglePopUp(appContext.setPopupContent);
     }
 
 

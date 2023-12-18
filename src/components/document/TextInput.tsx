@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getDocumentId, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex } from "../../utils/Utils";
+import { getCSSValueAsNumber, getCursorIndex, getDocumentId, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex } from "../../utils/Utils";
 import { AppContext } from "../../App";
-import Style, { StyleProp, applyTextInputStyle, getTextInputStyle } from "../../abstract/Style";
+import { StyleProp, applyTextInputStyle, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
-import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
+import { SINGLE_TAB_UNICODE_ESCAPED, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
 import { ColumnContext } from "./Column";
 
 
@@ -14,12 +14,17 @@ import { ColumnContext } from "./Column";
     // strg a
     // strg c / strg v(?)
 
-// TODO: minimize use effect calls
+// TODO: increase font size but only on display
+// TOOD: underline tabs
+// TODO: fix tab size
+// TODO: font size does not work
+// TODO: focus after select
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
     paragraphIndex: number,
     textInputIndex: number,
+    isHeading: boolean,
     key?: string | number
     id?: string | number,
     className?: string,
@@ -62,9 +67,20 @@ export default function TextInput(props: {
 
         const style = appContext.selectedTextInputStyle;
         const headingState = documentContext.getHeadingStateByTextInputId(id);
+        const headingFontsize = headingState ? headingState[0] : "";
 
-        // set font size of heading or body
-        style.fontSize = getCSSValueAsNumber(headingState ? headingState[0] : documentContext.columnFontSize, 2);
+        // font size
+        // case: heading
+        if (props.isHeading && !isBlank(headingFontsize)) {
+            log("heading: " + headingFontsize)   
+            style.fontSize = getCSSValueAsNumber(headingFontsize, 2);
+        }
+        
+        // case: normal line
+        else {
+            log("normal: " + documentContext.columnFontSize)   
+            style.fontSize = getCSSValueAsNumber(documentContext.columnFontSize, 2);
+        }
 
         applyTextInputStyle(id, style);
     }
@@ -97,6 +113,12 @@ export default function TextInput(props: {
         if (event.key === "ArrowUp")
             focusPrevTextInput(event);
 
+        if (event.key === "ArrowLeft")
+            handleArrowLeft(event);
+
+        if (event.key === "ArrowRight")
+            handleArrowRight(event);
+
         if (event.key === "Backspace")
             handleBackspace(event);
     }
@@ -111,6 +133,41 @@ export default function TextInput(props: {
     }
 
 
+    function handleClick(event): void {
+        
+        handleCursorInBetweenSingleTabUnicodes(event.target.id);
+    }
+
+
+    /**
+     * Move cursor left by one char if cursor is in between two connected tab unicodes. I.e. a click on cursor '|' in ```\t\t\t|\t```
+     * would move the cursor like ```\t\t|\t\t```
+     * @param textInputId id of text input to potentially move cursor of
+     */
+    function handleCursorInBetweenSingleTabUnicodes(textInputId: string): void {
+
+        const cursorIndex = getCursorIndex(textInputId);
+        const inputValue = $(inputRef.current!).prop("value");
+
+        // count single tab unicodes in front of cursor
+        let tabUnicodeCount = 0;
+        for (let i = cursorIndex - 1; i >= 0; i--) {
+            if (inputValue.charAt(i) !== SINGLE_TAB_UNICODE_ESCAPED)
+                break;
+
+            tabUnicodeCount++;
+        }
+
+        // is cursor between tab unicodes
+        const isCursorInBetweenTabUnicodes = inputValue.charAt(cursorIndex - 1) === SINGLE_TAB_UNICODE_ESCAPED && 
+                                             inputValue.charAt(cursorIndex) === SINGLE_TAB_UNICODE_ESCAPED;
+                          
+        // case: cursor between connected tab unicodes
+        if (isCursorInBetweenTabUnicodes && tabUnicodeCount % 2 === 1)
+            moveCursor(textInputId, cursorIndex - 1, cursorIndex - 1);
+    }
+
+
     function handleTab(event): void {
 
         if (appContext.pressedKey === "Shift") {
@@ -119,6 +176,24 @@ export default function TextInput(props: {
 
         } else 
             documentContext.handleTab(event);
+    }
+
+
+    function handleArrowLeft(event): void {
+
+        if (areCharsInFrontOfCursorTab()) {
+            const cursorIndex = getCursorIndex(event.target.id);
+            moveCursor(event.target.id, cursorIndex - 1, cursorIndex - 1);
+        }
+    }
+
+
+    function handleArrowRight(event): void {
+
+        if (areCharsAfterCursorTab()) {
+            const cursorIndex = getCursorIndex(event.target.id);
+            moveCursor(event.target.id, cursorIndex + 1, cursorIndex + 1);
+        }
     }
 
 
@@ -182,20 +257,52 @@ export default function TextInput(props: {
      */
     function handleBackspace(event): void {
         
-        const input = $(inputRef.current!);
-        const value: string = input.prop("value");
-        
-        const cursorIndex = input.prop("selectionStart");
-        const charsInFrontOfCursor = value.charAt(cursorIndex - 1) + value.charAt(cursorIndex - 2);
+        // case: is tab
+        if (areCharsInFrontOfCursorTab()) {
+            const input = $(inputRef.current!);
+            const value: string = input.prop("value");
+            const cursorIndex = input.prop("selectionStart");
 
-        // case: remove tab
-        if (charsInFrontOfCursor === TAB_UNICODE_ESCAPED) {
             event.preventDefault();
 
-            // remove one of two unicodes
+            // remove both unicodes
             let newValue = replaceAtIndex(value, "", cursorIndex - 2, cursorIndex);
             input.prop("value", newValue);
         }
+    }
+
+
+    /**
+     * @returns true if ```2 chars in front of cursor === TAB_UNICODE_ESCAPED```.
+     */
+    function areCharsInFrontOfCursorTab(): boolean {
+
+        // get input value
+        const input = $(inputRef.current!);
+        const value: string = input.prop("value");
+        
+        // get 2 chars in front of cursor
+        const cursorIndex = input.prop("selectionStart");
+        const charsInFrontOfCursor = value.charAt(cursorIndex - 1) + value.charAt(cursorIndex - 2);
+
+        return charsInFrontOfCursor === TAB_UNICODE_ESCAPED;
+    }
+
+
+    /**
+     * @returns true if ```2 chars after cursor === TAB_UNICODE_ESCAPED```.
+     */
+    function areCharsAfterCursorTab(): boolean {
+
+        // get input value
+        const input = $(inputRef.current!);
+        const value: string = input.prop("value");
+        
+        // get 2 chars after cursor
+        const cursorIndex = input.prop("selectionStart");
+        const charsInFrontOfCursor = value.charAt(cursorIndex) + value.charAt(cursorIndex + 1);
+
+        return charsInFrontOfCursor === TAB_UNICODE_ESCAPED;
     }
 
 
@@ -233,6 +340,7 @@ export default function TextInput(props: {
                    ref={inputRef} 
                    type="text" 
                    onMouseDown={handleMouseDown}
+                   onClick={handleClick}
                    onKeyDown={handleKeyDown}
                    onKeyUp={() => documentContext.setIsSelectedColumnEmpty(isSelectedColumnEmpty())}
                    />
