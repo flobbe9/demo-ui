@@ -3,7 +3,6 @@ import "../../assets/styles/WarnIcon.css"
 import { log } from "../../utils/Utils";
 
 
-// TODO: continue here
 export default function WarnIcon(props: {
     id?: string,
     className?: string,

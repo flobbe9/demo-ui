@@ -3,8 +3,8 @@ import "../assets/styles/Menu.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { hidePopUp, log, togglePopUp } from "../utils/Utils";
 import { AppContext } from "../App";
-import PopUpNewDocument from "./popups/PopUpNewDocument";
 import Popup from "./Popup";
+import PopUpNewDocument from "./popUps/PopUpNewDocument";
 
 
 export default function Menu(props) {

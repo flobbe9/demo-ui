@@ -71,16 +71,12 @@ export default function TextInput(props: {
 
         // font size
         // case: heading
-        if (props.isHeading && !isBlank(headingFontsize)) {
-            log("heading: " + headingFontsize)   
+        if (props.isHeading && headingFontsize) 
             style.fontSize = getCSSValueAsNumber(headingFontsize, 2);
-        }
         
         // case: normal line
-        else {
-            log("normal: " + documentContext.columnFontSize)   
-            style.fontSize = getCSSValueAsNumber(documentContext.columnFontSize, 2);
-        }
+        else 
+            style.fontSize = getCSSValueAsNumber(appContext.columnFontSize, 2);
 
         applyTextInputStyle(id, style);
     }
@@ -128,6 +124,7 @@ export default function TextInput(props: {
         
         columnContext.updateColumnStates(id);
 
+        // case: selected new text input
         if (appContext.selectedTextInputId !== id) 
             appContext.focusTextInput(id);
     }
@@ -306,32 +303,6 @@ export default function TextInput(props: {
     }
 
 
-    /**
-     * @returns true if no chars are found in any text input of selected column, else false (Tabs and spaces don't count as chars here)
-     */
-    function isSelectedColumnEmpty(): boolean {
-
-        const selectedColumnId = appContext.getSelectedColumnId();
-        if (isBlank(selectedColumnId))
-            return true;
-
-        const columnTextInputs = $("#" + selectedColumnId + " .TextInput");
-
-        let isEmpty = true;
-        
-        Array.from(columnTextInputs).forEach(textInputElement => {
-            const textInput = textInputElement as HTMLInputElement;
-
-            if (!isBlank(textInput.value)) {
-                isEmpty = false;
-                return;
-            }
-        });
-
-        return isEmpty;
-    }
-
-
     return (
         <div className={"textInputContainer"}>
             <label htmlFor={id}></label>
@@ -342,7 +313,7 @@ export default function TextInput(props: {
                    onMouseDown={handleMouseDown}
                    onClick={handleClick}
                    onKeyDown={handleKeyDown}
-                   onKeyUp={() => documentContext.setIsSelectedColumnEmpty(isSelectedColumnEmpty())}
+                   onKeyUp={() => documentContext.setIsSelectedColumnEmpty(documentContext.checkIsSelectedColumnEmpty())}
                    />
         </div>
     )

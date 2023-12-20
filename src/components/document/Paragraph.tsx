@@ -21,16 +21,22 @@ export default function Paragraph(props: {
     
     const columnContext = useContext(ColumnContext);
 
-    const [textInputs, setTextInputs] = useState(initTextInputs());
+    const [textInputs, setTextInputs] = useState();
+
+
+    useEffect(() => {
+        setTextInputs(initTextInputs());
+
+    }, []);
 
 
     function initTextInputs(): React.JSX.Element[] {
 
-        const textInputs: React.JSX.Element[] = [];
+        const initTextInputs: React.JSX.Element[] = [];
         const numLinesPerParagraph = columnContext.numLinesPerParagraph;
 
         for (let i = 0; i < numLinesPerParagraph; i++) 
-            textInputs.push(<TextInput key={i}
+            initTextInputs.push(<TextInput key={crypto.randomUUID()}
                                         id={columnContext.columnType}
                                         pageIndex={props.pageIndex}
                                         columnIndex={props.columnIndex}
@@ -39,7 +45,7 @@ export default function Paragraph(props: {
                                         isHeading={i < NUM_HEADINGS_PER_COLUMN}
                             />)
 
-        return textInputs;
+        return initTextInputs;
     }
 
 

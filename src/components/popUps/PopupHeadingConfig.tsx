@@ -7,13 +7,6 @@ import Select from "../helpers/Select";
 
 
 export default function PopupHeadingConfig(props:{
-    handleSelect,
-    fontSizeHeading1: string,
-    fontSizeHeading2: string,
-    fontSizeHeading3: string,
-    setFontSizeHeading1: (str: string) => void,
-    setFontSizeHeading2: (str: string) => void,
-    setFontSizeHeading3: (str: string) => void,
     handleSubmit?,
     id?: string,
     className?: string,
@@ -25,20 +18,8 @@ export default function PopupHeadingConfig(props:{
 
     const appContext = useContext(AppContext);
     
-    const [fontSizeHeading1, setFontSizeHeading1] = useState(props.fontSizeHeading1);
-    const [fontSizeHeading2, setFontSizeHeading2] = useState(props.fontSizeHeading2);
-    const [fontSizeHeading3, setFontSizeHeading3] = useState(props.fontSizeHeading3);
-
     const [selectedColumnIndex, setSelectedColumnIndex] = useState(-1);
-
-
-    useEffect(() => {
-        props.setFontSizeHeading1(fontSizeHeading1);
-        props.setFontSizeHeading2(fontSizeHeading2);
-        props.setFontSizeHeading3(fontSizeHeading3);
-
-    }, [fontSizeHeading1, fontSizeHeading2, fontSizeHeading3])
-
+    
 
     useEffect(() => {
         document.addEventListener("keydown", handleKeyDown)
@@ -79,7 +60,7 @@ export default function PopupHeadingConfig(props:{
         return stringToNumber(getPartFromDocumentId(columnId, 2));
     }
 
-    
+
     return (
         <div id={id} className={className} style={props.style}>
             <div className="header flexRight">
@@ -91,15 +72,19 @@ export default function PopupHeadingConfig(props:{
 
                 {/* heading 1 */}
                 <div className="headingContainer flexCenter mb-3">
-                    <div className="heading heading1" style={{
-                        fontSize: fontSizeHeading1
-                    }}>Überschrift 1</div>
+                    <div className="heading heading1" 
+                         style={{
+                            fontSize: appContext.columnHeading1FontSize || appContext.columnFontSize
+                        }}
+                    >
+                        Überschrift 1
+                    </div>
 
                     <Select id={"Heading1FontSize"}
-                            label={getCSSValueAsNumber(fontSizeHeading1, 2).toString()}
+                            label={getCSSValueAsNumber(appContext.columnHeading1FontSize || appContext.columnFontSize, 2).toString()}
                             className="flexCenter"
                             componentStyle={{width: "30%"}} 
-                            handleSelect={setFontSizeHeading1}
+                            handleSelect={appContext.setColumnHeading1FontSize}
                             options={[
                                 ["10px", "10"],
                                 ["11px", "11"],
@@ -114,15 +99,19 @@ export default function PopupHeadingConfig(props:{
 
                 {/* heading 2 */}
                 <div className="headingContainer flexCenter mb-3">
-                    <div className="heading heading1" style={{
-                        fontSize: fontSizeHeading2
-                    }}>Überschrift 2</div>
+                    <div className="heading heading1" 
+                         style={{
+                            fontSize: appContext.columnHeading2FontSize || appContext.columnFontSize
+                        }}
+                    >
+                        Überschrift 2
+                    </div>
 
                     <Select id={"Heading2FontSize"}
-                            label={getCSSValueAsNumber(fontSizeHeading2, 2).toString()}
+                            label={getCSSValueAsNumber(appContext.columnHeading2FontSize || appContext.columnFontSize, 2).toString()}
                             className="flexCenter"
                             componentStyle={{width: "30%"}} 
-                            handleSelect={setFontSizeHeading2}
+                            handleSelect={appContext.setColumnHeading2FontSize}
                             options={[
                                 ["10px", "10"],
                                 ["11px", "11"],
@@ -138,14 +127,14 @@ export default function PopupHeadingConfig(props:{
                 {/* heading 3 */}
                 <div className="headingContainer flexCenter">
                     <div className="heading heading1" style={{
-                        fontSize: fontSizeHeading3
+                        fontSize: appContext.columnHeading3FontSize || appContext.columnFontSize
                     }}>Überschrift 3</div>
 
                     <Select id={"Heading3FontSize"}
-                            label={getCSSValueAsNumber(fontSizeHeading3, 2).toString()}
+                            label={getCSSValueAsNumber(appContext.columnHeading3FontSize || appContext.columnFontSize, 2).toString()}
                             className="flexCenter"
                             componentStyle={{width: "30%"}} 
-                            handleSelect={setFontSizeHeading3}
+                            handleSelect={appContext.setColumnHeading3FontSize}
                             options={[
                                 ["10px", "10"],
                                 ["11px", "11"],

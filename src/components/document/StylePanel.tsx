@@ -29,10 +29,6 @@ export default function StylePanel(props) {
 
     const [disabled, setDisabled] = useState(true);
 
-    const [fontSizeHeading1, setFontSizeHeading1] = useState(documentContext.columnHeading1FontSize);
-    const [fontSizeHeading2, setFontSizeHeading2] = useState(documentContext.columnHeading2FontSize);
-    const [fontSizeHeading3, setFontSizeHeading3] = useState(documentContext.columnHeading3FontSize);
-
     const stylePanelRef = useRef(null);
     const sectionContainerRef = useRef(null);
 
@@ -44,38 +40,31 @@ export default function StylePanel(props) {
     }, [appContext.selectedTextInputId]);
 
     
-    useEffect(() => {
-        // set heading font size
-        setHeadingFontSize();
-
-    }, [fontSizeHeading1, fontSizeHeading2, fontSizeHeading3]);
-
-
     /**
      * Set font size of all heading text inputs offered by ```<PopupHeadingConfig />```.
      */
-    function setHeadingFontSize(): void {
+    // function setHeadingFontSize(): void {
 
-        const columnId = appContext.getSelectedColumnId();
-        // case: no text input selected yet
-        if (isBlank(columnId))
-            return;
+    //     const columnId = appContext.getSelectedColumnId();
+    //     // case: no text input selected yet
+    //     if (isBlank(columnId))
+    //         return;
     
-        // find first three text inputs
-        const columnTextInputs = $("#" + columnId + " .paragraphContainer .Paragraph .TextInput");
+    //     // find first three text inputs
+    //     const columnTextInputs = $("#" + columnId + " .paragraphContainer .Paragraph .TextInput");
 
-        const heading1 = columnTextInputs.get(0)
-        if (heading1)
-            heading1.style.fontSize = fontSizeHeading1;
+    //     const heading1 = columnTextInputs.get(0)
+    //     if (heading1)
+    //         heading1.style.fontSize = fontSizeHeading1 || appContext.columnFontSize;
 
-        const heading2 = columnTextInputs.get(1)
-        if (heading2)
-            heading2.style.fontSize = fontSizeHeading2;
+    //     const heading2 = columnTextInputs.get(1)
+    //     if (heading2)
+    //         heading2.style.fontSize = fontSizeHeading2 || appContext.columnFontSize;
 
-        const heading3 = columnTextInputs.get(2)
-        if (heading3)
-            heading3.style.fontSize = fontSizeHeading3;
-    }
+    //     const heading3 = columnTextInputs.get(2)
+    //     if (heading3)
+    //         heading3.style.fontSize = fontSizeHeading3 || appContext.columnFontSize;
+    // }
     
 
     function handleFontFamilySelect(fontFamily: string): void {
@@ -87,11 +76,7 @@ export default function StylePanel(props) {
 
     function handleFontSizeSelect(fontSize: string): void {
 
-        if (isBlank(appContext.getSelectedColumnId()))
-            return;
-
-        documentContext.setRenderColumn(true);
-        documentContext.setColumnFontSize(fontSize);
+        appContext.setColumnFontSize(fontSize);
     }
 
 
@@ -149,14 +134,7 @@ export default function StylePanel(props) {
         // configure popup
         appContext.setPopupContent(
             <Popup height="small" width="large">
-                <PopupHeadingConfig handleSelect={() => {}}
-                                    fontSizeHeading1={fontSizeHeading1}
-                                    fontSizeHeading2={fontSizeHeading2}
-                                    fontSizeHeading3={fontSizeHeading3}
-                                    setFontSizeHeading1={setFontSizeHeading1}
-                                    setFontSizeHeading2={setFontSizeHeading2}
-                                    setFontSizeHeading3={setFontSizeHeading3}
-                />
+                <PopupHeadingConfig />
             </Popup>
         );
 
@@ -204,7 +182,7 @@ export default function StylePanel(props) {
                             </WarnIcon>
 
                             <Select id="FontSize"
-                                    label={getCSSValueAsNumber(documentContext.columnFontSize, 2).toString()}
+                                    label={getCSSValueAsNumber(appContext.columnFontSize, 2).toString()}
                                     disabled={disabled || !documentContext.isSelectedColumnEmpty}
                                     hoverBackgroundColor="rgb(245, 245, 245)"
                                     className="mr-sm-5 mr-md-3"

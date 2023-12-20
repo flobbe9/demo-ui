@@ -17,15 +17,6 @@ export default function Document(props) {
     const className = props.className ? "Document " + props.className : "Document";
 
     const appContext = useContext(AppContext);
-    
-    const [columnFontSize, setColumnFontSize] = useState(appContext.selectedTextInputStyle.fontSize + "px");
-    const [renderColumn, setRenderColumn] = useState(false);
-
-    // TODO: make this generic sothat adding headings is easier, ColumnTypeConfig?
-    // TODO: render this with empty string or something
-    const [columnHeading1FontSize, setColumnHeading1FontSize] = useState("");
-    const [columnHeading2FontSize, setColumnHeading2FontSize] = useState("");
-    const [columnHeading3FontSize, setColumnHeading3FontSize] = useState("");
 
     const [isSelectedColumnEmpty, setIsSelectedColumnEmpty] = useState(true);
 
@@ -35,19 +26,11 @@ export default function Document(props) {
         getTextInputOverhead,
         getNextTextInput,
         getPrevTextInput,
-        columnFontSize,
-        setColumnFontSize,
-        renderColumn,
-        setRenderColumn,
-        columnHeading1FontSize,
-        setColumnHeading1FontSize,
-        columnHeading2FontSize,
-        setColumnHeading2FontSize, 
-        columnHeading3FontSize,
-        setColumnHeading3FontSize,
         getHeadingStateByTextInputId,
         isSelectedColumnEmpty,
-        setIsSelectedColumnEmpty
+        setIsSelectedColumnEmpty,
+        checkIsSelectedColumnEmpty,
+        checkIsColumnEmptyById
     }
 
 
@@ -60,6 +43,42 @@ export default function Document(props) {
 
         // TODO: confirm url change
     }, []);
+
+    
+    /**
+     * Overloading ```checkIsColumnEmtpyById```.
+     */
+    function checkIsSelectedColumnEmpty(): boolean {
+
+        const selectedColumnId = appContext.getSelectedColumnId();
+
+        return checkIsColumnEmptyById(selectedColumnId);
+    }
+
+
+    /**
+     * @returns true if no chars are found in any text input of selected column, else false (Tabs and spaces don't count as chars here)
+     */
+    function checkIsColumnEmptyById(columnId: string): boolean {
+
+        if (isBlank(columnId))
+            return true;
+
+        const columnTextInputs = $("#" + columnId + " .TextInput");
+
+        let isEmpty = true;
+        
+        Array.from(columnTextInputs).forEach(textInputElement => {
+            const textInput = textInputElement as HTMLInputElement;
+
+            if (!isBlank(textInput.value)) {
+                isEmpty = false;
+                return;
+            }
+        });
+
+        return isEmpty;
+    }
 
 
     /**
@@ -179,18 +198,18 @@ export default function Document(props) {
 
         switch (textInputIndex) {
             case 0: 
-                if (!isBlank(columnHeading1FontSize))
-                    return [columnHeading1FontSize, setColumnHeading1FontSize];
+                if (appContext.columnHeading1FontSize)
+                    return [appContext.columnHeading1FontSize, appContext.setColumnHeading1FontSize];
                 break;
 
             case 1: 
-                if (!isBlank(columnHeading2FontSize))
-                    return [columnHeading2FontSize, setColumnHeading2FontSize];
+                if (appContext.columnHeading2FontSize)
+                    return [appContext.columnHeading2FontSize, appContext.setColumnHeading2FontSize];
                 break;
 
             case 2: 
-                if (!isBlank(columnHeading3FontSize))
-                    return [columnHeading3FontSize, setColumnHeading3FontSize];
+                if (appContext.columnHeading3FontSize)
+                    return [appContext.columnHeading3FontSize, appContext.setColumnHeading3FontSize];
                 break;
         }
 
@@ -250,16 +269,8 @@ export const DocumentContext = createContext({
     setColumnFontSize: (columnFontSize: string) => {},
     isSelectedColumnEmpty: true,
     setIsSelectedColumnEmpty: (isEmpty: boolean) => {},
-
-    renderColumn: false,
-    setRenderColumn: (renderColumn: boolean) => {},
-
-    columnHeading1FontSize: "",
-    setColumnHeading1FontSize: (headingFontSize: string) => {},
-    columnHeading2FontSize: "",
-    setColumnHeading2FontSize: (headingFontSize: string) => {},
-    columnHeading3FontSize: "",
-    setColumnHeading3FontSize: (headingFontSize: string) => {},
+    checkIsSelectedColumnEmpty: (): boolean => {return true},
+    checkIsColumnEmptyById: (columnId: string): boolean => {return true},
 
     getHeadingStateByTextInputId: (textInputId: string): [string, (fontSize: string) => void] | null => {return null}
 })

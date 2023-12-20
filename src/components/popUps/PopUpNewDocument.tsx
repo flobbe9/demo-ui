@@ -4,7 +4,7 @@ import { AppContext } from "../../App";
 import { Orientation } from "../../enums/Orientation";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hidePopUp, log } from "../../utils/Utils";
+import { log } from "../../utils/Utils";
 import { Link } from "react-router-dom";
 
 

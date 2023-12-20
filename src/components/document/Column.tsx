@@ -25,7 +25,7 @@ export default function Column(props: {
     
     const [columnType, setColumnType] = useState(1);
     const [numLinesPerParagraph, setNumLinesPerParagraph] = useState(1);
-    const [paragraphs, setParagraphs] = useState([<div key={0}></div>]);
+    const [paragraphs, setParagraphs] = useState<React.JSX.Element[]>();
     
     const context = {
         columnType,
@@ -44,12 +44,10 @@ export default function Column(props: {
 
     useEffect(() => {
         // case: rerender this column for font size changes
-        if (documentContext.renderColumn && appContext.getSelectedColumnId() === id) {
-            setParagraphs(initParagraphs(documentContext.columnFontSize));
-            documentContext.setRenderColumn(false);
-        }
+        if (appContext.getSelectedColumnId() === id)
+            setParagraphs(initParagraphs(appContext.columnFontSize));
 
-    }, [documentContext.columnFontSize]);
+    }, [appContext.columnHeading1FontSize, appContext.columnHeading2FontSize, appContext.columnHeading3FontSize, appContext.columnFontSize]);
 
 
     function initParagraphs(fontSize: string | number): React.JSX.Element[] {
@@ -58,7 +56,7 @@ export default function Column(props: {
         const numParagraphs = getNumParagraphs(appContext.orientation, getCSSValueAsNumber(fontSize, 2), getHeadingFontSizes());
 
         for (let i = 0; i < numParagraphs; i++) 
-            paragraphs.push(<Paragraph key={i}
+            paragraphs.push(<Paragraph key={crypto.randomUUID()}
                                         pageIndex={props.pageIndex}
                                         columnIndex={props.columnIndex} 
                                         paragraphIndex={i} />)
@@ -74,12 +72,12 @@ export default function Column(props: {
     function getHeadingFontSizes(): number[] {
 
         return [
-            isBlank(documentContext.columnHeading1FontSize) ? appContext.selectedTextInputStyle.fontSize : 
-                                                              getCSSValueAsNumber(documentContext.columnHeading1FontSize, 2),
-            isBlank(documentContext.columnHeading2FontSize) ? appContext.selectedTextInputStyle.fontSize : 
-                                                              getCSSValueAsNumber(documentContext.columnHeading2FontSize, 2),
-            isBlank(documentContext.columnHeading3FontSize) ? appContext.selectedTextInputStyle.fontSize : 
-                                                              getCSSValueAsNumber(documentContext.columnHeading3FontSize, 2),
+            !appContext.columnHeading1FontSize ? appContext.selectedTextInputStyle.fontSize : 
+                                                getCSSValueAsNumber(appContext.columnHeading1FontSize, 2),
+            !appContext.columnHeading2FontSize ? appContext.selectedTextInputStyle.fontSize : 
+                                                getCSSValueAsNumber(appContext.columnHeading2FontSize, 2),
+            !appContext.columnHeading3FontSize ? appContext.selectedTextInputStyle.fontSize : 
+                                                getCSSValueAsNumber(appContext.columnHeading3FontSize, 2),
         ];
     }
 
@@ -95,30 +93,32 @@ export default function Column(props: {
         if (!isBlank(selectedColumnId) && !isBlank(newSelectedColumnId)) {
             const columnTextInputs = $("#" + id + " .paragraphContainer .Paragraph .TextInput");
 
-            // case: column contains non-heading inputs
+            // update column font size
             if (columnTextInputs.length > NUM_HEADINGS_PER_COLUMN) {
                 const columnFontSize = columnTextInputs.get(3)!.style.fontSize;
 
                 // case: column fontSize has changed
-                if (documentContext.columnFontSize !== columnFontSize) {
-                    documentContext.setRenderColumn(false);
-                    documentContext.setColumnFontSize(columnFontSize);
-                }
+                if (appContext.columnFontSize !== columnFontSize) 
+                    appContext.setColumnFontSize(columnFontSize);
             }
 
-            // update heading states
             if (columnTextInputs.length) {
+                // update heading font sizes
                 const columnHeading1FontSize = columnTextInputs.get(0)!.style.fontSize;
-                if (documentContext.columnHeading1FontSize !== columnHeading1FontSize)
-                    documentContext.setColumnHeading1FontSize(columnHeading1FontSize);
+                if (appContext.columnHeading1FontSize !== columnHeading1FontSize)
+                    appContext.setColumnHeading1FontSize(columnHeading1FontSize);
 
                 const columnHeading2FontSize = columnTextInputs.get(1)!.style.fontSize;
-                if (documentContext.columnHeading2FontSize !== columnHeading2FontSize)
-                    documentContext.setColumnHeading2FontSize(columnHeading2FontSize);
+                if (appContext.columnHeading2FontSize !== columnHeading2FontSize)
+                    appContext.setColumnHeading2FontSize(columnHeading2FontSize);
 
                 const columnHeading3FontSize = columnTextInputs.get(2)!.style.fontSize;
-                if (documentContext.columnHeading3FontSize !== columnHeading3FontSize)
-                    documentContext.setColumnHeading3FontSize(columnHeading3FontSize);
+                if (appContext.columnHeading3FontSize !== columnHeading3FontSize)
+                    appContext.setColumnHeading3FontSize(columnHeading3FontSize);
+                
+                // update column empty
+                if (appContext.getSelectedColumnId() !== appContext.getColumnIdByTextInputId(id))
+                    documentContext.setIsSelectedColumnEmpty(documentContext.checkIsColumnEmptyById(id));
             }
         }
     }
@@ -136,23 +136,6 @@ export default function Column(props: {
     }
 
 
-    function handleSelectType(columnType: number): void {
-
-        // TODO: set config by columnType
-        setColumnType(columnType);
-    }
-    
-    
-    function handleTypeSubmit(): void {
-        
-        $("#" + id + " .columnOverlay").hide();
-        $("#" + id + " .paragraphContainer").show();
-
-        shutDownColumnAnimations();
-        setParagraphs(initParagraphs(appContext.selectedTextInputStyle.fontSize));
-    }
-
-        
     /**
      * Calculate the number of paragraphs that can fit inside this column, considering the fontSize of the column,
      * the {@link Orientation} of the page and the numLinesPerParagraph.

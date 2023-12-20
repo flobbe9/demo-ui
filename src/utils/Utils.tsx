@@ -191,7 +191,7 @@ export function getCursorIndex(textInputId: string): number {
  * @param textInputId id of text input to compare text width to
  * @param inputOverhead amount of pixels of input's width that should not be considered for calculation, i.e. padding or border.
  * @param testChars string that is not part of input value but should be included in value when calculating value's width
- * @returns true if width of text is greater than width of input - 10
+ * @returns true if width of text is greater than width of input
  */
 export function isTextLongerThanInput(textInputId: string, inputOverhead: number, testChars = ""): boolean {
 
