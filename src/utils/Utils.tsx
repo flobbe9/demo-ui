@@ -373,6 +373,12 @@ export function resetPopUp(setPopupContent: (content: React.JSX.Element) => void
 }
 
 
+export function isRGB(color: string): boolean {
+
+    return color.toLowerCase().includes("rgb");
+}
+
+
 /**
  * @param rgb string formatted like ```rgb(0, 0, 0)```
  * @returns hex string with '#' prepended

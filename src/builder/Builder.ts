@@ -69,7 +69,6 @@ function buildContent(numColumns: number): BasicParagraph[] {
     content.push(getDefaultBasicParagraph());
 
     // heading
-    // TODO: figure out how to seperate heading from column
     const heading = $(".heading");
     const headingText = getTextInputContent(heading);
     if (!isBlank(headingText))

@@ -117,9 +117,8 @@ export default function Select(props: {
                  onMouseOut={handleMouseOut}
                  >
                 {/* <option> somehow solves the overflow problem xd */}
-                {/* TODO: stop changing width, use overflow */}
                 <div className="selectLabel dontMarkText dontHideSelect" title={props.label}>{props.label}</div>
-                <img className="arrowDownIcon dontHideSelect dontMarkText" src="arrowDown.png" alt="arrow down" />
+                <i className="fa-solid fa-chevron-down dontHideSelect dontMarkText"></i>
             </div>
 
             {/* all options box */}

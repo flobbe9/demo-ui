@@ -5,7 +5,6 @@ import { SELECTED_STYLE } from "../../utils/GlobalVariables";
 import { log } from "../../utils/Utils";
 
 
-// TODO: test
 export default function Checkbox(props: {
     id: string, 
     checked: boolean,

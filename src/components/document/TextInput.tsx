@@ -15,10 +15,8 @@ import { ColumnContext } from "./Column";
     // strg c / strg v(?)
 
 // TODO: increase font size but only on display
-// TOOD: underline tabs
+// TODO: underline tabs
 // TODO: fix tab size
-// TODO: font size does not work
-// TODO: focus after select
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,

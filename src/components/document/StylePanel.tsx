@@ -18,7 +18,6 @@ import Popup from "../Popup";
 // TODO: add key combinations for most buttons
     // set title to combination
 
-// TODO: decrease margin top in small mode
 export default function StylePanel(props) {
 
     const id = props.id ? "StylePanel" + props.id : "StylePanel";

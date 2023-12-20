@@ -44,7 +44,6 @@ export default function App() {
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
     const [columnFontSize, setColumnFontSize] = useState(selectedTextInputStyle.fontSize + "px");
-    // TODO: make this generic sothat adding headings is easier, ColumnTypeConfig?
     const [columnHeading1FontSize, setColumnHeading1FontSize] = useState<string>(null);
     const [columnHeading2FontSize, setColumnHeading2FontSize] = useState<string>(null);
     const [columnHeading3FontSize, setColumnHeading3FontSize] = useState<string>(null);

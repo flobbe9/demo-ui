@@ -1,7 +1,6 @@
 .StylePanelSection {
     height: 120px;
     padding: 7px 0;
-    /* position: relative; */
     
     .buttonContainer {
         border-right: 1px solid rgb(125, 125, 125);

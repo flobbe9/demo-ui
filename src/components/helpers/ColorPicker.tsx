@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/ColorPicker.css";
-import { log } from "../../utils/Utils";
+import { isRGB, log } from "../../utils/Utils";
 
 
 export default function ColorPicker(props: {
@@ -108,7 +108,7 @@ export default function ColorPicker(props: {
              className={className} 
              ref={componentRef}
              onClick={handleClick} 
-             title={props.color} 
+             title={isRGB(props.color) ? props.color : "#" + props.color} 
              style={props.componentStyle}
              >
             <label className="colorLabel"

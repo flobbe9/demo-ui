@@ -1,6 +1,6 @@
 import { BreakType } from "../enums/Breaktype";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, isBlank, log, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
+import { getCSSValueAsNumber, isBlank, isRGB, log, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
 
 
 /**
@@ -127,10 +127,4 @@ function appendUnit(str: string | number, unit: string): string {
     str = str.toString();
 
     return str.includes(unit) ? str : str + unit;
-}
-
-
-function isRGB(color: string): boolean {
-
-    return color.toLowerCase().includes("rgb");
 }
