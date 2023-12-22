@@ -44,8 +44,8 @@ export default function Column(props: {
 
 
     useEffect(() => {
-        // case: rerender this column for font size changes
-        if (appContext.getSelectedColumnId() === id)
+        // case: column empty and font sizes changed
+        if (appContext.getSelectedColumnId() === id && documentContext.isSelectedColumnEmpty)
             setParagraphs(initParagraphs(appContext.columnFontSize));
 
     }, [appContext.columnHeading1FontSize, appContext.columnHeading2FontSize, appContext.columnHeading3FontSize, appContext.columnFontSize]);
