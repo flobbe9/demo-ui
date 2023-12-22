@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import "../../assets/styles/Document.css";
 import Page from "./Page";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { confirmPageUnload, flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, getTabSpaces, getTextWidth, hidePopUp, insertString, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
+import { confirmPageUnload, flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, getTabSpaces, getTextWidth, hidePopup, insertString, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
 import { AppContext } from "../../App";
 import StylePanel from "./StylePanel";
 import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
@@ -38,7 +38,7 @@ export default function Document(props) {
     useEffect(() => {
         // confirmPageUnload();
 
-        hidePopUp(appContext.setPopupContent);
+        hidePopup(appContext.setPopupContent);
 
         $(".App").css("backgroundColor", "white");
     }, []);

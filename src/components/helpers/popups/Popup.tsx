@@ -1,7 +1,7 @@
 import React from "react";
-import "../assets/styles/Popup.css";
+import "../../../assets/styles/Popup.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../utils/Utils";
+import { log } from "../../../utils/Utils";
 
 
 export default function Popup(props: {

@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/Menu.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hidePopUp, log, togglePopUp } from "../utils/Utils";
+import { hidePopup, log, togglePopup } from "../utils/Utils";
 import { AppContext } from "../App";
-import Popup from "./Popup";
-import PopUpNewDocument from "./popUps/PopUpNewDocument";
+import Popup from "./helpers/popups/Popup";
+import PopupNewDocument from "./helpers/popups/PopupNewDocument"; 
 
 
 export default function Menu(props) {
@@ -18,7 +18,7 @@ export default function Menu(props) {
 
 
     useEffect(() => {
-        hidePopUp(appContext.setPopupContent);
+        hidePopup(appContext.setPopupContent);
 
         $(".App").css("backgroundColor", "rgb(228, 228, 228)")
     }, []);
@@ -40,12 +40,12 @@ export default function Menu(props) {
         appContext.setPopupContent(
             <Popup width="large"
                     height="large">
-                <PopUpNewDocument />
+                <PopupNewDocument />
             </Popup>
         );
 
         // toggle popup
-        togglePopUp(appContext.setPopupContent);
+        togglePopup(appContext.setPopupContent);
     }
 
 

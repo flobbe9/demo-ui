@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import "../../assets/styles/PopupHeadingConfig.css";
-import { AppContext } from "../../App";
+import "../../../assets/styles/PopupHeadingConfig.css";
+import { AppContext } from "../../../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getPartFromDocumentId, hidePopUp, isBlank, log, stringToNumber } from "../../utils/Utils";
-import Select from "../helpers/Select";
-import { FONT_SIZES } from "../../utils/GlobalVariables";
+import { getCSSValueAsNumber, getPartFromDocumentId, hidePopup, isBlank, log, stringToNumber } from "../../../utils/Utils";
+import Select from "../../helpers/Select";
+import { FONT_SIZES } from "../../../utils/GlobalVariables";
 
 
 export default function PopupHeadingConfig(props:{
@@ -47,7 +47,7 @@ export default function PopupHeadingConfig(props:{
             if (props.handleSubmit)
                 props.handleSubmit();
 
-            hidePopUp(appContext.setPopupContent);
+            hidePopup(appContext.setPopupContent);
         }
     }
 
@@ -65,7 +65,7 @@ export default function PopupHeadingConfig(props:{
     return (
         <div id={id} className={className} style={props.style}>
             <div className="header flexRight">
-                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopUp dontMarkText"/>
+                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopup dontMarkText"/>
             </div>
 
             <div className="body textCenter">
@@ -116,7 +116,7 @@ export default function PopupHeadingConfig(props:{
                     <div className="heading heading1" style={{
                         fontSize: appContext.columnHeading3FontSize || appContext.columnFontSize
                     }}>
-                        Überschrift 3
+                        Überschrift 3   
                     </div>
 
                     <Select id={"Heading3FontSize"}
@@ -133,7 +133,7 @@ export default function PopupHeadingConfig(props:{
 
 
             <div className="footer flexRight">
-                <button className="blackButton blackButtonContained buttonMedium hidePopUp"
+                <button className="blackButton blackButtonContained buttonMedium hidePopup"
                         onClick={handleSubmit}>
                     OK
                 </button>

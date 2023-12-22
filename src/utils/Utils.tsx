@@ -330,40 +330,40 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 /**
  * Display ``` #PopupContainer``` and ``` .appOverlay```.
  * 
- * @param setPopupContent setter of content inside ```#PopUpContainer```
+ * @param setPopupContent setter of content in  side ```#PopupContainer```
  * @param duration fade in / out time in milliseconds
  */
-export function togglePopUp(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
+export function togglePopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
 
     $("#PopupContainer").fadeToggle(duration);
     $(".appOverlay").fadeToggle(duration);
 
-    resetPopUp(setPopupContent);
+    resetPopup(setPopupContent);
 }
 
 
 /**
  * Hide ```#PopupContainer``` and ``` .appOverlay```.
  * 
- * @param setPopupContent setter of content inside ```#PopUpContainer```
+ * @param setPopupContent setter of content inside ```#PopupContainer```
  * @param duration fade in / out time in milliseconds
  */
-export function hidePopUp(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
+export function hidePopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
 
     $("#PopupContainer").fadeOut(duration);
     $(".appOverlay").fadeOut(duration);
 
-    resetPopUp(setPopupContent, duration);
+    resetPopup(setPopupContent, duration);
 }
 
 
 /**
- * Set content from ```#PopUpContainer``` to ```<></>``` and reset className.
+ * Set content from ```#PopupContainer``` to ```<></>``` and reset className.
  * 
- * @param setPopupContent setter of content inside ```#PopUpContainer```
+ * @param setPopupContent setter of content inside ```#PopupContainer```
  * @param duration milliseconds to wait until reset
  */
-export function resetPopUp(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
+export function resetPopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
 
     setTimeout(() => {
         if ($("#PopupContainer").css("display") === "none") 

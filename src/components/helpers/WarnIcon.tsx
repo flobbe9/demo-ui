@@ -13,7 +13,7 @@ export default function WarnIcon(props: {
     popupStyle?: React.CSSProperties,
 
     /** if true, the popup will be displayed on hover, else the popup wont be displayed at all */
-    showPopUpOnHover?: boolean,
+    showPopupOnHover?: boolean,
     children?
 }) {
 
@@ -27,7 +27,7 @@ export default function WarnIcon(props: {
         const isVisible = $(popupRef.current!).is(":visible");
 
         // case: hidden
-        if (props.showPopUpOnHover && !isVisible)
+        if (props.showPopupOnHover && !isVisible)
             $(popupRef.current!).fadeIn(100);
 
         // case: click on icon

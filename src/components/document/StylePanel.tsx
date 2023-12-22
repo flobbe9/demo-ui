@@ -7,12 +7,12 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, togglePopUp } from "../../utils/Utils";
+import { flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, togglePopup } from "../../utils/Utils";
 import { DocumentContext } from "./Document";
 import Button from "../helpers/Button";
 import WarnIcon from "../helpers/WarnIcon";
-import PopupHeadingConfig from "../popUps/PopupHeadingConfig";
-import Popup from "../Popup";
+import PopupHeadingConfig from "../helpers/popups/PopupHeadingConfig";
+import Popup from "../helpers/popups/Popup";
 import { FONT_FAMILIES, FONT_SIZES } from "../../utils/GlobalVariables";
 
 
@@ -112,7 +112,7 @@ export default function StylePanel(props) {
         );
 
         // toggle
-        togglePopUp(appContext.setPopupContent);
+        togglePopup(appContext.setPopupContent);
     }
 
 
@@ -148,7 +148,7 @@ export default function StylePanel(props) {
                                     width: "120px",
                                     zIndex: 1
                                 }}
-                                showPopUpOnHover={true}
+                                showPopupOnHover={true}
                                 title="Schriftgöße ändern"
                             >
                                 Um die Schriftgröße zu verändern, lösche allen Text in der Spalte.

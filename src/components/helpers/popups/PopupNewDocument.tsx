@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from "react"; 
-import "../../assets/styles/PopUpNewDocument.css";
-import { AppContext } from "../../App";
-import { Orientation } from "../../enums/Orientation";
-import RadioButton from "../helpers/RadioButton";
+import "../../../assets/styles/PopupNewDocument.css";
+import { AppContext } from "../../../App";
+import { Orientation } from "../../../enums/Orientation";
+import RadioButton from "../../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../../utils/Utils";
+import { log } from "../../../utils/Utils";
 import { Link } from "react-router-dom";
 
 
-export default function PopUpNewDocument(props) {
+export default function PopupNewDocument(props) {
 
-    const className = props.className ? "PopUpNewDocument " + props.classname : "PopUpNewDocument";
-    const id = props.id ? "PopUpNewDocument " + props.id : "PopUpNewDocument";
+    const className = props.className ? "PopupNewDocument " + props.classname : "PopupNewDocument";
+    const id = props.id ? "PopupNewDocument " + props.id : "PopupNewDocument";
 
     const [containerIndex, setContainerIndex] = useState(0);
     const [isContinue, setIsContinue] = useState(false);
@@ -110,7 +110,7 @@ export default function PopUpNewDocument(props) {
 
 
     const nextButton = <button id="nextButton"
-                                className={"slideButton slideLeftButton blackButton blackButtonContained buttonSmall" + (containerIndex === 1 ? " hidePopUp" : "")}// last container
+                                className={"slideButton slideLeftButton blackButton blackButtonContained buttonSmall" + (containerIndex === 1 ? " hidePopup" : "")}// last container
                                 onClick={() => handleNextContainer(false)}>
                             {/* last container */}
                             {containerIndex === 1 ? "Fertig" : "Weiter"}
@@ -120,7 +120,7 @@ export default function PopUpNewDocument(props) {
     return (
         <div id={id} className={className}> 
             <div className="header flexRight">
-                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopUp dontMarkText"/>
+                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopup dontMarkText"/>
             </div>
             
             <div className="body flexCenter">

@@ -6,10 +6,10 @@ import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import Menu from "./components/Menu";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, hidePopUp, isBlank, log, stringToNumber } from "./utils/Utils";
+import { getDocumentId, getPartFromDocumentId, hidePopup, isBlank, log, stringToNumber } from "./utils/Utils";
 import { Orientation } from "./enums/Orientation";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "./abstract/Style";
-import PopupContainer from "./components/PopupContainer";
+import PopupContainer from "./components/helpers/popups/PopupContainer";
 
 
 /**
@@ -35,7 +35,7 @@ export default function App() {
     // use this when backend login is implemented (https://www.baeldung.com/spring-security-csrf)
     // const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
 
-    const [escapePopUp, setEscapePopUp] = useState(true);
+    const [escapePopup, setEscapePopup] = useState(true);
     const [popupContent, setPopupContent] = useState(<></>);
     
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
@@ -53,7 +53,7 @@ export default function App() {
     const appRef = useRef(null);
 
     const context = {
-        setEscapePopUp: setEscapePopUp,
+        setEscapePopup: setEscapePopup,
         setPopupContent: setPopupContent,
 
         orientation: orientation,
@@ -127,8 +127,8 @@ export default function App() {
     function handleClick(event): void {
 
         // hide popup
-        if (event.target.className.includes("hidePopUp") && escapePopUp)
-            hidePopUp(setPopupContent);
+        if (event.target.className.includes("hidePopup") && escapePopup)
+            hidePopup(setPopupContent);
 
         // hide select options
         if (!event.target.className.includes("dontHideSelect")) 
@@ -147,7 +147,7 @@ export default function App() {
     function handleGlobalKeyDown(event): void {
 
         if (event.key === "Escape") 
-            hidePopUp(setPopupContent);
+            hidePopup(setPopupContent);
 
         if (event.key === "Control")
             setPressedKey("Control");
@@ -265,7 +265,7 @@ export default function App() {
 
                     <NavBar />
 
-                    <div className="appOverlay hidePopUp"></div>
+                    <div className="appOverlay hidePopup"></div>
 
                     <div className="content">
                         <div className="flexCenter">
@@ -291,7 +291,7 @@ export default function App() {
 
 
 export const AppContext = createContext({
-    setEscapePopUp: (escapePopUp: boolean) => {},
+    setEscapePopup: (escapePopup: boolean) => {},
     setPopupContent: (content: React.JSX.Element) => {},
 
     orientation: Orientation.PORTRAIT,

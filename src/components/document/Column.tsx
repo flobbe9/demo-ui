@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import "../../assets/styles/Column.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getDocumentId, isBlank, log, togglePopUp } from "../../utils/Utils";
+import { getCSSValueAsNumber, getDocumentId, isBlank, log, togglePopup } from "../../utils/Utils";
 import Paragraph from "./Paragraph";
 import { AppContext } from "../../App";
 import { DocumentContext } from "./Document";
@@ -187,14 +187,6 @@ export default function Column(props: {
     return (
         <div id={id} className={className}>
             <ColumnContext.Provider value={context}>
-                {/* <div className="columnOverlay flexCenter" onClick={handlePopUpToggle} title="Spalten Typ auswählen">
-                    <div className="plusIconBackgroundContainer flexCenter">
-                        <div className="plusIconBackground flexCenter">
-                            <img className="plusIcon dontMarkText" src="plusIcon.png" alt="plus icon" />
-                        </div>
-                    </div>
-                </div> */}
-
                 <div className={"paragraphContainer columnType-" + columnType}>
                     {paragraphs}
                 </div>
