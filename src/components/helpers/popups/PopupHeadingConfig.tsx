@@ -7,7 +7,7 @@ import Select from "../../helpers/Select";
 import { FONT_SIZES } from "../../../utils/GlobalVariables";
 
 
-export default function PopupHeadingConfig(props:{
+export default function PopupHeadingConfig(props: {
     handleSubmit?,
     id?: string,
     className?: string,
