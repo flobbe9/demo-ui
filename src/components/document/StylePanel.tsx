@@ -13,6 +13,7 @@ import Button from "../helpers/Button";
 import WarnIcon from "../helpers/WarnIcon";
 import PopupHeadingConfig from "../popUps/PopupHeadingConfig";
 import Popup from "../Popup";
+import { FONT_FAMILIES, FONT_SIZES } from "../../utils/GlobalVariables";
 
 
 // TODO: add key combinations for most buttons
@@ -39,33 +40,6 @@ export default function StylePanel(props) {
     }, [appContext.selectedTextInputId]);
 
     
-    /**
-     * Set font size of all heading text inputs offered by ```<PopupHeadingConfig />```.
-     */
-    // function setHeadingFontSize(): void {
-
-    //     const columnId = appContext.getSelectedColumnId();
-    //     // case: no text input selected yet
-    //     if (isBlank(columnId))
-    //         return;
-    
-    //     // find first three text inputs
-    //     const columnTextInputs = $("#" + columnId + " .paragraphContainer .Paragraph .TextInput");
-
-    //     const heading1 = columnTextInputs.get(0)
-    //     if (heading1)
-    //         heading1.style.fontSize = fontSizeHeading1 || appContext.columnFontSize;
-
-    //     const heading2 = columnTextInputs.get(1)
-    //     if (heading2)
-    //         heading2.style.fontSize = fontSizeHeading2 || appContext.columnFontSize;
-
-    //     const heading3 = columnTextInputs.get(2)
-    //     if (heading3)
-    //         heading3.style.fontSize = fontSizeHeading3 || appContext.columnFontSize;
-    // }
-    
-
     function handleFontFamilySelect(fontFamily: string): void {
 
         appContext.selectedTextInputStyle.fontFamily = fontFamily;
@@ -186,18 +160,10 @@ export default function StylePanel(props) {
                                     hoverBackgroundColor="rgb(245, 245, 245)"
                                     className="mr-sm-5 mr-md-3"
                                     boxStyle={{borderColor: "rgb(200, 200, 200)", width: "70px"}}
-                                    optionsBoxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                    optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
                                     handleSelect={handleFontSizeSelect}
                                     title="Schriftgröße"
-                                    options={[
-                                        ["10px", "10"],
-                                        ["11px", "11"],
-                                        ["12px", "12"],
-                                        ["14px", "14"],
-                                        ["16px", "16"],
-                                        ["18px", "18"],
-                                        ["20px", "20"]
-                                    ]}
+                                    options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
                                     />
                         </div>
 
@@ -230,15 +196,11 @@ export default function StylePanel(props) {
                                 disabled={disabled}
                                 hoverBackgroundColor="rgb(245, 245, 245)"
                                 componentStyle={{width: "100%"}}
-                                optionsBoxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
                                 handleSelect={handleFontFamilySelect}
                                 title="Schriftart"
-                                options={[
-                                    ["Calibri", "Calibri"],
-                                    ["Arial", "Arial"],
-                                    ["Times new roman", "Times new roman"]
-                                ]}
+                                options={FONT_FAMILIES.sort().map(font => [font, font])}
                                 />
                     </div>
 

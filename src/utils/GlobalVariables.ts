@@ -4,18 +4,47 @@ import React from "react";
 export const BACKEND_BASE_URL = "" + process.env.REACT_APP_BACKEND_BASE_URL;
 export const USER_SERVICE_BASE_URL = "" + process.env.REACT_APP_USER_SERVICE_BASE_URL;
 
-// TODO: improove this
-export const fontFamilies = [
-    "Arial", 
+export const FONT_FAMILIES = [
+    "Helvetica",
+    "Arial",
+    "Arial Black",
     "Verdana",
     "Tahoma",
     "Trebuchet MS",
+    "Impact",
+    "Gill Sans",
     "Times New Roman",
     "Georgia",
-    "Garamond",
-    "Courier New",
-    "Brush Script MT"
+    "Palatino",
+    "Baskerville",
+    "Andalé Mono",
+    "Courier",
+    "Lucida",
+    "Monaco",
+    "Bradley Hand",
+    "Brush Script MT",
+    "Luminari",
+    "Comic Sans MS"
 ];
+
+export const FONT_SIZES = [
+    8,
+    9,
+    10,
+    11,
+    12,
+    14,
+    16,
+    18,
+    20,
+    22,
+    24,
+    26,
+    28,
+    36,
+    48,
+    72
+]
 
 export type Side = "top" | "right" | "left" | "bottom" | "none";
 
@@ -49,7 +78,7 @@ export function getNumLinesPerColumn(orientation: Orientation, fontSize: number)
 /** Number of empty lines on top of every column, becuase of backend */
 const numFillerLines = 1;
 
-const numLinesPortrait: ReadonlyArray<Object> = [{
+const NUM_LINES_PROTRAIT: ReadonlyArray<Object> = [{
     8: 76 - numFillerLines,
     9: 68 - numFillerLines,
     10: 61 - numFillerLines,
@@ -80,11 +109,11 @@ const numLinesPortrait: ReadonlyArray<Object> = [{
  */
 function getNumLinesPerColumnPortraitByFontSize(fontSize: number): number {
 
-    return numLinesPortrait[0][fontSize];
+    return NUM_LINES_PROTRAIT[0][fontSize];
 }
 
 
-const numLinesLandscape: ReadonlyArray<Object> = [{
+const NUM_LINES_LANDSCAPE: ReadonlyArray<Object> = [{
     8: 53 - numFillerLines,
     9: 47 - numFillerLines,
     10: 43 - numFillerLines,
@@ -115,7 +144,7 @@ const numLinesLandscape: ReadonlyArray<Object> = [{
  */
 function getNumLinesPerColumnLandscapeByFontSize(fontSize: number): number {
 
-    return numLinesLandscape[0][fontSize];
+    return NUM_LINES_LANDSCAPE[0][fontSize];
 }
 
 const WsPerLineLandscapeFontSize14 = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";

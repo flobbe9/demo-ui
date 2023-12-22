@@ -32,6 +32,7 @@
         display: none;
         padding: 4px;
         position: absolute;
+        overflow-y: auto;
         text-align: left;
         z-index: 2;
         

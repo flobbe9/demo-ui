@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import "../../assets/styles/Document.css";
 import Page from "./Page";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, getTabSpaces, getTextWidth, hidePopUp, insertString, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
+import { confirmPageUnload, flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, getTabSpaces, getTextWidth, hidePopUp, insertString, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
 import { AppContext } from "../../App";
 import StylePanel from "./StylePanel";
 import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
@@ -19,6 +19,7 @@ export default function Document(props) {
     const appContext = useContext(AppContext);
 
     const [isSelectedColumnEmpty, setIsSelectedColumnEmpty] = useState(true);
+    const [textInputBorderFlashing, setTextInputBorderFlashing] = useState(false);
 
     const context = {
         handleTab,
@@ -40,11 +41,9 @@ export default function Document(props) {
         hidePopUp(appContext.setPopupContent);
 
         $(".App").css("backgroundColor", "white");
-
-        // TODO: confirm url change
     }, []);
 
-    
+
     /**
      * Overloading ```checkIsColumnEmtpyById```.
      */
@@ -90,7 +89,7 @@ export default function Document(props) {
 
         // case: text too long
         if (isTextLongerThanInput(appContext.selectedTextInputId, getTextInputOverhead(), getTabSpaces())) {
-            handleTextLongerThanLine(appContext.selectedTextInputId);
+            handleTextLongerThanLine(appContext.selectedTextInputId, "rgb(0, 255, 255)");
             return;
         }
 
@@ -105,10 +104,21 @@ export default function Document(props) {
     }
 
 
-    function handleTextLongerThanLine(textInputId: string): void {
+    /**
+     * Flash border bottom color of text input and go back to border color from before. Use ```textInputborderFlashing``` state to
+     * prevent flashing after event action.
+     * 
+     * @param textInputId id of text input where text is too long
+     */
+    async function handleTextLongerThanLine(textInputId: string, initialBorderColor = "rgb(128, 128, 128)"): Promise<void> {
 
-        // TODO: reconsider black
-        flashBorder($("#" + textInputId), "bottom", "red", "black", 200);
+        // case: border still flashing
+        if (textInputBorderFlashing)
+            return;
+
+        setTextInputBorderFlashing(true);
+        await flashBorder($("#" + textInputId), "bottom", "red", initialBorderColor, 200);
+        setTextInputBorderFlashing(false);
     }
 
 
@@ -260,7 +270,7 @@ export default function Document(props) {
 
 export const DocumentContext = createContext({
     handleTab: (event) => {},
-    handleTextLongerThanLine: (iputId: string) => {},
+    handleTextLongerThanLine: (iputId: string, initialBorderColor?: string) => {},
     getTextInputOverhead: (): number => {return 0},
     getNextTextInput: (inputId: string): JQuery | null => {return null},
     getPrevTextInput: (inputId: string): JQuery | null => {return null},

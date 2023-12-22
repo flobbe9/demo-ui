@@ -91,7 +91,7 @@ export default function TextInput(props: {
             appContext.pressedKey === "") {
 
             event.preventDefault();
-            documentContext.handleTextLongerThanLine(id);
+            documentContext.handleTextLongerThanLine(id, "aqua");
             return;
         }
 

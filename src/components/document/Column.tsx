@@ -9,6 +9,7 @@ import { NUM_HEADINGS_PER_COLUMN, getNumLinesPerColumn } from "../../utils/Globa
 import { Orientation } from "../../enums/Orientation";
 
 
+// TODO: num lines per column calculation inaccurate with large headings
 export default function Column(props: {
     pageIndex: number,
     columnIndex: number,

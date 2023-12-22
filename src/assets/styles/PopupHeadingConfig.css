@@ -13,10 +13,12 @@
 
     .body {
         height: 85%;
-        /* overflow: auto; */
+        overflow: auto;
 
         .headingContainer {
             .heading {
+                overflow-x: hidden;
+                white-space: nowrap;
                 width: 50%;
             }
 

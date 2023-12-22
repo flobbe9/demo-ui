@@ -302,7 +302,7 @@ export function getWidthRelativeToWindow(width: string | number, unitDigits: num
         return "";
     }
 
-    // TODO: will this work if one line has not the same width as the window?
+    // NOTE: will this work if one line has not the same width as the window?
     const widhInPercent = (getCSSValueAsNumber(width.toString(), unitDigits) / windowWidth) * 100;
 
     return widhInPercent + "%";
@@ -477,11 +477,11 @@ export function confirmPageUnload(): void {
  * @param holdTime time in ms that the border stays in given flashColor
  * @return promise that resolves once animation is finished
  */
-export function flashBorder(element: JQuery,
+export async function flashBorder(element: JQuery,
                             borderSide: Side, 
                             flashColor: string, 
                             endColor: string,
-                            holdTime = 1000): any {
+                            holdTime = 1000) {
 
     if (!element.length) {
         logWarn("flashBorder() failed")
@@ -491,8 +491,10 @@ export function flashBorder(element: JQuery,
     const borderAttr = "border-" + borderSide + "-color";
 
     return new Promise((res, rej) => {
-        element.animate({[borderAttr]: flashColor}, 100, () => 
-            setTimeout(() => res(element.animate({[borderAttr]: endColor}, 100)), holdTime))
+        element.animate({[borderAttr]: flashColor}, 100, () => {
+            log(endColor)
+            setTimeout(() => res(element.animate({[borderAttr]: endColor}, 100)), holdTime)
+        })
     });
 }
 
@@ -531,7 +533,7 @@ export function replaceAtIndex(str: string, replacement: string, startIndex: num
 }
 
 
-// TODO: does not work
+// BUG: does not work
 // /**
 //  * @param keyName of event key to trigger (i.e. 'A' or 'Backspace')
 //  * @param eventTargetId id of the html element to trigger the event on

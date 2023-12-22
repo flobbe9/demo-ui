@@ -4,6 +4,7 @@ import { AppContext } from "../../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getCSSValueAsNumber, getPartFromDocumentId, hidePopUp, isBlank, log, stringToNumber } from "../../utils/Utils";
 import Select from "../helpers/Select";
+import { FONT_SIZES } from "../../utils/GlobalVariables";
 
 
 export default function PopupHeadingConfig(props:{
@@ -85,16 +86,9 @@ export default function PopupHeadingConfig(props:{
                             className="flexCenter"
                             componentStyle={{width: "30%"}} 
                             handleSelect={appContext.setColumnHeading1FontSize}
-                            options={[
-                                ["10px", "10"],
-                                ["11px", "11"],
-                                ["12px", "12"],
-                                ["14px", "14"],
-                                ["16px", "16"],
-                                ["18px", "18"],
-                                ["20px", "20"]
-                            ]}
-                    />
+                            optionsBoxStyle={{maxHeight: "30vb"}}
+                            options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
+                            />
                 </div>
 
                 {/* heading 2 */}
@@ -112,15 +106,8 @@ export default function PopupHeadingConfig(props:{
                             className="flexCenter"
                             componentStyle={{width: "30%"}} 
                             handleSelect={appContext.setColumnHeading2FontSize}
-                            options={[
-                                ["10px", "10"],
-                                ["11px", "11"],
-                                ["12px", "12"],
-                                ["14px", "14"],
-                                ["16px", "16"],
-                                ["18px", "18"],
-                                ["20px", "20"]
-                            ]}
+                            optionsBoxStyle={{maxHeight: "30vb"}}
+                            options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
                     />
                 </div>
 
@@ -128,22 +115,17 @@ export default function PopupHeadingConfig(props:{
                 <div className="headingContainer flexCenter">
                     <div className="heading heading1" style={{
                         fontSize: appContext.columnHeading3FontSize || appContext.columnFontSize
-                    }}>Überschrift 3</div>
+                    }}>
+                        Überschrift 3
+                    </div>
 
                     <Select id={"Heading3FontSize"}
                             label={getCSSValueAsNumber(appContext.columnHeading3FontSize || appContext.columnFontSize, 2).toString()}
                             className="flexCenter"
                             componentStyle={{width: "30%"}} 
                             handleSelect={appContext.setColumnHeading3FontSize}
-                            options={[
-                                ["10px", "10"],
-                                ["11px", "11"],
-                                ["12px", "12"],
-                                ["14px", "14"],
-                                ["16px", "16"],
-                                ["18px", "18"],
-                                ["20px", "20"]
-                            ]}
+                            optionsBoxStyle={{maxHeight: "30vb"}}
+                            options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
                     />
                 </div>
 
