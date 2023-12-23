@@ -106,7 +106,7 @@ export default function StylePanel(props) {
 
         // configure popup
         appContext.setPopupContent(
-            <Popup height="small" width="large">
+            <Popup height="large" width="large">
                 <PopupHeadingConfig />
             </Popup>
         );
@@ -144,14 +144,14 @@ export default function StylePanel(props) {
                                     boxShadow: "0 0 3px 1px rgb(200, 200, 200)",
                                     fontSize: "0.8em",
                                     marginTop: "2px",
-                                    padding: "3px",
-                                    width: "120px",
+                                    padding: "5px",
+                                    width: "130px",
                                     zIndex: 1
                                 }}
                                 showPopupOnHover={true}
                                 title="Schriftgöße ändern"
                             >
-                                Um die Schriftgröße zu verändern, lösche allen Text in der Spalte.
+                                Um Schriftgrößen zu verändern, lösche allen Text in der Spalte.
                             </WarnIcon>
 
                             <Select id="FontSize"

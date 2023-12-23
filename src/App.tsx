@@ -50,6 +50,8 @@ export default function App() {
     
     const [pressedKey, setPressedKey] = useState("");
 
+    const [documentFileName, setDocumentFileName] = useState("Dokument_1.docx");
+
     const appRef = useRef(null);
 
     const context = {
@@ -79,7 +81,10 @@ export default function App() {
         focusTextInput: focusTextInput,
         unFocusTextInput: unFocusTextInput,
 
-        pressedKey: pressedKey
+        pressedKey: pressedKey,
+
+        documentFileName,
+        setDocumentFileName
     }
 
 
@@ -140,7 +145,7 @@ export default function App() {
 
         // hide warn info popup
         if (!event.target.className.includes("dontHideWarnIcon"))
-            $(".WarnIcon .miniPopup").fadeOut(200);
+            $(".WarnIcon .miniPopup").hide();
     }
 
 
@@ -317,5 +322,7 @@ export const AppContext = createContext({
     focusTextInput: (id: string, updateSelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
     unFocusTextInput: (id: string) => {},
 
-    pressedKey: ""
+    pressedKey: "",
+    documentFileName: "",
+    setDocumentFileName: (fileName: string) => {}
 })

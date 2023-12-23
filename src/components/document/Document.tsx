@@ -7,10 +7,13 @@ import { AppContext } from "../../App";
 import StylePanel from "./StylePanel";
 import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
 import ControlBar from "../ControlBar";
+import Button from "../helpers/Button";
+import { buildDocument, downloadDocument } from "../../builder/Builder";
 
 
 // TODO: how to cache document?
 // TODO: fontsize looks smaller in frontend
+// TODO: update to bootstrap 5
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -36,7 +39,8 @@ export default function Document(props) {
 
 
     useEffect(() => {
-        // confirmPageUnload();
+        if (process.env.REACT_APP_ENV !== "dev")
+            confirmPageUnload();
 
         hidePopup(appContext.setPopupContent);
 
@@ -246,22 +250,48 @@ export default function Document(props) {
         return Array.from(columnTextInputs).indexOf(textInput.get(0)!);
     }
 
+    
+    async function buildAndDownloadDocument(): Promise<void> {
+
+        const buildResponse = await buildDocument(appContext.orientation, appContext.numColumns);
+
+        if (buildResponse.status === 200)
+            downloadDocument(false, appContext.documentFileName);
+    }
+
 
     return (
         <div id={id} className={className}>
-            <ControlBar />
+            {/* mobile controlbar */}
+            {/* <ControlBar /> */}
 
             <DocumentContext.Provider value={context}>
                 <StylePanel />
 
-                <div className="pageContainer">
-                    <div className="flexCenter">
-                        <Page pageIndex={0}/>
+                <div className="subContainer flexRight align-items-start">
+                    <div className="pageContainer">
+                        <div className="flexCenter">
+                            <Page pageIndex={0} />
+                        </div>
+
+                        <div className="flexCenter">
+                            <Page pageIndex={1}/>
+                        </div>
                     </div>
-                    <div className="flexCenter">
-                        <Page pageIndex={1}/>
+
+                    <div className="controlBar flexRight mr-2">
+                        <Button id={"DownloadDocument"}
+                                handlePromise={buildAndDownloadDocument}
+                                className="blackButton blackButtonContained"
+                                hoverBackgroundColor="rgb(50, 50, 50)"
+                                clickBackgroundColor="rgb(150, 150, 150)"
+                                title="Dokument herunterladen"
+                                >
+                            <i className="fa-regular fa-circle-down"></i> Download
+                        </Button>  
                     </div>
                 </div>
+
             </DocumentContext.Provider>
         </div>
     )

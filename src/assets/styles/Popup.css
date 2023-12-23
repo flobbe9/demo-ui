@@ -3,4 +3,12 @@
     border-radius: 5px;
     padding: 2%;
     width: 100%;
+
+    .closeIcon {
+        transition: opacity 0.2s;
+        
+        &:hover {
+            opacity: 0.5;
+        }
+    }
 }

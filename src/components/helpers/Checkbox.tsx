@@ -138,7 +138,11 @@ export default function Checkbox(props: {
                        disabled={disabled}
                        />
 
-                <div className="checkboxChildren dontMarkText flexCenter" ref={childrenRef} style={props.childrenStyle}>
+                <div className="checkboxChildren dontMarkText flexCenter" 
+                     ref={childrenRef} 
+                     style={props.childrenStyle}
+                     title={props.title}
+                     >
                     {props.children}
                 </div>
             </label>

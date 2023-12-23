@@ -7,7 +7,12 @@ import { log } from "../utils/Utils";
 import Button from "./helpers/Button";
 
 
-export default function ControlBar(props) {
+export default function ControlBar(props: {
+    id?: string,
+    className?: string,
+    key?: string,
+    chiildren?
+}) {
 
     const id = props.id ? "ControlBar" + props.id : "ControlBar";
     const className = props.className ? "ControlBar " + props.className : "ControlBar";
@@ -20,25 +25,23 @@ export default function ControlBar(props) {
         const buildResponse = await buildDocument(appContext.orientation, appContext.numColumns);
 
         if (buildResponse.status === 200)
-            downloadDocument(false);
+            downloadDocument(false, appContext.documentFileName);
     }
 
 
     return (
         <div id={id} className={className}>
-            <div className="flexCenter">
-                Dokument1.docx
-            </div>
-
-            <div className="flexRight">
+            <div className="downloadButtonContainer flexRight mr-3">
                 <Button id={"DownloadDocument"}
                         handlePromise={buildAndDownloadDocument}
-                        className="blackButton blackButtonContained" 
+                        childrenStyle={{
+                            padding: "3px"
+                        }}
                         hoverBackgroundColor="rgb(50, 50, 50)"
                         clickBackgroundColor="rgb(150, 150, 150)"
                         title="Dokument herunterladen"
-                >
-                    Download
+                        >
+                    <i className="fa-regular fa-circle-down"></i> Download
                 </Button>                
             </div>
         </div>

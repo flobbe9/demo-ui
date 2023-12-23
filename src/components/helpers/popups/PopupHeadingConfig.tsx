@@ -65,16 +65,16 @@ export default function PopupHeadingConfig(props: {
     return (
         <div id={id} className={className} style={props.style}>
             <div className="header flexRight">
-                <img src={"closeX.png"} alt="close icon" className="smallIconButton hidePopup dontMarkText"/>
+                <i className="fa-solid fa-xmark fa-xl closeIcon hidePopup"></i>
             </div>
 
-            <div className="body textCenter">
+            <div className="body">
                 <h2 className="textCenter">Spalte {selectedColumnIndex + 1}</h2><br />
 
                 {/* heading 1 */}
-                <div className="headingContainer flexCenter mb-3">
+                <div className="headingContainer flexCenter">
                     <div className="heading heading1" 
-                         style={{
+                        style={{
                             fontSize: appContext.columnHeading1FontSize || appContext.columnFontSize
                         }}
                     >
@@ -92,9 +92,9 @@ export default function PopupHeadingConfig(props: {
                 </div>
 
                 {/* heading 2 */}
-                <div className="headingContainer flexCenter mb-3">
+                <div className="headingContainer flexCenter">
                     <div className="heading heading1" 
-                         style={{
+                        style={{
                             fontSize: appContext.columnHeading2FontSize || appContext.columnFontSize
                         }}
                     >
@@ -106,7 +106,9 @@ export default function PopupHeadingConfig(props: {
                             className="flexCenter"
                             componentStyle={{width: "30%"}} 
                             handleSelect={appContext.setColumnHeading2FontSize}
-                            optionsBoxStyle={{maxHeight: "30vb"}}
+                            optionsBoxStyle={{
+                                maxHeight: "30vb",
+                            }}
                             options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
                     />
                 </div>
@@ -128,7 +130,6 @@ export default function PopupHeadingConfig(props: {
                             options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
                     />
                 </div>
-
             </div>
 
 

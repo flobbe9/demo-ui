@@ -2,20 +2,16 @@
     height: 100%;
     overflow: visible;
 
-    .smallIconButton {
-        transition: opacity 0.2s;
-
-        &:hover {
-            cursor: pointer;
-            opacity: 0.5;
-        }
+    .header {
+        height: 5%;
     }
 
     .body {
         height: 85%;
-        overflow: auto;
 
         .headingContainer {
+            margin-bottom: 40px;
+
             .heading {
                 overflow-x: hidden;
                 white-space: nowrap;
@@ -32,40 +28,6 @@
 
             .heading3 {
                 font-size: 20px;
-            }
-        }
-
-        .radioContainer {
-            margin-bottom: 70px;
-
-            .RadioButton {
-                width: 80%;
-                
-                .radioLabel {
-                    border-right: none;
-                    border-bottom: none;
-                    border-top-right-radius: 0;
-                    border-bottom-right-radius: 0;
-                    border-bottom-left-radius: 0;
-                    height: 160px;
-                    max-width: 400px;
-
-                    .radioChildren {
-                        border-right: 1px dashed rgb(179, 179, 179);
-                        font-size: 0.8rem;
-                        overflow: hidden;
-                        padding-right: 1vi;
-                        width: 80%;
-                    }
-                }
-
-                .whiteButtonLandscape {
-                    width: 80%;
-                }
-
-                .whiteButtonPortrait {
-                    width: 80%;
-                }
             }
         }
     }

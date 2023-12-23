@@ -10,7 +10,8 @@ import { getDocumentId, getPartFromDocumentId, log } from "../../utils/Utils";
 export default function Page(props: {
     pageIndex: number,
     id?: string,
-    className?: string
+    className?: string,
+    style?: React.CSSProperties
 }) {
 
     const id = getDocumentId("Page", props.pageIndex, props.id);
@@ -44,7 +45,7 @@ export default function Page(props: {
 
 
     return (
-        <div id={id} className={className + " " + orientationClassName}>
+        <div id={id} className={className + " " + orientationClassName} style={props.style}>
             <div className="columnContainer">
                 {columns}
             </div>

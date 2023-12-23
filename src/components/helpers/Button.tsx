@@ -4,11 +4,6 @@ import "../../assets/styles/Button.css";
 import { isBooleanFalsy, log } from "../../utils/Utils";
 
 
-/**
- * 
- * @param props test
- * @returns 
- */
 export default function Button(props: {
     id: string,
 
@@ -32,6 +27,8 @@ export default function Button(props: {
     const [rendered, setRendered] = useState(isBooleanFalsy(props.rendered) ? true : props.rendered);
     const [disabled, setDisabled] = useState(isBooleanFalsy(props.disabled) ? false : props.disabled);
     const [initialBackgroundColor, setInitialBackgroundColor] = useState("");
+
+    const [children, setChildren] = useState(props.children || <></>);
 
     const buttonRef = useRef(null);
     const buttonChildrenRef = useRef(null);
@@ -90,10 +87,10 @@ export default function Button(props: {
         const buttonChildren = $(buttonChildrenRef.current!);
         const buttonWidth = buttonChildren.css("width");
         const buttonHeight = buttonChildren.css("height");
-        const buttonText = buttonChildren.text();
+        const buttonChildrenContent = children;
 
         // remove children
-        buttonChildren.text("");
+        setChildren(<></>);
         // keep size
         buttonChildren.css("width", buttonWidth);
         buttonChildren.css("height", buttonHeight);
@@ -106,7 +103,7 @@ export default function Button(props: {
         // remove spinner
         spinner.remove();
         // add back children
-        buttonChildren.text(buttonText);
+        setChildren(buttonChildrenContent);
         
         setDisabled(false);
     }
@@ -182,12 +179,12 @@ export default function Button(props: {
                 >
             {/* hidden */}
             <div className="buttonOverlay buttonChildren" ref={buttonOverlayRef} style={props.childrenStyle}>
-                <div className="hiddenChildren">{props.children}</div>
+                <div className="hiddenChildren">{children}</div>
             </div>
 
             {/* visible */}
             <div className="buttonChildren" ref={buttonChildrenRef} style={props.childrenStyle}>
-                {props.children}
+                {children}
             </div>
         </button>
     )

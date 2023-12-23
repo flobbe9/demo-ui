@@ -1,9 +1,15 @@
 .ControlBar {
-    display: flex;
-    margin-top: 5px;
+    background-color: rgb(114, 114, 114);
+    position: sticky;
+    top: 0;
     width: 100%;
 
-    .flexCenter {
-        width: 100%;
+    .downloadButtonContainer {
+        padding: 10px 0;
+    }
+
+    .hrBottom {
+        border-bottom: 1px solid rgb(219, 219, 219);
+        width: 99%;
     }
 }

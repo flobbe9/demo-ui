@@ -8,6 +8,7 @@ import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, TABLE_CONFIG } from "..
 import { downloadFileByUrl, getDocumentId, getPartFromDocumentId, isBlank, log, logWarn, stringToNumber } from "../utils/Utils";
 import fetchJson from "../utils/fetch/fetch";
 
+
 const documentBuilderMapping = "/api/documentBuilder";
 
 // TODO: remember to add empty line after table (in case of column break)
@@ -18,10 +19,10 @@ const documentBuilderMapping = "/api/documentBuilder";
  *  
  * @param pdf if true, a pdf file is returned by backend
  */
-export async function downloadDocument(pdf: boolean) {
+export async function downloadDocument(pdf: boolean, documentFileName: string) {
     
-    // TODO: replace file name
-    const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf + "&fileName=Document1.docx";
+    const fileName = documentFileName || "Dokument_1.docx";
+    const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf + "&fileName=" + fileName;
 
     downloadFileByUrl(url);
 }

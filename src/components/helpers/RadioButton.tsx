@@ -139,12 +139,19 @@ export default function RadioButton(props: {
                        className="radioInput " 
                        type="radio" 
                        name={props.name} 
+                       title={props.title}
                        checked={checked}
                        disabled={disabled}
                        readOnly
                        />
 
-                <div className={childrenClassName} ref={childrenRef} style={props.childrenStyle}>{props.children}</div>
+                <div className={childrenClassName} 
+                     ref={childrenRef} 
+                     style={props.childrenStyle}
+                     title={props.title}
+                     >
+                    {props.children}
+                </div>
             </label>
         </div>
     )

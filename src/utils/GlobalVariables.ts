@@ -24,7 +24,8 @@ export const FONT_FAMILIES = [
     "Bradley Hand",
     "Brush Script MT",
     "Luminari",
-    "Comic Sans MS"
+    "Comic Sans MS",
+    "Calibri"
 ];
 
 export const FONT_SIZES = [
@@ -189,3 +190,7 @@ export function isMobileWidth(): boolean {
 export const SELECTED_STYLE: React.CSSProperties = {
     borderColor: "rgba(0, 255, 255, 0.527)" // kind of aqua
 }
+
+
+/** format of a word file */
+export const DOCUMENT_SUFFIX = ".docx";

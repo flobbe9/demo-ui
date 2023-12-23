@@ -98,6 +98,7 @@ export default function TextInput(props: {
         if (event.key === "Tab") 
             handleTab(event);
         
+        // TODO: move all values down by one line, or flash if no line below is empty
         if (event.key === "Enter")
             focusNextTextInput(true, ["fontSize"]);
 
@@ -250,6 +251,7 @@ export default function TextInput(props: {
     /**
      * Remove tab unicodes
      */
+    // TODO: move up one line if value is blank
     function handleBackspace(event): void {
         
         // case: is tab

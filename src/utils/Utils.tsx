@@ -162,9 +162,9 @@ export function isBlank(str: string): boolean {
 
 export function moveCursor(textInputId: string, start = 0, end = 0): void {
 
-    const textInput = $("#" + textInputId);
+    let textInput: JQuery;
     
-    if (!textInput.length) {
+    if (!textInputId || !(textInput = $("#" + textInputId)).length) {
         console.warn("Failed to move cursor for text input with id: " + textInputId);
         return;
     }
