@@ -12,14 +12,17 @@ export default function LeaveConfirmLink(props: {
     className?, 
     style?,
     children?,
-    to
+    to: string,
+    /** paths to use the confirm popup for */
+    pathsToConfirm: string[]
 }) {
 
     const location = useLocation();
 
 
     /**
-     * Makes user confirm and prevents default event if confirm alert was canceld.
+     * Makes user confirm and prevents default event if confirm alert was canceld. Only confirm if 
+     * current location matches at least one of ```props.pathsToConfirm```
      * 
      * @param event 
      */
@@ -27,7 +30,7 @@ export default function LeaveConfirmLink(props: {
 
         const confirmLeaveMessage = "Seite verlassen? \nVorgenommene Änderungen werden unter Umständen nicht gespeichert."
 
-        if (location.pathname === "/" && !window.confirm(confirmLeaveMessage))
+        if (props.pathsToConfirm.includes(location.pathname) && !window.confirm(confirmLeaveMessage))
             event.preventDefault();
     }
 

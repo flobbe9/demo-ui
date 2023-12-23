@@ -6,6 +6,7 @@ import { log, moveCursor } from "../utils/Utils";
 import LoadingButton from "./helpers/Button";
 import { DOCUMENT_SUFFIX, isMobileWidth } from "../utils/GlobalVariables";
 import { AppContext } from "../App";
+import LeaveConfirmLink from "./LeaveConfirmLink";
 
 
 export default function NavBar(props) {
@@ -117,10 +118,10 @@ export default function NavBar(props) {
     return (
         <div id={id} className={className}>
             <div className="navSectionLeft textLeft flexLeft">
-                <Link className="navLink" to="/">
+                <LeaveConfirmLink className="navLink" to="/" pathsToConfirm={["/build"]}>
                     <img className="navImage dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
                     <span className="navHeading ml-0 ml-sm-3">DocumentBuilder</span>
-                </Link>
+                </LeaveConfirmLink>
             </div>
 
             <div className="navSectionCenter textCenter flexCenter">

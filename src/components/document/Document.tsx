@@ -6,7 +6,7 @@ import { confirmPageUnload, flashBorder, getCSSValueAsNumber, getDocumentId, get
 import { AppContext } from "../../App";
 import StylePanel from "./StylePanel";
 import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
-import ControlBar from "../ControlBar";
+import ControlPanel from "../ControlPanel";
 import Button from "../helpers/Button";
 import { buildDocument, downloadDocument } from "../../builder/Builder";
 
@@ -14,6 +14,7 @@ import { buildDocument, downloadDocument } from "../../builder/Builder";
 // TODO: how to cache document?
 // TODO: fontsize looks smaller in frontend
 // TODO: update to bootstrap 5
+// TODO: landscape mode interferes with controlpanel on small width screens 
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -263,7 +264,7 @@ export default function Document(props) {
     return (
         <div id={id} className={className}>
             {/* mobile controlbar */}
-            {/* <ControlBar /> */}
+            {/* <ControlPanel /> */}
 
             <DocumentContext.Provider value={context}>
                 <StylePanel />
@@ -279,16 +280,8 @@ export default function Document(props) {
                         </div>
                     </div>
 
-                    <div className="controlBar flexRight mr-2">
-                        <Button id={"DownloadDocument"}
-                                handlePromise={buildAndDownloadDocument}
-                                className="blackButton blackButtonContained"
-                                hoverBackgroundColor="rgb(50, 50, 50)"
-                                clickBackgroundColor="rgb(150, 150, 150)"
-                                title="Dokument herunterladen"
-                                >
-                            <i className="fa-regular fa-circle-down"></i> Download
-                        </Button>  
+                    <div className="controlPanelContainer flexRight mr-2">
+                        <ControlPanel /> 
                     </div>
                 </div>
 
