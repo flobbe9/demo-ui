@@ -1,0 +1,47 @@
+.Checkbox {
+    
+    .checkboxLabel {
+        border: 1px solid grey;
+        transition: background-color 0.2s, border 0.2s, opacity 0.2s;
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &.disabled {
+            &:hover {
+                cursor: default;
+            }
+        }
+        
+        .checkboxInput {
+            opacity: 0;
+            position: absolute;
+    
+            &:hover {
+                cursor: pointer;
+            }
+    
+            &.disabled {
+                &:hover {
+                    cursor: default;
+                }
+            }
+        }
+        
+        .checkboxChildren {
+            height: 100%;
+            width: 100%;
+    
+            &:hover {
+                cursor: pointer;
+            }
+    
+            &.disabled {
+                &:hover {
+                    cursor: default;
+                }
+            }
+        }
+    }
+}

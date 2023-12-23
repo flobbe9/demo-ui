@@ -1,0 +1,173 @@
+/* disable reacts error overlay */
+iframe {
+    display: none;
+}
+
+body {
+    padding: 0;
+}
+
+label {
+    margin: 0;
+}
+
+.App {
+    min-height: 100vh;
+    position: relative;
+    
+    .appOverlay {
+        background-color: rgb(0, 0, 0, 0.4);
+        display: none;
+        height: 100%;
+        position: absolute;
+        width: 100%;
+        z-index: 2;
+    }
+    
+    .content {
+        background-color: rgb(228, 228, 228);
+        margin-top: 7px;
+    }
+
+    /* Buttons */
+    .blackButton {
+        border-color: black;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: 0.2s;
+
+        &:disabled {
+            color: grey;
+
+            &:hover {
+                background-color: black;
+            }
+        }
+    }
+    
+    .blackButtonContained {
+        border: none;
+        background-color: black;
+        color: white;
+        outline: none;
+    }
+
+    .blackButtonContained:hover {
+        background-color: rgb(77, 77, 77);
+    }
+    
+    .blackButtonOutlined {
+        color: black;
+    }
+    
+    .blackButtonOutlined:hover {
+        border-color: black;
+    }
+
+    .buttonSmall {
+        padding: 5px 10px 5px 10px;
+    }
+
+    .buttonMedium {
+        padding: 10px 25px 10px 25px;
+    }
+
+    .whiteButton {
+        background-color: white;
+        border: none;
+        border-radius: 5px;
+        color: black;
+        outline: none;
+    }
+    
+    .whiteButtonPortrait {
+        height: 140px;
+        width: 100px;
+    }
+
+    .whiteButtonLandscape {
+        height: 100px;
+        width: 140px;
+    }
+
+    .smallIconButton {
+        background-color: transparent;
+        border-radius: 100%;
+        height: 28px;
+        transition: background-color 0.2s, padding 0.2s;
+    }
+    
+    .disabledButton {
+        box-shadow: none;
+        cursor: default;
+        opacity: 0.5;
+    }
+
+    /* Other */
+    .flexCenter {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+    }
+
+    .flexLeft {
+        align-items: center;
+        display: flex;
+        justify-content: left;
+    }
+
+    .flexRight {
+        align-items: center;
+        display: flex;
+        justify-content: right;
+    }
+
+    .textCenter {
+        text-align: center;
+    }
+
+    .textLeft {
+        text-align: left;
+    }
+
+    .textRight {
+        text-align: right;
+    }
+
+    .whiteLink {
+        color: white;
+        text-decoration: none;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .dontMarkText {
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+    }
+    
+    .rotating {
+        -webkit-animation: rotating 2s linear infinite;
+        -moz-animation: rotating 2s linear infinite;
+        -ms-animation: rotating 2s linear infinite;
+        -o-animation: rotating 2s linear infinite;
+        animation: rotating 2s linear infinite;
+    }
+
+    .disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+}
+
+
+@keyframes rotating {
+    from {transform: rotate(0deg)}
+    to {transform: rotate(360deg)} 
+}

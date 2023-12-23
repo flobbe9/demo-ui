@@ -1,0 +1,16 @@
+.WarnIcon {
+    .iconContainer {
+        border: 1px solid grey;
+        border-radius: 50%;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 0.5
+        }
+    }
+
+    .miniPopup {
+        display: none;
+        position: absolute;
+    }
+}

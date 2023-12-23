@@ -1,0 +1,50 @@
+.Select {
+    position: relative;
+
+    .selectBox {
+        border: 1px solid grey;
+        border-radius: 3px;
+        min-height: 33px;
+        padding: 0 4px;
+        position: relative;
+        transition: background-color 0.2s, opacity 0.2s;
+        
+        &:hover {
+            cursor: pointer;
+        }
+
+        &.disabled {
+            cursor: default;
+        }
+
+        .selectLabel {
+            margin-right: 3px;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+        }
+    }
+
+    .selectOptionsBox {
+        background-color: white;
+        border: 1px solid grey;
+        border-radius: 3px;;
+        display: none;
+        padding: 4px;
+        position: absolute;
+        overflow-y: auto;
+        text-align: left;
+        z-index: 2;
+        
+        & option {
+            border-radius: 3px;
+            overflow: hidden;
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: rgb(185, 185, 185);
+                cursor: pointer;
+            }
+        }
+    }
+}

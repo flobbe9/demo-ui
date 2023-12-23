@@ -1,0 +1,27 @@
+.ColorPicker {
+    .colorLabel {
+        border: 1px solid grey;
+        border-radius: 3px;
+        height: 30px;
+        padding: 3px;
+        transition: background-color 0.2s, opacity 0.2s;
+        width: 30px;
+
+        &:hover {
+            cursor: pointer;
+        }
+                
+        .colorInput {
+            height: 5px;
+            opacity: 0;
+            position: absolute;
+            width: 5px;
+        }
+
+        .colorChildren {
+            height: 90%;
+            font-size: 18px;
+            width: 100%;
+        }
+    }
+}

@@ -1,0 +1,37 @@
+.Page {
+    background-color: white;
+    margin: 20px 0 70px;
+    
+    /* .headingContainer {
+        display: flex; 
+        height: 5%;
+        justify-content: center;
+        margin-bottom: 15px;
+        width: 100%;
+
+        .heading {
+            height: fit-content;
+            outline: none;
+        }
+    } */
+    
+    .columnContainer {
+        display: flex;
+        /* height: 94%; */
+        height: 100%;
+    }
+}
+
+.pagePortrait {
+    height: 205vh;
+    max-height: 1160px;
+    padding: 33px;
+    width: 685px !important;
+}
+
+.pageLandscape {
+    height: 47vh;
+    min-height: 830px;
+    padding: 28px;
+    width: 1030px;
+}

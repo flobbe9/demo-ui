@@ -1,0 +1,27 @@
+.StylePanelSection {
+    height: 120px;
+    padding: 7px 0;
+    
+    .buttonContainer {
+        border-right: 1px solid rgb(125, 125, 125);
+        height: 100%;
+
+        .Checkbox {
+            margin-right: 5px;
+
+            .checkboxLabel {
+                border-radius: 3px;
+                height: 30px;
+                width: 30px;
+            }
+
+            .checkboxChildren {
+                text-align: center;
+            }
+        }
+    }
+
+    .hideRightBorder {
+        border-right: none;
+    }
+}

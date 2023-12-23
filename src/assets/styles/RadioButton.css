@@ -1,0 +1,48 @@
+.RadioButton {
+    
+    .radioLabel {
+        border: 1px solid grey;
+        padding: 1vi;
+        transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &.disabled {
+            &:hover {
+                cursor: default;
+            }
+        }
+        
+        .radioInput {
+            opacity: 0;
+            position: absolute;
+
+            &:hover {
+                cursor: pointer;
+            }
+
+            &.disabled {
+                &:hover {
+                    cursor: default;
+                }
+            }
+        }
+        
+        .radioChildren {
+            height: 100%;
+            width: 100%;
+
+            &:hover {
+                cursor: pointer;
+            }
+
+            &.disabled {
+                &:hover {
+                    cursor: default;
+                }
+            }
+        }
+    }
+}

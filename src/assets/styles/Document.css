@@ -1,0 +1,24 @@
+.Document {
+    height: 100%;
+
+    .subContainer {
+        .pageContainer {
+            margin: 0 1vi;
+            width: 100%;
+        }
+        
+        .stickyDownloadButton {
+            bottom: 130px;
+            right: 30px;
+            position: fixed;
+            width: fit-content;
+        }
+        
+        .controlPanelContainer {
+            margin-top: 20px;
+            position: sticky;
+            top: 150px;
+            width: 130px;
+        }
+    }
+}

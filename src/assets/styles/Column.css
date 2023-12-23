@@ -1,0 +1,146 @@
+:root {
+    --plusIconHoverSize: 60px
+}
+
+.Column {
+    border-right: 1px dashed rgb(194, 194, 194);
+    height: 100%;
+    transition: background-color 0.7s;
+    width: 100%;
+
+    .columnOverlay {
+        color: grey;
+        height: 100%;
+
+        .plusIconBackgroundContainer {
+            height: var(--plusIconHoverSize);
+            width: var(--plusIconHoverSize);
+
+            .plusIconBackground {
+                /* animation: backgroundPulse 4s infinite; */
+                border-radius: 100%;
+                transition: background-color 0.3s;
+                
+                &:hover {
+                    animation: none;
+                    background-color: rgb(167, 167, 167);
+                }
+                
+                .plusIcon {
+                    /* animation: heightPulse 3s infinite; */
+                    height: 50px;
+                    transition: height 0.3s;
+                    
+                    &:hover {
+                        animation: none;
+                        cursor: pointer;
+                        height: var(--plusIconHoverSize);
+                    }
+                }
+            }
+        }
+    }
+
+    .paragraphContainer {
+        /* display: none; */
+    
+        &.columnType-1 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+
+                    .TextInput {
+                        text-align: left;
+                        width: 100%;
+                    }
+                }
+            }
+        }
+        
+        &.columnType-2 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+                    justify-content: center;
+
+                    .TextInput {
+                        text-align: center;
+                    }
+                }
+            }
+        }
+
+        &.columnType-3 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+                    justify-content: right;
+
+                    .TextInput {
+                        border-right: 1px solid black;
+                        text-align: right;
+                    }
+                }
+            }
+        }
+        
+        &.columnType-4 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+                    justify-content: left;
+
+                    .TextInput {
+                        /* margin-left: 20px; */
+                        text-align: left;
+                    }
+                }
+            }
+        }
+
+        &.columnType-5 {
+            .Paragraph {
+                .textInputContainer {
+                    display: flex;
+                    justify-content: left;
+
+                    .TextInput {
+                        /* margin-left: 20px; */
+                        text-align: left;
+                    }
+                }
+            }
+        }
+
+        &.columnType-6 {
+
+        }
+    }
+}
+
+/* hover only if '.hover' class is present */
+.Column.hover:hover {
+    background-color: rgb(219, 219, 219);
+    cursor: pointer;
+}
+
+
+@keyframes heightPulse {
+    0% {height: 50px}
+
+    30% {height: 50px}
+
+    35% {height: 60px}
+
+    40% {height: 50px}
+}
+
+@keyframes backgroundPulse {
+    0% {background-color: transparent}
+
+    30% {background-color: transparent}
+
+    35% {background-color: rgb(167, 167, 167)}
+
+    40% {background-color: transparent}
+}
