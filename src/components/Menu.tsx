@@ -2,11 +2,16 @@ import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/Menu.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { hidePopup, log, togglePopup } from "../utils/Utils";
-import { AppContext } from "../App";
+import { AppContext } from "./App";
 import Popup from "./helpers/popups/Popup";
 import PopupNewDocument from "./helpers/popups/PopupNewDocument"; 
 
 
+/**
+ * Will be displayed at "/" root. Serves as start page.
+ * 
+ * @since 0.0.6
+ */
 export default function Menu(props) {
 
     const id = props.id ? "Menu" + props.id : "Menu";

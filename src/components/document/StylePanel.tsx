@@ -4,7 +4,7 @@ import StylePanelSection from "./StylePanelSection";
 import Checkbox from "../helpers/Checkbox";
 import Select from "../helpers/Select";
 import ColorPicker from "../helpers/ColorPicker";
-import { AppContext } from "../../App";
+import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, togglePopup } from "../../utils/Utils";

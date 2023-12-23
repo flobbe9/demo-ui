@@ -2,6 +2,11 @@ import React from "react";
 import "../../../assets/styles/PopupContainer.css";
 
 
+/**
+ * Container component for ```<Popup />```. Only exists for several css configurations.
+ * 
+ * @since 0.0.6
+ */
 export default function PopupContainer(props: {
     id?: string,
     className?: string,
@@ -14,7 +19,7 @@ export default function PopupContainer(props: {
 
 
     return (
-        <div id={id} className={className + " flexCenter hidePopup"}>
+        <div id={id} className={className + "PopupContainer flexCenter hidePopup"}>
             {props.children}
         </div>
     )

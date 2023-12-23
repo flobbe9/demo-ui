@@ -5,6 +5,13 @@ import { SELECTED_STYLE } from "../../utils/GlobalVariables";
 import { log } from "../../utils/Utils";
 
 
+/**
+ * Custom checkbox. Stylable through props. 
+ * Wether a checkbox is checked or not is only determined by ```props.checked``` which will be 
+ * treated and listened to like a state.
+ * 
+ * @since 0.0.6
+ */
 export default function Checkbox(props: {
     id: string, 
     checked: boolean,

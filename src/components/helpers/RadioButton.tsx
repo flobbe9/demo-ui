@@ -5,6 +5,13 @@ import { log } from "../../utils/Utils";
 import { SELECTED_STYLE } from "../../utils/GlobalVariables";
 
 
+/**
+ * Custom radio button. Stylable through components.
+ * Wether a button is checked or not is determined by ```props.radioGroupValue === props.value``` where 
+ * ```radioGroupValue``` is the value of the radio button currently selected and ```value``` is the value of this radio button.
+ * 
+ * @since 0.0.6
+ */
 export default function RadioButton(props: {
     id: string,
     name: string,

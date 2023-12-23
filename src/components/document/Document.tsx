@@ -3,7 +3,7 @@ import "../../assets/styles/Document.css";
 import Page from "./Page";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { confirmPageUnload, flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, getTabSpaces, getTextWidth, hidePopup, insertString, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
-import { AppContext } from "../../App";
+import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
 import { TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
 import ControlPanel from "../ControlPanel";

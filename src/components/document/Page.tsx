@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import "../../assets/styles/Page.css";
 import Column from "./Column";
 import TextInput from "./TextInput";
-import { AppContext } from "../../App";
+import { AppContext } from "../App";
 import { getDocumentId, getPartFromDocumentId, log } from "../../utils/Utils";
 
 

@@ -1,8 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import "../../assets/styles/WarnIcon.css"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../../utils/Utils";
 
 
+/**
+ * Icon with "!" char to click on and display a text popup with some kind of warning text.
+ * 
+ * @since 0.0.6
+ */
 export default function WarnIcon(props: {
     id?: string,
     className?: string,

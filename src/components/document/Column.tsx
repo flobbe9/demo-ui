@@ -3,7 +3,7 @@ import "../../assets/styles/Column.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getCSSValueAsNumber, getDocumentId, isBlank, log, togglePopup } from "../../utils/Utils";
 import Paragraph from "./Paragraph";
-import { AppContext } from "../../App";
+import { AppContext } from "../App";
 import { DocumentContext } from "./Document";
 import { NUM_HEADINGS_PER_COLUMN, getNumLinesPerColumn } from "../../utils/GlobalVariables";
 import { Orientation } from "../../enums/Orientation";

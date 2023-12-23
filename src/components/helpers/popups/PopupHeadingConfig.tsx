@@ -1,12 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../../../assets/styles/PopupHeadingConfig.css";
-import { AppContext } from "../../../App";
+import { AppContext } from "../../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getCSSValueAsNumber, getPartFromDocumentId, hidePopup, isBlank, log, stringToNumber } from "../../../utils/Utils";
 import Select from "../../helpers/Select";
 import { FONT_SIZES } from "../../../utils/GlobalVariables";
 
 
+/**
+ * Popup content used for setting font sizes of headings.
+ * 
+ * @since 0.0.6
+ */
 export default function PopupHeadingConfig(props: {
     handleSubmit?,
     id?: string,

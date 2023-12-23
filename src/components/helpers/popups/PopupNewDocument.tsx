@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"; 
 import "../../../assets/styles/PopupNewDocument.css";
-import { AppContext } from "../../../App";
+import { AppContext } from "../../App";
 import { Orientation } from "../../../enums/Orientation";
 import RadioButton from "../../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -8,6 +8,11 @@ import { log } from "../../../utils/Utils";
 import { Link } from "react-router-dom";
 
 
+/**
+ * Popup content used for configuring a new document.
+ * 
+ * @since 0.0.6
+ */
 export default function PopupNewDocument(props) {
 
     const className = props.className ? "PopupNewDocument " + props.classname : "PopupNewDocument";

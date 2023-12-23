@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/ControlPanel.css";
 import { buildDocument, downloadDocument } from "../builder/Builder";
-import { AppContext } from "../App";
+import { AppContext } from "./App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { isBlank, log } from "../utils/Utils";
 import Button from "./helpers/Button";

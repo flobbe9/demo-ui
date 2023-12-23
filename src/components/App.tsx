@@ -1,19 +1,19 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
-import "./App.css";
+import "../assets/styles/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Document from "./components/document/Document";
-import NavBar from "./components/NavBar";
-import Footer from "./components/Footer";
-import Menu from "./components/Menu";
+import Document from "./document/Document";
+import NavBar from "./NavBar";
+import Footer from "./Footer";
+import Menu from "./Menu";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, hidePopup, isBlank, log, stringToNumber } from "./utils/Utils";
-import { Orientation } from "./enums/Orientation";
-import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "./abstract/Style";
-import PopupContainer from "./components/helpers/popups/PopupContainer";
+import { getDocumentId, getPartFromDocumentId, hidePopup, isBlank, log, stringToNumber } from "../utils/Utils";
+import { Orientation } from "../enums/Orientation";
+import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../abstract/Style";
+import PopupContainer from "./helpers/popups/PopupContainer";
 
 
 /**
- * Document is structured like 
+ * Document is structured like
  * ```
  *  <Document>
  *      <StylePanel />

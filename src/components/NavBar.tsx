@@ -5,10 +5,13 @@ import { Link } from "react-router-dom";
 import { log, moveCursor } from "../utils/Utils";
 import LoadingButton from "./helpers/Button";
 import { DOCUMENT_SUFFIX, isMobileWidth } from "../utils/GlobalVariables";
-import { AppContext } from "../App";
+import { AppContext } from "./App";
 import LeaveConfirmLink from "./LeaveConfirmLink";
 
 
+/**
+ * @since 0.0.1
+ */
 export default function NavBar(props) {
     
     const id = props.id ? "NavBar" + props.id : "NavBar";

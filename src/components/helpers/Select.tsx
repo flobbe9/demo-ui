@@ -2,10 +2,17 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../../utils/Utils";
-import { AppContext } from "../../App";
+import { AppContext } from "../App";
 import { isMobileWidth } from "../../utils/GlobalVariables";
 
 
+/**
+ * Custom select input. Styleable through props.
+ * Pass select options as 2D array formatted like ```[value, label]``` where ```value``` will be passed inside the 
+ * select handler and ```label``` will be displayed as select option.
+ * 
+ * @since 0.0.6
+ */
 export default function Select(props: {
     id: string, 
     label: string,
