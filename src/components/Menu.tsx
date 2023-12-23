@@ -10,7 +10,7 @@ import PopupNewDocument from "./helpers/popups/PopupNewDocument";
 /**
  * Will be displayed at "/" root. Serves as start page.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default function Menu(props) {
 

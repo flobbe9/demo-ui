@@ -54,7 +54,7 @@ export default async function fetchJson(url: string, method = "get", body?, head
  * @param body (optional) to add to the request
  * @param headers json object with strings as keys and values
  * @returns a promise with the response
- * @since 0.0.6
+ * @since 0.0.5
  */
 export async function fetchAny(url: string, method = "get", body?, headers?) {
     

@@ -11,7 +11,7 @@ import { isMobileWidth } from "../../utils/GlobalVariables";
  * Pass select options as 2D array formatted like ```[value, label]``` where ```value``` will be passed inside the 
  * select handler and ```label``` will be displayed as select option.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default function Select(props: {
     id: string, 

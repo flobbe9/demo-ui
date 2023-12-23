@@ -10,7 +10,7 @@ import { FONT_SIZES } from "../../../utils/GlobalVariables";
 /**
  * Popup content used for setting font sizes of headings.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default function PopupHeadingConfig(props: {
     handleSubmit?,

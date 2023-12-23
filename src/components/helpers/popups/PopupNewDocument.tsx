@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 /**
  * Popup content used for configuring a new document.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default function PopupNewDocument(props) {
 

@@ -8,7 +8,7 @@ import { log } from "../../../utils/Utils";
  * Container that can be toggled via ```togglePopup()```. An overlay will be displayed to
  * blur any other content (z-index = 2).
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default function Popup(props: {
     className?: string,

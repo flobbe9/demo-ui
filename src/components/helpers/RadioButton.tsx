@@ -10,7 +10,7 @@ import { SELECTED_STYLE } from "../../utils/GlobalVariables";
  * Wether a button is checked or not is determined by ```props.radioGroupValue === props.value``` where 
  * ```radioGroupValue``` is the value of the radio button currently selected and ```value``` is the value of this radio button.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default function RadioButton(props: {
     id: string,

@@ -10,7 +10,7 @@ import { log } from "../../utils/Utils";
  * Wether a checkbox is checked or not is only determined by ```props.checked``` which will be 
  * treated and listened to like a state.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default function Checkbox(props: {
     id: string, 

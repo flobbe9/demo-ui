@@ -7,7 +7,7 @@ import { log } from "../../utils/Utils";
 /**
  * Icon with "!" char to click on and display a text popup with some kind of warning text.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default function WarnIcon(props: {
     id?: string,

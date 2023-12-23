@@ -5,7 +5,7 @@ import TableConfig from "./TableConfig";
 /**
  * Inteface defining the final request body to send to vorspiel_backend.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default interface DocumentWrapper {
     content: (BasicParagraph | null)[],

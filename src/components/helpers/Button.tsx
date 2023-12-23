@@ -8,7 +8,7 @@ import { isBooleanFalsy, log } from "../../utils/Utils";
  * Custom button. Stylable through props.
  * If ```props.handlePromise()``` is defined a loading animation will be displayed on click.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default function Button(props: {
     id: string,

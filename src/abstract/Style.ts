@@ -6,7 +6,7 @@ import { getCSSValueAsNumber, isBlank, isRGB, log, logError, rgbStringToHex, str
 /**
  * Interface defining a style object as defined in vorspiel_backend.
  * 
- * @since 0.0.6
+ * @since 0.0.5
  */
 export default interface Style {
 

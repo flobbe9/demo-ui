@@ -1,6 +1,6 @@
 {
   "name": "vorspiel_frontend",
-  "version": "0.0.6",
+  "version": "0.0.5",
   "private": true,
   "dependencies": {
     "@types/jquery": "^3.5.19",
