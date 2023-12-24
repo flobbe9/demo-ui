@@ -3,7 +3,7 @@ import "../assets/styles/ControlPanel.css";
 import { buildDocument, downloadDocument } from "../builder/Builder";
 import { AppContext } from "./App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { isBlank, log } from "../utils/Utils";
+import { confirmPageUnload, isBlank, log, removeConfirmPageUnloadEvent } from "../utils/Utils";
 import Button from "./helpers/Button";
 
 
@@ -30,10 +30,18 @@ export default function ControlPanel(props: {
 
     async function buildAndDownloadDocument(): Promise<void> {
 
+        // remove confirm unload event
+        removeConfirmPageUnloadEvent();
+
+        // build
         const buildResponse = await buildDocument(appContext.orientation, appContext.numColumns);
 
+        // download
         if (buildResponse.status === 200)
             downloadDocument(false, appContext.documentFileName);
+
+        // add back confirm unload event
+        confirmPageUnload();
     }
 
 

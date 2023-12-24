@@ -6,4 +6,6 @@ COPY . /app/
 
 RUN npm ci
 
-CMD npm start
+RUN npm run build
+
+ENTRYPOINT npm start

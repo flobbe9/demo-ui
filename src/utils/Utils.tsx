@@ -454,16 +454,26 @@ export function downloadFileByUrl(url: string) {
 }
 
 
+function confirmPageUnloadEvent(event): void {
+
+    event.preventDefault();
+    event.returnValue = "";
+}
+
+
 /**
  * Confirm page refresh, tab close and window close with browser popup
  */
 export function confirmPageUnload(): void {
 
     // confirm page refresh / tab close / window close
-    window.addEventListener("beforeunload", (event) => {
-        event.preventDefault();
-        event.returnValue = "";
-    });
+    window.addEventListener("beforeunload", confirmPageUnloadEvent);
+}
+
+
+export function removeConfirmPageUnloadEvent(): void {
+
+    window.removeEventListener("beforeunload", confirmPageUnloadEvent);
 }
 
 
