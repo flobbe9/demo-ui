@@ -27,6 +27,7 @@ export default function LeaveConfirmLink(props: {
      * 
      * @param event 
      */
+    // TODO: replace window.confirm with popup
     function confirmNavigate(event): void {
 
         const confirmLeaveMessage = "Seite verlassen? \nVorgenommene Änderungen werden unter Umständen nicht gespeichert."
