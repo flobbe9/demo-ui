@@ -10,6 +10,8 @@ import { getDocumentId, getPartFromDocumentId, hidePopup, isBlank, log, stringTo
 import { Orientation } from "../enums/Orientation";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../abstract/Style";
 import PopupContainer from "./helpers/popups/PopupContainer";
+import { API_VERSION, BUILDER_PATH } from "../utils/GlobalVariables";
+import Version from "./Version";
 
 
 /**
@@ -185,9 +187,13 @@ export default function App() {
     /**
      * @param textInputId id of valid ```<TextInput />``` to focus
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` state will be updated with focused text input style
+     * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` will be applied to text input with ```selectedTextInputId```
      * @param stylePropsToOverride list of style properties to override when copying styles 
      */
-    function focusTextInput(textInputId: string, updateSelectedTextInputStyle = true, stylePropsToOverride?: [StyleProp, string | number][]): void {
+    function focusTextInput(textInputId: string, 
+                            updateSelectedTextInputStyle = true, 
+                            applySelectedTextInputStyle = true,
+                            stylePropsToOverride?: [StyleProp, string | number][]): void {
 
         if (!isTextInputIdValid(textInputId))
             return;
@@ -204,7 +210,8 @@ export default function App() {
             setSelectedTextInputStyle(getTextInputStyle(textInput), stylePropsToOverride);
 
         // style text input
-        applyTextInputStyle(textInputId, selectedTextInputStyle);
+        if (applySelectedTextInputStyle)
+            applyTextInputStyle(textInputId, selectedTextInputStyle);
 
         textInput.trigger("focus");
     }
@@ -279,7 +286,8 @@ export default function App() {
 
                         <Routes>
                             <Route path="/" element={<Menu />} />
-                            <Route path="/build" element={<Document />} />
+                            <Route path={BUILDER_PATH} element={<Document />} />
+                            <Route path={"/version"} element={<Version />} />
                             {/* <Route path="/login" element={<Login />} /> */}
                             {/* <Route path="/confirmAccount" element={<AccountConfirmed />} /> */}
                             {/* <Route path="*" element={<NotFound />} /> */}
@@ -319,7 +327,7 @@ export const AppContext = createContext({
     setSelectedTextInputStyle: (style: Style, stylePropsToOverride?: [StyleProp, string | number][]) => {},
 
     focusSelectedTextInput: () => {},
-    focusTextInput: (id: string, updateSelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
+    focusTextInput: (id: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
     unFocusTextInput: (id: string) => {},
 
     pressedKey: "",
