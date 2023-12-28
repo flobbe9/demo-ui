@@ -1,10 +1,10 @@
 import React, { useEffect, useContext, useRef } from "react";
 import "../assets/styles/NavBar.css"
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log, moveCursor } from "../utils/Utils";
 import LoadingButton from "./helpers/Button";
-import { DOCUMENT_SUFFIX, isMobileWidth } from "../utils/GlobalVariables";
+import { BUILDER_PATH, DOCUMENT_SUFFIX, isMobileWidth } from "../utils/GlobalVariables";
 import { AppContext } from "./App";
 import LeaveConfirmLink from "./LeaveConfirmLink";
 
@@ -16,6 +16,8 @@ export default function NavBar(props) {
     
     const id = props.id ? "NavBar" + props.id : "NavBar";
     const className = props.className ? "NavBar " + props.className : "NavBar";
+
+    const location = useLocation();
 
     const appContext = useContext(AppContext);
     const fileNameInputRef = useRef(null);
@@ -119,21 +121,17 @@ export default function NavBar(props) {
 
 
     return (
-        <div id={id} className={className}>
+        <div id={id} className={className + " dontMarkText"}>
             <div className="navSectionLeft textLeft flexLeft">
-                <LeaveConfirmLink className="navLink" to="/" pathsToConfirm={["/build"]}>
+                <LeaveConfirmLink className="navLink" to="/" pathsToConfirm={[BUILDER_PATH]}>
                     <img className="navImage dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
                     <span className="navHeading ml-0 ml-sm-3">DocumentBuilder</span>
                 </LeaveConfirmLink>
             </div>
 
             <div className="navSectionCenter textCenter flexCenter">
-                {/* TODO: add '.docx' on focus out if is not suffix already */}
-                {/* TODO: validate file name before using it on download */}
-                    {/* replace spaces with '_' */}
-                    {/* avoid special chars (?) */}
                 <input id="fileNameInput"
-                       className="fileNameInput" 
+                       className={"fileNameInput" + (location.pathname === BUILDER_PATH ? "" : " hidden")} 
                        ref={fileNameInputRef}
                        type="text" 
                        defaultValue={appContext.documentFileName}

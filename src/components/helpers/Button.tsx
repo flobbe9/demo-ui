@@ -10,6 +10,7 @@ import { isBooleanFalsy, log } from "../../utils/Utils";
  * 
  * @since 0.0.5
  */
+// TODO: add more className props
 export default function Button(props: {
     id: string,
 
@@ -27,7 +28,7 @@ export default function Button(props: {
     title?: string
 }) {
 
-    const id = props.id ? "Button" + props.id : "Button";
+    const id = props.id ? "Button dontMarkText" + props.id : "Button dontMarkText";
     const className = "Button " + props.className || "";
 
     const [rendered, setRendered] = useState(isBooleanFalsy(props.rendered) ? true : props.rendered);

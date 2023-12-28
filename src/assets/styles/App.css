@@ -103,9 +103,21 @@ label {
         opacity: 0.5;
     }
 
-    /* Other */
+    /* Flex */
     .flexCenter {
         align-items: center;
+        display: flex;
+        justify-content: center;
+    }
+
+    .flexCenterStart {
+        align-items: start;
+        display: flex;
+        justify-content: center;
+    }
+
+    .flexCenterEnd {
+        align-items: end;
         display: flex;
         justify-content: center;
     }
@@ -116,12 +128,25 @@ label {
         justify-content: left;
     }
 
+    .flexLeftStart {
+        align-items: start;
+        display: flex;
+        justify-content: left;
+    }
+
+    .flexLeftEnd {
+        align-items: end;
+        display: flex;
+        justify-content: left;
+    }
+
     .flexRight {
         align-items: center;
         display: flex;
         justify-content: right;
     }
 
+    /* Other */
     .textCenter {
         text-align: center;
     }

@@ -10,7 +10,7 @@ import { getDocumentId, getPartFromDocumentId, hidePopup, isBlank, log, stringTo
 import { Orientation } from "../enums/Orientation";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../abstract/Style";
 import PopupContainer from "./helpers/popups/PopupContainer";
-import { API_VERSION, BUILDER_PATH } from "../utils/GlobalVariables";
+import { BUILDER_PATH } from "../utils/GlobalVariables";
 import Version from "./Version";
 
 
@@ -45,10 +45,6 @@ export default function App() {
 
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
-    const [columnFontSize, setColumnFontSize] = useState(selectedTextInputStyle.fontSize + "px");
-    const [columnHeading1FontSize, setColumnHeading1FontSize] = useState<string>(null);
-    const [columnHeading2FontSize, setColumnHeading2FontSize] = useState<string>(null);
-    const [columnHeading3FontSize, setColumnHeading3FontSize] = useState<string>(null);
     
     const [pressedKey, setPressedKey] = useState("");
 
@@ -66,14 +62,6 @@ export default function App() {
         setNumColumns: setNumColumns,
         getSelectedColumnId,
         getColumnIdByTextInputId,
-        columnFontSize,
-        setColumnFontSize,
-        columnHeading1FontSize,
-        setColumnHeading1FontSize,
-        columnHeading2FontSize,
-        setColumnHeading2FontSize, 
-        columnHeading3FontSize,
-        setColumnHeading3FontSize,
 
         selectedTextInputId: selectedTextInputId,
         setSelectedTextInputId: setSelectedTextInputId,
@@ -313,13 +301,6 @@ export const AppContext = createContext({
     setNumColumns: (numColumns: number) => {},
     getSelectedColumnId: (): string => {return ""},
     getColumnIdByTextInputId: (textInputId: string): string => {return ""},
-
-    columnHeading1FontSize: "",
-    setColumnHeading1FontSize: (headingFontSize: string) => {},
-    columnHeading2FontSize: "",
-    setColumnHeading2FontSize: (headingFontSize: string) => {},
-    columnHeading3FontSize: "",
-    setColumnHeading3FontSize: (headingFontSize: string) => {},
 
     selectedTextInputId: "",
     setSelectedTextInputId: (id: string) => {},

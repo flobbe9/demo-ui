@@ -45,8 +45,6 @@ export async function buildDocument(orientation: Orientation, numColumns: number
 
     // TODO
     // case: is table
-    // if (isTable(columnType)) 
-    //     body.tableConfig = getTableConfig(columnType);
 
     return await fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/createDocument", "post", body);
 }
@@ -189,28 +187,4 @@ function isLastColumn(documentId: string, numColumns: number): boolean {
     const columnIndex = getPartFromDocumentId(documentId, 2);
 
     return stringToNumber(columnIndex) === numColumns - 1;
-}
-
-
-/**
- * @param columnType type of column
- * @returns true if this column is a table
- */
-function isTable(columnType: number): boolean {
-
-    return columnType === 6 ||
-           columnType === 7 ||
-           columnType === 8;
-}
-
-
-function getTableConfig(columnType: number): TableConfig {
-
-    const numRows = 10;// TODO
-
-    return {
-        numColumns: TABLE_CONFIG[columnType].numColumns,
-        numRows: 0, // iterate and count
-        startIndex: TABLE_CONFIG[columnType].startIndex
-    };
 }

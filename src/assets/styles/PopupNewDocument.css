@@ -11,13 +11,6 @@
         .orientationContainer {
             flex-wrap: wrap;
             position: absolute;
-
-            .radioChildren {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-                text-align: center;
-            }
         }
 
         .numColumnsContainer {
@@ -26,23 +19,8 @@
             flex-wrap: wrap;
             overflow: auto;
 
-            .radioContainer {
-                text-align: center;
-
-                .radioLabel {
-                    padding: 0;
-
-                    .radioChildren {
-                        align-items: center;
-                        display: flex;
-                        font-size: 9px;
-                        justify-content: center;
-                    }
-                }
-            }
-
             .verticalBorderRightDotted {
-                border-right: 1px dashed rgba(128, 128, 128, 0.39);
+                border-right: 1px dashed rgba(128, 128, 128, 0.568);
                 height: 100%;
             }
         }

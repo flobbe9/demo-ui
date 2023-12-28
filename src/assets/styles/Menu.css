@@ -7,6 +7,7 @@
 
     .leftSideBar {
         margin-right: 5vi;
+        width: 200px;
 
         #newDocumentButton {
             transition: color 0.2s;
@@ -20,7 +21,6 @@
     .rightSideBar {
         height: fit-content;
         width: 100%;
-        color: rgb(128, 128, 128);
         
         .savedDocument {
             background-color: white;

@@ -478,33 +478,35 @@ export function removeConfirmPageUnloadEvent(): void {
 
 
 /**
- * Animate the css "border-```borderSide```-color" attribute of given element.
+ * Remove given ```removeClass``` className from given ```element```, add given ```addClass``` and then
+ * after given ```holdTime``` undo both operations.
  * 
  * @param element to flash the border of
- * @param borderSide side of the border. Possible values are: "top", "right", "left", "bottom"
- * @param flashColor color of border to use for flash effect
- * @param endColor color of border to fall back on
- * @param holdTime time in ms that the border stays in given flashColor
+ * @param addClass className the element has while flashing 
+ * @param removeClass className the element should loose while flashing and get back afterwards
+ * @param holdTime time in ms that the border stays with given addClass and without given removeClass
  * @return promise that resolves once animation is finished
  */
-export async function flashBorder(element: JQuery,
-                            borderSide: Side, 
-                            flashColor: string, 
-                            endColor: string,
-                            holdTime = 1000) {
+export async function flashClass(element: JQuery,
+                                addClass: string, 
+                                removeClass: string,
+                                holdTime = 1000) {
 
     if (!element.length) {
-        logWarn("flashBorder() failed")
+        logWarn("flashClass() failed")
         return;
     }
 
-    const borderAttr = "border-" + borderSide + "-color";
-
     return new Promise((res, rej) => {
-        element.animate({[borderAttr]: flashColor}, 100, () => {
-            log(endColor)
-            setTimeout(() => res(element.animate({[borderAttr]: endColor}, 100)), holdTime)
-        })
+        // remove old class
+        res(element.removeClass(removeClass));
+
+        // add flash class shortly
+        res(element.addClass(addClass));
+        setTimeout(() => {
+        res(element.removeClass(addClass));
+        res(element.addClass(removeClass));
+        }, holdTime);
     });
 }
 
@@ -540,6 +542,36 @@ export function replaceAtIndex(str: string, replacement: string, startIndex: num
     const charsBehindIndex = str.substring(endIndex);
 
     return charsBeforeIndex + replacement + charsBehindIndex;
+}
+
+
+export function getNumLinesPerPage(fontSizes: number[]): number {
+
+    const max = 424;
+    let sum = 0;
+
+    for (let i = 0; i < fontSizes.length; i++) {
+        const num = fontSizes[i];
+
+        if (sum + num >= max)
+            return i;
+
+        sum += num;
+    }
+
+    return fontSizes.length;
+}
+
+
+export function equalsIgnoreCase(str1: string, str2: string): boolean {
+
+    if (!str1 || !str2)
+        return str1 === str2;
+
+    str1 = str1.toString().trim().toLowerCase();
+    str2 = str2.toString().trim().toLowerCase();
+
+    return str1 === str2;
 }
 
 

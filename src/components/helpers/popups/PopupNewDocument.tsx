@@ -6,6 +6,7 @@ import RadioButton from "../../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../../../utils/Utils";
 import { Link } from "react-router-dom";
+import { BUILDER_PATH } from "../../../utils/GlobalVariables";
 
 
 /**
@@ -13,6 +14,8 @@ import { Link } from "react-router-dom";
  * 
  * @since 0.0.5
  */
+// TODO: add lorem ipsum to blank buttons
+// TODO: fix border: none error
 export default function PopupNewDocument(props) {
 
     const className = props.className ? "PopupNewDocument " + props.classname : "PopupNewDocument";
@@ -130,57 +133,94 @@ export default function PopupNewDocument(props) {
             
             <div className="body flexCenter">
                 <div id="orientationContainer" className="orientationContainer flexCenter dontMarkText">
-                    <RadioButton id="Portrait"
-                                 className="radioContainer" 
-                                 labelClassName="whiteButton whiteButtonPortrait"
-                                 name="Orientation" 
-                                 value={Orientation.PORTRAIT}
-                                 radioGroupValue={appContext.orientation}
-                                 handleSelect={(value: Orientation) => handleSelectOrientation(value)}
-                                 checkedBackgroundColor="rgb(230, 230, 230)"
-                                 hoverBackgroundColor="rgb(245, 245, 245)"
-                                 >
-                        Hoch-Format
-                    </RadioButton>
+                    <div className="mr-3">
+                        <RadioButton id="Portrait"
+                                    className="radioContainer" 
+                                    labelClassName="whiteButton whiteButtonPortrait"
+                                    childrenClassName="flexCenterStart"
+                                    name="Orientation" 
+                                    value={Orientation.PORTRAIT}
+                                    radioGroupValue={appContext.orientation}
+                                    handleSelect={(value: Orientation) => handleSelectOrientation(value)}
+                                    boxStyle={{
+                                        borderRadius: "3px",
+                                        boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
+                                        padding: "2px"
+                                    }}
+                                    checkedBackgroundColor="rgb(238, 238, 238)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    >
+                            <span style={{fontSize: "10px"}}>Lorem ipsum</span>
+                        </RadioButton>
+                        <div className="textCenter">Hoch-Format</div>
+                    </div>
                     
-                    <RadioButton id="Landscape"
-                                 className="radioContainer"
-                                 labelClassName="whiteButton whiteButtonLandscape"
-                                 name="Orientation"
-                                 value={Orientation.LANDSCAPE}
-                                 radioGroupValue={appContext.orientation}
-                                 handleSelect={(value: Orientation) => handleSelectOrientation(value)}
-                                 checkedBackgroundColor="rgb(230, 230, 230)"
-                                 hoverBackgroundColor="rgb(245, 245, 245)"
-                                 >
-                        Quer-Format
-                    </RadioButton>
+                    <div>
+                        <RadioButton id="Landscape"
+                                    className="radioContainer"
+                                    labelClassName="whiteButton whiteButtonLandscape"
+                                    childrenClassName="flexCenterStart"
+                                    name="Orientation"
+                                    value={Orientation.LANDSCAPE}
+                                    radioGroupValue={appContext.orientation}
+                                    handleSelect={(value: Orientation) => handleSelectOrientation(value)}
+                                    boxStyle={{
+                                        borderRadius: "3px",
+                                        boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
+                                        padding: "2px"
+                                    }}
+                                    checkedBackgroundColor="rgb(238, 238, 238)"
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    >
+                            <span style={{fontSize: "10px"}}>Lorem ipsum</span>
+                        </RadioButton>
+                        <div className="textCenter">Quer-Format</div>
+                    </div>
                 </div>
 
                 <div id="numColumnsContainer" className="numColumnsContainer flexCenter dontMarkText">
                     <div className="radioContainer">
                         <RadioButton id="OneColumn" 
                                     labelClassName={"whiteButton " + orientationClassName}
+                                    childrenClassName="flexLeftStart"
                                     name="NumColumns"
                                     value={1}
                                     radioGroupValue={appContext.numColumns}
                                     handleSelect={(value: number) => handleSelectNumColumns(value)}
-                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    boxStyle={{
+                                        borderRadius: "3px",
+                                        boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
+                                        padding: "2px"
+                                    }}
+                                    childrenStyle={{
+                                        fontSize: "9px",
+                                        height: "100%"
+                                    }}
+                                    checkedBackgroundColor="rgb(238, 238, 238)"
                                     hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
-                            <div style={{height: "100%"}}>Lorem ipsum</div>
+                            <div>Lorem ipsum</div>
                         </RadioButton>
-                        <span>1 Spalte / Seite</span>
+                        <div className="mt-3">1 Spalte / Seite</div>
                     </div>
 
                     <div className="radioContainer">
                         <RadioButton id="TwoColumns" 
                                     labelClassName={"whiteButton " + orientationClassName}
+                                    childrenClassName="flexLeftStart"
                                     name="NumColumns"
                                     value={2}
                                     radioGroupValue={appContext.numColumns}
                                     handleSelect={(value: number) => handleSelectNumColumns(value)}
-                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    boxStyle={{
+                                        borderRadius: "3px",
+                                        boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
+                                        padding: "2px"
+                                    }}
+                                    childrenStyle={{
+                                        fontSize: "9px",
+                                    }}
+                                    checkedBackgroundColor="rgb(238, 238, 238)"
                                     hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                             <div className="verticalBorderRightDotted" style={{width: "50%"}}>
@@ -188,17 +228,26 @@ export default function PopupNewDocument(props) {
                             </div>
                             <div style={{width: "50%"}}></div>
                         </RadioButton>
-                        <span>2 Spalten / Seite</span>
+                        <div className="mt-3">2 Spalten / Seite</div>
                     </div>
 
                     <div className="radioContainer">
                         <RadioButton id="ThreeColumns" 
                                     labelClassName={"whiteButton " + orientationClassName}
+                                    childrenClassName="flexLeftStart"
                                     name="NumColumns"
                                     value={3}
                                     radioGroupValue={appContext.numColumns}
                                     handleSelect={(value: number) => handleSelectNumColumns(value)}
-                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    boxStyle={{
+                                        borderRadius: "3px",
+                                        boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
+                                        padding: "2px"
+                                    }}
+                                    childrenStyle={{
+                                        fontSize: "9px",
+                                    }}
+                                    checkedBackgroundColor="rgb(238, 238, 238)"
                                     hoverBackgroundColor="rgb(245, 245, 245)"
                                     >
                             <div className="verticalBorderRightDotted" style={{width: "33%"}}>
@@ -207,12 +256,13 @@ export default function PopupNewDocument(props) {
                             <div className="verticalBorderRightDotted" style={{width: "33%"}}></div>
                             <div style={{width: "33%"}}></div>
                         </RadioButton>
-                        <span>3 Spalten / Seite</span>
+                        <div className="mt-3">3 Spalten / Seite</div>
                     </div>
                 </div>
             </div>
 
             <div className="footer">
+                    {/* TODO: make those button components */}
                 <div className="flexLeft">
                     <button id="prevButton"
                             className="slideButton slideRightButton blackButton blackButtonContained buttonSmall"
@@ -225,7 +275,7 @@ export default function PopupNewDocument(props) {
                 <div className="flexRight">
                     {/* case: last container */}
                     {containerIndex === 1 ? 
-                        <Link to="/build" className="whiteLink">{nextButton}</Link> : nextButton
+                        <Link to={BUILDER_PATH} className="whiteLink">{nextButton}</Link> : nextButton
                     }       
                 </div>
             </div>

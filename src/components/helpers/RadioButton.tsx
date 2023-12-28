@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/RadioButton.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../../utils/Utils";
+import { equalsIgnoreCase, log } from "../../utils/Utils";
 import { SELECTED_STYLE } from "../../utils/GlobalVariables";
 
 
@@ -41,7 +41,7 @@ export default function RadioButton(props: {
     const labelId = labelClassName + props.id;
     const childrenClassName = props.childrenClassName ? "radioChildren " + props.childrenClassName : "radioChildren";
 
-    const [checked, setChecked] = useState(props.value === props.radioGroupValue);
+    const [checked, setChecked] = useState(equalsIgnoreCase(props.value, props.radioGroupValue));
     const [disabled, setDisabled] = useState(props.disabled);
     const [boxStyle, setBoxStyle] = useState<React.CSSProperties>();
 

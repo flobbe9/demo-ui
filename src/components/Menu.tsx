@@ -1,15 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/Menu.css";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hidePopup, log, togglePopup } from "../utils/Utils";
+import { hidePopup, togglePopup } from "../utils/Utils";
 import { AppContext } from "./App";
 import Popup from "./helpers/popups/Popup";
-import PopupNewDocument from "./helpers/popups/PopupNewDocument"; 
-
+import PopupNewDocument from "./helpers/popups/PopupNewDocument";
+import Button from "./helpers/Button";
 
 /**
  * Will be displayed at "/" root. Serves as start page.
- * 
+ *
  * @since 0.0.5
  */
 export default function Menu(props) {
@@ -25,15 +24,15 @@ export default function Menu(props) {
     useEffect(() => {
         hidePopup(appContext.setPopupContent);
 
-        $(".App").css("backgroundColor", "rgb(228, 228, 228)")
+        $(".App").css("backgroundColor", "rgb(228, 228, 228)");
     }, []);
 
 
     // TODO: fetch saved documents from backend
     function initSavedDocuments(): React.JSX.Element[] {
 
-        const temp1 = <div key={0} className="savedDocument">File 1</div>;
-        const temp2 = <div key={1} className="savedDocument">File 2</div>;
+        const temp1 = <div key={0} className="savedDocument dontMarkText">File 1</div>;
+        const temp2 = <div key={1} className="savedDocument dontMarkText">File 2</div>;
 
         return [temp1, temp2];
     }
@@ -44,7 +43,7 @@ export default function Menu(props) {
         // define popup
         appContext.setPopupContent(
             <Popup width="large"
-                    height="large">
+                height="large">
                 <PopupNewDocument />
             </Popup>
         );
@@ -57,22 +56,33 @@ export default function Menu(props) {
     return (
         <div id={id} className={className}>
             <div className="leftSideBar">
-                <button id="newDocumentButton" 
-                        className="whiteButton whiteButtonPortrait newDocumentButton " 
-                        onClick={handleNewDocument}>
+                <div className="newDocumentButtonContainer ">
+                    <Button id={"NewDocument"}
+                            boxStyle={{
+                                height: "250px",
+                                width: "100%", 
+                            }}
+                            childrenStyle={{
+                                alignItems: "center",
+                                display: "flex",
+                                height: "100%",
+                                justifyContent: "center",
+                                width: "100%", 
+                            }}
+                            hoverBackgroundColor="rgb(245, 245, 245)"
+                            clickBackgroundColor="rgb(230, 230, 230)"
+                            handleClick={handleNewDocument}
+                            >
+                        <i className="fa-solid fa-plus"></i>
+                    </Button>
 
-                    <div className="">Neues Dokument</div>
-
-                    <span className="" style={{fontSize: "30px"}}>+</span>
-                </button>
+                    <p className="textCenter dontMarkText">Neues Dokument</p>
+                </div>
             </div>
 
-            <div className="rightSideBar">
+            <div className="rightSideBar disabled">
                 {savedDocuments}
-                {/* <LoadingButton disabled={false} className="blackButton blackButtonOutlined navButton">
-                    Registrieren
-                </LoadingButton> */}
             </div>
         </div>
-    )
+    );
 }

@@ -3,6 +3,8 @@ import React from "react";
 
 export const BACKEND_BASE_URL = "" + process.env.REACT_APP_BACKEND_BASE_URL;
 export const USER_SERVICE_BASE_URL = "" + process.env.REACT_APP_USER_SERVICE_BASE_URL;
+export const API_ENV = "" + process.env.REACT_APP_ENV;
+export const API_VERSION = "" + process.env.REACT_APP_VERSION;
 
 export const FONT_FAMILIES = [
     "Helvetica",
@@ -76,6 +78,8 @@ export function getNumLinesPerColumn(orientation: Orientation, fontSize: number)
     return orientation === Orientation.PORTRAIT ? getNumLinesPerColumnPortraitByFontSize(fontSize) : getNumLinesPerColumnLandscapeByFontSize(fontSize);
 }
 
+export const FILLER_LINE_FONT_SIZE = 14;
+
 /** Number of empty lines on top of every column, becuase of backend */
 const numFillerLines = 1;
 
@@ -113,6 +117,8 @@ function getNumLinesPerColumnPortraitByFontSize(fontSize: number): number {
     return NUM_LINES_PROTRAIT[0][fontSize];
 }
 
+export const MAX_FONT_SIZE_SUM_PORTRAIT = NUM_LINES_PROTRAIT[0]["14"] * 14;
+
 
 const NUM_LINES_LANDSCAPE: ReadonlyArray<Object> = [{
     8: 53 - numFillerLines,
@@ -147,6 +153,9 @@ function getNumLinesPerColumnLandscapeByFontSize(fontSize: number): number {
 
     return NUM_LINES_LANDSCAPE[0][fontSize];
 }
+
+export const MAX_FONT_SIZE_SUM_LANDSCAPE = NUM_LINES_LANDSCAPE[0]["14"] * 14;
+
 
 const WsPerLineLandscapeFontSize14 = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";
 const WsPerLinePortraitFontSize14 = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"; // 19px in browser
@@ -187,10 +196,15 @@ export function isMobileWidth(): boolean {
 }
 
 
+export const SELECTED_COLOR = "rgb(0, 226, 226)";
+
+
 export const SELECTED_STYLE: React.CSSProperties = {
-    borderColor: "rgba(0, 255, 255, 0.527)" // kind of aqua
+    borderColor: SELECTED_COLOR
 }
 
 
 /** format of a word file */
 export const DOCUMENT_SUFFIX = ".docx";
+
+export const BUILDER_PATH = "/build";

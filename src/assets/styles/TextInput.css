@@ -11,6 +11,11 @@
     }
     
     .textInputFocus {
-        border-bottom-color: aqua;
+        border-bottom-color: rgb(0, 226, 226);
+    }
+
+    .textInputFlash {
+        border-bottom-color: red;
+        border-bottom-width: 2px;
     }
 }

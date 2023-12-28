@@ -7,18 +7,15 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, togglePopup } from "../../utils/Utils";
+import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, togglePopup } from "../../utils/Utils";
 import { DocumentContext } from "./Document";
-import Button from "../helpers/Button";
-import WarnIcon from "../helpers/WarnIcon";
-import PopupHeadingConfig from "../helpers/popups/PopupHeadingConfig";
-import Popup from "../helpers/popups/Popup";
 import { FONT_FAMILIES, FONT_SIZES } from "../../utils/GlobalVariables";
 
 
 // TODO: add key combinations for most buttons
     // set title to combination
 
+// TODO: switch num columns and orientation buttons
 export default function StylePanel(props) {
 
     const id = props.id ? "StylePanel" + props.id : "StylePanel";
@@ -49,7 +46,17 @@ export default function StylePanel(props) {
 
     function handleFontSizeSelect(fontSize: string): void {
 
-        appContext.setColumnFontSize(fontSize);
+        // TODO: calculation is inaccurate (off by two?)
+        // case: max line space in column reached
+        const checkFontSize = documentContext.isFontSizeTooLarge(fontSize);
+        const isFontSizeTooLarge = checkFontSize[0];
+        if (isFontSizeTooLarge) 
+            // case: dont increase font size
+            if (!documentContext.handleFontSizeTooLarge(true, checkFontSize[1]))
+               return;
+
+        appContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
+        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
     }
 
 
@@ -102,20 +109,6 @@ export default function StylePanel(props) {
     }
 
 
-    function handleHeadingClick(event): void {
-
-        // configure popup
-        appContext.setPopupContent(
-            <Popup height="large" width="large">
-                <PopupHeadingConfig />
-            </Popup>
-        );
-
-        // toggle
-        togglePopup(appContext.setPopupContent);
-    }
-
-
     return (
         <div id={id} className={className + " flexCenter"} ref={stylePanelRef} >
             <div className={"sectionContainer flexLeft row " + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
@@ -126,7 +119,7 @@ export default function StylePanel(props) {
                     {/* <h6 className="textCenter">Spalte</h6> */}
                     <div className="flexCenter align-items-start row">
                         <div className="flexCenter col-sm-4 col-md-6">
-                            <WarnIcon 
+                            {/* <WarnIcon 
                                 componentStyle={{
                                     visibility: documentContext.isSelectedColumnEmpty ? "hidden" : "visible",
                                 }}
@@ -152,11 +145,11 @@ export default function StylePanel(props) {
                                 title="Schriftgöße ändern"
                             >
                                 Um Schriftgrößen zu verändern, lösche allen Text in der Spalte.
-                            </WarnIcon>
+                            </WarnIcon> */}
 
                             <Select id="FontSize"
-                                    label={getCSSValueAsNumber(appContext.columnFontSize, 2).toString()}
-                                    disabled={disabled || !documentContext.isSelectedColumnEmpty}
+                                    label={appContext.selectedTextInputStyle.fontSize}
+                                    disabled={disabled}
                                     hoverBackgroundColor="rgb(245, 245, 245)"
                                     className="mr-sm-5 mr-md-3"
                                     boxStyle={{borderColor: "rgb(200, 200, 200)", width: "70px"}}
@@ -165,23 +158,6 @@ export default function StylePanel(props) {
                                     title="Schriftgröße"
                                     options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
                                     />
-                        </div>
-
-                        <div className="col-sm-4 col-md-3 mt-2 mt-sm-0 flexCenter">
-                            <Button id={"HeadingConfig"}
-                                    handleClick={handleHeadingClick}
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    clickBackgroundColor="rgb(200, 200, 200)"
-                                    boxStyle={{
-                                        border: "1px solid rgb(200, 200, 200)",
-                                        borderRadius: "3px",
-                                        boxShadow: "none",
-                                    }}
-                                    disabled={disabled || !documentContext.isSelectedColumnEmpty}
-                                    >
-                                <div style={{fontSize: "16px"}}>Überschrift</div>
-                                <div style={{fontSize: "12px"}}>Überschrift</div>
-                            </Button>
                         </div>
                     </div>
                 </StylePanelSection>
@@ -250,15 +226,14 @@ export default function StylePanel(props) {
                     </div>
                 </StylePanelSection>
 
-                <StylePanelSection 
-                                className="col-6 col-lg-2"
+                <StylePanelSection className="col-6 col-lg-2"
                                 hideRightBorder={false} 
                                 buttonContainerClassName="flexCenter"
                                 >
                     <RadioButton id={"Left"} 
                                  childrenClassName="flexCenter dontMarkText" 
                                  name={"TextAlign"} 
-                                 value="LEFT"
+                                 value="START"
                                  radioGroupValue={appContext.selectedTextInputStyle.textAlign}
                                  handleSelect={handleTextAlignSelect}
                                  title="Linksbündig" 
@@ -303,7 +278,7 @@ export default function StylePanel(props) {
                                     buttonContainerClassName="flexCenter"
                                     className="col-6 col-lg-2"
                                    >
-                    <Button id={"Tab"} 
+                    {/* <Button id={"Tab"} 
                             hoverBackgroundColor="rgb(245, 245, 245)"
                             clickBackgroundColor="rgb(200, 200, 200)"
                             disabled={disabled} 
@@ -317,7 +292,7 @@ export default function StylePanel(props) {
                             >
                         <div>Einrückung</div>
                         <img src="tab_copy_2.png" alt="Tab key icon" title="Einrückung (Tab)" height={30} width={40}/>
-                    </Button>
+                    </Button> */}
                 </StylePanelSection>
             </div>
         </div>

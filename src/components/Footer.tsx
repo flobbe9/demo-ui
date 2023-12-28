@@ -9,7 +9,7 @@ export default function Footer(props) {
 
     return (
         <div className="Footer">
-            <span className="footerItem">DocumentBuilder</span>
+            <div className="footerItem">DocumentBuilder</div>
         </div>
     );
 }

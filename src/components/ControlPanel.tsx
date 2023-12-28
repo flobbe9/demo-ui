@@ -5,8 +5,11 @@ import { AppContext } from "./App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { confirmPageUnload, isBlank, log, removeConfirmPageUnloadEvent } from "../utils/Utils";
 import Button from "./helpers/Button";
+import { API_ENV } from "../utils/GlobalVariables";
 
 
+// TODO: add print button
+// TODO: add save button
 export default function ControlPanel(props: {
     id?: string,
     className?: string,
@@ -41,7 +44,8 @@ export default function ControlPanel(props: {
             downloadDocument(false, appContext.documentFileName);
 
         // add back confirm unload event
-        confirmPageUnload();
+        if (API_ENV !== "dev")
+            confirmPageUnload();
     }
 
 
