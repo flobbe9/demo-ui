@@ -563,15 +563,34 @@ export function getNumLinesPerPage(fontSizes: number[]): number {
 }
 
 
-export function equalsIgnoreCase(str1: string, str2: string): boolean {
+export function equalsIgnoreCase(expected: string, actual: string): boolean {
 
-    if (!str1 || !str2)
-        return str1 === str2;
+    if (!expected || !actual)
+        return expected === actual;
 
-    str1 = str1.toString().trim().toLowerCase();
-    str2 = str2.toString().trim().toLowerCase();
+    expected = expected.toString().trim().toLowerCase();
+    actual = actual.toString().trim().toLowerCase();
 
-    return str1 === str2;
+    return expected === actual;
+}
+
+
+/**
+ * @param str to check 
+ * @param regexp pattern to use for checking
+ * @returns true if and only if all chars in given string match given pattern, else false
+ */
+export function matchesAll(str: string, regexp: RegExp): boolean {
+
+    // iterate chars
+    for (let i = 0; i < str.length; i++) {
+        const char = str[i];
+        
+        if (char.match(regexp) === null)
+            return false;
+    }
+
+    return true;
 }
 
 

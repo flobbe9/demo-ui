@@ -44,19 +44,18 @@ export default function TextInput(props: {
 
 
     useEffect(() => {
-        if (appContext.selectedTextInputId !== id) 
+        if (id !== appContext.selectedTextInputId) 
             appContext.unFocusTextInput(id);
         
     }, [appContext.selectedTextInputId]);
 
 
     useEffect(() => {
-        // TODO: dont call this 86 times
         if (id === appContext.selectedTextInputId) {
             appContext.focusTextInput(id, false);
             
             // check num lines to add to column
-            const numLinesToAdd = documentContext.getNumLinesToAdd();
+            const numLinesToAdd = documentContext.getFontSizeDiff();
             if (numLinesToAdd > 0) 
                 documentContext.setParagraphIdAppendTextInput([documentContext.getParagraphIdByColumnId(), numLinesToAdd])
         }
@@ -185,17 +184,18 @@ export default function TextInput(props: {
         // case: end of document
         if (!nextTextInput)
             return;
-
+    
+        const nextTextInputId = nextTextInput.prop("id");
         const nextTextInputFontSize = nextTextInput.css("fontSize");
 
         // case: next text input blank
         if (copyStyles && isBlank(nextTextInput.prop("value"))) {
-            const checkFontSize = documentContext.isFontSizeTooLarge(appContext.selectedTextInputStyle.fontSize, nextTextInputFontSize); 
+            const checkFontSize = documentContext.isFontSizeTooLarge(nextTextInputId); 
             
             // case: font size too large
             if (checkFontSize[0]) 
                 // case: cant handle font size too large
-                if (!documentContext.handleFontSizeTooLarge(false, checkFontSize[1], nextTextInput.prop("id")))
+                if (!documentContext.handleFontSizeTooLarge(false, checkFontSize[1], nextTextInputId))
                     // override fontSize with nextTextInputFontSize (keep nextTextInputFontSize)
                     stylePropsToOverride?.push(["fontSize", getCSSValueAsNumber(nextTextInputFontSize, 2)]);
             

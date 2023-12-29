@@ -56,6 +56,8 @@ export default function App() {
         setEscapePopup: setEscapePopup,
         setPopupContent: setPopupContent,
 
+        hideSelectOptions,
+
         orientation: orientation,
         setOrientation: setOrientation,
         numColumns: numColumns,
@@ -141,8 +143,10 @@ export default function App() {
 
     function handleGlobalKeyDown(event): void {
 
-        if (event.key === "Escape") 
+        if (event.key === "Escape") {
             hidePopup(setPopupContent);
+            hideSelectOptions();
+        }
 
         if (event.key === "Control")
             setPressedKey("Control");

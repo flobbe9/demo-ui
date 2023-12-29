@@ -78,6 +78,7 @@ export function getNumLinesPerColumn(orientation: Orientation, fontSize: number)
     return orientation === Orientation.PORTRAIT ? getNumLinesPerColumnPortraitByFontSize(fontSize) : getNumLinesPerColumnLandscapeByFontSize(fontSize);
 }
 
+/** fontSize of a line that is added to the document (i.e. because there's not enough lines at the moment) */
 export const FILLER_LINE_FONT_SIZE = 14;
 
 /** Number of empty lines on top of every column, becuase of backend */

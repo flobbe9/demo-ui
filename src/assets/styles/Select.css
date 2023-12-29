@@ -18,8 +18,12 @@
         }
 
         .selectLabel {
+            border: none;
+            border-radius: 3px;
             margin-right: 3px;
+            outline: none;
             overflow: hidden;
+            transition: background-color 0.2s, opacity 0.2s;
             white-space: nowrap;
             width: 100%;
         }

@@ -41,7 +41,7 @@ export default function Document(props) {
         
         isFontSizeTooLarge,
         handleFontSizeTooLarge,
-        getNumLinesToAdd,
+        getFontSizeDiff,
         appendTextInput,
         removeTextInput,
         paragraphIdAppendTextInput,
@@ -369,8 +369,13 @@ export default function Document(props) {
 
 
     /**
-     * TODO
-     * @returns false if fontSize shouldn't be changed because no line can be added or removed, else false
+     * Try to remove text inputs at the end of the column of given textInputId. Don't remove any text input if at least 
+     * one is not blank and try to flash text input border instead.
+     * 
+     * @param flash if true, the given text input will flash if no text input can be removed, default is true
+     * @param deleteCount number of lines to remove if blank, default is 1
+     * @param textInputId of any textInput inside the column
+     * @returns false if the fontSize should not be changed, else true
      */
     function handleFontSizeTooLarge(flash = true, deleteCount = 1, textInputId = appContext.selectedTextInputId): boolean {
 
@@ -416,35 +421,25 @@ export default function Document(props) {
 
 
     /**
-     * TODO:
-     * @param selectedFontSize font size that has been selected for the text input
-     * @param oldFontSize font size the text input had before
-     * @returns true if applying the ```selectedFontSize``` would exceed the value of MAX_ALLOWED_FONT_SIZE_SUM
+     * @param textInputId of any textInput inside the column
+     * @returns a touple formatted like: ```[isFontSizeTooLarge, numLinesOverhead]``` where numLinesOverhead is the number
+     *          of lines that should be removed to match the MAX_NUM_LINES.
      */
-    function isFontSizeTooLarge(selectedFontSize: number | string, oldFontSize?: number | string): [boolean, number] {
+    function isFontSizeTooLarge(textInputId = appContext.selectedTextInputId): [boolean, number] {
 
-        if (!oldFontSize)
-            // use selected text input
-            oldFontSize = $("#" + appContext.selectedTextInputId).css("fontSize");
+        const numLinesOverhead = Math.abs(getFontSizeDiff(textInputId));
 
-        oldFontSize = getCSSValueAsNumber(oldFontSize, 2);
-        selectedFontSize = getCSSValueAsNumber(selectedFontSize, 2);
-
-        // get difference in case of font size apply
-        const diff = selectedFontSize - oldFontSize;
-        const numLinesToRemove = Math.floor(diff / FILLER_LINE_FONT_SIZE);
-
-        const columnFontSizesSum = getColumnFontSizesSum();
+        const columnFontSizesSum = getColumnFontSizesSum(textInputId);
         if (columnFontSizesSum === -1)
-            return [false, numLinesToRemove];
+            return [false, numLinesOverhead];
 
         const maxSum = appContext.orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
 
-        // case: adding difference would exceed max value
-        if (columnFontSizesSum + diff > maxSum)
-            return [true, numLinesToRemove];
+        // case: adding numLinesOverhead would exceed max value
+        if (columnFontSizesSum + numLinesOverhead > maxSum)
+            return [true, numLinesOverhead];
 
-        return [false, numLinesToRemove];
+        return [false, numLinesOverhead];
     }
 
 
@@ -453,7 +448,7 @@ export default function Document(props) {
      * @returns number of lines with fontSize {@link FILLER_LINE_FONT_SIZE} that could fit in selected ```<Column />```. Return -1 if
      *          no column is selected yet.
      */
-    function getNumLinesToAdd(textInputId = appContext.selectedTextInputId): number {
+    function getFontSizeDiff(textInputId = appContext.selectedTextInputId): number {
 
         const columnFontSizesSum = getColumnFontSizesSum(textInputId);
         if (columnFontSizesSum === -1)

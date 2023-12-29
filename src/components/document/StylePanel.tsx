@@ -48,7 +48,7 @@ export default function StylePanel(props) {
 
         // TODO: calculation is inaccurate (off by two?)
         // case: max line space in column reached
-        const checkFontSize = documentContext.isFontSizeTooLarge(fontSize);
+        const checkFontSize = documentContext.isFontSizeTooLarge();
         const isFontSizeTooLarge = checkFontSize[0];
         if (isFontSizeTooLarge) 
             // case: dont increase font size
@@ -157,6 +157,7 @@ export default function StylePanel(props) {
                                     handleSelect={handleFontSizeSelect}
                                     title="Schriftgröße"
                                     options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
+                                    pattern={/[0-9]/}
                                     />
                         </div>
                     </div>
