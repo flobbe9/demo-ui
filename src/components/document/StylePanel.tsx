@@ -9,7 +9,7 @@ import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, togglePopup } from "../../utils/Utils";
 import { DocumentContext } from "./Document";
-import { FONT_FAMILIES, FONT_SIZES } from "../../utils/GlobalVariables";
+import { FONT_FAMILIES, FONT_SIZES, RAW_FONT_SIZES } from "../../utils/GlobalVariables";
 
 
 // TODO: add key combinations for most buttons
@@ -48,7 +48,8 @@ export default function StylePanel(props) {
 
         // TODO: calculation is inaccurate (off by two?)
         // case: max line space in column reached
-        const checkFontSize = documentContext.isFontSizeTooLarge();
+        const diff = getCSSValueAsNumber(fontSize, 2) - appContext.selectedTextInputStyle.fontSize;
+        const checkFontSize = documentContext.isFontSizeTooLarge(appContext.selectedTextInputId, diff);
         const isFontSizeTooLarge = checkFontSize[0];
         if (isFontSizeTooLarge) 
             // case: dont increase font size
@@ -116,37 +117,8 @@ export default function StylePanel(props) {
                                     className="col-6 col-lg-4"
                                     buttonContainerClassName="flexCenter"
                                     >
-                    {/* <h6 className="textCenter">Spalte</h6> */}
                     <div className="flexCenter align-items-start row">
                         <div className="flexCenter col-sm-4 col-md-6">
-                            {/* <WarnIcon 
-                                componentStyle={{
-                                    visibility: documentContext.isSelectedColumnEmpty ? "hidden" : "visible",
-                                }}
-                                iconContainerStyle={{
-                                    borderColor: "grey",
-                                    color: "grey",
-                                    height: "24px",
-                                    marginRight: "2px",
-                                    padding: "7px",
-                                    width: "24px"
-                                }}
-                                popupStyle={{
-                                    backgroundColor: "white",
-                                    borderRadius: "3px",
-                                    boxShadow: "0 0 3px 1px rgb(200, 200, 200)",
-                                    fontSize: "0.8em",
-                                    marginTop: "2px",
-                                    padding: "5px",
-                                    width: "130px",
-                                    zIndex: 1
-                                }}
-                                showPopupOnHover={true}
-                                title="Schriftgöße ändern"
-                            >
-                                Um Schriftgrößen zu verändern, lösche allen Text in der Spalte.
-                            </WarnIcon> */}
-
                             <Select id="FontSize"
                                     label={appContext.selectedTextInputStyle.fontSize}
                                     disabled={disabled}
@@ -156,7 +128,7 @@ export default function StylePanel(props) {
                                     optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
                                     handleSelect={handleFontSizeSelect}
                                     title="Schriftgröße"
-                                    options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
+                                    options={RAW_FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
                                     pattern={/[0-9]/}
                                     />
                         </div>

@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState, createContext } from "react";
 import "../../assets/styles/Document.css";
 import Page from "./Page";
-import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, getTabSpaces, hidePopup, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
+import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getTabSpaces, hidePopup, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
-import { API_ENV, FILLER_LINE_FONT_SIZE, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, NUM_HEADINGS_PER_COLUMN, SELECTED_COLOR, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
+import { API_ENV, DEFAULT_FONT_SIZE, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, NUM_HEADINGS_PER_COLUMN, SELECT_COLOR, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
 import ControlPanel from "../ControlPanel";
 import { buildDocument, downloadDocument } from "../../builder/Builder";
 import TextInput from "./TextInput";
@@ -41,7 +41,7 @@ export default function Document(props) {
         
         isFontSizeTooLarge,
         handleFontSizeTooLarge,
-        getFontSizeDiff,
+        getNumLinesOverhead,
         appendTextInput,
         removeTextInput,
         paragraphIdAppendTextInput,
@@ -113,7 +113,7 @@ export default function Document(props) {
 
         // case: text too long
         if (isTextLongerThanInput(appContext.selectedTextInputId, getTextInputOverhead(), getTabSpaces())) {
-            handleTextLongerThanLine(appContext.selectedTextInputId, SELECTED_COLOR);
+            handleTextLongerThanLine(appContext.selectedTextInputId, SELECT_COLOR);
             return;
         }
 
@@ -287,9 +287,12 @@ export default function Document(props) {
 
     /**
      * @param textInputId in order to identify the column, default is selected column
+     * @param useFakeFontSizes if true, the fontSizes will be used as are, else the diff will be subtracted
      * @returns sum of font sizes of all text inputs in column (in px) or -1 if column was not found
+     * 
+     * @see getFontSizeDiffInWord
      */
-    function getColumnFontSizesSum(textInputId = appContext.selectedTextInputId): number {
+    function getColumnFontSizesSum(textInputId = appContext.selectedTextInputId, useFakeFontSizes = false): number {
 
         const columnTextInputs = getColumnTextInputs(textInputId);
 
@@ -301,8 +304,10 @@ export default function Document(props) {
             const textInput = $("#" + textInputElement.id);
             const fontSize = textInput.css("fontSize");
 
-            if (fontSize)
-                sum += getCSSValueAsNumber(fontSize, 2);
+            if (fontSize) {
+                const fontSizeNumber = getCSSValueAsNumber(fontSize, 2);
+                sum += fontSizeNumber - getFontSizeDiffInWord(fontSizeNumber)
+            }
         });
 
         return sum;
@@ -377,6 +382,7 @@ export default function Document(props) {
      * @param textInputId of any textInput inside the column
      * @returns false if the fontSize should not be changed, else true
      */
+    // TODO: handle value too large
     function handleFontSizeTooLarge(flash = true, deleteCount = 1, textInputId = appContext.selectedTextInputId): boolean {
 
         const columnTextInputs = getColumnTextInputs(textInputId);
@@ -422,12 +428,13 @@ export default function Document(props) {
 
     /**
      * @param textInputId of any textInput inside the column
+     * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxSum```. Will be added to ```columnFontSizesSum```. 
      * @returns a touple formatted like: ```[isFontSizeTooLarge, numLinesOverhead]``` where numLinesOverhead is the number
      *          of lines that should be removed to match the MAX_NUM_LINES.
      */
-    function isFontSizeTooLarge(textInputId = appContext.selectedTextInputId): [boolean, number] {
+    function isFontSizeTooLarge(textInputId = appContext.selectedTextInputId, diff = 0): [boolean, number] {
 
-        const numLinesOverhead = Math.abs(getFontSizeDiff(textInputId));
+        const numLinesOverhead = Math.abs(getNumLinesOverhead(textInputId, diff));
 
         const columnFontSizesSum = getColumnFontSizesSum(textInputId);
         if (columnFontSizesSum === -1)
@@ -444,21 +451,24 @@ export default function Document(props) {
 
 
     /**
-     * @param textInputId of any textInput inside the column
-     * @returns number of lines with fontSize {@link FILLER_LINE_FONT_SIZE} that could fit in selected ```<Column />```. Return -1 if
-     *          no column is selected yet.
+     * @param textInputId of any textInput inside the column, default is selected text input id
+     * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxSum```. Will be added to ```columnFontSizesSum```. 
+     * @returns number of lines with fontSize {@link DEFAULT_FONT_SIZE} by which the number of lines in the given ```<Column />``` differes from max num lines.
+     *          Return -1 if no column is selected yet.
      */
-    function getFontSizeDiff(textInputId = appContext.selectedTextInputId): number {
+    function getNumLinesOverhead(textInputId = appContext.selectedTextInputId, diff = 0): number {
 
-        const columnFontSizesSum = getColumnFontSizesSum(textInputId);
+        let columnFontSizesSum = getColumnFontSizesSum(textInputId);
         if (columnFontSizesSum === -1)
             return -1;
 
+        columnFontSizesSum += diff;
+        
         const maxSum = appContext.orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
         
-        const diff = maxSum - columnFontSizesSum;
-        
-        return Math.floor(diff / FILLER_LINE_FONT_SIZE);
+        const totalDiff = maxSum - columnFontSizesSum;
+
+        return Math.floor(totalDiff / DEFAULT_FONT_SIZE);
     }
 
 

@@ -1,6 +1,7 @@
 import { BreakType } from "../enums/Breaktype";
+import { DEFAULT_FONT_SIZE } from "../utils/GlobalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, isBlank, isRGB, log, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
+import { getCSSValueAsNumber, getFontSizeDiffInWord, isBlank, isRGB, log, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
 
 
 /**
@@ -80,10 +81,11 @@ export function applyTextInputStyle(textInputId: string, style: Style): void {
     textInput.css("textAlign", style.textAlign);
 }
 
+
 export function getDefaultStyle(): Style {
 
     return {
-        fontSize: 14,
+        fontSize: DEFAULT_FONT_SIZE + stringToNumber(getFontSizeDiffInWord(DEFAULT_FONT_SIZE)),
         fontFamily: "Calibri",
         color: "000000",
         bold: false,

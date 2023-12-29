@@ -1,9 +1,13 @@
+:root {
+    --initialTextInputFontSize: 14px; /** is changed on render */
+}
+
 .textInputContainer {
     .TextInput {
         border: none;
         border-bottom: 1px dashed grey;
         font-family: 'Calibri';
-        font-size: 14px;
+        font-size: var(--initialTextInputFontSize);
         margin: 0 3px 1px 3px;
         outline: none;
         width: 100%;

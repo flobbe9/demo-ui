@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCase, isBlank, isKeyAlphaNumeric, log, matchesAll, stringToNumber } from "../../utils/Utils";
+import { equalsIgnoreCase, getCSSValueAsNumber, getFontSizeDiffInWord, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, stringToNumber } from "../../utils/Utils";
 import { AppContext } from "../App";
-import { FONT_SIZES, isMobileWidth } from "../../utils/GlobalVariables";
+import { MAX_FONT_SIZE, MIN_FONT_SIZE, getFakeFontSizeByOriginalFontSize, getOriginalFontSizeByFakeFontSize, isMobileWidth } from "../../utils/GlobalVariables";
 
 
 /**
@@ -13,7 +13,7 @@ import { FONT_SIZES, isMobileWidth } from "../../utils/GlobalVariables";
  * 
  * @since 0.0.5
  */
-// TODO: make box an input
+// TOOD: adjust page dimensions
 export default function Select(props: {
     id: string, 
     label: string,
@@ -40,6 +40,8 @@ export default function Select(props: {
     const className = props.className ? "Select " + props.className : "Select";
 
     const [disabled, setDisabled] = useState(props.disabled);
+    // this is quite risky, change this if necessary
+    const [isFontSize, setIsFontSize] = useState(includesIgnoreCase(id, "fontsize"))
 
     const componentRef = useRef(null);
     const boxRef = useRef(null);
@@ -69,7 +71,7 @@ export default function Select(props: {
 
 
     useEffect(() => {
-        setInputLabel(props.label);
+        setSelectLabel(props.label);
         
     }, [props.label]);
 
@@ -94,11 +96,10 @@ export default function Select(props: {
     }
 
 
-    function handleSelect(event, value: string, label: string): void {
+    function handleSelect(event, value: string, label: string | number): void {
 
+        value = isFontSize ? getFakeFontSizeByOriginalFontSize(getCSSValueAsNumber(value, 2)).toString() : getOptionsBoxValueByLabel(value, true);
         props.handleSelect(value);
-
-        setInputLabel(label);
     }
 
 
@@ -126,34 +127,41 @@ export default function Select(props: {
     }
 
 
-    function setInputLabel(label: string): void {
+    function setSelectLabel(label: string | number): void {
 
+        if (isFontSize) {
+            $(labelRef.current!).prop("value", getOriginalFontSize(label));
+            return;
+        }
+        
         $(labelRef.current!).prop("value", label);
     }
 
 
+    // TODO: clean this up
     function handleLabelKeyUp(event): void {
 
         if (event.key === "Enter")
             appContext.hideSelectOptions();
         
-        const newLabel = $(labelRef.current!).prop("value");
+        const inputValue = $(labelRef.current!).prop("value");
 
-        const isFontSize = equalsIgnoreCase(id, "selectFontSize");
-
-        // edge case: font size
-        const isValid = isFontSize ? isFontSizeValid(newLabel) : validateLabelInput(newLabel, !isFontSize);
+        let isValid = true;
         
+        // edge case: font size
+        if (isFontSize) {
+            isValid = isFontSizeValid(inputValue);
+
+        } else
+            isValid = validateLabelInput(inputValue, !isFontSize);
+
         // select if is valid
         if (isValid) {
-            const value = isFontSize ? newLabel + "px" : getOptionsBoxValueByLabel(newLabel, true);
-            handleSelect(event, value, newLabel);
+            handleSelect(event, isFontSize ? inputValue + "px" : inputValue, inputValue);
 
             // refocus on select input
             if (isKeyAlphaNumeric(event.keyCode) || event.key === "Shift" || event.key === "CapsLock") 
-                setTimeout(() => {
-                    $(labelRef.current!).trigger("focus")
-                }, 50)
+                setTimeout(() => $(labelRef.current!).trigger("focus"), 50)
         }
     }
 
@@ -163,35 +171,18 @@ export default function Select(props: {
      * @param checkIsInOptionsList if true, the label will be searched in ```props.options``` (ignoring the case)
      * @returns true if pattern matches and label exists in options list (the latter check can be disabled)
      */
-    function validateLabelInput(label: string, checkIsInOptionsList = true): boolean {
+    function validateLabelInput(label: string | number, checkIsInOptionsList = true): boolean {
 
         // map labels
         const optionLabels: string[] = props.options.map(option => option[1].trim().toLowerCase());
 
         // label is in options list
-        const labelExistsInList = checkIsInOptionsList ? optionLabels.includes(label.trim().toLowerCase()) : true;
+        const labelExistsInList = checkIsInOptionsList ? includesIgnoreCase(optionLabels, label) : true;
 
         // matches pattern completely
-        const labelMatchesPattern = props.pattern ? matchesAll(label, props.pattern) : true;
+        const labelMatchesPattern = props.pattern ? matchesAll(label.toString(), props.pattern) : true;
 
         return labelExistsInList && labelMatchesPattern;
-    }
-
-
-    /**
-     * @param value options box value (i.e. "16px")
-     * @param ignoreCase if true, the case of the label will be ignored when searching, default is false
-     * @returns matching label to given value (i.e. ```value = "16px" => "16"```)
-     */
-    function getOptionsBoxLabelByValue(value: string, ignoreCase = false): string {
-
-        if (!value)
-            return "";
-
-        const results = props.options.find(([key, label]) => 
-            ignoreCase ? equalsIgnoreCase(key, value) : key === value);
-
-        return results ? results[0] : "";
     }
 
 
@@ -214,16 +205,38 @@ export default function Select(props: {
 
     /**
      * @param fontSize to validate
-     * @returns true if ```validateLabelInput(fontSize, false)``` is true and fontSize is in bounds of min and max values
+     * @returns true if ```validateLabelInput(fontSize, false)``` is true and fontSize is in bounds of {@link MIN_FONT_SIZE} and {@link MAX_FONT_SIZE}
      */
-    function isFontSizeValid(fontSize: string): boolean {
-
-        const minFontSize = FONT_SIZES[0];
-        const maxFontSize = FONT_SIZES[FONT_SIZES.length - 1];
+    function isFontSizeValid(fontSize: string | number): boolean {
 
         return validateLabelInput(fontSize, false) &&
-               stringToNumber(fontSize) >= minFontSize && 
-               stringToNumber(fontSize) <= maxFontSize;
+               stringToNumber(fontSize) >= MIN_FONT_SIZE && 
+               stringToNumber(fontSize) <= MAX_FONT_SIZE;
+    }
+
+
+    /**
+     * Adds a certain value to given fontSize in order to display the fontSize almost like in MS Word.
+     * 
+     * @param fakeFontSize to get the original fontSize of (is not altered)
+     * @returns the given font size plus {@link getFontSizeDiffInWord()} or the fake fontSize, if state 
+     *          ```isFontSize``` is false or ```fakeFontSize``` is NaN
+     * @see getFontSizeDiffInWord
+     */
+    function getOriginalFontSize(fakeFontSize: string | number): number | string {
+
+        if (!isFontSize)
+            return fakeFontSize;
+
+        const fontSizeNumber = getCSSValueAsNumber(fakeFontSize, 2);
+        if (isNaN(fontSizeNumber)) {
+            logWarn("'getOriginalFontSize()' failed. 'fontSizeNumber' is NaN. 'fontSize': " + fakeFontSize);
+            return fakeFontSize;
+        }
+
+        const originalFontSize = getOriginalFontSizeByFakeFontSize(fontSizeNumber);
+
+        return originalFontSize;
     }
 
     
@@ -243,7 +256,6 @@ export default function Select(props: {
                  onMouseOver={handleBoxMouseOver}
                  onMouseOut={handleBoxMouseOut}
                  >
-                {/* <option> somehow solves the overflow problem xd */}
                 <input className="selectLabel dontMarkText dontHideSelect" 
                        ref={labelRef}
                        title={props.label}

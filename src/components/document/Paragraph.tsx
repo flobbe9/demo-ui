@@ -47,7 +47,7 @@ export default function Paragraph(props: {
 
 
     useEffect(() => {
-        if (documentContext.paragraphIdRemoveTextInput)
+        if (documentContext.paragraphIdRemoveTextInput) 
             handleRemoveTextInput();
         
     }, [documentContext.paragraphIdRemoveTextInput]);

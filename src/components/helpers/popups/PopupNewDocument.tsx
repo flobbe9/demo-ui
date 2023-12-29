@@ -14,8 +14,6 @@ import { BUILDER_PATH } from "../../../utils/GlobalVariables";
  * 
  * @since 0.0.5
  */
-// TODO: add lorem ipsum to blank buttons
-// TODO: fix border: none error
 export default function PopupNewDocument(props) {
 
     const className = props.className ? "PopupNewDocument " + props.classname : "PopupNewDocument";

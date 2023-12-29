@@ -295,27 +295,4 @@ export default function App() {
 }
 
 
-export const AppContext = createContext({
-    setEscapePopup: (escapePopup: boolean) => {},
-    setPopupContent: (content: React.JSX.Element) => {},
-
-    orientation: Orientation.PORTRAIT,
-    setOrientation: (orientation: Orientation) => {},
-    numColumns: 1,
-    setNumColumns: (numColumns: number) => {},
-    getSelectedColumnId: (): string => {return ""},
-    getColumnIdByTextInputId: (textInputId: string): string => {return ""},
-
-    selectedTextInputId: "",
-    setSelectedTextInputId: (id: string) => {},
-    selectedTextInputStyle: getDefaultStyle(),
-    setSelectedTextInputStyle: (style: Style, stylePropsToOverride?: [StyleProp, string | number][]) => {},
-
-    focusSelectedTextInput: () => {},
-    focusTextInput: (id: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
-    unFocusTextInput: (id: string) => {},
-
-    pressedKey: "",
-    documentFileName: "",
-    setDocumentFileName: (fileName: string) => {}
-})
+export const AppContext = createContext();

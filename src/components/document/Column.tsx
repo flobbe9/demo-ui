@@ -1,15 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import "../../assets/styles/Column.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getDocumentId, getNumLinesPerPage, isBlank, log, togglePopup } from "../../utils/Utils";
+import { getCSSValueAsNumber, getDocumentId, isBlank, log, togglePopup } from "../../utils/Utils";
 import Paragraph from "./Paragraph";
 import { AppContext } from "../App";
 import { DocumentContext } from "./Document";
-import { NUM_HEADINGS_PER_COLUMN, getNumLinesPerColumn } from "../../utils/GlobalVariables";
+import { NUM_LINES_LANDSCAPE, NUM_LINES_PROTRAIT } from "../../utils/GlobalVariables";
 import { Orientation } from "../../enums/Orientation";
-import TextInput from "./TextInput";
 
 
+// TODO: add some margin between columns
 export default function Column(props: {
     pageIndex: number,
     columnIndex: number,
@@ -22,6 +22,7 @@ export default function Column(props: {
     const className = props.className ? "Column " + props.className : "Column";
 
     const appContext = useContext(AppContext);
+    const documentContext = useContext(DocumentContext);
     
     const [numLinesPerParagraph, setNumLinesPerParagraph] = useState(1);
     const [paragraphs, setParagraphs] = useState<React.JSX.Element[]>();
@@ -33,15 +34,15 @@ export default function Column(props: {
 
 
     useEffect(() => {
-        setParagraphs(initParagraphs(appContext.selectedTextInputStyle.fontSize));
+        setParagraphs(initParagraphs());
 
     }, []);
 
 
-    function initParagraphs(fontSize: string | number): React.JSX.Element[] {
+    function initParagraphs(): React.JSX.Element[] {
 
         const paragraphs: React.JSX.Element[] = [];
-        const numParagraphs = getNumParagraphs(appContext.orientation, getCSSValueAsNumber(fontSize, 2));
+        const numParagraphs = getInitialNumParagraphs(appContext.orientation);
 
         for (let i = 0; i < numParagraphs; i++) 
             paragraphs.push(<Paragraph key={crypto.randomUUID()}
@@ -55,12 +56,11 @@ export default function Column(props: {
 
     /**
      * @param orientation of the document
-     * @param fontSize of all lines in this column
-     * @returns number of paragraphs considering the orientation and fontSize
+     * @returns number of paragraphs considering the orientation of the document
      */
-    function getNumParagraphs(orientation: Orientation, fontSize: number): number {
+    function getInitialNumParagraphs(orientation: Orientation): number {
 
-        const numLinesPerColumn = getNumLinesPerColumn(orientation, fontSize)
+        const numLinesPerColumn = orientation === Orientation.PORTRAIT ? NUM_LINES_PROTRAIT : NUM_LINES_LANDSCAPE;
         const numParagraphs = numLinesPerColumn / numLinesPerParagraph;
 
         return Math.floor(numParagraphs);
@@ -79,7 +79,4 @@ export default function Column(props: {
 }
 
 
-export const ColumnContext = createContext({
-    numLinesPerParagraph: 1,
-    setNumLinesPerParagraph: (numLines: number) => {}
-});
+export const ColumnContext = createContext();

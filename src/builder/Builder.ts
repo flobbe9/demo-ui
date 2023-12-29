@@ -4,8 +4,8 @@ import { getTextInputStyle } from "../abstract/Style";
 import TableConfig from "../abstract/TableConfig";
 import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
-import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, TABLE_CONFIG } from "../utils/GlobalVariables";
-import { downloadFileByUrl, getDocumentId, getPartFromDocumentId, isBlank, log, logWarn, stringToNumber } from "../utils/Utils";
+import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, TABLE_CONFIG, getOriginalFontSizeByFakeFontSize } from "../utils/GlobalVariables";
+import { downloadFileByUrl, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, isBlank, log, logWarn, stringToNumber } from "../utils/Utils";
 import fetchJson from "../utils/fetch/fetch";
 
 
@@ -118,7 +118,11 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
         if (isBlank(text))
             text = DEFAULT_BASIC_PARAGRAPH_TEXT;
 
-        allBasicParagrahps.push({text: text, style: getTextInputStyle(textInput)})
+        const style = getTextInputStyle(textInput);
+        // fix font size for MS Word
+        style.fontSize = getOriginalFontSizeByFakeFontSize(style.fontSize);
+
+        allBasicParagrahps.push({text: text, style})
     });
 
     // case: is not very last column

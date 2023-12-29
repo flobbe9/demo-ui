@@ -54,8 +54,11 @@ export function logApiError(message: string, error: Error): void {
 }
 
 
-export function stringToNumber(str: string): number {
+export function stringToNumber(str: string | number): number {
 
+    if (typeof str === "number")
+        return str;
+    
     try {
         return Number.parseFloat(str);
 
@@ -280,8 +283,13 @@ export function getCSSValueAsNumber(cssValue: string | number, unitDigits: numbe
         return cssValue;
 
     const length = cssValue.length;
-    if (unitDigits >= length)
+    if (unitDigits >= length) {
+        // case: is numeric
+        if (isStringNumeric(cssValue, true))
+            return stringToNumber(cssValue);
+
         logError("Failed to get css value as number. 'unitDigits' (" + unitDigits + ") too long or 'cssValue' (" + cssValue + ") too short.");
+    }
 
     const endIndex = cssValue.length - unitDigits;
 
@@ -545,25 +553,13 @@ export function replaceAtIndex(str: string, replacement: string, startIndex: num
 }
 
 
-export function getNumLinesPerPage(fontSizes: number[]): number {
-
-    const max = 424;
-    let sum = 0;
-
-    for (let i = 0; i < fontSizes.length; i++) {
-        const num = fontSizes[i];
-
-        if (sum + num >= max)
-            return i;
-
-        sum += num;
-    }
-
-    return fontSizes.length;
-}
-
-
-export function equalsIgnoreCase(expected: string, actual: string): boolean {
+/**
+ * @param expected first value to compare
+ * @param actual second value to compare
+ * @returns ```expected === actual``` after calling ```trim()``` and ```toLowerCase()``` on both values.
+ *          Types wont be considered: ```"1" === 1 = true```
+ */
+export function equalsIgnoreCase(expected: string | number, actual: string | number): boolean {
 
     if (!expected || !actual)
         return expected === actual;
@@ -573,6 +569,24 @@ export function equalsIgnoreCase(expected: string, actual: string): boolean {
 
     return expected === actual;
 }
+
+
+/**
+ * @param arr array to search in
+ * @param value string or number to look for
+ * @returns true if value is included in array. Uses {@link equalsIgnoreCase} for comparison instead of ```includes()```.
+ */
+export function includesIgnoreCase(arr: (string | number)[] | string, value: string | number): boolean {
+
+    // case: arr is string
+    if (typeof arr === "string")
+        return arr.trim().toLowerCase().includes(value.toString().trim().toLowerCase());
+
+    const result = arr.find(val => equalsIgnoreCase(val, value));
+
+    return result ? true : false;
+}
+
 
 
 /**
@@ -593,6 +607,86 @@ export function matchesAll(str: string, regexp: RegExp): boolean {
     return true;
 }
 
+
+/**
+ * This calculation is quite inaccurate. Tends to subtract more pixels than necessary which means the fontSize in 
+ * Word will be a bit too small.
+ * 
+ * @param fontSize get the fontSize difference in Word for
+ * @returns approximated number of pixels by which the fontSize in the browser should be increased to match the actual fontSize in MS Word
+ */
+export function getFontSizeDiffInWord(fontSize: number): number {
+
+    if (isNaN(fontSize)) {
+        logError("'getFontSizeDiffInWord()' failed. 'fontSize' is NaN")
+        return -1;
+    }
+
+    return fontSize >= 19 ? Math.ceil(fontSize / 4) : Math.ceil(fontSize / 3);
+}
+
+
+export function isStringAlphaNumeric(str: string): boolean {
+
+    // alpha numeric regex
+    const regexp = /^[a-z0-9ßäÄöÖüÜ]+$/i;
+
+    return matchString(str, regexp);
+}
+
+
+/**
+ * @param str to check
+ * @returns true if every char of given string matches regex. Only alphabetical chars including german exceptions
+ *          'ßäÄöÖüÜ' are a match (case insensitive).
+ */
+export function isStringAlphabetical(str: string): boolean {
+
+    // alpha numeric regex
+    const regexp = /^[a-zßäÄöÖüÜ]+$/i;
+
+    return matchString(str, regexp);
+}
+
+
+/**
+ * @param str to check
+ * @param considerDouble if true, ',' and '.' will be included in the regex
+ * @returns true if every char of given string matches the numeric regex
+ */
+export function isStringNumeric(str: string, considerDouble = false): boolean {
+
+    // alpha numeric regex
+    let regexp = /^[0-9]+$/;
+
+    if (considerDouble)
+        regexp = /^[0-9.,]+$/;
+
+    return matchString(str, regexp);
+}
+
+
+/**
+ * @param str to check
+ * @param regexp to use for matching
+ * @returns true if every char of string matches the regex, trims the string first
+ */
+function matchString(str: string, regexp: RegExp): boolean {
+
+    str = str.trim();
+
+    let matches = true;
+    for (let i = 0; i < str.length; i++) {
+        const char = str[i];
+
+        if (char.match(regexp) === null) {
+            matches = false;
+            break;
+        }
+    }
+
+    return matches
+}
 
 // BUG: does not work
 // /**

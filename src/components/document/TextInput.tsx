@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useRef } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getCursorIndex, getDocumentId, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex } from "../../utils/Utils";
+import { getCSSValueAsNumber, getCursorIndex, getDocumentId, getFontSizeDiffInWord, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex } from "../../utils/Utils";
 import { AppContext } from "../App";
 import { StyleProp, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
-import { SELECTED_COLOR, SINGLE_TAB_UNICODE_ESCAPED, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
+import { DEFAULT_FONT_SIZE, SELECT_COLOR, SINGLE_TAB_UNICODE_ESCAPED, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
 
 
 // TODO: 
@@ -13,7 +13,6 @@ import { SELECTED_COLOR, SINGLE_TAB_UNICODE_ESCAPED, TAB_UNICODE_ESCAPED } from 
     // strg a
     // strg c / strg v(?)
 
-// TODO: increase font size but only on display
 // TODO: underline tabs
 // TODO: fix tab size
 export default function TextInput(props: {
@@ -37,7 +36,10 @@ export default function TextInput(props: {
 
 
     useEffect(() => {
-        // focus very first text input on render
+        // set initial font size
+        document.documentElement.style.setProperty("--initialTextInputFontSize", DEFAULT_FONT_SIZE + getFontSizeDiffInWord(DEFAULT_FONT_SIZE) + "px");
+        
+        // focus first text input of document
         if (id === getDocumentId("TextInput", 0, "", 0, 0, 0))
             appContext.focusTextInput(id);
     }, [])
@@ -55,7 +57,7 @@ export default function TextInput(props: {
             appContext.focusTextInput(id, false);
             
             // check num lines to add to column
-            const numLinesToAdd = documentContext.getFontSizeDiff();
+            const numLinesToAdd = documentContext.getNumLinesOverhead();
             if (numLinesToAdd > 0) 
                 documentContext.setParagraphIdAppendTextInput([documentContext.getParagraphIdByColumnId(), numLinesToAdd])
         }
@@ -69,12 +71,13 @@ export default function TextInput(props: {
         let typedChar = event.key === "Tab" ? getTabSpaces() : event.key;
 
         // case: text too long when including typed char
+        // TODO: does not validate when key combination is active
         if (isTextLongerThanInput(appContext.selectedTextInputId, documentContext.getTextInputOverhead(), typedChar) && 
             isKeyAlphaNumeric(event.keyCode) &&
             appContext.pressedKey === "") {
 
             event.preventDefault();
-            documentContext.handleTextLongerThanLine(id, SELECTED_COLOR);
+            documentContext.handleTextLongerThanLine(id, SELECT_COLOR);
             return;
         }
 

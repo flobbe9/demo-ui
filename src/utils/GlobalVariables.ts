@@ -1,5 +1,5 @@
-import { Orientation } from "../enums/Orientation";
 import React from "react";
+import { getFontSizeDiffInWord, log } from "./Utils";
 
 export const BACKEND_BASE_URL = "" + process.env.REACT_APP_BACKEND_BASE_URL;
 export const USER_SERVICE_BASE_URL = "" + process.env.REACT_APP_USER_SERVICE_BASE_URL;
@@ -30,24 +30,37 @@ export const FONT_FAMILIES = [
     "Calibri"
 ];
 
-export const FONT_SIZES = [
-    8,
-    9,
-    10,
-    11,
-    12,
-    14,
-    16,
-    18,
-    20,
-    22,
-    24,
-    26,
-    28,
-    36,
-    48,
-    72
-]
+export const RAW_FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72]
+
+export const MAX_FONT_SIZE = RAW_FONT_SIZES[RAW_FONT_SIZES.length - 1];
+export const MIN_FONT_SIZE = RAW_FONT_SIZES[0];
+
+/** Formatted like: ```[originalFontSize, fakeFontSize]```. To get fakeFontSize add a certain diff to even out font style difference in MS Word */
+export const FONT_SIZES = RAW_FONT_SIZES.map(fontSize => [fontSize, fontSize + getFontSizeDiffInWord(fontSize)]);
+
+/** Formatted liek {@link FONT_SIZES} but mapping all numbers from {@link MIN_FONT_SIZE} to {@link MAX_FONT_SIZE} */
+export const ALL_FONT_SIZES = getAllFontSizes();
+function getAllFontSizes(): number[][] {
+    const allFontSizes: number[][] = [];
+
+    for (let i = MIN_FONT_SIZE; i <= MAX_FONT_SIZE; i++) 
+        allFontSizes.push([i, i + getFontSizeDiffInWord(i)])
+
+    return allFontSizes;
+}
+
+export function getFakeFontSizeByOriginalFontSize(originalFontSize: number): number {
+
+    return originalFontSize + getFontSizeDiffInWord(originalFontSize);
+}
+
+export function getOriginalFontSizeByFakeFontSize(fakeFontSize: number): number {
+
+    const originalFontSize = ALL_FONT_SIZES.find(([originalFontSize, fontSize]) => fontSize === fakeFontSize);
+
+    return originalFontSize ? originalFontSize[0] : -1;
+}
+
 
 export type Side = "top" | "right" | "left" | "bottom" | "none";
 
@@ -73,99 +86,25 @@ export function setTextInputWidth(textInputWidth: number): void {
 }
 
 
-export function getNumLinesPerColumn(orientation: Orientation, fontSize: number): number {
-
-    return orientation === Orientation.PORTRAIT ? getNumLinesPerColumnPortraitByFontSize(fontSize) : getNumLinesPerColumnLandscapeByFontSize(fontSize);
-}
-
 /** fontSize of a line that is added to the document (i.e. because there's not enough lines at the moment) */
-export const FILLER_LINE_FONT_SIZE = 14;
+export const DEFAULT_FONT_SIZE = 14;
 
 /** Number of empty lines on top of every column, becuase of backend */
 const numFillerLines = 1;
 
-const NUM_LINES_PROTRAIT: ReadonlyArray<Object> = [{
-    8: 76 - numFillerLines,
-    9: 68 - numFillerLines,
-    10: 61 - numFillerLines,
-    11: 54 - numFillerLines,
-    12: 51 - numFillerLines,
-    14: 44 - numFillerLines,
-    16: 38 - numFillerLines,
-    18: 34 - numFillerLines,
-    20: 31 - numFillerLines,
-    22: 28 - numFillerLines,
-    24: 26 - numFillerLines,
-    26: 24 - numFillerLines,
-    28: 22 - numFillerLines,
-    36: 17 - numFillerLines,
-    48: 13 - numFillerLines,
-    72: 9 - numFillerLines
-}];
+/** assuming a fontSize of 14 */
+export const NUM_LINES_PROTRAIT = 44 - numFillerLines;
+/** assuming a fontSize of 19 */
+export const MAX_FONT_SIZE_SUM_PORTRAIT = NUM_LINES_PROTRAIT * DEFAULT_FONT_SIZE;
 
-/**
- * Get number of lines fitting on a single page (or column) in protrait mode.
- * Considering the font size and expecting the whole page (or column) to have the same font size (in px).
- * Expecting no header / footer. 1 line of header / footer would take 2 lines on the page (so with both header and footer
- * present at least 4 lines would have to be added to below values).<p>
- * 
- * {@link numFillerLines} will be subtracted from the number of lines. <p>
- * 
- * Array is read only and has only one object formatted like: ```{fontSize: numLines}```
- */
-function getNumLinesPerColumnPortraitByFontSize(fontSize: number): number {
-
-    return NUM_LINES_PROTRAIT[0][fontSize];
-}
-
-export const MAX_FONT_SIZE_SUM_PORTRAIT = NUM_LINES_PROTRAIT[0]["14"] * 14;
-
-
-const NUM_LINES_LANDSCAPE: ReadonlyArray<Object> = [{
-    8: 53 - numFillerLines,
-    9: 47 - numFillerLines,
-    10: 43 - numFillerLines,
-    11: 39 - numFillerLines,
-    12: 36 - numFillerLines,
-    14: 31 - numFillerLines,
-    16: 28 - numFillerLines,
-    18: 25 - numFillerLines,
-    20: 23 - numFillerLines,
-    22: 21 - numFillerLines,
-    24: 19 - numFillerLines,
-    26: 18 - numFillerLines,
-    28: 17 - numFillerLines,
-    36: 14 - numFillerLines,
-    48: 11 - numFillerLines,
-    72: 8 - numFillerLines
-}];
-
-/**
- * Get number of lines fitting on a single page (or column) in landscape mode.
- * Considering the font size and expecting the whole page (or column) to have the same font size (in px).
- * Expecting no header / footer. 1 line of header / footer would take 2 lines on the page (so with both header and footer
- * present at least 4 lines would have to be added to below values).<p>
- * 
- * {@link numFillerLines} will be subtracted from the number of lines. <p>
- * 
- * Array is read only and has only one object formatted like: ```{fontSize: numLines}```
- */
-function getNumLinesPerColumnLandscapeByFontSize(fontSize: number): number {
-
-    return NUM_LINES_LANDSCAPE[0][fontSize];
-}
-
-export const MAX_FONT_SIZE_SUM_LANDSCAPE = NUM_LINES_LANDSCAPE[0]["14"] * 14;
-
-
-const WsPerLineLandscapeFontSize14 = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";
-const WsPerLinePortraitFontSize14 = "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"; // 19px in browser
+/** assuming a fontSize of 14 */
+export const NUM_LINES_LANDSCAPE = 31 - numFillerLines;
+/** assuming a fontSize of 19 */
+export const MAX_FONT_SIZE_SUM_LANDSCAPE = NUM_LINES_LANDSCAPE * DEFAULT_FONT_SIZE;
 
 
 export const MAX_NUM_TABS = 12;
-
 export const SPACES_PER_TAB = 16;
-
 export const TAB_UNICODE = "0x09";
 export const SINGLE_TAB_UNICODE_ESCAPED = "\x09";
 export const TAB_UNICODE_ESCAPED = "\x09\x09";
@@ -197,15 +136,57 @@ export function isMobileWidth(): boolean {
 }
 
 
-export const SELECTED_COLOR = "rgb(0, 226, 226)";
+export const SELECT_COLOR = "rgb(0, 226, 226)";
 
 
 export const SELECTED_STYLE: React.CSSProperties = {
-    borderColor: SELECTED_COLOR
+    borderColor: SELECT_COLOR
 }
 
 
 /** format of a word file */
 export const DOCUMENT_SUFFIX = ".docx";
 
+
 export const BUILDER_PATH = "/build";
+
+
+// ------------------- Archive
+
+const NUM_LINES_PROTRAIT_OLD: ReadonlyArray<Object> = [{
+    8: 76 - numFillerLines,
+    9: 68 - numFillerLines,
+    10: 61 - numFillerLines,
+    11: 54 - numFillerLines,
+    12: 51 - numFillerLines,
+    14: 44 - numFillerLines,
+    16: 38 - numFillerLines,
+    18: 34 - numFillerLines,
+    20: 31 - numFillerLines,
+    22: 28 - numFillerLines,
+    24: 26 - numFillerLines,
+    26: 24 - numFillerLines,
+    28: 22 - numFillerLines,
+    36: 17 - numFillerLines,
+    48: 13 - numFillerLines,
+    72: 9 - numFillerLines
+}];
+
+const NUM_LINES_LANDSCAPE_OLD: ReadonlyArray<Object> = [{
+    8: 53 - numFillerLines,
+    9: 47 - numFillerLines,
+    10: 43 - numFillerLines,
+    11: 39 - numFillerLines,
+    12: 36 - numFillerLines,
+    14: 31 - numFillerLines,
+    16: 28 - numFillerLines,
+    18: 25 - numFillerLines,
+    20: 23 - numFillerLines,
+    22: 21 - numFillerLines,
+    24: 19 - numFillerLines,
+    26: 18 - numFillerLines,
+    28: 17 - numFillerLines,
+    36: 14 - numFillerLines,
+    48: 11 - numFillerLines,
+    72: 8 - numFillerLines
+}];
