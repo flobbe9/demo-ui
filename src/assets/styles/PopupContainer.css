@@ -11,18 +11,15 @@
     }
 
     .largeWidth {
-        max-width: 600px;
-        width: 75%;
+        width: 450px;
     }
 
     .mediumWidth {
-        max-width: 400px;
-        width: 50%;
+        width: 300px;
     }
 
     .smallWidth {
-        max-width: 300px;
-        width: 30%;
+        max-width: 200px;
     }
 
     .fullHeight {
@@ -30,17 +27,14 @@
     }
 
     .largeHeight {
-        max-height: 600px;
-        height: 75%;
+        height: 450px;
     }
 
     .mediumHeight {
-        max-height: 400px;
         height: 300px;
     }
 
     .smallHeight {
         height: 200px;
-        max-height: 300px;
     }
 }

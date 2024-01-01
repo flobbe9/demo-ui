@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useRef } from "react";
+import React, { useEffect, useContext, useRef, useState } from "react";
 import "../assets/styles/NavBar.css"
 import { Link, useLocation } from "react-router-dom";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,6 +17,8 @@ export default function NavBar(props) {
     const id = props.id ? "NavBar" + props.id : "NavBar";
     const className = props.className ? "NavBar " + props.className : "NavBar";
 
+    const [flexClass, setFlexClass] = useState("flexCenter");
+
     const location = useLocation();
 
     const appContext = useContext(AppContext);
@@ -34,6 +36,9 @@ export default function NavBar(props) {
             $(".navSectionCenter").css("width", "45%");
             $(".navSectionRight").css("width", "10%");
         }
+
+        if (appContext.isWindowWidthTooSmall())
+            setFlexClass("flexLeft");
     }, []);
 
     
@@ -129,7 +134,7 @@ export default function NavBar(props) {
                 </LeaveConfirmLink>
             </div>
 
-            <div className="navSectionCenter textCenter flexCenter">
+            <div className={"navSectionCenter textCenter " + flexClass}>
                 <input id="fileNameInput"
                        className={"fileNameInput" + (location.pathname === BUILDER_PATH ? "" : " hidden")} 
                        ref={fileNameInputRef}

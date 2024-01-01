@@ -16,8 +16,8 @@ export default function Popup(props: {
     children?,
     style?: React.CSSProperties,
 
-    height?: "small" | "large" | "full",
-    width?: "small" | "large" | "full",
+    height: "small" | "medium" | "large" | "full",
+    width: "small" | "medium" | "large" | "full",
 }) {
 
 

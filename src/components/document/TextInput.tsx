@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getCursorIndex, getDocumentId, getFontSizeDiffInWord, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex } from "../../utils/Utils";
+import { getCSSValueAsNumber, getCursorIndex, getDocumentId, getFontSizeDiffInWord, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex, setCssVariable } from "../../utils/Utils";
 import { AppContext } from "../App";
 import { StyleProp, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
@@ -37,7 +37,7 @@ export default function TextInput(props: {
 
     useEffect(() => {
         // set initial font size
-        document.documentElement.style.setProperty("--initialTextInputFontSize", DEFAULT_FONT_SIZE + getFontSizeDiffInWord(DEFAULT_FONT_SIZE) + "px");
+        setCssVariable("initialTextInputFontSize", DEFAULT_FONT_SIZE + getFontSizeDiffInWord(DEFAULT_FONT_SIZE) + "px");
         
         // focus first text input of document
         if (id === getDocumentId("TextInput", 0, "", 0, 0, 0))

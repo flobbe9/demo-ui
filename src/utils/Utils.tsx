@@ -678,6 +678,12 @@ export function isStringNumeric(str: string, considerDouble = false): boolean {
 }
 
 
+export function setCssVariable(variableName: string, value: string): void {
+
+    document.documentElement.style.setProperty("--" + variableName, value);
+}
+
+
 /**
  * @param str to check
  * @param regexp to use for matching

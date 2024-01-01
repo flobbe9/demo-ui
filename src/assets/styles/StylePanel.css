@@ -1,3 +1,7 @@
+:root {
+    --stylePanelOverflow: none
+}
+
 .StylePanel {
     background-color: rgb(255, 255, 255);
     border-bottom-left-radius: 5px;
@@ -11,9 +15,10 @@
 
     .sectionContainer {
         height: 100%;
-        transition: opacity 0.2s;
         max-width: 100vi;
         min-width: 80vi;
+        overflow: var(--stylePanelOverflow);
+        transition: opacity 0.2s;
 
         /* ColorPicker */
         .colorChildren {
@@ -27,8 +32,12 @@
             width: 30px;
         }
 
-        .StylePanelIcon {
-            height: 50px;
+        .StylePanelIconContainer {
+            white-space: nowrap;
+
+            .StylePanelIcon {
+                height: 50px;
+            }
         }
     }
 }

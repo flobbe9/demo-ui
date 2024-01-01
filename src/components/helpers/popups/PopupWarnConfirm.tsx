@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from "react"; 
 import "../../../assets/styles/PopupWarnConfirm.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hideGlobalPopup, log, togglePopupOverlay } from "../../../utils/Utils";
+import { hideGlobalPopup, isBooleanFalsy, log, togglePopupOverlay } from "../../../utils/Utils";
 import Button from "../Button";
 import WarnIcon from "../WarnIcon";
 
@@ -19,11 +19,15 @@ export default function PopupWarnConfirm(props: {
     children?
     handleConfirm?,
     handleDecline?
+    /** if true, the yes/no buttons wont be displayed */
+    dontConfirm?: boolean,
 }) {
 
     const className = props.className ? "PopupWarnConfirm " + props.className : "PopupWarnConfirm";
     const childrenClassName = props.childrenClassName || "";
     const id = props.id ? "PopupWarnConfirm " + props.id : "PopupWarnConfirm";
+
+    const [dontConfirm, setDontConfirm] = useState(isBooleanFalsy(props.dontConfirm) ? false : props.dontConfirm);
 
 
     return (
@@ -43,7 +47,7 @@ export default function PopupWarnConfirm(props: {
                 {props.children}
             </div>
 
-            <div className="popupFooter flexCenter">
+            <div className={"popupFooter flexCenter " + (dontConfirm ? "hidden " : "")}>
                 <Button id={id + "Decline"} 
                         className="mr-4 blackButton blackButtonContained" 
                         childrenStyle={{

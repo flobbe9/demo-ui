@@ -85,7 +85,9 @@ export default function App() {
         pressedKey,
 
         documentFileName,
-        setDocumentFileName
+        setDocumentFileName,
+
+        isWindowWidthTooSmall
     }
 
 
@@ -297,6 +299,15 @@ export default function App() {
         
         // update ref
         windowScrollY.current = currentScrollY;
+    }
+    
+
+    /**
+     * @returns true if window width is smaller thatn landscape page width
+     */
+    function isWindowWidthTooSmall(): boolean {
+
+        return document.documentElement.clientWidth < 1014;
     }
 
     

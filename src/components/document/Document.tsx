@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, createContext } from "react";
 import "../../assets/styles/Document.css";
-import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getTabSpaces, hideGlobalPopup, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
+import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getTabSpaces, hideGlobalPopup, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, stringToNumber, toggleGlobalPopup } from "../../utils/Utils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, NUM_HEADINGS_PER_COLUMN, NUM_PAGES, SELECT_COLOR, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
@@ -8,6 +8,9 @@ import ControlPanel from "../ControlPanel";
 import { buildDocument, downloadDocument } from "../../builder/Builder";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
+import Popup from "../helpers/popups/Popup";
+import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
+import Button from "../helpers/Button";
 
 
 // TODO: add some kind of "back" button
@@ -63,6 +66,9 @@ export default function Document(props) {
         hideGlobalPopup(appContext.setPopupContent);
 
         $(".App").css("backgroundColor", "white");
+
+        if (appContext.isWindowWidthTooSmall())
+            handleWindowTooSmall();
     }, []);
 
 
@@ -520,6 +526,35 @@ export default function Document(props) {
         }
 
         return -1;
+    }
+
+
+    function handleWindowTooSmall(): void {
+
+        // warn about width
+        appContext.setPopupContent((
+            <Popup id={id} height="medium" width="medium">
+                <PopupWarnConfirm hideThis={() => hideGlobalPopup(appContext.setPopupContent)} dontConfirm={true}>
+                    <div className="textCenter">
+                        Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
+                        nicht identisch dargestellt werden.
+                    </div>
+
+                    <div className="flexCenter mt-5">
+                        <Button id={id + "Ok"}
+                                className="blackButton blackButtonContained"
+                                hoverBackgroundColor="rgb(100, 100, 100)"
+                                clickBackgroundColor="rgb(130, 130, 130)"
+                                handleClick={() => hideGlobalPopup(appContext.setPopupContent)}
+                                >
+                            Alles klar
+                        </Button>
+                    </div>
+                </PopupWarnConfirm>
+            </Popup>
+        )); 
+
+        toggleGlobalPopup(appContext.setPopupContent);
     }
 
 

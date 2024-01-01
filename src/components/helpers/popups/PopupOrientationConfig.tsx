@@ -66,7 +66,7 @@ export default function PopupOrientationConfig(props) {
             
             <div className="popupBody flexCenter">
                 <div id="orientationContainer" className="orientationContainer flexCenter dontMarkText">
-                    <div className="mr-3">
+                    <div className="mr-0 mr-sm-3">
                         <RadioButton id="Portrait"
                                     className="radioContainer" 
                                     labelClassName="whiteButton whiteButtonPortrait"
@@ -111,7 +111,7 @@ export default function PopupOrientationConfig(props) {
                     </div>
                 </div>
 
-                <Popup id={warnPopupId} className="warnPopup" height="small" width="large">
+                <Popup id={warnPopupId} className="warnPopup" height="small" width="medium">
                     <PopupWarnConfirm handleConfirm={handleSubmit} 
                                       handleDecline={() => hideGlobalPopup(appContext.setPopupContent)}
                                       hideThis={toggleWarnPopup}

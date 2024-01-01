@@ -7,13 +7,14 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, toggleGlobalPopup } from "../../utils/Utils";
+import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, hideGlobalPopup, isBlank, isTextLongerThanInput, log, logWarn, setCssVariable, stringToNumber, toggleGlobalPopup } from "../../utils/Utils";
 import { DocumentContext } from "./Document";
 import { FONT_FAMILIES, FONT_SIZES, RAW_FONT_SIZES } from "../../utils/GlobalVariables";
 import Button from "../helpers/Button";
 import Popup from "../helpers/popups/Popup";
 import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
 import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
+import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
 
 
 // TODO: add key combinations for most buttons
@@ -28,9 +29,16 @@ export default function StylePanel(props) {
     const documentContext = useContext(DocumentContext);
 
     const [disabled, setDisabled] = useState(true);
+    const [flexClass, setFlexClass] = useState("flexCenter");
 
     const stylePanelRef = useRef(null);
     const sectionContainerRef = useRef(null);
+
+
+    useEffect(() => {
+        if (appContext.isWindowWidthTooSmall()) 
+            handleWindowWidthTooSmall();
+    }, []);
 
 
     useEffect(() => {
@@ -131,12 +139,17 @@ export default function StylePanel(props) {
     }
 
 
+    function handleWindowWidthTooSmall(): void {
+
+        setFlexClass("flexLeft");
+        setCssVariable("stylePanelOverflow", "auto");
+    }
+
+
     return (
-        <div id={id} className={className + " flexCenter"} ref={stylePanelRef} >
-            <div className={"sectionContainer flexLeft" + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
-                <StylePanelSection className="col-3 col-xl-2" 
-                                    hideRightBorder={true} 
-                                    >
+        <div id={id} className={className} ref={stylePanelRef}>
+            <div className={"sectionContainer " + flexClass + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
+                <StylePanelSection hideRightBorder={true} componentStyle={{maxWidth: "215px"}}>
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
                                     label={appContext.selectedTextInputStyle.fontFamily}
@@ -201,7 +214,7 @@ export default function StylePanel(props) {
                     </div>
                 </StylePanelSection>
 
-                <StylePanelSection className="col-3" hideRightBorder={false}>
+                <StylePanelSection hideRightBorder={false} componentStyle={{maxWidth: "150px"}}>
                     <div className="flexCenter" style={{height: "50%"}}>
                         <Select id="FontSize"
                                 label={appContext.selectedTextInputStyle.fontSize}
@@ -268,8 +281,9 @@ export default function StylePanel(props) {
                 </StylePanelSection>
 
                 <StylePanelSection id={"NumColumns"} 
-                                   hideRightBorder={true}
                                    buttonContainerClassName="flexCenter"
+                                   componentStyle={{maxWidth: "260px"}}
+                                   hideRightBorder={true}
                                    >
                     <Button id={"OrientationConfig"}
                             className="mr-3"
@@ -281,7 +295,7 @@ export default function StylePanel(props) {
                             title={"Ausrichtung"}
                             handleClick={handleOrientationConfig}
                             >
-                        <div className="orientationIcon">
+                        <div className={id + "IconContainer"}>
                             <img className={id + "Icon"} src="portraitSheet.png" alt="portrait mode"/>
                             <img className={id + "Icon"} src="landscapeSheet.png" alt="landscape mode"/>
                         </div>
@@ -301,7 +315,7 @@ export default function StylePanel(props) {
                             title={"Spalten"}
                             handleClick={handleColumnConfig}
                             >
-                        <div>
+                        <div className={id + "IconContainer"}>
                             <img className={id + "Icon"} src="columnIcon.png" alt="column icon" style={{opacity: 0.7}}/>
                         </div>
                         Spalten

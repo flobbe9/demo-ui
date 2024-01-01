@@ -58,7 +58,6 @@ export default function PopupColumnConfig(props) {
 
 
     function toggleWarnPopup(): void {
-        log("toggle")
 
         // case: selected same number
         if (selectedNumColumns === appContext.numColumns) {
@@ -79,7 +78,7 @@ export default function PopupColumnConfig(props) {
             
             <div className="popupBody flexCenter">
                 <div id="numColumnsContainer" className="numColumnsContainer flexCenter dontMarkText">
-                    <div className="radioContainer">
+                    <div className="radioContainer mr-0 mr-sm-4">
                         <RadioButton id="OneColumn" 
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName="flexLeftStart"
@@ -101,10 +100,10 @@ export default function PopupColumnConfig(props) {
                                     >
                             <div>Lorem ipsum</div>
                         </RadioButton>
-                        <div className="mt-3">1 Spalte / Seite</div>
+                        <div className="mt-2 mb-3 mr-2">1 Spalte / Seite</div>
                     </div>
 
-                    <div className="radioContainer">
+                    <div className="radioContainer mr-0 mr-sm-4">
                         <RadioButton id="TwoColumns" 
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName="flexLeftStart"
@@ -128,7 +127,7 @@ export default function PopupColumnConfig(props) {
                             </div>
                             <div style={{width: "50%"}}></div>
                         </RadioButton>
-                        <div className="mt-3">2 Spalten / Seite</div>
+                        <div className="mt-2 mb-3">2 Spalten / Seite</div>
                     </div>
 
                     <div className="radioContainer">
@@ -156,11 +155,11 @@ export default function PopupColumnConfig(props) {
                             <div className="verticalBorderRightDotted" style={{width: "33%"}}></div>
                             <div style={{width: "33%"}}></div>
                         </RadioButton>
-                        <div className="mt-3">3 Spalten / Seite</div>
+                        <div className="mt-2 mb-3">3 Spalten / Seite</div>
                     </div>
                 </div>
 
-                <Popup id={warnPopupId} className="warnPopup" height="small" width="large">
+                <Popup id={warnPopupId} className="warnPopup" height="small" width="medium">
                     <PopupWarnConfirm handleConfirm={handleSubmit} 
                                       handleDecline={() => hideGlobalPopup(appContext.setPopupContent)}
                                       hideThis={toggleWarnPopup}
