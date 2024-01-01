@@ -138,11 +138,9 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
 function getTextInputContent(textInput: JQuery): string {
 
     // case: input falsy
-    if (!textInput.length) {
-        logWarn("Failed to get text input content. 'textInput' not present");
+    if (!textInput.length) 
         return ""
-    }
-
+    
     // case: not a text input
     if (textInput.prop("type") !== "text") {
         logWarn("Failed to get text input content. 'textInput' type does not equal 'text'");

@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/Menu.css";
-import { hidePopup, togglePopup } from "../utils/Utils";
+import { hideGlobalPopup, toggleGlobalPopup } from "../utils/Utils";
 import { AppContext } from "./App";
-import Popup from "./helpers/popups/Popup";
-import PopupNewDocument from "./helpers/popups/PopupNewDocument";
 import Button from "./helpers/Button";
+import { BUILDER_PATH } from "../utils/GlobalVariables";
+import { Link } from "react-router-dom";
 
 /**
  * Will be displayed at "/" root. Serves as start page.
@@ -22,7 +22,7 @@ export default function Menu(props) {
 
 
     useEffect(() => {
-        hidePopup(appContext.setPopupContent);
+        hideGlobalPopup(appContext.setPopupContent);
 
         $(".App").css("backgroundColor", "rgb(228, 228, 228)");
     }, []);
@@ -38,45 +38,32 @@ export default function Menu(props) {
     }
 
 
-    function handleNewDocument(event: any): void {
-
-        // define popup
-        appContext.setPopupContent(
-            <Popup width="large"
-                height="large">
-                <PopupNewDocument />
-            </Popup>
-        );
-
-        // toggle popup
-        togglePopup(appContext.setPopupContent);
-    }
-
-
     return (
         <div id={id} className={className}>
             <div className="leftSideBar">
                 <div className="newDocumentButtonContainer ">
-                    <Button id={"NewDocument"}
-                            boxStyle={{
-                                height: "250px",
-                                width: "100%", 
-                            }}
-                            childrenStyle={{
-                                alignItems: "center",
-                                display: "flex",
-                                height: "100%",
-                                justifyContent: "center",
-                                width: "100%", 
-                            }}
-                            hoverBackgroundColor="rgb(245, 245, 245)"
-                            clickBackgroundColor="rgb(230, 230, 230)"
-                            handleClick={handleNewDocument}
-                            >
-                        <i className="fa-solid fa-plus"></i>
-                    </Button>
+                    <Link to={BUILDER_PATH}>
+                        <Button id={"NewDocument"}
+                                boxStyle={{
+                                    height: "250px",
+                                    width: "100%", 
+                                }}
+                                childrenStyle={{
+                                    alignItems: "center",
+                                    display: "flex",
+                                    height: "100%",
+                                    justifyContent: "center",
+                                    width: "100%", 
+                                }}
+                                hoverBackgroundColor="rgb(245, 245, 245)"
+                                clickBackgroundColor="rgb(230, 230, 230)"
+                                title="Leeres Dokument"
+                                >
+                            <i className="fa-solid fa-plus"></i>
+                        </Button>
+                    </Link>
 
-                    <p className="textCenter dontMarkText">Neues Dokument</p>
+                    <p className="textCenter dontMarkText">Leeres Dokument</p>
                 </div>
             </div>
 

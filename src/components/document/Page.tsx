@@ -4,9 +4,9 @@ import Column from "./Column";
 import TextInput from "./TextInput";
 import { AppContext } from "../App";
 import { getDocumentId, getPartFromDocumentId, log } from "../../utils/Utils";
+import { MAX_NUM_COLUMNS } from "../../utils/GlobalVariables";
 
 
-// TODO: consider page width, compare with word
 export default function Page(props: {
     pageIndex: number,
     id?: string,
@@ -32,7 +32,8 @@ export default function Page(props: {
 
     function initColumns(): React.JSX.Element[] {
 
-        if (appContext.numColumns > 3)
+        // case: invalid num columns
+        if (appContext.numColumns > MAX_NUM_COLUMNS || appContext.numColumns < 1)
             return [<Column key={0} pageIndex={props.pageIndex} columnIndex={0}/>];
 
         const columns: React.JSX.Element[] = [];
@@ -45,7 +46,10 @@ export default function Page(props: {
 
 
     return (
-        <div id={id} className={className + " " + orientationClassName} style={props.style}>
+        <div id={id} 
+             className={className + " " + orientationClassName} 
+             style={props.style}
+             >
             <div className="columnContainer">
                 {columns}
             </div>

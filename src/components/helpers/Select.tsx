@@ -20,7 +20,7 @@ export default function Select(props: {
     /** the value prop of the selected <option /> tag will be passed as param */
     handleSelect: (value: any) => void, 
     /** [option value, option label] */
-    options: [string, string][],
+    options: [string, any][],
     
     hoverBackgroundColor?: string,
     
@@ -138,7 +138,6 @@ export default function Select(props: {
     }
 
 
-    // TODO: clean this up
     function handleLabelKeyUp(event): void {
 
         if (event.key === "Enter")

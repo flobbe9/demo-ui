@@ -15,9 +15,14 @@
         width: 75%;
     }
 
-    .smallWidth {
+    .mediumWidth {
         max-width: 400px;
         width: 50%;
+    }
+
+    .smallWidth {
+        max-width: 300px;
+        width: 30%;
     }
 
     .fullHeight {
@@ -29,8 +34,13 @@
         height: 75%;
     }
 
-    .smallHeight {
+    .mediumHeight {
         max-height: 400px;
         height: 300px;
+    }
+
+    .smallHeight {
+        height: 200px;
+        max-height: 300px;
     }
 }

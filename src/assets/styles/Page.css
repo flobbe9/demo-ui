@@ -2,36 +2,20 @@
     background-color: white;
     margin: 20px 0 70px;
     
-    /* .headingContainer {
-        display: flex; 
-        height: 5%;
-        justify-content: center;
-        margin-bottom: 15px;
-        width: 100%;
-
-        .heading {
-            height: fit-content;
-            outline: none;
-        }
-    } */
-    
     .columnContainer {
         display: flex;
-        /* height: 94%; */
         height: 100%;
     }
 }
 
 .pagePortrait {
-    height: 205vh;
-    max-height: 2060px;
-    padding: 33px;
+    max-height: 1500px !important;
+    padding: 33px !important;
     width: 685px !important;
 }
 
 .pageLandscape {
-    height: 47vh;
-    min-height: 830px;
-    padding: 28px;
-    width: 1030px;
+    min-height: 1057px !important;
+    padding: 28px !important;
+    width: 1014px !important;
 }

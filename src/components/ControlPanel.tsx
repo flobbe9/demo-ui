@@ -51,16 +51,61 @@ export default function ControlPanel(props: {
 
     return (
         <div id={id} className={className}>
-            <Button id={"DownloadDocument"}
-                    handlePromise={buildAndDownloadDocument}
-                    className="blackButton blackButtonContained"
+            <Button id={"SaveDocument"}
+                    className="blackButton blackButtonContained mr-5"
+
+                    title="Dokument speichern"
+                    disabled={true}
+                    rendered={false}
+
+                    childrenStyle={{
+                        padding: "3px 9px"
+                    }}
                     hoverBackgroundColor="rgb(50, 50, 50)"
                     clickBackgroundColor="rgb(150, 150, 150)"
-                    title="Dokument herunterladen"
-                    disabled={disabled}
                     >
-                <i className="fa-regular fa-circle-down"></i> Download
+                <i className="fa-regular fa-floppy-disk mr-1"></i> 
+                <span>Save</span>
             </Button>             
+
+            <Button id={"DownloadDocument"}
+                    className="mr-3"
+
+                    handlePromise={buildAndDownloadDocument}
+                    title="Als Word Dokument herunterladen"
+                    disabled={disabled}
+
+                    boxStyle={{backgroundColor: "blue"}}
+                    childrenStyle={{
+                        color: "white",
+                        padding: "3px 9px"
+                    }}
+                    hoverBackgroundColor="rgb(80, 80, 255)"
+                    clickBackgroundColor="rgb(80, 80, 255)"
+                    >
+                <i className="fa-solid fa-download mr-1"></i> 
+                <span>Word</span>
+            </Button>   
+
+            <Button id={"DownloadDocument"}
+                    className="mr-3"
+
+                    handlePromise={buildAndDownloadDocument}
+                    title="Als PDF herunterladen"
+                    disabled={true}
+                    rendered={false}
+
+                    boxStyle={{backgroundColor: "red"}}
+                    childrenStyle={{
+                        color: "white",
+                        padding: "3px 9px"
+                    }}
+                    hoverBackgroundColor="rgb(255, 135, 135)"
+                    clickBackgroundColor="rgb(255, 80, 80)"
+                    >
+                <i className="fa-solid fa-download mr-1"></i> 
+                <span>Pdf</span>
+            </Button>      
         </div>
     )
 }

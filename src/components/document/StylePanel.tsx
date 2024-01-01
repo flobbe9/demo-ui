@@ -7,15 +7,18 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, togglePopup } from "../../utils/Utils";
+import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, toggleGlobalPopup } from "../../utils/Utils";
 import { DocumentContext } from "./Document";
 import { FONT_FAMILIES, FONT_SIZES, RAW_FONT_SIZES } from "../../utils/GlobalVariables";
+import Button from "../helpers/Button";
+import Popup from "../helpers/popups/Popup";
+import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
+import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
 
 
 // TODO: add key combinations for most buttons
     // set title to combination
 
-// TODO: switch num columns and orientation buttons
 export default function StylePanel(props) {
 
     const id = props.id ? "StylePanel" + props.id : "StylePanel";
@@ -102,54 +105,49 @@ export default function StylePanel(props) {
     }
 
 
-    function handleTab(event): void {
+    function handleColumnConfig(event): void {
 
-        documentContext.handleTab(event);
+        appContext.setPopupContent(
+            <Popup id="" width="large" height="large">
+                <PopupColumnConfig />
+            </Popup>
+        );
 
-        appContext.focusSelectedTextInput();
+        // toggle popup
+        toggleGlobalPopup(appContext.setPopupContent);
+    }
+
+
+    function handleOrientationConfig(event): void {
+
+        appContext.setPopupContent(
+            <Popup id="" width="large" height="large">
+                <PopupOrientationConfig />
+            </Popup>
+        );
+
+        // toggle popup
+        toggleGlobalPopup(appContext.setPopupContent);
     }
 
 
     return (
         <div id={id} className={className + " flexCenter"} ref={stylePanelRef} >
-            <div className={"sectionContainer flexLeft row " + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
-                <StylePanelSection hideRightBorder={false} 
-                                    className="col-6 col-lg-4"
-                                    buttonContainerClassName="flexCenter"
-                                    >
-                    <div className="flexCenter align-items-start row">
-                        <div className="flexCenter col-sm-4 col-md-6">
-                            <Select id="FontSize"
-                                    label={appContext.selectedTextInputStyle.fontSize}
-                                    disabled={disabled}
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    className="mr-sm-5 mr-md-3"
-                                    boxStyle={{borderColor: "rgb(200, 200, 200)", width: "70px"}}
-                                    optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
-                                    handleSelect={handleFontSizeSelect}
-                                    title="Schriftgröße"
-                                    options={RAW_FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
-                                    pattern={/[0-9]/}
-                                    />
-                        </div>
-                    </div>
-                </StylePanelSection>
-                
-                <StylePanelSection className="col-6 col-lg-3" 
-                                    hideRightBorder={false} 
-                                    buttonContainerClassName="pl-4 pr-4"
+            <div className={"sectionContainer flexLeft" + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
+                <StylePanelSection className="col-3 col-xl-2" 
+                                    hideRightBorder={true} 
                                     >
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
-                                label={appContext.selectedTextInputStyle.fontFamily}
-                                disabled={disabled}
-                                hoverBackgroundColor="rgb(245, 245, 245)"
-                                componentStyle={{width: "100%"}}
-                                optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
-                                boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                handleSelect={handleFontFamilySelect}
-                                title="Schriftart"
-                                options={FONT_FAMILIES.sort().map(font => [font, font])}
+                                    label={appContext.selectedTextInputStyle.fontFamily}
+                                    disabled={disabled}
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    componentStyle={{width: "100%"}}
+                                    optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
+                                    boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                    handleSelect={handleFontFamilySelect}
+                                    title="Schriftart"
+                                    options={FONT_FAMILIES.sort().map(font => [font, font])}
                                 />
                     </div>
 
@@ -173,7 +171,9 @@ export default function StylePanel(props) {
                                   disabled={disabled}
                                   boxStyle={{borderColor: "rgb(200, 200, 200)"}}
                                   title="Unterstrichen"
-                                  ><u>U</u></Checkbox>
+                                  >
+                            <u>U</u>
+                        </Checkbox>
                         <Checkbox id="Italic" 
                                   handleSelect={handleItalicSelect}
                                   checked={appContext.selectedTextInputStyle.italic}
@@ -182,7 +182,9 @@ export default function StylePanel(props) {
                                   disabled={disabled}
                                   boxStyle={{borderColor: "rgb(200, 200, 200)"}}
                                   title="Kursiv"
-                                  ><i>K</i></Checkbox>
+                                  >
+                            <i>K</i>
+                        </Checkbox>
 
                         <div className="flexRight" style={{width: "100%"}}>
                             <ColorPicker id="StylePanelColor" 
@@ -199,73 +201,111 @@ export default function StylePanel(props) {
                     </div>
                 </StylePanelSection>
 
-                <StylePanelSection className="col-6 col-lg-2"
-                                hideRightBorder={false} 
-                                buttonContainerClassName="flexCenter"
-                                >
-                    <RadioButton id={"Left"} 
-                                 childrenClassName="flexCenter dontMarkText" 
-                                 name={"TextAlign"} 
-                                 value="START"
-                                 radioGroupValue={appContext.selectedTextInputStyle.textAlign}
-                                 handleSelect={handleTextAlignSelect}
-                                 title="Linksbündig" 
-                                 hoverBackgroundColor="rgb(245, 245, 245)"
-                                 checkedBackgroundColor="rgb(230, 230, 230)"
-                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                 disabled={disabled}
-                                 >
-                        L
-                    </RadioButton>
-                    <RadioButton id={"Center"} 
-                                 childrenClassName="flexCenter dontMarkText" 
-                                 name={"TextAlign"} 
-                                 value="CENTER"
-                                 radioGroupValue={appContext.selectedTextInputStyle.textAlign}
-                                 handleSelect={handleTextAlignSelect}
-                                 title="Zentriert" 
-                                 hoverBackgroundColor="rgb(245, 245, 245)"
-                                 checkedBackgroundColor="rgb(230, 230, 230)"
-                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                 disabled={disabled}
-                                 >
-                        M
-                    </RadioButton>
-                    <RadioButton id={"Right"} 
-                                 childrenClassName="flexCenter dontMarkText" 
-                                 name={"TextAlign"} 
-                                 value="RIGHT"
-                                 radioGroupValue={appContext.selectedTextInputStyle.textAlign}
-                                 handleSelect={handleTextAlignSelect}
-                                 title="Rechtsbündig" 
-                                 hoverBackgroundColor="rgb(245, 245, 245)"
-                                 checkedBackgroundColor="rgb(230, 230, 230)"
-                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                 disabled={disabled}
-                                 >
-                        R
-                    </RadioButton>
+                <StylePanelSection className="col-3" hideRightBorder={false}>
+                    <div className="flexCenter" style={{height: "50%"}}>
+                        <Select id="FontSize"
+                                label={appContext.selectedTextInputStyle.fontSize}
+                                disabled={disabled}
+                                hoverBackgroundColor="rgb(245, 245, 245)"
+                                boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
+                                handleSelect={handleFontSizeSelect}
+                                title="Schriftgröße"
+                                options={RAW_FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
+                                pattern={/[0-9]/}
+                                />
+                    </div>
+
+                    <div className="flexLeft" style={{height: "50%"}}>
+                        <RadioButton id={"Left"} 
+                                    childrenClassName="flexCenter dontMarkText" 
+                                    name={"TextAlign"} 
+                                    value="START"
+                                    radioGroupValue={appContext.selectedTextInputStyle.textAlign}
+                                    handleSelect={handleTextAlignSelect}
+                                    title="Linksbündig" 
+                                    disabled={disabled}
+                                    componentStyle={{width: "33%"}}
+                                    boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    >
+                            L
+                        </RadioButton>
+                        <RadioButton id={"Center"} 
+                                    className="flexCenter"
+                                    childrenClassName="flexCenter dontMarkText" 
+                                    name={"TextAlign"} 
+                                    value="CENTER"
+                                    radioGroupValue={appContext.selectedTextInputStyle.textAlign}
+                                    handleSelect={handleTextAlignSelect}
+                                    title="Zentriert" 
+                                    disabled={disabled}
+                                    componentStyle={{width: "33%"}}
+                                    boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    >
+                            M
+                        </RadioButton>
+                        <RadioButton id={"Right"} 
+                                    className="flexRight"
+                                    childrenClassName="flexCenter dontMarkText" 
+                                    name={"TextAlign"} 
+                                    value="RIGHT"
+                                    radioGroupValue={appContext.selectedTextInputStyle.textAlign}
+                                    handleSelect={handleTextAlignSelect}
+                                    title="Rechtsbündig" 
+                                    disabled={disabled}
+                                    componentStyle={{width: "34%"}}
+                                    boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    >
+                            R
+                        </RadioButton>
+                    </div>
                 </StylePanelSection>
 
-                <StylePanelSection hideRightBorder={true}
-                                    buttonContainerClassName="flexCenter"
-                                    className="col-6 col-lg-2"
+                <StylePanelSection id={"NumColumns"} 
+                                   hideRightBorder={true}
+                                   buttonContainerClassName="flexCenter"
                                    >
-                    {/* <Button id={"Tab"} 
-                            hoverBackgroundColor="rgb(245, 245, 245)"
+                    <Button id={"OrientationConfig"}
+                            className="mr-3"
+                            
+                            hoverBackgroundColor="rgb(230, 230, 230)"
                             clickBackgroundColor="rgb(200, 200, 200)"
-                            disabled={disabled} 
-                            handleClick={handleTab}
-                            title="Tab"
-                            boxStyle={{
-                                border: "1px solid rgb(200, 200, 200)",
-                                borderRadius: "3px",
-                                boxShadow: "none"
-                            }}
+
+                            disabled={disabled}
+                            title={"Ausrichtung"}
+                            handleClick={handleOrientationConfig}
                             >
-                        <div>Einrückung</div>
-                        <img src="tab_copy_2.png" alt="Tab key icon" title="Einrückung (Tab)" height={30} width={40}/>
-                    </Button> */}
+                        <div className="orientationIcon">
+                            <img className={id + "Icon"} src="portraitSheet.png" alt="portrait mode"/>
+                            <img className={id + "Icon"} src="landscapeSheet.png" alt="landscape mode"/>
+                        </div>
+                        Ausrichtung
+                    </Button>
+
+                    <Button id={"ColumnConfig"}
+
+                            childrenStyle={{
+                                paddingRight: "15px",
+                                paddingLeft: "15px"
+                            }}
+                            hoverBackgroundColor="rgb(230, 230, 230)"
+                            clickBackgroundColor="rgb(200, 200, 200)"
+
+                            disabled={disabled}
+                            title={"Spalten"}
+                            handleClick={handleColumnConfig}
+                            >
+                        <div>
+                            <img className={id + "Icon"} src="columnIcon.png" alt="column icon" style={{opacity: 0.7}}/>
+                        </div>
+                        Spalten
+                    </Button>
                 </StylePanelSection>
             </div>
         </div>

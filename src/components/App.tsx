@@ -6,12 +6,13 @@ import NavBar from "./NavBar";
 import Footer from "./Footer";
 import Menu from "./Menu";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, hidePopup, isBlank, log, stringToNumber } from "../utils/Utils";
+import { getDocumentId, getPartFromDocumentId, hideGlobalPopup, isBlank, log, stringToNumber } from "../utils/Utils";
 import { Orientation } from "../enums/Orientation";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../abstract/Style";
 import PopupContainer from "./helpers/popups/PopupContainer";
-import { BUILDER_PATH } from "../utils/GlobalVariables";
+import { BUILDER_PATH, NUM_PAGES } from "../utils/GlobalVariables";
 import Version from "./Version";
+import Page from "./document/Page";
 
 
 /**
@@ -37,6 +38,8 @@ export default function App() {
     // use this when backend login is implemented (https://www.baeldung.com/spring-security-csrf)
     // const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
 
+    const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
+
     const [escapePopup, setEscapePopup] = useState(true);
     const [popupContent, setPopupContent] = useState(<></>);
     
@@ -50,30 +53,36 @@ export default function App() {
 
     const [documentFileName, setDocumentFileName] = useState("Dokument_1.docx");
 
+    const windowScrollY = useRef(0);
+
     const appRef = useRef(null);
 
     const context = {
-        setEscapePopup: setEscapePopup,
-        setPopupContent: setPopupContent,
+        pages,
+        setPages,
+        initPages,
+
+        setEscapePopup,
+        setPopupContent,
 
         hideSelectOptions,
 
-        orientation: orientation,
-        setOrientation: setOrientation,
-        numColumns: numColumns,
-        setNumColumns: setNumColumns,
+        orientation,
+        setOrientation,
+        numColumns,
+        setNumColumns,
         getSelectedColumnId,
         getColumnIdByTextInputId,
 
-        selectedTextInputId: selectedTextInputId,
-        setSelectedTextInputId: setSelectedTextInputId,
-        selectedTextInputStyle: selectedTextInputStyle,
-        setSelectedTextInputStyle: setSelectedTextInputStyle,
-        focusSelectedTextInput: focusSelectedTextInput,
-        focusTextInput: focusTextInput,
-        unFocusTextInput: unFocusTextInput,
+        selectedTextInputId,
+        setSelectedTextInputId,
+        selectedTextInputStyle,
+        setSelectedTextInputStyle,
+        focusSelectedTextInput,
+        focusTextInput,
+        unFocusTextInput,
 
-        pressedKey: pressedKey,
+        pressedKey,
 
         documentFileName,
         setDocumentFileName
@@ -81,9 +90,9 @@ export default function App() {
 
 
     useEffect(() => {
-        document.addEventListener("keydown", (event) => handleGlobalKeyDown(event));
-        document.addEventListener("keyup", (event) => handleGlobalKeyUp(event));
-
+        document.addEventListener("keydown", handleGlobalKeyDown);
+        document.addEventListener("keyup", handleGlobalKeyUp);
+        window.addEventListener('scroll', handleScroll);
     }, []);
 
 
@@ -118,14 +127,28 @@ export default function App() {
 
         return getDocumentId("Column", stringToNumber(pageIndex), "", stringToNumber(columnIndex));
     }
+    
 
+    function initPages(): React.JSX.Element[] {
+
+        const pages: React.JSX.Element[] = [];
+
+        for (let i = 0; i < NUM_PAGES; i++)
+            pages.push((
+                <div className="flexCenter" key={i}>
+                    <Page pageIndex={i} />
+                </div>
+            ));
+
+        return pages;
+    }
 
 
     function handleClick(event): void {
 
         // hide popup
-        if (event.target.className.includes("hidePopup") && escapePopup)
-            hidePopup(setPopupContent);
+        if (event.target.className.includes("hideGlobalPopup") && escapePopup)
+            hideGlobalPopup(setPopupContent);
 
         // hide select options
         if (!event.target.className.includes("dontHideSelect")) 
@@ -144,7 +167,7 @@ export default function App() {
     function handleGlobalKeyDown(event): void {
 
         if (event.key === "Escape") {
-            hidePopup(setPopupContent);
+            hideGlobalPopup(setPopupContent);
             hideSelectOptions();
         }
 
@@ -260,6 +283,21 @@ export default function App() {
 
         return true;
     }
+            
+
+    function handleScroll(event): void {
+
+        const currentScrollY = window.scrollY;
+
+        const controlPanelHeight = $(".ControlPanel").css("height");
+        const isScrollUp = windowScrollY.current > currentScrollY;
+
+        // move controlPanel in view
+        $(".StylePanel").css("top", isScrollUp ? controlPanelHeight : 0);
+        
+        // update ref
+        windowScrollY.current = currentScrollY;
+    }
 
     
     return (
@@ -269,7 +307,7 @@ export default function App() {
 
                     <NavBar />
 
-                    <div className="appOverlay hidePopup"></div>
+                    <div className="appOverlay hideGlobalPopup"></div>
 
                     <div className="content">
                         <div className="flexCenter">

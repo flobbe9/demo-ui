@@ -19,7 +19,7 @@ export default function PopupContainer(props: {
 
 
     return (
-        <div id={id} className={className + " flexCenter hidePopup"}>
+        <div id={id} className={className + " flexCenter hideGlobalPopup"}>
             {props.children}
         </div>
     )

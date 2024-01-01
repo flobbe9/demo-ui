@@ -9,8 +9,32 @@
         }
     }
 
+    .dontHover {
+        &:hover {
+            opacity: 1;
+        }
+    }
+
     .miniPopup {
         display: none;
         position: absolute;
+    }
+
+    .smallCircle {
+        height: 24px;
+        padding: 7px;
+        width: 24px;
+    }
+
+    .mediumCircle {
+        height: 34px;
+        padding: 17px;
+        width: 34px;
+    }
+
+    .largeCircle {
+        height: 44px;
+        padding: 27px;
+        width: 44px;
     }
 }

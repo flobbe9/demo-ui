@@ -341,12 +341,12 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
  * @param setPopupContent setter of content in  side ```#PopupContainer```
  * @param duration fade in / out time in milliseconds
  */
-export function togglePopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
+export function toggleGlobalPopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
 
     $("#PopupContainer").fadeToggle(duration);
     $(".appOverlay").fadeToggle(duration);
 
-    resetPopup(setPopupContent);
+    resetGlobalPopup(setPopupContent);
 }
 
 
@@ -356,12 +356,12 @@ export function togglePopup(setPopupContent: (content: React.JSX.Element) => voi
  * @param setPopupContent setter of content inside ```#PopupContainer```
  * @param duration fade in / out time in milliseconds
  */
-export function hidePopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
+export function hideGlobalPopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
 
     $("#PopupContainer").fadeOut(duration);
     $(".appOverlay").fadeOut(duration);
 
-    resetPopup(setPopupContent, duration);
+    resetGlobalPopup(setPopupContent, duration);
 }
 
 
@@ -371,13 +371,25 @@ export function hidePopup(setPopupContent: (content: React.JSX.Element) => void,
  * @param setPopupContent setter of content inside ```#PopupContainer```
  * @param duration milliseconds to wait until reset
  */
-export function resetPopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
+export function resetGlobalPopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
 
     setTimeout(() => {
         if ($("#PopupContainer").css("display") === "none") 
             setPopupContent(<></>);
         
     }, duration + 100);
+}
+
+
+/**
+ * Fade toggle greyish overlay over ```<Popup />``` component currently displayed.
+ * 
+ * @param duration milliseconds to wait until reset
+ * @param popupId additional id of regarding ```<Popup />``` component, i.e. "NewDocument" (but not "PopupNewDocument")
+ */
+export function togglePopupOverlay(duration = 100, popupId = ""): void {
+
+    $("#" + popupId + "PopupOverlay").fadeToggle(duration);
 }
 
 

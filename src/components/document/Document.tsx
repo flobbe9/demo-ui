@@ -1,22 +1,20 @@
 import React, { useContext, useEffect, useState, createContext } from "react";
 import "../../assets/styles/Document.css";
-import Page from "./Page";
-import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getTabSpaces, hidePopup, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
+import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getTabSpaces, hideGlobalPopup, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, stringToNumber } from "../../utils/Utils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
-import { API_ENV, DEFAULT_FONT_SIZE, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, NUM_HEADINGS_PER_COLUMN, SELECT_COLOR, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
+import { API_ENV, DEFAULT_FONT_SIZE, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, NUM_HEADINGS_PER_COLUMN, NUM_PAGES, SELECT_COLOR, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
 import ControlPanel from "../ControlPanel";
 import { buildDocument, downloadDocument } from "../../builder/Builder";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
 
 
-// TODO: how to cache document?
 // TODO: add some kind of "back" button
-// TODO: fontsize looks smaller in frontend
 // TODO: update to bootstrap 5
 
 // TODO: landscape mode interferes with controlpanel on small width screens 
+// TODO: mobile mode is not working properly anymore
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -62,7 +60,7 @@ export default function Document(props) {
         if (API_ENV !== "dev")
             confirmPageUnload();
 
-        hidePopup(appContext.setPopupContent);
+        hideGlobalPopup(appContext.setPopupContent);
 
         $(".App").css("backgroundColor", "white");
     }, []);
@@ -527,26 +525,13 @@ export default function Document(props) {
 
     return (
         <div id={id} className={className}>
-            {/* mobile controlbar */}
-            {/* <ControlPanel /> */}
-
             <DocumentContext.Provider value={context}>
+                <ControlPanel className="flexRight" />
+
                 <StylePanel />
 
-                <div className="subContainer flexRight align-items-start">
-                    <div className="pageContainer">
-                        <div className="flexCenter">
-                            <Page pageIndex={0} />
-                        </div>
-
-                        <div className="flexCenter">
-                            <Page pageIndex={1} />
-                        </div>
-                    </div>
-
-                    <div className="controlPanelContainer flexRight mr-2">
-                        <ControlPanel />
-                    </div>
+                <div className="pageContainer">
+                    {appContext.pages}
                 </div>
 
             </DocumentContext.Provider>

@@ -145,6 +145,18 @@ label {
         display: flex;
         justify-content: right;
     }
+    
+    .flexRightStart {
+        align-items: start;
+        display: flex;
+        justify-content: right;
+    }
+
+    .flexRightEnd {
+        align-items: end;
+        display: flex;
+        justify-content: right;
+    }
 
     /* Other */
     .textCenter {

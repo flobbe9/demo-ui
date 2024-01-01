@@ -70,14 +70,15 @@ export default function Button(props: {
         if (disabled)
             return;
         
-        animateOverlay();
-
         // case: loading button
         if (props.handlePromise) 
             handlePromiseAnimation();
-        
+
         // case: normal button
-        else if (props.handleClick)
+        else 
+            animateOverlay();
+        
+        if (props.handleClick)
             props.handleClick(event);
     }
 
@@ -175,7 +176,7 @@ export default function Button(props: {
     
     return (
         <button id={id} 
-                className={className + (disabled ? " disabledButton" : "") + (rendered ? "" : "hidden")}
+                className={className + (disabled ? " disabledButton" : "") + (rendered ? "" : " hidden")}
                 style={props.boxStyle}
                 ref={buttonRef}
                 disabled={disabled} 
@@ -190,7 +191,7 @@ export default function Button(props: {
             </div>
 
             {/* visible */}
-            <div className="buttonChildren" ref={buttonChildrenRef} style={props.childrenStyle}>
+            <div className="buttonChildren dontMarkText" ref={buttonChildrenRef} style={props.childrenStyle}>
                 {children}
             </div>
         </button>

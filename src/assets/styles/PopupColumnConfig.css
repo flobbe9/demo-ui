@@ -1,0 +1,23 @@
+.PopupColumnConfig {
+    height: 100%;
+    padding: 2%;
+    position: relative;
+    
+    .popupBody {        
+        .numColumnsContainer {
+            height: 80%;
+            flex-wrap: wrap;
+            overflow: auto;
+            
+            .verticalBorderRightDotted {
+                border-right: 1px dashed rgba(128, 128, 128, 0.568);
+                height: 100%;
+            }
+        }
+    }
+
+    .popupFooter {
+        align-items: last baseline;
+        width: 100%;
+    }
+}

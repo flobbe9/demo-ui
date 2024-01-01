@@ -1,7 +1,7 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import "../../assets/styles/WarnIcon.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../../utils/Utils";
+import { isBooleanFalsy, log } from "../../utils/Utils";
 
 
 /**
@@ -10,6 +10,7 @@ import { log } from "../../utils/Utils";
  * @since 0.0.5
  */
 export default function WarnIcon(props: {
+    size: "small" | "medium" | "large",
     id?: string,
     className?: string,
     title?: string,
@@ -20,12 +21,21 @@ export default function WarnIcon(props: {
 
     /** if true, the popup will be displayed on hover, else the popup wont be displayed at all */
     showPopupOnHover?: boolean,
+    hover?: boolean,
     children?
 }) {
 
     const componentRef = useRef(null);
     const iconContainerRef = useRef(null);
     const popupRef = useRef(null);
+
+
+    useEffect(() => {
+        $(iconContainerRef.current!).addClass(props.size + "Circle");
+
+        if (!isBooleanFalsy(props.hover) && !props.hover)
+            $(iconContainerRef.current!).addClass("dontHover");
+    }, []);
 
 
     function handleClick(event): void {

@@ -71,10 +71,8 @@ export default function TextInput(props: {
         let typedChar = event.key === "Tab" ? getTabSpaces() : event.key;
 
         // case: text too long when including typed char
-        // TODO: does not validate when key combination is active
         if (isTextLongerThanInput(appContext.selectedTextInputId, documentContext.getTextInputOverhead(), typedChar) && 
-            isKeyAlphaNumeric(event.keyCode) &&
-            appContext.pressedKey === "") {
+            isKeyAlphaNumeric(event.keyCode)) {
 
             event.preventDefault();
             documentContext.handleTextLongerThanLine(id, SELECT_COLOR);

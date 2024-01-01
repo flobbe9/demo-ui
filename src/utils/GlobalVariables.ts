@@ -6,6 +6,10 @@ export const USER_SERVICE_BASE_URL = "" + process.env.REACT_APP_USER_SERVICE_BAS
 export const API_ENV = "" + process.env.REACT_APP_ENV;
 export const API_VERSION = "" + process.env.REACT_APP_VERSION;
 
+export const NUM_PAGES = 2;
+
+export const MAX_NUM_COLUMNS = 3;
+
 export const FONT_FAMILIES = [
     "Helvetica",
     "Arial",
@@ -104,6 +108,7 @@ export const MAX_FONT_SIZE_SUM_LANDSCAPE = NUM_LINES_LANDSCAPE * DEFAULT_FONT_SI
 
 
 export const MAX_NUM_TABS = 12;
+// TODO: this is inaccurate
 export const SPACES_PER_TAB = 16;
 export const TAB_UNICODE = "0x09";
 export const SINGLE_TAB_UNICODE_ESCAPED = "\x09";
