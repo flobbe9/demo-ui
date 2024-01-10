@@ -8,15 +8,10 @@
     box-shadow: 0 1px 5px -2px black;
     display: flex;
     font-size: 20px;
-    overflow: auto;
     padding: var(--marginNavBarInside);
     
     .navSectionLeft {
-        margin-left: var(--marginNavBarInside);
-        width: 33%;
-    
         .navLink {
-            color: black;
             padding-right: 20px;
             text-decoration: none;
             transition: opacity 0.2s;
@@ -26,32 +21,8 @@
             }
         }
     }
-
-    .navSectionCenter {
-        color: rgba(0, 0, 0, 0.486);
-        font-size: 15px;
-        overflow: auto;
-        width: 33%;
-
-        .fileNameInput {
-            background-color: bisque;
-            background-color: rgb(255, 242, 223);
-            border: none;
-            border-radius: 3px;
-            opacity: 0.6;
-            padding: 5px;
-
-            &:focus {
-                opacity: 1;
-                outline: none;
-            }
-        }
-    }
         
     .navSectionRight {
-        margin-right: var(--marginNavBarInside);
-        width: 33%;
-
         .navButton {
             margin-left: 10px;
             

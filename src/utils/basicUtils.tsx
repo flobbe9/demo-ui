@@ -1,7 +1,7 @@
 import React from "react";
 import $ from "jquery";
 import { ApiExceptionFormat } from "../abstract/ApiExceptionFormat";
-import { SPACES_PER_TAB, Side, TAB_UNICODE_ESCAPED } from "./GlobalVariables";
+import { DOCUMENT_SUFFIX, SPACES_PER_TAB, Side, TAB_UNICODE_ESCAPED } from "../globalVariables";
 
 
 export function log(text?: any, debug = false): void {
@@ -160,6 +160,16 @@ export function isBlank(str: string): boolean {
     str = str.trim();
 
     return str.length === 0;
+}
+
+
+/**
+ * @param length num chars the string should have
+ * @returns random string of of alphanumeric chars with given length
+ */
+export function getRandomString(length = 12): string {
+
+    return Math.random().toString(36).substring(2, length + 2);
 }
 
 
@@ -501,17 +511,15 @@ export function removeConfirmPageUnloadEvent(): void {
  * Remove given ```removeClass``` className from given ```element```, add given ```addClass``` and then
  * after given ```holdTime``` undo both operations.
  * 
- * @param element to flash the border of
+ * @param elementId id of element to flash the className of
  * @param addClass className the element has while flashing 
  * @param removeClass className the element should loose while flashing and get back afterwards
  * @param holdTime time in ms that the border stays with given addClass and without given removeClass
  * @return promise that resolves once animation is finished
  */
-export async function flashClass(element: JQuery,
-                                addClass: string, 
-                                removeClass: string,
-                                holdTime = 1000) {
+export async function flashClass(elementId: string, addClass: string, removeClass: string, holdTime = 1000) {
 
+    const element = $("#" + elementId);
     if (!element.length) {
         logWarn("flashClass() failed")
         return;
@@ -524,8 +532,8 @@ export async function flashClass(element: JQuery,
         // add flash class shortly
         res(element.addClass(addClass));
         setTimeout(() => {
-        res(element.removeClass(addClass));
-        res(element.addClass(removeClass));
+            res(element.removeClass(addClass));
+            res(element.addClass(removeClass));
         }, holdTime);
     });
 }
@@ -553,10 +561,10 @@ export function getOppositeSide(side: Side): Side {
  * @param str string to replace a char in
  * @param replacement string to use as replacement
  * @param startIndex of chars to replace in ```str```
- * @param endIndex of chars to replace in ```str``` (not included)
+ * @param endIndex of chars to replace in ```str``` (not included), default is ```str.length```
  * @returns string with replacement at given position (does not alter ```str```)
  */
-export function replaceAtIndex(str: string, replacement: string, startIndex: number, endIndex = startIndex + 1): string {
+export function replaceAtIndex(str: string, replacement: string, startIndex: number, endIndex = str.length): string {
 
     const charsBeforeIndex = str.substring(0, startIndex);
     const charsBehindIndex = str.substring(endIndex);
@@ -598,7 +606,6 @@ export function includesIgnoreCase(arr: (string | number)[] | string, value: str
 
     return result ? true : false;
 }
-
 
 
 /**
@@ -681,6 +688,24 @@ export function isStringNumeric(str: string, considerDouble = false): boolean {
 export function setCssVariable(variableName: string, value: string): void {
 
     document.documentElement.style.setProperty("--" + variableName, value);
+}
+
+
+/**
+ * @param fileName to append suffix to
+ * @returns given fileName with {@link DOCUMENT_SUFFIX} appended or unaltered fileName, if fileName is falsy
+ *          or has suffix already
+ */
+export function appendDocxSuffix(fileName: string): string {
+
+    if (!fileName) {
+        logWarn("'appendDocxSuffix()' failed. 'fileName' is falsy: " + fileName);
+        return fileName;
+    }
+
+    const suffix = fileName.substring(fileName.length - 5);
+
+    return suffix !== DOCUMENT_SUFFIX ? fileName += DOCUMENT_SUFFIX : fileName;
 }
 
 

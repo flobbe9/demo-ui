@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import "../../assets/styles/WarnIcon.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { isBooleanFalsy, log } from "../../utils/Utils";
+import { isBooleanFalsy, log } from "../../utils/basicUtils";
 
 
 /**

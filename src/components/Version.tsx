@@ -1,6 +1,6 @@
 import React from "react";
 import "../assets/styles/Version.css";
-import { API_VERSION } from "../utils/GlobalVariables";
+import { API_VERSION } from "../globalVariables";
 
 
 /**

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../../../assets/styles/Popup.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log, togglePopupOverlay } from "../../../utils/Utils";
+import { log, togglePopupOverlay } from "../../../utils/basicUtils";
 
 
 /**
@@ -10,6 +10,7 @@ import { log, togglePopupOverlay } from "../../../utils/Utils";
  * 
  * @since 0.0.5
  */
+// TODO: flashes weirdly on toggle
 export default function Popup(props: {
     id: string,
     className?: string,

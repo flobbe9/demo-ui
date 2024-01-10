@@ -1,4 +1,4 @@
-import { DEFAULT_BASIC_PARAGRAPH_TEXT } from "../utils/GlobalVariables";
+import { DEFAULT_BASIC_PARAGRAPH_TEXT } from "../globalVariables";
 import Style, { getDefaultStyle } from "./Style";
 
 

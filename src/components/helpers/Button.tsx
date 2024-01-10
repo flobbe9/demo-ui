@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/Button.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { isBooleanFalsy, log } from "../../utils/Utils";
+import { isBooleanFalsy, log } from "../../utils/basicUtils";
 
 
 /**
@@ -19,16 +19,17 @@ export default function Button(props: {
     boxStyle?: React.CSSProperties,
     childrenStyle?: React.CSSProperties,
 
+    className?: string,
+    childrenClassName?: string,
     handlePromise?: () => Promise<any>,
     handleClick?,
     disabled?: boolean,
     rendered?: boolean,
-    className?: string
     children?,
     title?: string
 }) {
 
-    const id = props.id ? "Button dontMarkText" + props.id : "Button dontMarkText";
+    const id = props.id ? "Button" + props.id : "Button";
     const className = "Button " + props.className || "";
 
     const [rendered, setRendered] = useState(isBooleanFalsy(props.rendered) ? true : props.rendered);
@@ -186,12 +187,12 @@ export default function Button(props: {
                 title={props.title}
                 >
             {/* hidden */}
-            <div className="buttonOverlay buttonChildren" ref={buttonOverlayRef} style={props.childrenStyle}>
+            <div className={"buttonOverlay buttonChildren " + props.childrenClassName} ref={buttonOverlayRef} style={props.childrenStyle}>
                 <div className="hiddenChildren">{children}</div>
             </div>
 
             {/* visible */}
-            <div className="buttonChildren dontMarkText" ref={buttonChildrenRef} style={props.childrenStyle}>
+            <div className={"buttonChildren dontMarkText " + props.childrenClassName} ref={buttonChildrenRef} style={props.childrenStyle}>
                 {children}
             </div>
         </button>

@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCase, getCSSValueAsNumber, getFontSizeDiffInWord, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, stringToNumber } from "../../utils/Utils";
+import { equalsIgnoreCase, getCSSValueAsNumber, getFontSizeDiffInWord, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
-import { MAX_FONT_SIZE, MIN_FONT_SIZE, getFakeFontSizeByOriginalFontSize, getOriginalFontSizeByFakeFontSize, isMobileWidth } from "../../utils/GlobalVariables";
+import { MAX_FONT_SIZE, MIN_FONT_SIZE, getFakeFontSizeByOriginalFontSize, getOriginalFontSizeByFakeFontSize, isMobileWidth } from "../../globalVariables";
 
 
 /**
@@ -13,7 +13,6 @@ import { MAX_FONT_SIZE, MIN_FONT_SIZE, getFakeFontSizeByOriginalFontSize, getOri
  * 
  * @since 0.0.5
  */
-// TOOD: adjust page dimensions
 export default function Select(props: {
     id: string, 
     label: string,
@@ -40,6 +39,7 @@ export default function Select(props: {
     const className = props.className ? "Select " + props.className : "Select";
 
     const [disabled, setDisabled] = useState(props.disabled);
+
     // this is quite risky, change this if necessary
     const [isFontSize, setIsFontSize] = useState(includesIgnoreCase(id, "fontsize"))
 
@@ -58,6 +58,8 @@ export default function Select(props: {
         // place optionsBox exactly below selectBox and use same dimensions
         $(optionsBoxRef.current!).css("top", $(boxRef.current!).css("height"));
         $(optionsBoxRef.current!).css("width", $(boxRef.current!).css("width"));
+
+        setCssVariable("selectBackgroundColor", props.boxStyle.backgroundColor || "white");
 
     }, []);
 
@@ -118,12 +120,14 @@ export default function Select(props: {
             return;
 
         $(boxRef.current!).css("backgroundColor", props.hoverBackgroundColor || "");
+        $(labelRef.current).css("backgroundColor", "white");
     }
 
 
     function handleBoxMouseOut(): void {
 
         $(boxRef.current!).css("backgroundColor", props.boxStyle?.backgroundColor || "");
+        $(labelRef.current).css("backgroundColor", props.boxStyle?.backgroundColor || "");
     }
 
 
@@ -257,7 +261,7 @@ export default function Select(props: {
                  >
                 <input className="selectLabel dontMarkText dontHideSelect" 
                        ref={labelRef}
-                       title={props.label}
+                       title={isFontSize ? getOriginalFontSize(props.label) : props.label}
                        defaultValue={props.label}
                        onKeyUp={handleLabelKeyUp}
                        />

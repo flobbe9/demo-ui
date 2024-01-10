@@ -1,4 +1,5 @@
 import React from "react";
+import "../assets/styles/LeavConfirm.css";
 import { Link, useLocation } from "react-router-dom";
 
 
@@ -18,6 +19,8 @@ export default function LeaveConfirmLink(props: {
     pathsToConfirm: string[]
 }) {
 
+    const id = "LeaveConfirmLink" + (props.id || "");
+    const className = "LeaveConfirmLink " + (props.className || "");
     const location = useLocation();
 
 
@@ -27,7 +30,6 @@ export default function LeaveConfirmLink(props: {
      * 
      * @param event 
      */
-    // TODO: replace window.confirm with popup
     function confirmNavigate(event): void {
 
         const confirmLeaveMessage = "Seite verlassen? \nVorgenommene Änderungen werden unter Umständen nicht gespeichert."
@@ -38,8 +40,8 @@ export default function LeaveConfirmLink(props: {
 
     
     return (
-        <Link id={props.id}     
-              className={props.className} 
+        <Link id={id}     
+              className={className} 
               to={props.to} 
               style={props.style} 
               onClick={confirmNavigate}>

@@ -1,5 +1,7 @@
 import React from "react";
-import { getFontSizeDiffInWord, log } from "./Utils";
+import { getFontSizeDiffInWord } from "./utils/basicUtils";
+
+export const API_NAME = "Word light"
 
 export const BACKEND_BASE_URL = "" + process.env.REACT_APP_BACKEND_BASE_URL;
 export const USER_SERVICE_BASE_URL = "" + process.env.REACT_APP_USER_SERVICE_BASE_URL;
@@ -71,8 +73,6 @@ export type Side = "top" | "right" | "left" | "bottom" | "none";
 export const DEFAULT_BASIC_PARAGRAPH_TEXT = " ";
 
 export const NO_TEXT_INPUT_SELECTED = "Wähle zuerst ein Texteingabefeld aus.";
-
-export const NUM_HEADINGS_PER_COLUMN = 3;
 
 /** 
  * Width of one text input relative to the wirndwo width (at the moment). 
@@ -154,6 +154,8 @@ export const DOCUMENT_SUFFIX = ".docx";
 
 
 export const BUILDER_PATH = "/build";
+
+export const SINGLE_COLUMN_LINE_CLASS_NAME = "SingleColumnLine";
 
 
 // ------------------- Archive

@@ -9,13 +9,17 @@
 }
 
 .pagePortrait {
-    max-height: 1500px !important;
+    /* height: 1500px !important; */
+    /* height: 1580px !important; */
+    height: 1660px !important;
     padding: 33px !important;
     width: 685px !important;
 }
 
 .pageLandscape {
-    min-height: 1057px !important;
-    padding: 28px !important;
-    width: 1014px !important;
+    /* height: 1057px !important; */
+    /* height: 1100px !important; */
+    height: 1180px !important;
+    padding: 33px !important;
+    width: 1019px !important;
 }

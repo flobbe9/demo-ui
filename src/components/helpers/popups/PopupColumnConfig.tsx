@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useState, useRef } from "react"; 
+import React, { useContext, useEffect, useState } from "react"; 
 import "../../../assets/styles/PopupColumnConfig.css";
 import { AppContext } from "../../App";
 import { Orientation } from "../../../enums/Orientation";
 import RadioButton from "../../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hideGlobalPopup, log, togglePopupOverlay } from "../../../utils/Utils";
+import { hideGlobalPopup, log, togglePopupOverlay } from "../../../utils/basicUtils";
 import Button from "../Button";
 import Popup from "./Popup";
 import PopupWarnConfirm from "./PopupWarnConfirm";
@@ -78,7 +78,7 @@ export default function PopupColumnConfig(props) {
             
             <div className="popupBody flexCenter">
                 <div id="numColumnsContainer" className="numColumnsContainer flexCenter dontMarkText">
-                    <div className="radioContainer mr-0 mr-sm-4">
+                    <div className="radioContainer ml-1 mr-0 mr-sm-4">
                         <RadioButton id="OneColumn" 
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName="flexLeftStart"
@@ -89,14 +89,14 @@ export default function PopupColumnConfig(props) {
                                     boxStyle={{
                                         borderRadius: "3px",
                                         boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
-                                        padding: "2px"
+                                        padding: "4px"
                                     }}
                                     childrenStyle={{
                                         fontSize: "9px",
                                         height: "100%"
                                     }}
-                                    checkedBackgroundColor="rgb(238, 238, 238)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    checkedStyle={{backgroundColor: "rgb(238, 238, 238)"}}
+                                    hoverBackgroundColor="rgb(243, 243, 243)"
                                     >
                             <div>Lorem ipsum</div>
                         </RadioButton>
@@ -114,13 +114,13 @@ export default function PopupColumnConfig(props) {
                                     boxStyle={{
                                         borderRadius: "3px",
                                         boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
-                                        padding: "2px"
+                                        padding: "4px"
                                     }}
                                     childrenStyle={{
                                         fontSize: "9px",
                                     }}
-                                    checkedBackgroundColor="rgb(238, 238, 238)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    checkedStyle={{backgroundColor: "rgb(238, 238, 238)"}}
+                                    hoverBackgroundColor="rgb(243, 243, 243)"
                                     >
                             <div className="verticalBorderRightDotted" style={{width: "50%"}}>
                                 Lorem ipsum
@@ -141,13 +141,13 @@ export default function PopupColumnConfig(props) {
                                     boxStyle={{
                                         borderRadius: "3px",
                                         boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
-                                        padding: "2px"
+                                        padding: "4px"
                                     }}
                                     childrenStyle={{
                                         fontSize: "9px",
                                     }}
-                                    checkedBackgroundColor="rgb(238, 238, 238)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    checkedStyle={{backgroundColor: "rgb(238, 238, 238)"}}
+                                    hoverBackgroundColor="rgb(243, 243, 243)"
                                     >
                             <div className="verticalBorderRightDotted" style={{width: "33%"}}>
                                 Lorem ipsum
@@ -159,7 +159,7 @@ export default function PopupColumnConfig(props) {
                     </div>
                 </div>
 
-                <Popup id={warnPopupId} className="warnPopup" height="small" width="medium">
+                <Popup id={warnPopupId} className="warnPopup" height="small" width="medium" style={{display: "none"}}>
                     <PopupWarnConfirm handleConfirm={handleSubmit} 
                                       handleDecline={() => hideGlobalPopup(appContext.setPopupContent)}
                                       hideThis={toggleWarnPopup}

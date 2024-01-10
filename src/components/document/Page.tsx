@@ -1,10 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, createContext } from "react";
 import "../../assets/styles/Page.css";
 import Column from "./Column";
-import TextInput from "./TextInput";
 import { AppContext } from "../App";
-import { getDocumentId, getPartFromDocumentId, log } from "../../utils/Utils";
-import { MAX_NUM_COLUMNS } from "../../utils/GlobalVariables";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { getDocumentId, getPartFromDocumentId, getRandomString, hideGlobalPopup, includesIgnoreCase, log, logWarn } from "../../utils/basicUtils";
+import { MAX_NUM_COLUMNS, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
+import { DocumentContext } from "./Document";
+import Paragraph from "./Paragraph";
 
 
 export default function Page(props: {
@@ -18,16 +20,16 @@ export default function Page(props: {
     let className = props.className ? "Page " + props.className : "Page";
 
     const appContext = useContext(AppContext);
+    const documentContext = useContext(DocumentContext);
 
     const [columns, setColumns] = useState(initColumns());
+    const [linesAsSingleColumn, setLinesAsSingleColumn] = useState<React.JSX.Element[]>([]);
     const [orientationClassName, setOrientationClassName] = useState(appContext.orientation === "portrait" ? "pagePortrait" : "pageLandscape");
 
-
-    useEffect(() => {
-        // remove right border from last column on page
-        $("#" + getDocumentId("Column", props.pageIndex, "", columns.length - 1)).css("border-right", "none");
-        
-    }, []);
+    const context = {
+        connectColumnLines,
+        disconnectColumnLine,
+    }
 
 
     function initColumns(): React.JSX.Element[] {
@@ -45,14 +47,179 @@ export default function Page(props: {
     }
 
 
+    function connectColumnLines(lineIndex: number): void {
+
+        // case: no columns to connect
+        if (appContext.numColumns === 1 && props.pageIndex !== 0)
+            return;
+
+        // hide column text inputs 
+        const textInputsToBeConnected = getNthTextInputOfAllColumnsOfPage(lineIndex, 0); // only works because there's one text input per paragraph
+        textInputsToBeConnected.forEach((textInput, i) => 
+            disableTextInput(textInput, i, lineIndex));
+        
+        appContext.setNumLinesAsSingleColumn(appContext.numLinesAsSingleColumn + 1);
+
+        // add singleColumnLine
+        setLinesAsSingleColumn([...linesAsSingleColumn, createSingleColumnLine(lineIndex)]);
+
+        refreshSingleColumnLines();
+    }
+
+
+    function disconnectColumnLine(lineIndex: number): void {
+
+        // case: no columns to connect
+        if (appContext.numColumns === 1 && props.pageIndex !== 0)
+            return;
+
+        for (let i = 0; i < appContext.numColumns; i++)
+            // only works because there's one text input per paragraph
+            enableTextInput(i, lineIndex, 0);
+
+        appContext.setNumLinesAsSingleColumn(appContext.numLinesAsSingleColumn - 1);
+
+        // remove last singleColumn line
+        linesAsSingleColumn.pop();
+        setLinesAsSingleColumn([...linesAsSingleColumn]);
+
+        refreshSingleColumnLines();
+    }
+
+
+    /**
+     * Set refreshSingleColumnLines state in order for all ```<TextInput />``` components to check their isHedingCandidate state
+     * @returns the new state of refreshSingleColumnLines (technically irrelevant)
+     */
+    function refreshSingleColumnLines(): boolean {
+
+        documentContext.setRefreshSingleColumnLines(!documentContext.refreshSingleColumnLines);
+
+        return !documentContext.refreshSingleColumnLines;
+    }
+
+
+    // TODO
+    function toggleConnectWarnPopup(): void {
+
+        // const warnPopup = 
+            // <Popup id={warnPopupId} className="warnPopup" height="small" width="medium" style={{display: "none"}}>
+            //     <PopupWarnConfirm handleConfirm={handleSubmit} 
+            //                         handleDecline={() => hideGlobalPopup(appContext.setPopupContent)}
+            //                         hideThis={toggleWarnPopup}
+            //                         >
+            //         <p className="textCenter">Der Inhalt dieser Zeile wird <strong>gelöscht</strong> werden.</p>
+            //         <p className="textCenter">Fortfahren?</p>
+            //     </PopupWarnConfirm>
+            // </Popup>
+        
+    }
+
+
+    function disableTextInput(textInput: JQuery, columnIndex: number, paragraphIndex = 0): JQuery {
+
+        if (!textInput.length) {
+            logWarn("'sortOutTextInput()' failed. 'textInput' is falsy");
+            return textInput;
+        }
+
+        // set invalid id
+        textInput.prop("id", getDocumentId("TextInput", props.pageIndex, "", columnIndex, paragraphIndex, -1));
+
+        // classes
+        textInput.addClass("hidden");
+        textInput.removeClass("TextInput");
+        textInput.removeClass("textInputFocus");
+
+        return textInput;
+    }
+
+
+    // TODO: 
+    function enableTextInput(columnIndex: number, paragraphIndex: number, textInputIndex: number): JQuery {
+
+        // find the hidden text input in same paragraph
+        const hiddenTextInputId = getDocumentId("TextInput", props.pageIndex, "", columnIndex, paragraphIndex, -1);
+        const hiddenTextInput = $("#" + hiddenTextInputId);
+
+        // case: no hidden text input in this paragraph
+        if (!hiddenTextInput.length) {
+            logWarn("'enableTextInput()' failed. Did not find hidden textInput with id " + hiddenTextInputId);
+            return hiddenTextInput;
+        }
+
+        // set valid id
+        const textInputId = getDocumentId("TextInput", props.pageIndex, "", columnIndex, paragraphIndex, textInputIndex);
+        hiddenTextInput.prop("id", textInputId);
+
+        // restore classes
+        hiddenTextInput.addClass("TextInput");
+        hiddenTextInput.removeClass(SINGLE_COLUMN_LINE_CLASS_NAME)
+        hiddenTextInput.removeClass("hidden");
+
+        return hiddenTextInput;
+    }
+
+
+    function createSingleColumnLine(paragraphIndex: number): React.JSX.Element {
+
+        return (
+            <Paragraph pageIndex={props.pageIndex} 
+                       columnIndex={0} 
+                       // only works because there's one text input per paragraph
+                       paragraphIndex={paragraphIndex} 
+                       key={getRandomString()}
+                       textInputClassName={SINGLE_COLUMN_LINE_CLASS_NAME}
+                       isTextInputSingleLineColumn={true}
+            />
+        )
+    }
+
+
+    /**
+     * @returns jquery of the first ```<TextInput />``` of each ```<Column />``` on this page.
+     */
+    function getNthTextInputOfAllColumnsOfPage(paragraphIndex = 0, textInputIndex = 0): JQuery[] {
+
+        const textInputsToBeConnected: JQuery[] = [];
+
+        for (let i = 0; i < appContext.numColumns; i++) {
+            const textInput = $("#" + getDocumentId("TextInput", props.pageIndex, "", i, paragraphIndex, textInputIndex));
+            if (textInput.length)
+                textInputsToBeConnected.push(textInput);
+        }
+
+        return textInputsToBeConnected;
+    }
+
+
+    function handleMouseMove(event): void {
+
+        const targetClassName = event.target.className;
+
+        // hide connect icon of text inputs
+        if (!includesIgnoreCase(targetClassName, "dontHideConnectIcon"))
+            $(".connectIcon").fadeOut(100);
+    }
+
+
     return (
         <div id={id} 
              className={className + " " + orientationClassName} 
              style={props.style}
+             onMouseMove={handleMouseMove}
              >
-            <div className="columnContainer">
-                {columns}
-            </div>
+            <PageContext.Provider value={context}>
+                <div className="headingContainer">
+                    {linesAsSingleColumn}
+                </div>
+
+                <div className="columnContainer">
+                    {columns}
+                </div>
+            </PageContext.Provider>
         </div>
     )
 }
+
+export const PageContext = createContext();

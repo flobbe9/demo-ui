@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../assets/styles/Menu.css";
-import { hideGlobalPopup, toggleGlobalPopup } from "../utils/Utils";
+import { hideGlobalPopup, setCssVariable, toggleGlobalPopup } from "../utils/basicUtils";
 import { AppContext } from "./App";
 import Button from "./helpers/Button";
-import { BUILDER_PATH } from "../utils/GlobalVariables";
+import { BUILDER_PATH } from "../globalVariables";
 import { Link } from "react-router-dom";
 
 /**
@@ -24,7 +24,8 @@ export default function Menu(props) {
     useEffect(() => {
         hideGlobalPopup(appContext.setPopupContent);
 
-        $(".App").css("backgroundColor", "rgb(228, 228, 228)");
+        setCssVariable("appBackgroundColor", "rgb(228, 228, 228)");
+
     }, []);
 
 

@@ -11,5 +11,7 @@ export default interface DocumentWrapper {
     content: (BasicParagraph | null)[],
     tableConfigs: TableConfig[],
     landscape: boolean,
-    numColumns: number
+    numColumns: number,
+    numLinesAsSingleColumn: number,
+    fileName: string,
 }

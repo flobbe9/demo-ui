@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from "react"; 
 import "../../../assets/styles/PopupWarnConfirm.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hideGlobalPopup, isBooleanFalsy, log, togglePopupOverlay } from "../../../utils/Utils";
+import { hideGlobalPopup, isBooleanFalsy, log, togglePopupOverlay } from "../../../utils/basicUtils";
 import Button from "../Button";
 import WarnIcon from "../WarnIcon";
 

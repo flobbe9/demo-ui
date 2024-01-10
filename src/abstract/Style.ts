@@ -1,7 +1,7 @@
 import { BreakType } from "../enums/Breaktype";
-import { DEFAULT_FONT_SIZE } from "../utils/GlobalVariables";
+import { DEFAULT_FONT_SIZE } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getFontSizeDiffInWord, isBlank, isRGB, log, logError, rgbStringToHex, stringToNumber } from "../utils/Utils";
+import { getCSSValueAsNumber, getFontSizeDiffInWord, isBlank, isRGB, log, logError, rgbStringToHex, stringToNumber } from "../utils/basicUtils";
 
 
 /**

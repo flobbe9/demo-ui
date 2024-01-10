@@ -2,9 +2,9 @@ import React, { useEffect, useContext, useRef, useState } from "react";
 import "../assets/styles/NavBar.css"
 import { Link, useLocation } from "react-router-dom";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log, moveCursor } from "../utils/Utils";
+import { log, moveCursor } from "../utils/basicUtils";
 import LoadingButton from "./helpers/Button";
-import { BUILDER_PATH, DOCUMENT_SUFFIX, isMobileWidth } from "../utils/GlobalVariables";
+import { API_NAME, BUILDER_PATH, DOCUMENT_SUFFIX, isMobileWidth } from "../globalVariables";
 import { AppContext } from "./App";
 import LeaveConfirmLink from "./LeaveConfirmLink";
 
@@ -64,88 +64,23 @@ export default function NavBar(props) {
     }
 
 
-    /**
-     * Move cursor in front of ```.docx``` suffix if was not focused.
-     * 
-     * @param event 
-     */
-    function handleFileNameInputMouseDown(event): void {
-
-        const value = event.target.value;
-        let valueLength: number;
-
-        // case: invalid file name
-        if (!value || (valueLength = value.length) < 5)
-            return;
-
-        const input = $(fileNameInputRef.current!);
-
-        // case: not focused yet
-        // if (!input.is(":focus")) {
-        //     event.preventDefault();
-
-        //     input.trigger("focus");
-        //     moveCursor(event.target.id, valueLength - 5, valueLength - 5);
-        // }
-    }
-
-
-    function handleFileNameKeyUp(event): void {
-
-        const input = $(fileNameInputRef.current!);
-        let inputValue: string;
-
-        if (!input || !(inputValue = input.prop("value")))  
-            return;
-
-        inputValue = adjustDocumentFileName(inputValue);
-
-        appContext.setDocumentFileName(inputValue);
-    }
-
-
-    /**
-     * Append {@link DOCUMENT_SUFFIX} if last chars dont match it.
-     * 
-     * @param documentFileName to adjust
-     * @returns fixed document file name (not altering givn param)
-     */
-    function adjustDocumentFileName(documentFileName: string): string {
-
-        let fileName = documentFileName.trim();
-
-        fileName = fileName.replaceAll(" ", "_");
-
-        const suffix = fileName.substring(fileName.length - 5);
-
-        if (suffix !== DOCUMENT_SUFFIX)
-            fileName += DOCUMENT_SUFFIX;
-
-        return fileName;
-    }
-
-
+    // TODO: optimize for mobile
     return (
-        <div id={id} className={className + " dontMarkText"}>
-            <div className="navSectionLeft textLeft flexLeft">
+        <div id={id} className={className + " dontMarkText flex"}>
+            <div className="col-4 navSectionLeft textLeft flexLeft">
                 <LeaveConfirmLink className="navLink" to="/" pathsToConfirm={[BUILDER_PATH]}>
                     <img className="navImage dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
-                    <span className="navHeading ml-0 ml-sm-3">DocumentBuilder</span>
+                    <span className="navHeading ml-0 ml-sm-3">{API_NAME}</span>
                 </LeaveConfirmLink>
             </div>
 
-            <div className={"navSectionCenter textCenter " + flexClass}>
-                <input id="fileNameInput"
-                       className={"fileNameInput" + (location.pathname === BUILDER_PATH ? "" : " hidden")} 
-                       ref={fileNameInputRef}
-                       type="text" 
-                       defaultValue={appContext.documentFileName}
-                       onMouseDown={handleFileNameInputMouseDown}
-                       onKeyUp={handleFileNameKeyUp}
-                       />
+            <div className={"col-4 navSectionCenter textCenter " + flexClass}>
+                <LeaveConfirmLink className="navLink" to="/" pathsToConfirm={[BUILDER_PATH]}>
+                    <span>Home</span>
+                </LeaveConfirmLink>
             </div>
 
-            <div className="navSectionRight textRight">
+            <div className="col-4 navSectionRight textRight">
                 <i className="navMenuIcon fa fa-bars fa-lg hidden dontHideNavSectionRightMobile" onClick={handleClickMenuIcon}></i>
                 {/* TODO: add functionality */}
                 <div className="navSectionRightDesktop">
@@ -159,6 +94,7 @@ export default function NavBar(props) {
                                 hoverBackgroundColor={"rgb(255, 238, 214)"} 
                                 clickBackgroundColor={"rgb(180, 180, 180)"}
                                 disabled={true}
+                                rendered={false}
                                 >
                         Registrieren
                     </LoadingButton>
@@ -173,6 +109,7 @@ export default function NavBar(props) {
                                 hoverBackgroundColor={"rgb(60, 60, 60)"} 
                                 clickBackgroundColor={"rgb(200, 200, 200)"}
                                 disabled={true}
+                                rendered={false}
                                 >
                         Login
                     </LoadingButton>

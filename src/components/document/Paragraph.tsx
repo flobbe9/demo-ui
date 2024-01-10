@@ -2,24 +2,27 @@ import React, { useContext, useState, useEffect, createContext } from "react";
 import "../../assets/styles/Paragraph.css";
 import TextInput from "./TextInput";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, log, stringToNumber } from "../../utils/Utils";
+import { getDocumentId, getPartFromDocumentId, getRandomString, isBlank, log, stringToNumber } from "../../utils/basicUtils";
 import { ColumnContext } from "./Column";
-import { NUM_HEADINGS_PER_COLUMN } from "../../utils/GlobalVariables";
 import { DocumentContext } from "./Document";
+import { AppContext } from "../App";
 
 
 export default function Paragraph(props: {
     pageIndex: number,
     columnIndex: number,
     paragraphIndex: number,
-    key: string | number,
+    key?: string | number,
     id?: string,
-    className?: string
+    className?: string,
+    textInputClassName?: string,
+    isTextInputSingleLineColumn?: boolean
 }) {
     
     const id = getDocumentId("Paragraph", props.pageIndex, props.id, props.columnIndex, props.paragraphIndex);
     const className = props.className ? "Paragraph " + props.className : "Paragraph";
     
+    const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
     const columnContext = useContext(ColumnContext);
 
@@ -34,13 +37,12 @@ export default function Paragraph(props: {
 
     useEffect(() => {
         if (documentContext.paragraphIdAppendTextInput) {
-            const paragraphId = documentContext.paragraphIdAppendTextInput[0];
+            const paragraphIds = documentContext.paragraphIdAppendTextInput[0];
             const numTextInputsToAppend = documentContext.paragraphIdAppendTextInput[1];
             
             // case: append text inputs to this paragraph
-            if (paragraphId === id) {
+            if (paragraphIds.includes(id))
                 documentContext.appendTextInput(textInputs, setTextInputs, props.pageIndex, props.columnIndex, props.paragraphIndex, numTextInputsToAppend);
-            }
         }
 
     }, [documentContext.paragraphIdAppendTextInput]);
@@ -56,16 +58,16 @@ export default function Paragraph(props: {
     function initTextInputs(): React.JSX.Element[] {
 
         const initTextInputs: React.JSX.Element[] = [];
-        const numLinesPerParagraph = columnContext.numLinesPerParagraph;
+        const numLinesPerParagraph = columnContext ? columnContext.numLinesPerParagraph : 1;
 
         for (let i = 0; i < numLinesPerParagraph; i++) 
-            initTextInputs.push(<TextInput key={crypto.randomUUID()}
+            initTextInputs.push(<TextInput key={getRandomString()}
                                         pageIndex={props.pageIndex}
                                         columnIndex={props.columnIndex}
                                         paragraphIndex={props.paragraphIndex}
                                         textInputIndex={i} 
-                                        // only works because there's one text input per paragraph
-                                        isHeading={props.paragraphIndex < NUM_HEADINGS_PER_COLUMN}
+                                        isSingleColumnLine={props.isTextInputSingleLineColumn || false}
+                                        className={props.textInputClassName}
                                 />)
 
         return initTextInputs;
@@ -78,24 +80,26 @@ export default function Paragraph(props: {
      * If this paragraph has less textInputs than there are to remove, set state to prev textInput or (if
      * there is no prev text input) do nothing.
      */
+    // TODO: enable remove many
     function handleRemoveTextInput(): void {
 
-        const paragraphId = documentContext.paragraphIdRemoveTextInput[0];
+        const paragraphIds = documentContext.paragraphIdRemoveTextInput[0];
         const numTextInputsToRemove = documentContext.paragraphIdRemoveTextInput[1];
             
         // case: remove text inputs from this paragraph
-        if (paragraphId === id) {
+        if (paragraphIds.includes(id)) {
             const textInputsRemoved = documentContext.removeTextInput(textInputs, setTextInputs, textInputs.length - 1, numTextInputsToRemove);
 
             // case: not enough text inputs inside this paragraph
             if (numTextInputsToRemove > textInputsRemoved.length) {
-                const prevParagraphId = getPrevParagraphId();
+                // delete text inputs from prev paragraph
+                const prevParagraphIds = documentContext.getParagraphIdsForFontSizeChange(id, props.paragraphIndex - 1);
 
                 // case: is first paragraph in column (shouldn't happen)
-                if (!prevParagraphId)
+                if (props.paragraphIndex === 0)
                     return;
 
-                documentContext.setParagraphIdRemoveTextInput([prevParagraphId, numTextInputsToRemove - textInputsRemoved.length])
+                documentContext.setParagraphIdRemoveTextInput([prevParagraphIds, numTextInputsToRemove - textInputsRemoved.length])
             }
         }
     }

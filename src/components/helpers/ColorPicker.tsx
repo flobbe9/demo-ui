@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/ColorPicker.css";
-import { isRGB, log } from "../../utils/Utils";
+import { isRGB, log } from "../../utils/basicUtils";
 
 
 export default function ColorPicker(props: {

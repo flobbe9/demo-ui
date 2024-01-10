@@ -1,6 +1,6 @@
-import { BACKEND_BASE_URL } from "../GlobalVariables";
+import { BACKEND_BASE_URL } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../Utils";
+import { log } from "./basicUtils";
 
 
 /**

@@ -1,12 +1,12 @@
 import BasicParagraph, { getDefaultBasicParagraph } from "../abstract/BasicParagraphs";
 import DocumentWrapper from "../abstract/DocumentWrapper";
 import { getTextInputStyle } from "../abstract/Style";
-import TableConfig from "../abstract/TableConfig";
 import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
-import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, TABLE_CONFIG, getOriginalFontSizeByFakeFontSize } from "../utils/GlobalVariables";
-import { downloadFileByUrl, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, isBlank, log, logWarn, stringToNumber } from "../utils/Utils";
-import fetchJson from "../utils/fetch/fetch";
+import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLASS_NAME, getOriginalFontSizeByFakeFontSize } from "../globalVariables";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { appendDocxSuffix, downloadFileByUrl, getDocumentId, getPartFromDocumentId, isBlank, log, logApiResponse, logError, logWarn, stringToNumber } from "../utils/basicUtils";
+import fetchJson from "../utils/fetch";
 
 
 const documentBuilderMapping = "/api/documentBuilder";
@@ -19,11 +19,11 @@ const documentBuilderMapping = "/api/documentBuilder";
  *  
  * @param pdf if true, a pdf file is returned by backend
  */
-export async function downloadDocument(pdf: boolean, documentFileName: string) {
+export async function downloadDocument(pdf: boolean) {
     
-    const fileName = documentFileName || "Dokument_1.docx";
-    const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf + "&fileName=" + fileName;
+    const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf;
 
+    // TODO: dont stay on localhost:4001 in case of error
     downloadFileByUrl(url);
 }
 
@@ -33,20 +33,31 @@ export async function downloadDocument(pdf: boolean, documentFileName: string) {
  * 
  * @param orientation of the document
  * @param numColumns number of columns in the document
+ * @param docxFileName full name of the document (including suffix)
+ * @return promise of json response
  */
-export async function buildDocument(orientation: Orientation, numColumns: number): Promise<any> {
+export async function buildDocument(orientation: Orientation, numColumns: number, docxFileName: string, numLinesAsSingleColumn = 0): Promise<any> {
+
+    const fileName = docxFileName ? appendDocxSuffix(docxFileName) : "Dokument_1.docx";
 
     const body: DocumentWrapper =  {
         content: buildContent(numColumns),
         tableConfigs: [],
         landscape: orientation === Orientation.LANDSCAPE,
-        numColumns: numColumns
+        numColumns: numColumns,
+        numLinesAsSingleColumn: numLinesAsSingleColumn,
+        fileName: fileName
     }
 
     // TODO
     // case: is table
 
-    return await fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/createDocument", "post", body);
+    const jsonResponse = await fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/buildAndWrite", "post", body);
+
+    if (jsonResponse.status !== 200)
+        logApiResponse(jsonResponse);
+
+    return jsonResponse;
 }
 
 
@@ -66,12 +77,6 @@ function buildContent(numColumns: number): BasicParagraph[] {
 
     // header (none)
     content.push(getDefaultBasicParagraph());
-
-    // heading
-    const heading = $(".heading");
-    const headingText = getTextInputContent(heading);
-    if (!isBlank(headingText))
-        content.push({text: headingText, style: getTextInputStyle(heading)});
 
     // body
     Array.from(columns).forEach(column => {
@@ -98,15 +103,23 @@ function buildContent(numColumns: number): BasicParagraph[] {
  * @param numColumns number of columns in document
  * @see BasicParagraph
  */
+// TODO: dont add empty paragraph on top of colum of first page if headings are present 
 function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps: BasicParagraph[], numColumns: number): void {
 
     const columnId = getDocumentId("Column", pageIndex, "", columnIndex);
-    const columnTextInputs = $("#" + columnId + " .TextInput");
-
+    let columnTextInputs = $("#" + columnId + " .TextInput");
+    
     // case: no text inputs yet
     if (!columnTextInputs.length) {
         logWarn("Failed to build column. No text inputs rendered yet. 'columnId': " + columnId);
         return;
+    }
+    
+    // case: first page first column
+    if (pageIndex === 0 && columnIndex === 0 ) {
+        // add single column lines
+        const linesAsSingleColumn = $("." + SINGLE_COLUMN_LINE_CLASS_NAME);
+        columnTextInputs = columnTextInputs.add(linesAsSingleColumn);
     }
 
     // iterate text inputs

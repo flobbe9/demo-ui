@@ -4,7 +4,7 @@ import { AppContext } from "../../App";
 import { Orientation } from "../../../enums/Orientation";
 import RadioButton from "../../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hideGlobalPopup, log, togglePopupOverlay } from "../../../utils/Utils";
+import { hideGlobalPopup, log, togglePopupOverlay } from "../../../utils/basicUtils";
 import Button from "../Button";
 import Popup from "./Popup";
 import PopupWarnConfirm from "./PopupWarnConfirm";
@@ -23,7 +23,7 @@ export default function PopupOrientationConfig(props) {
 
     const appContext = useContext(AppContext);
 
-    const [orientation, setOrientation] = useState(appContext.orientation)
+    const [orientation, setOrientation] = useState(appContext.orientation);
 
 
     function handleSelectOrientation(orientation: Orientation): void {
@@ -80,8 +80,8 @@ export default function PopupOrientationConfig(props) {
                                         boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
                                         padding: "2px"
                                     }}
-                                    checkedBackgroundColor="rgb(238, 238, 238)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    checkedStyle={{backgroundColor: "rgb(238, 238, 238)"}}
+                                    hoverBackgroundColor="rgb(243, 243, 243)"
                                     >
                             <span style={{fontSize: "10px"}}>Lorem ipsum</span>
                         </RadioButton>
@@ -102,8 +102,8 @@ export default function PopupOrientationConfig(props) {
                                         boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
                                         padding: "2px"
                                     }}
-                                    checkedBackgroundColor="rgb(238, 238, 238)"
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
+                                    checkedStyle={{backgroundColor: "rgb(238, 238, 238)"}}
+                                    hoverBackgroundColor="rgb(243, 243, 243)"
                                     >
                             <span style={{fontSize: "10px"}}>Lorem ipsum</span>
                         </RadioButton>
@@ -111,18 +111,18 @@ export default function PopupOrientationConfig(props) {
                     </div>
                 </div>
 
-                <Popup id={warnPopupId} className="warnPopup" height="small" width="medium">
+                <Popup id={warnPopupId} className="warnPopup" height="small" width="medium" style={{display: "none"}}>
                     <PopupWarnConfirm handleConfirm={handleSubmit} 
-                                      handleDecline={() => hideGlobalPopup(appContext.setPopupContent)}
-                                      hideThis={toggleWarnPopup}
-                                      >
+                                        handleDecline={() => hideGlobalPopup(appContext.setPopupContent)}
+                                        hideThis={toggleWarnPopup}
+                                        >
                         <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
                         <p className="textCenter">Fortfahren?</p>
                     </PopupWarnConfirm>
                 </Popup>
             </div>
 
-            <div className="popupFooter flexRight">
+            <div className="popupFooter flexRight" >
                 <Button id={id + "Submit"} 
                         className="blackButton blackButtonContained"
 
@@ -130,7 +130,8 @@ export default function PopupOrientationConfig(props) {
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
                         
-                        handleClick={toggleWarnPopup}>
+                        handleClick={toggleWarnPopup}
+                        >
                     Anwenden
                 </Button>
             </div>

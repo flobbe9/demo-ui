@@ -9,6 +9,10 @@
 
         &:hover {
             cursor: pointer;
+
+            &.disabled {
+                cursor: default;
+            }
         }
                 
         .colorInput {
@@ -16,12 +20,28 @@
             opacity: 0;
             position: absolute;
             width: 5px;
+
+            &:hover {
+                cursor: pointer;
+    
+                &.disabled {
+                    cursor: default;
+                }
+            }
         }
 
         .colorChildren {
             height: 90%;
             font-size: 18px;
             width: 100%;
+            
+            &:hover {
+                cursor: pointer;
+    
+                &.disabled {
+                    cursor: default;
+                }
+            }
         }
     }
 }

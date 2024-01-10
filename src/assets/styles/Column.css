@@ -3,7 +3,6 @@
 }
 
 .Column {
-    border-right: 1px dashed rgb(194, 194, 194);
     height: 100%;
     transition: background-color 0.7s;
     width: 100%;
@@ -11,60 +10,17 @@
     .columnOverlay {
         color: grey;
         height: 100%;
-
-        .plusIconBackgroundContainer {
-            height: var(--plusIconHoverSize);
-            width: var(--plusIconHoverSize);
-
-            .plusIconBackground {
-                /* animation: backgroundPulse 4s infinite; */
-                border-radius: 100%;
-                transition: background-color 0.3s;
-                
-                &:hover {
-                    animation: none;
-                    background-color: rgb(167, 167, 167);
-                }
-                
-                .plusIcon {
-                    /* animation: heightPulse 3s infinite; */
-                    height: 50px;
-                    transition: height 0.3s;
-                    
-                    &:hover {
-                        animation: none;
-                        cursor: pointer;
-                        height: var(--plusIconHoverSize);
-                    }
-                }
-            }
-        }
     }
 }
 
-/* hover only if '.hover' class is present */
-.Column.hover:hover {
-    background-color: rgb(219, 219, 219);
-    cursor: pointer;
+.spaceBetweenColumns {
+    padding: 0 12px !important;
 }
 
-
-@keyframes heightPulse {
-    0% {height: 50px}
-
-    30% {height: 50px}
-
-    35% {height: 60px}
-
-    40% {height: 50px}
+.halfSpaceRightBetweenColumns {
+    padding-right: 24px !important;
 }
 
-@keyframes backgroundPulse {
-    0% {background-color: transparent}
-
-    30% {background-color: transparent}
-
-    35% {background-color: rgb(167, 167, 167)}
-
-    40% {background-color: transparent}
+.halfSpaceLeftBetweenColumns {
+    padding-left: 24px !important;
 }

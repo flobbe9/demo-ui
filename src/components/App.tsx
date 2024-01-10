@@ -6,11 +6,11 @@ import NavBar from "./NavBar";
 import Footer from "./Footer";
 import Menu from "./Menu";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, hideGlobalPopup, isBlank, log, stringToNumber } from "../utils/Utils";
+import { getDocumentId, getPartFromDocumentId, hideGlobalPopup, isBlank, log, stringToNumber } from "../utils/basicUtils";
 import { Orientation } from "../enums/Orientation";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../abstract/Style";
 import PopupContainer from "./helpers/popups/PopupContainer";
-import { BUILDER_PATH, NUM_PAGES } from "../utils/GlobalVariables";
+import { API_NAME, BUILDER_PATH, DOCUMENT_SUFFIX, NUM_PAGES } from "../globalVariables";
 import Version from "./Version";
 import Page from "./document/Page";
 
@@ -48,6 +48,7 @@ export default function App() {
 
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
+    const [numLinesAsSingleColumn, setNumLinesAsSingleColumn] = useState(0);
     
     const [pressedKey, setPressedKey] = useState("");
 
@@ -71,8 +72,10 @@ export default function App() {
         setOrientation,
         numColumns,
         setNumColumns,
-        getSelectedColumnId,
-        getColumnIdByTextInputId,
+        numLinesAsSingleColumn, 
+        setNumLinesAsSingleColumn,
+        getColumnIdByDocumentId,
+        getPageIdByTextInputId,
 
         selectedTextInputId,
         setSelectedTextInputId,
@@ -81,13 +84,15 @@ export default function App() {
         focusSelectedTextInput,
         focusTextInput,
         unFocusTextInput,
+        isTextInputIdValid,
 
         pressedKey,
 
         documentFileName,
         setDocumentFileName,
 
-        isWindowWidthTooSmall
+        isWindowWidthTooSmall,
+        adjustDocumentFileName
     }
 
 
@@ -95,6 +100,8 @@ export default function App() {
         document.addEventListener("keydown", handleGlobalKeyDown);
         document.addEventListener("keyup", handleGlobalKeyUp);
         window.addEventListener('scroll', handleScroll);
+
+        document.title = API_NAME;
     }, []);
 
 
@@ -112,20 +119,26 @@ export default function App() {
     }
     
 
-    function getSelectedColumnId(): string {
-
-        return getColumnIdByTextInputId(selectedTextInputId);
-    }
-
-
-    function getColumnIdByTextInputId(textInputId: string): string {
+    function getPageIdByTextInputId(textInputId: string): string {
 
         // case: no text input selected yet
         if (isBlank(textInputId))
             return "";
 
         const pageIndex = getPartFromDocumentId(textInputId, 1);
-        const columnIndex = getPartFromDocumentId(textInputId, 2);
+
+        return getDocumentId("Page", stringToNumber(pageIndex), "");
+    }
+
+
+    function getColumnIdByDocumentId(documentId: string): string | null {
+
+        // case: no text input selected yet
+        if (isBlank(documentId))
+            return null;
+
+        const pageIndex = getPartFromDocumentId(documentId, 1);
+        const columnIndex = getPartFromDocumentId(documentId, 2);
 
         return getDocumentId("Column", stringToNumber(pageIndex), "", stringToNumber(columnIndex));
     }
@@ -308,6 +321,22 @@ export default function App() {
     function isWindowWidthTooSmall(): boolean {
 
         return document.documentElement.clientWidth < 1014;
+    }
+
+
+    /**
+     * Append {@link DOCUMENT_SUFFIX} if last chars dont match it.
+     * 
+     * @param documentFileName to adjust
+     * @returns fixed document file name (not altering givn param)
+     */
+    function adjustDocumentFileName(documentFileName: string): string {
+
+        let fileName = documentFileName.trim();
+
+        fileName = fileName.replaceAll(" ", "_");
+
+        return fileName;
     }
 
     

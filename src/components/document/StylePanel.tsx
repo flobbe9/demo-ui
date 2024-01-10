@@ -7,9 +7,9 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, hideGlobalPopup, isBlank, isTextLongerThanInput, log, logWarn, setCssVariable, stringToNumber, toggleGlobalPopup } from "../../utils/Utils";
+import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, hideGlobalPopup, isBlank, isTextLongerThanInput, log, logWarn, setCssVariable, stringToNumber, toggleGlobalPopup } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
-import { FONT_FAMILIES, FONT_SIZES, RAW_FONT_SIZES } from "../../utils/GlobalVariables";
+import { FONT_FAMILIES, FONT_SIZES, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
 import Popup from "../helpers/popups/Popup";
 import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
@@ -33,6 +33,11 @@ export default function StylePanel(props) {
 
     const stylePanelRef = useRef(null);
     const sectionContainerRef = useRef(null);
+
+    const boxBackgroundColor = "rgb(240, 240, 240)";
+    const boxBorder = "1px solid white";
+    const hoverBackgroundColor = "rgb(225, 225, 225)";
+    const checkedBackgroundColor = "rgb(200, 200, 200)";
 
 
     useEffect(() => {
@@ -62,10 +67,13 @@ export default function StylePanel(props) {
         const diff = getCSSValueAsNumber(fontSize, 2) - appContext.selectedTextInputStyle.fontSize;
         const checkFontSize = documentContext.isFontSizeTooLarge(appContext.selectedTextInputId, diff);
         const isFontSizeTooLarge = checkFontSize[0];
-        if (isFontSizeTooLarge) 
+        const deleteCount = checkFontSize[1];
+
+        if (isFontSizeTooLarge) {
             // case: dont increase font size
-            if (!documentContext.handleFontSizeTooLarge(true, checkFontSize[1]))
-               return;
+            if (!documentContext.handleFontSizeTooLarge(true, deleteCount))
+                return;
+        }
 
         appContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
         appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
@@ -152,15 +160,21 @@ export default function StylePanel(props) {
                 <StylePanelSection hideRightBorder={true} componentStyle={{maxWidth: "215px"}}>
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
-                                    label={appContext.selectedTextInputStyle.fontFamily}
-                                    disabled={disabled}
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    componentStyle={{width: "100%"}}
-                                    optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
-                                    boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                    handleSelect={handleFontFamilySelect}
-                                    title="Schriftart"
-                                    options={FONT_FAMILIES.sort().map(font => [font, font])}
+                                label={appContext.selectedTextInputStyle.fontFamily}
+                                disabled={disabled}
+                                hoverBackgroundColor={hoverBackgroundColor}
+                                componentStyle={{width: "100%"}}
+                                optionsBoxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: "rgb(235, 235, 235)",
+                                    maxHeight: "50vb"}}
+                                boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                }}
+                                handleSelect={handleFontFamilySelect}
+                                title="Schriftart"
+                                options={FONT_FAMILIES.sort().map(font => [font, font])}
                                 />
                     </div>
 
@@ -168,10 +182,13 @@ export default function StylePanel(props) {
                         <Checkbox id="Bold" 
                                   handleSelect={handleBoldSelect}
                                   checked={appContext.selectedTextInputStyle.bold}
-                                  hoverBackgroundColor="rgb(245, 245, 245)"
-                                  checkedBackgroundColor="rgb(230, 230, 230)"
+                                  hoverBackgroundColor={hoverBackgroundColor}
+                                  checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                   disabled={disabled}
-                                  boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                  boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                  }}
                                   title="Fett"
                                   >
                             <strong>F</strong>
@@ -179,10 +196,13 @@ export default function StylePanel(props) {
                         <Checkbox id="Underline" 
                                   handleSelect={handleUnderlineSelect}
                                   checked={appContext.selectedTextInputStyle.underline}
-                                  hoverBackgroundColor="rgb(245, 245, 245)"
-                                  checkedBackgroundColor="rgb(230, 230, 230)"
+                                  hoverBackgroundColor={hoverBackgroundColor}
+                                  checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                   disabled={disabled}
-                                  boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                  boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                  }}
                                   title="Unterstrichen"
                                   >
                             <u>U</u>
@@ -190,10 +210,13 @@ export default function StylePanel(props) {
                         <Checkbox id="Italic" 
                                   handleSelect={handleItalicSelect}
                                   checked={appContext.selectedTextInputStyle.italic}
-                                  hoverBackgroundColor="rgb(245, 245, 245)"
-                                  checkedBackgroundColor="rgb(230, 230, 230)"
+                                  hoverBackgroundColor={hoverBackgroundColor}
+                                  checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                   disabled={disabled}
-                                  boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                  boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                  }}
                                   title="Kursiv"
                                   >
                             <i>K</i>
@@ -204,9 +227,12 @@ export default function StylePanel(props) {
                                         handleSelect={handleColorSelect} 
                                         color={appContext.selectedTextInputStyle.color}
                                         toggleStyle={toggleColorPickerStyle}
-                                        hoverBackgroundColor="rgb(245, 245, 245)"
+                                        hoverBackgroundColor={hoverBackgroundColor}
                                         disabled={disabled}
-                                        boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                        boxStyle={{
+                                            border: boxBorder,
+                                            backgroundColor: boxBackgroundColor
+                                        }}
                                         >
                                 <span className="dontMarkText">A</span>
                             </ColorPicker>
@@ -219,9 +245,15 @@ export default function StylePanel(props) {
                         <Select id="FontSize"
                                 label={appContext.selectedTextInputStyle.fontSize}
                                 disabled={disabled}
-                                hoverBackgroundColor="rgb(245, 245, 245)"
-                                boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
+                                hoverBackgroundColor={hoverBackgroundColor}
+                                boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                }}
+                                optionsBoxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: "rgb(235, 235, 235)",                                    
+                                    maxHeight: "50vb"}}
                                 handleSelect={handleFontSizeSelect}
                                 title="Schriftgröße"
                                 options={RAW_FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
@@ -239,9 +271,12 @@ export default function StylePanel(props) {
                                     title="Linksbündig" 
                                     disabled={disabled}
                                     componentStyle={{width: "33%"}}
-                                    boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    boxStyle={{
+                                        border: boxBorder,
+                                        backgroundColor: boxBackgroundColor
+                                    }}
+                                    hoverBackgroundColor={hoverBackgroundColor}
+                                    checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                     >
                             L
                         </RadioButton>
@@ -255,9 +290,12 @@ export default function StylePanel(props) {
                                     title="Zentriert" 
                                     disabled={disabled}
                                     componentStyle={{width: "33%"}}
-                                    boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    boxStyle={{
+                                        border: boxBorder,
+                                        backgroundColor: boxBackgroundColor
+                                    }}
+                                    hoverBackgroundColor={hoverBackgroundColor}
+                                    checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                     >
                             M
                         </RadioButton>
@@ -271,9 +309,12 @@ export default function StylePanel(props) {
                                     title="Rechtsbündig" 
                                     disabled={disabled}
                                     componentStyle={{width: "34%"}}
-                                    boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    checkedBackgroundColor="rgb(230, 230, 230)"
+                                    boxStyle={{
+                                        border: boxBorder,
+                                        backgroundColor: boxBackgroundColor
+                                    }}
+                                    hoverBackgroundColor={hoverBackgroundColor}
+                                    checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                     >
                             R
                         </RadioButton>
@@ -288,8 +329,14 @@ export default function StylePanel(props) {
                     <Button id={"OrientationConfig"}
                             className="mr-3"
                             
-                            hoverBackgroundColor="rgb(230, 230, 230)"
-                            clickBackgroundColor="rgb(200, 200, 200)"
+                            
+                            boxStyle={{
+                                backgroundColor: boxBackgroundColor,
+                                border: boxBorder,
+                                boxShadow: "none"
+                            }}
+                            hoverBackgroundColor={hoverBackgroundColor}
+                            clickBackgroundColor={checkedBackgroundColor}
 
                             disabled={disabled}
                             title={"Ausrichtung"}
@@ -304,12 +351,17 @@ export default function StylePanel(props) {
 
                     <Button id={"ColumnConfig"}
 
+                            boxStyle={{
+                                backgroundColor: boxBackgroundColor,
+                                border: boxBorder,
+                                boxShadow: "none"
+                            }}
                             childrenStyle={{
                                 paddingRight: "15px",
                                 paddingLeft: "15px"
                             }}
-                            hoverBackgroundColor="rgb(230, 230, 230)"
-                            clickBackgroundColor="rgb(200, 200, 200)"
+                            hoverBackgroundColor={hoverBackgroundColor}
+                            clickBackgroundColor={checkedBackgroundColor}
 
                             disabled={disabled}
                             title={"Spalten"}

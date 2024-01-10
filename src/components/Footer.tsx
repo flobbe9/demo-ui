@@ -1,5 +1,6 @@
 import React from "react";
 import "../assets/styles/Footer.css";
+import { API_NAME } from "../globalVariables";
 
 
 /**
@@ -9,7 +10,7 @@ export default function Footer(props) {
 
     return (
         <div className="Footer">
-            <div className="footerItem">DocumentBuilder</div>
+            <div className="footerItem">{API_NAME}</div>
         </div>
     );
 }

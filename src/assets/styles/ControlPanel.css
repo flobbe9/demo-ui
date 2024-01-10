@@ -1,7 +1,30 @@
 .ControlPanel {
     background-color: white;
+    overflow: auto;
     padding: 5px;
     position: sticky;
     top: 0;
-    color: rgb(0, 0, 255);
+    z-index: 1;
+
+    .controlPanelItem {
+        min-width: 145px;
+    }
+
+    .fileNameInput {
+        border: none;
+        border-radius: 3px;
+        min-width: 191px;
+        opacity: 0.4;
+        padding: 5px;
+        transition: background-color 0.2s, opacity 0.2s;
+
+        &:focus {
+            outline: none;
+        }
+        
+        &:hover {
+            background-color: rgb(233, 233, 233);
+            opacity: 1;
+        }
+    }
 }

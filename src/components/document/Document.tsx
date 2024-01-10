@@ -1,23 +1,25 @@
 import React, { useContext, useEffect, useState, createContext } from "react";
 import "../../assets/styles/Document.css";
-import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getTabSpaces, hideGlobalPopup, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, stringToNumber, toggleGlobalPopup } from "../../utils/Utils";
+import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getRandomString, getTabSpaces, hideGlobalPopup, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber, toggleGlobalPopup } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
-import { API_ENV, DEFAULT_FONT_SIZE, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, NUM_HEADINGS_PER_COLUMN, NUM_PAGES, SELECT_COLOR, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
+import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE_ESCAPED } from "../../globalVariables";
 import ControlPanel from "../ControlPanel";
-import { buildDocument, downloadDocument } from "../../builder/Builder";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
 import Popup from "../helpers/popups/Popup";
 import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
 import Button from "../helpers/Button";
+import { getJQueryElementById } from "../../utils/documentUtils";
 
 
 // TODO: add some kind of "back" button
 // TODO: update to bootstrap 5
+// TODO: fix console errors
 
-// TODO: landscape mode interferes with controlpanel on small width screens 
-// TODO: mobile mode is not working properly anymore
+// TODO: reduce jquery calls
+    // replace ids with refs if possible
+    // somehow cache elements (especially collections) or save them as variables somewhere
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -25,14 +27,19 @@ export default function Document(props) {
 
     const appContext = useContext(AppContext);
 
-    const [isSelectedColumnEmpty, setIsSelectedColumnEmpty] = useState(true);
     const [textInputBorderFlashing, setTextInputBorderFlashing] = useState(false);
 
     /** <Paragraph /> component listens to changes of these states and attempts to append or remove a <TextInput /> at the end */
-    const [paragraphIdAppendTextInput, setParagraphIdAppendTextInput] = useState<[string, number]>(); // [paragraphId, numTextInputsToAppend]
-    const [paragraphIdRemoveTextInput, setParagraphIdRemoveTextInput] = useState<[string, number]>(); // [paragraphId, numTextInputsToRemove]
+    const [paragraphIdAppendTextInput, setParagraphIdAppendTextInput] = useState<[string[], number]>(); // [paragraphIds, numTextInputsToAppend]
+    const [paragraphIdRemoveTextInput, setParagraphIdRemoveTextInput] = useState<[string[], number]>(); // [paragraphIds, numTextInputsToRemove]
+    
+    /** serves as notification for the singleColumnLines state in ```<Page />``` component to refresh */
+    const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
 
     const context = {
+        refreshSingleColumnLines, 
+        setRefreshSingleColumnLines,
+
         handleTab,
         handleTextLongerThanLine,
         getTextInputOverhead,
@@ -49,13 +56,14 @@ export default function Document(props) {
         setParagraphIdAppendTextInput,
         paragraphIdRemoveTextInput,
         setParagraphIdRemoveTextInput,
-        getParagraphIdByColumnId,
+        getParagraphIdByDocumentId,
+        getParagraphIdsForFontSizeChange,
 
-        isSelectedColumnEmpty,
-        setIsSelectedColumnEmpty,
-        checkIsSelectedColumnEmpty,
         checkIsColumnEmptyById,
-        getColumnFontSizesSum
+        getColumnFontSizesSum,
+        getLastTextInputOfColumn,
+
+        isTextInputHeading
     };
 
 
@@ -65,22 +73,12 @@ export default function Document(props) {
 
         hideGlobalPopup(appContext.setPopupContent);
 
-        $(".App").css("backgroundColor", "white");
+        setCssVariable("selectedColor", SELECT_COLOR);
+        setCssVariable("appBackgroundColor", "white");
 
         if (appContext.isWindowWidthTooSmall())
             handleWindowTooSmall();
     }, []);
-
-
-    /**
-     * Overloading ```checkIsColumnEmtpyById```.
-     */
-    function checkIsSelectedColumnEmpty(): boolean {
-
-        const selectedColumnId = appContext.getSelectedColumnId();
-
-        return checkIsColumnEmptyById(selectedColumnId);
-    }
 
 
     /**
@@ -91,7 +89,9 @@ export default function Document(props) {
         if (isBlank(columnId))
             return true;
 
-        const columnTextInputs = $("#" + columnId + " .TextInput");
+        const columnTextInputs = getColumnTextInputs(columnId);
+        if (!columnTextInputs) 
+            return false;
 
         let isEmpty = true;
 
@@ -109,7 +109,7 @@ export default function Document(props) {
 
 
     /**
-     * Add {@link TAB_UNICODE_ESCAPED} to ```selectedTextInput```. Prevent any keydown event.
+     * Add {@link TAB_UNICODE_ESCAPED} to ```selectedTextInput```. Prevent default event.
      */
     function handleTab(event): void {
 
@@ -117,7 +117,7 @@ export default function Document(props) {
 
         // case: text too long
         if (isTextLongerThanInput(appContext.selectedTextInputId, getTextInputOverhead(), getTabSpaces())) {
-            handleTextLongerThanLine(appContext.selectedTextInputId, SELECT_COLOR);
+            handleTextLongerThanLine(appContext.selectedTextInputId);
             return;
         }
 
@@ -138,14 +138,14 @@ export default function Document(props) {
      *
      * @param textInputId id of text input where text is too long
      */
-    async function handleTextLongerThanLine(textInputId: string, initialBorderColor = "rgb(128, 128, 128)"): Promise<void> {
+    async function handleTextLongerThanLine(textInputId: string): Promise<void> {
 
         // case: border still flashing
         if (textInputBorderFlashing)
             return;
 
         setTextInputBorderFlashing(true);
-        await flashClass($("#" + textInputId), "textInputFlash", "textInputFocus", 200);
+        await flashClass(textInputId, "textInputFlash", "textInputFocus", 200);
         setTextInputBorderFlashing(false);
     }
 
@@ -172,17 +172,9 @@ export default function Document(props) {
      */
     function getNextTextInput(textInputId: string): JQuery | null {
 
-        // case: blank text input id
-        if (isBlank(textInputId))
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
             return null;
-
-        const textInput = $("#" + textInputId);
-
-        // case: falsy text input
-        if (!textInput.length) {
-            logWarn("hasTextIinputNextLine() failed. 'textInput' not present");
-            return null;
-        }
 
         const allTextInputs = $(".TextInput");
         const index = allTextInputs.index(textInput);
@@ -196,27 +188,20 @@ export default function Document(props) {
 
 
     /**
- * @param textInputId id of the current text input
- * @returns JQuery of the next ```<TextInput>``` ```<input />``` tag or null if not found
- */
-    function getPrevTextInput(textInputId: string): JQuery | null {
+     * @param textInputId id of the current text input
+     * @param debug if true, some more warn messages will be logged in case of falsy varaibles
+     * @returns JQuery of the next ```<TextInput>``` ```<input />``` tag or null if not found
+     */
+    function getPrevTextInput(textInputId: string, debug = true): JQuery | null {
 
-        // case: blank text input id
-        if (isBlank(textInputId))
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
             return null;
-
-        const textInput = $("#" + textInputId);
-
-        // case: falsy text input
-        if (!textInput.length) {
-            logWarn("hasTextIinputNextLine() failed. 'textInput' not present");
-            return null;
-        }
 
         const allTextInputs = $(".TextInput");
         const index = allTextInputs.index(textInput);
 
-        // case: has no next text input
+        // case: has no prev text input
         if (index === 0)
             return null;
 
@@ -224,81 +209,55 @@ export default function Document(props) {
     }
 
 
-    function getTextInputIndex(textInputId: string): number {
-
-        const columnTextInputs = getColumnTextInputs(textInputId);
-
-        if (!columnTextInputs || !columnTextInputs.length)
-            return -1;
-
-        const textInput = $("#" + textInputId);
-        if (!textInput || !textInput.length)
-            return -1;
-
-        return Array.from(columnTextInputs).indexOf(textInput.get(0)!);
-    }
-
-
     /**
-     * @param textInputId in order to identify the column, default is selected column
-     * @returns jquery of all ```<TextInput />``` components inside given column or ```null``` if column was not found
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @returns jquery of all ```<TextInput />``` components inside given column or ```null``` if column was not found.
+     *          Also include ```<TextInput />```components in page with className {@link SINGLE_COLUMN_LINE_CLASS_NAME}.
      */
-    function getColumnTextInputs(textInputId = appContext.selectedTextInputId): JQuery | null {
+    function getColumnTextInputs(documentId = appContext.selectedTextInputId): JQuery | null {
 
-        if (isBlank(textInputId))
+        const docxElement = getJQueryElementById(documentId);
+        if (!docxElement)
             return null;
         
+        // get .TextInput
+        const columnId = appContext.getColumnIdByDocumentId(documentId);
+        let columnTextInputs = $("#" + columnId + " .TextInput");
+        
+        // get .SingleColumnLine
+        const pageId = appContext.getPageIdByTextInputId(documentId);
+        const singleColumnLines = $("#" + pageId + " .TextInput." + SINGLE_COLUMN_LINE_CLASS_NAME);
+        columnTextInputs = columnTextInputs.add(singleColumnLines);
 
-        const textInput = $("#" + textInputId);
-        if (!textInput.length) {
-            logWarn("'getColumnTextInputs' failed. 'textInput' length is 0");
-            return null;
-        }
-
-        const columnId = appContext.getColumnIdByTextInputId(textInputId);
-        return $("#" + columnId + " .TextInput");
+        return columnTextInputs;
     }
 
 
     /**
-     * @param textInputId in order to identify the paragraph, default is selected text input
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @returns jquery of all ```<TextInput />``` components inside given paragraph or ```null``` if paragraph was not found
      */
-    function getColumnParagraphs(textInputId = appContext.selectedTextInputId): JQuery | null {
+    function getColumnParagraphs(documentId = appContext.selectedTextInputId): JQuery | null {
 
-        if (isBlank(textInputId))
+        const docxElement = getJQueryElementById(documentId);
+        if (!docxElement)
             return null;
 
-        const textInput = $("#" + textInputId);
-        if (!textInput.length) {
-            logWarn("'getColumnParagraphs()' failed. 'textInput' length is 0");
-            return null;
-        }
+        const columnId = appContext.getColumnIdByDocumentId(documentId);
 
-        const columnId = appContext.getColumnIdByTextInputId(textInputId);
         return $("#" + columnId + " .Paragraph");
     }
 
 
-    async function buildAndDownloadDocument(): Promise<void> {
-
-        const buildResponse = await buildDocument(appContext.orientation, appContext.numColumns);
-
-        if (buildResponse.status === 200)
-            downloadDocument(false, appContext.documentFileName);
-    }
-
-
     /**
-     * @param textInputId in order to identify the column, default is selected column
-     * @param useFakeFontSizes if true, the fontSizes will be used as are, else the diff will be subtracted
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @returns sum of font sizes of all text inputs in column (in px) or -1 if column was not found
      * 
      * @see getFontSizeDiffInWord
      */
-    function getColumnFontSizesSum(textInputId = appContext.selectedTextInputId, useFakeFontSizes = false): number {
+    function getColumnFontSizesSum(documentId = appContext.selectedTextInputId): number {
 
-        const columnTextInputs = getColumnTextInputs(textInputId);
+        const columnTextInputs = getColumnTextInputs(documentId);
 
         if (!columnTextInputs || !columnTextInputs.length)
             return -1;
@@ -339,13 +298,12 @@ export default function Document(props) {
         let newTextInputs: React.JSX.Element[] = [];
 
         for (let i = 0; i < numTextInputs; i++) {
-            newTextInputs.push(<TextInput key={crypto.randomUUID()}
+            newTextInputs.push(<TextInput key={getRandomString()}
                                             pageIndex={pageIndex}
                                             columnIndex={columnIndex}
                                             paragraphIndex={paragraphIndex}
                                             textInputIndex={textInputs.length + i}
-                                            // only works because there's one text input per paragraph
-                                            isHeading={paragraphIndex < NUM_HEADINGS_PER_COLUMN} 
+                                            isSingleColumnLine={false}
                                             />);
         }
 
@@ -383,13 +341,13 @@ export default function Document(props) {
      * 
      * @param flash if true, the given text input will flash if no text input can be removed, default is true
      * @param deleteCount number of lines to remove if blank, default is 1
-     * @param textInputId of any textInput inside the column
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @returns false if the fontSize should not be changed, else true
      */
     // TODO: handle value too large
-    function handleFontSizeTooLarge(flash = true, deleteCount = 1, textInputId = appContext.selectedTextInputId): boolean {
+    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = appContext.selectedTextInputId): boolean {
 
-        const columnTextInputs = getColumnTextInputs(textInputId);
+        const columnTextInputs = getColumnTextInputs(documentId);
         if (!columnTextInputs) {
             logError("'handleFontSizeTooLarge()' failed. 'columnTextInputs' is falsy.");
             return false;
@@ -413,14 +371,14 @@ export default function Document(props) {
 
         // case: last input blank
         if (areTextInputsBlank && !areTextInputsToDeleteFocused) {
-            const paragraphIndex = getParagraphIndexOfLastTextInputInColumn(textInputId);
-            const paragraphId = getParagraphIdByColumnId(textInputId, paragraphIndex);
-            setParagraphIdRemoveTextInput([paragraphId, deleteCount]);
+            const paragraphIndex = getParagraphIndexOfLastTextInputInColumn(documentId);
+            const paragraphIds = getParagraphIdsForFontSizeChange(documentId, paragraphIndex);
+            setParagraphIdRemoveTextInput([paragraphIds, deleteCount]);
 
         // case: last input not blank
         } else {
             if (flash)
-                flashClass($("#" + appContext.selectedTextInputId), "textInputFlash", "textInputFocus");
+                flashClass(appContext.selectedTextInputId, "textInputFlash", "textInputFocus");
 
             return false;
         }
@@ -431,18 +389,66 @@ export default function Document(props) {
 
 
     /**
-     * @param textInputId of any textInput inside the column
+     * @param textInputId to check
+     * @returns true if ```<TextInput />``` has {@link SINGLE_COLUMN_LINE_CLASS_NAME}
+     */
+    function isTextInputHeading(textInputId = appContext.selectedTextInputId): boolean {
+
+        if (isBlank(textInputId)) {
+            logWarn("'isTextInputHeading()' failed. 'textInputId' is blank")
+            return false;
+        }
+
+        const textInput = $("#" + textInputId);
+        if (!textInput.length) {
+            logWarn("'isTextInputHeading()' failed. 'textInput' is falsy")
+            return false;
+        }
+
+        return textInput.prop("className").includes(SINGLE_COLUMN_LINE_CLASS_NAME);
+    }
+
+
+    /**
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @param paragraphIndex index of paragraph in column, relevant if only one column is changed
+     * @param isSingleColumnLine true if text input component is heading
+     * @returns array of paragraph ids that should be considered for font size change
+     */
+    function getParagraphIdsForFontSizeChange(documentId = appContext.selectedTextInputId, paragraphIndex?: number, isSingleColumnLine = isTextInputHeading()): string[] {
+
+        const paragraphIds: string[] = [];
+
+        // case: is heading
+        if (isSingleColumnLine) {
+            const pageIndex = stringToNumber(getPartFromDocumentId(documentId, 1));
+            
+            // add lines to all columns
+            for (let i = 0; i < appContext.numColumns; i++)
+                paragraphIds.push(getParagraphIdByDocumentId(getDocumentId("Column", pageIndex, "", i), paragraphIndex));
+
+        // case: normal line
+        } else 
+            paragraphIds.push(getParagraphIdByDocumentId(documentId, paragraphIndex));
+
+        return paragraphIds;
+    }
+
+
+    /**
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxSum```. Will be added to ```columnFontSizesSum```. 
      * @returns a touple formatted like: ```[isFontSizeTooLarge, numLinesOverhead]``` where numLinesOverhead is the number
      *          of lines that should be removed to match the MAX_NUM_LINES.
      */
-    function isFontSizeTooLarge(textInputId = appContext.selectedTextInputId, diff = 0): [boolean, number] {
+    function isFontSizeTooLarge(documentId = appContext.selectedTextInputId, diff = 0): [boolean, number] {
 
-        const numLinesOverhead = Math.abs(getNumLinesOverhead(textInputId, diff));
-
-        const columnFontSizesSum = getColumnFontSizesSum(textInputId);
+        const columnFontSizesSum = getColumnFontSizesSum(documentId);
+        
         if (columnFontSizesSum === -1)
-            return [false, numLinesOverhead];
+            return [false, -1];
+
+        const numLinesOverhead = Math.abs(getNumLinesOverhead(documentId, diff, columnFontSizesSum));
 
         const maxSum = appContext.orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
 
@@ -455,14 +461,19 @@ export default function Document(props) {
 
 
     /**
-     * @param textInputId of any textInput inside the column, default is selected text input id
-     * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxSum```. Will be added to ```columnFontSizesSum```. 
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxSum```. Will be added to ```columnFontSizesSum```.
+     * @param columnFontSizesSum sum of fontSizes of all text inputs in this column. If present it wont be calculated again to increase performance 
      * @returns number of lines with fontSize {@link DEFAULT_FONT_SIZE} by which the number of lines in the given ```<Column />``` differes from max num lines.
      *          Return -1 if no column is selected yet.
      */
-    function getNumLinesOverhead(textInputId = appContext.selectedTextInputId, diff = 0): number {
+    function getNumLinesOverhead(documentId = appContext.selectedTextInputId, diff = 0, columnFontSizesSum?: number): number {
 
-        let columnFontSizesSum = getColumnFontSizesSum(textInputId);
+        // case: no sum in param
+        if (!columnFontSizesSum)
+            columnFontSizesSum = getColumnFontSizesSum(documentId);
+
+        // case: invalid document id
         if (columnFontSizesSum === -1)
             return -1;
 
@@ -477,26 +488,25 @@ export default function Document(props) {
 
 
     /**
-     * @param textInputId of any textInput inside the column
-     * @param paragraphIndex index of the paragraph inside the column
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @param paragraphIndex index of the paragraph inside the column, will be set to last paragraph in column if not present
      * @returns id of the paragraph found with given params. Contains -1 as paragraphIndex if paragraph wasn't found
      */
-    function getParagraphIdByColumnId(textInputId = appContext.selectedTextInputId, paragraphIndex?: number): string {
+    function getParagraphIdByDocumentId(documentId = appContext.selectedTextInputId, paragraphIndex?: number): string {
 
         // set default paragraph index to last paragraph in column
         if (!paragraphIndex) {
-            const columnParagraphs = getColumnParagraphs(textInputId);
+            const columnParagraphs = getColumnParagraphs(documentId);
 
-            if (!columnParagraphs) {
-                logWarn("'getParagraphIdByColumnId()' failed. 'columnParagraphs' is falsy.");
+            if (!columnParagraphs) 
                 paragraphIndex = -1;
                 
-            } else 
+            else 
                 paragraphIndex = columnParagraphs.length - 1;
         }
 
-        const pageIndex = getPartFromDocumentId(textInputId, 1);
-        const columnIndex = getPartFromDocumentId(textInputId, 2);
+        const pageIndex = getPartFromDocumentId(documentId, 1);
+        const columnIndex = getPartFromDocumentId(documentId, 2);
 
         const paragraphId = getDocumentId("Paragraph", stringToNumber(pageIndex), "", stringToNumber(columnIndex), paragraphIndex);
 
@@ -504,21 +514,24 @@ export default function Document(props) {
     }
 
 
-    function getParagraphIndexOfLastTextInputInColumn(textInputId = appContext.selectedTextInputId): number {
+    /**
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @return index of last ```<Paragraph />``` component in ```<Column />``` or -1
+     */
+    // TODO: continue here
+    function getParagraphIndexOfLastTextInputInColumn(documentId = appContext.selectedTextInputId): number {
 
-        const columnParagraphs = getColumnParagraphs(textInputId);
-        if (!columnParagraphs) {
-            logWarn("'getParagraphIndexOfLastTextInputInColumn()' failed. 'columnParagraphs' is falsy.");
+        const columnParagraphs = getColumnParagraphs(documentId);
+        if (!columnParagraphs) 
             return -1;
-        }
-
+        
         // iterate in reverse
         for (let i = columnParagraphs.length - 1; i >= 0; i--) {
             const paragraphElement = columnParagraphs.get(i);
             if (!paragraphElement)
                 continue;
 
-            const paragraph = $("#" + paragraphElement.id);
+            const paragraph = $(paragraphElement);
             const childTextInput = paragraph.find(".TextInput");
 
             if (childTextInput.length)
@@ -526,6 +539,22 @@ export default function Document(props) {
         }
 
         return -1;
+    }
+
+
+    /**
+     * @param textInputId of any ```<TextInput />``` inside of column to get the last text input of
+     * @returns a JQuery of the last ```<TextInput />``` or null if not found
+     */
+    function getLastTextInputOfColumn(textInputId: string): JQuery | null {
+
+        const columnTextInputs = getColumnTextInputs(textInputId);
+        if (!columnTextInputs || !columnTextInputs.length) {
+            logWarn("'getLastTextInputOfColumn()' failed. 'columnTextInputs' is null");
+            return null;
+        }
+
+        return $("#" + columnTextInputs.get(columnTextInputs.length - 1)!.id);
     }
 
 
@@ -561,7 +590,7 @@ export default function Document(props) {
     return (
         <div id={id} className={className}>
             <DocumentContext.Provider value={context}>
-                <ControlPanel className="flexRight" />
+                <ControlPanel />
 
                 <StylePanel />
 

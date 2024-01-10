@@ -1,15 +1,15 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import "../../assets/styles/Column.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getDocumentId, isBlank, log, toggleGlobalPopup } from "../../utils/Utils";
+import { getCSSValueAsNumber, getDocumentId, getRandomString, isBlank, log, toggleGlobalPopup } from "../../utils/basicUtils";
 import Paragraph from "./Paragraph";
 import { AppContext } from "../App";
 import { DocumentContext } from "./Document";
-import { NUM_LINES_LANDSCAPE, NUM_LINES_PROTRAIT } from "../../utils/GlobalVariables";
+import { NUM_LINES_LANDSCAPE, NUM_LINES_PROTRAIT } from "../../globalVariables";
 import { Orientation } from "../../enums/Orientation";
+import { PageContext } from "./Page";
 
 
-// TODO: add some margin between columns
 export default function Column(props: {
     pageIndex: number,
     columnIndex: number,
@@ -23,9 +23,12 @@ export default function Column(props: {
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
+    const pageContext = useContext(PageContext);
     
     const [numLinesPerParagraph, setNumLinesPerParagraph] = useState(1);
     const [paragraphs, setParagraphs] = useState<React.JSX.Element[]>();
+
+    const componentRef = useRef(null);
     
     const context = {
         numLinesPerParagraph,
@@ -36,6 +39,8 @@ export default function Column(props: {
     useEffect(() => {
         setParagraphs(initParagraphs());
 
+        addSpaceBetweenColumns();
+
     }, []);
 
 
@@ -45,12 +50,30 @@ export default function Column(props: {
         const numParagraphs = getInitialNumParagraphs(appContext.orientation);
 
         for (let i = 0; i < numParagraphs; i++) 
-            paragraphs.push(<Paragraph key={crypto.randomUUID()}
+            paragraphs.push(<Paragraph key={getRandomString()}
                                         pageIndex={props.pageIndex}
                                         columnIndex={props.columnIndex} 
                                         paragraphIndex={i} />)
 
         return paragraphs;
+    }
+
+
+    function addSpaceBetweenColumns(): void {
+
+        if (appContext.numColumns > 1) {
+            // case: is first column
+            if (props.columnIndex === 0)
+                $(componentRef.current).addClass("halfSpaceRightBetweenColumns")
+
+            // case: is last column
+            else if (props.columnIndex === appContext.numColumns - 1)
+                $(componentRef.current).addClass("halfSpaceLeftBetweenColumns")
+            
+            // case: is middle column
+            else 
+                $(componentRef.current).addClass("spaceBetweenColumns")
+        }
     }
 
 
@@ -68,7 +91,7 @@ export default function Column(props: {
 
 
     return (
-        <div id={id} className={className}>
+        <div id={id} className={className} ref={componentRef}>
             <ColumnContext.Provider value={context}>
                 <div className={"paragraphContainer"}>
                     {paragraphs}
