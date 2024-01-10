@@ -4,6 +4,6 @@ services:
   api:
     build: .
     image: flobbe9/vorspiel_frontend
-    container_name: vorspiel_frontend
+    container_name: word_light_frontend
     ports:
-      - 3000:3000
+      - ${API_PORT}:${API_PORT}
