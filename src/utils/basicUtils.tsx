@@ -345,64 +345,6 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 }
 
 
-/**
- * Display ``` #PopupContainer``` and ``` .appOverlay```.
- * 
- * @param setPopupContent setter of content in  side ```#PopupContainer```
- * @param duration fade in / out time in milliseconds
- */
-export function toggleGlobalPopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
-
-    $("#PopupContainer").fadeToggle(duration);
-    $(".appOverlay").fadeToggle(duration);
-
-    resetGlobalPopup(setPopupContent);
-}
-
-
-/**
- * Hide ```#PopupContainer``` and ``` .appOverlay```.
- * 
- * @param setPopupContent setter of content inside ```#PopupContainer```
- * @param duration fade in / out time in milliseconds
- */
-export function hideGlobalPopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
-
-    $("#PopupContainer").fadeOut(duration);
-    $(".appOverlay").fadeOut(duration);
-
-    resetGlobalPopup(setPopupContent, duration);
-}
-
-
-/**
- * Set content from ```#PopupContainer``` to ```<></>``` and reset className.
- * 
- * @param setPopupContent setter of content inside ```#PopupContainer```
- * @param duration milliseconds to wait until reset
- */
-export function resetGlobalPopup(setPopupContent: (content: React.JSX.Element) => void, duration = 100): void {
-
-    setTimeout(() => {
-        if ($("#PopupContainer").css("display") === "none") 
-            setPopupContent(<></>);
-        
-    }, duration + 100);
-}
-
-
-/**
- * Fade toggle greyish overlay over ```<Popup />``` component currently displayed.
- * 
- * @param duration milliseconds to wait until reset
- * @param popupId additional id of regarding ```<Popup />``` component, i.e. "NewDocument" (but not "PopupNewDocument")
- */
-export function togglePopupOverlay(duration = 100, popupId = ""): void {
-
-    $("#" + popupId + "PopupOverlay").fadeToggle(duration);
-}
-
-
 export function isRGB(color: string): boolean {
 
     return color.toLowerCase().includes("rgb");

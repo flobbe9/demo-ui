@@ -29,8 +29,8 @@ export default function Button(props: {
     title?: string
 }) {
 
-    const id = props.id ? "Button" + props.id : "Button";
-    const className = "Button " + props.className || "";
+    const id = "Button" + (props.id || "Button");
+    const className = "Button " + (props.className || "");
 
     const [rendered, setRendered] = useState(isBooleanFalsy(props.rendered) ? true : props.rendered);
     const [disabled, setDisabled] = useState(isBooleanFalsy(props.disabled) ? false : props.disabled);

@@ -6,19 +6,21 @@ import NavBar from "./NavBar";
 import Footer from "./Footer";
 import Menu from "./Menu";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, hideGlobalPopup, isBlank, log, stringToNumber } from "../utils/basicUtils";
+import { getDocumentId, getPartFromDocumentId, isBlank, log, stringToNumber } from "../utils/basicUtils";
 import { Orientation } from "../enums/Orientation";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../abstract/Style";
 import PopupContainer from "./helpers/popups/PopupContainer";
-import { API_NAME, BUILDER_PATH, DOCUMENT_SUFFIX, NUM_PAGES } from "../globalVariables";
+import { WEBSITE_NAME, BUILDER_PATH, DOCUMENT_SUFFIX, NUM_PAGES } from "../globalVariables";
 import Version from "./Version";
 import Page from "./document/Page";
+import { getJQueryElementByClassName, getJQueryElementById } from "../utils/documentUtils";
 
 
 /**
  * Document is structured like
  * ```
  *  <Document>
+ *      <ControlPanel />
  *      <StylePanel />
  * 
  *      <Page>
@@ -54,9 +56,9 @@ export default function App() {
 
     const [documentFileName, setDocumentFileName] = useState("Dokument_1.docx");
 
-    const windowScrollY = useRef(0);
-
     const appRef = useRef(null);
+    const appPopupRef = useRef(null);
+    const appOverlayRef = useRef(null);
 
     const context = {
         pages,
@@ -65,6 +67,8 @@ export default function App() {
 
         setEscapePopup,
         setPopupContent,
+        togglePopup,
+        hidePopup,
 
         hideSelectOptions,
 
@@ -81,7 +85,6 @@ export default function App() {
         setSelectedTextInputId,
         selectedTextInputStyle,
         setSelectedTextInputStyle,
-        focusSelectedTextInput,
         focusTextInput,
         unFocusTextInput,
         isTextInputIdValid,
@@ -92,16 +95,15 @@ export default function App() {
         setDocumentFileName,
 
         isWindowWidthTooSmall,
-        adjustDocumentFileName
+        adjustDocumentFileName,
     }
 
 
     useEffect(() => {
         document.addEventListener("keydown", handleGlobalKeyDown);
         document.addEventListener("keyup", handleGlobalKeyUp);
-        window.addEventListener('scroll', handleScroll);
 
-        document.title = API_NAME;
+        document.title = WEBSITE_NAME;
     }, []);
 
 
@@ -161,20 +163,23 @@ export default function App() {
 
     function handleClick(event): void {
 
+        const targetClassName = event.target.className;
+
         // hide popup
-        if (event.target.className.includes("hideGlobalPopup") && escapePopup)
-            hideGlobalPopup(setPopupContent);
+        if (targetClassName.includes("hideAppPopup") && escapePopup)
+            hidePopup();
 
         // hide select options
-        if (!event.target.className.includes("dontHideSelect")) 
+        // TOOD: do this inside document
+        if (!targetClassName.includes("dontHideSelect")) 
             hideSelectOptions();
 
         // hide nav menu mobile
-        if (!event.target.className.includes("dontHideNavSectionRightMobile")) 
+        if (!targetClassName.includes("dontHideNavSectionRightMobile")) 
             $(".navSectionRightMobile").slideUp(200);
 
         // hide warn info popup
-        if (!event.target.className.includes("dontHideWarnIcon"))
+        if (!targetClassName.includes("dontHideWarnIcon"))
             $(".WarnIcon .miniPopup").hide();
     }
 
@@ -182,7 +187,9 @@ export default function App() {
     function handleGlobalKeyDown(event): void {
 
         if (event.key === "Escape") {
-            hideGlobalPopup(setPopupContent);
+            if (escapePopup)
+                hideAllPopups();
+
             hideSelectOptions();
         }
 
@@ -204,16 +211,6 @@ export default function App() {
     }
 
 
-    function focusSelectedTextInput(): void {
-        
-        // case: no textinput id selected yet
-        if (isBlank(selectedTextInputId))
-            return;
-
-        focusTextInput(selectedTextInputId);
-    }
-
-
     /**
      * @param textInputId id of valid ```<TextInput />``` to focus
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` state will be updated with focused text input style
@@ -228,7 +225,9 @@ export default function App() {
         if (!isTextInputIdValid(textInputId))
             return;
 
-        const textInput = $("#" + textInputId);
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
+            return;
     
         textInput.addClass("textInputFocus");
 
@@ -247,49 +246,41 @@ export default function App() {
     }
 
 
-    function unFocusSelectedTextInput(): void {
-
-        if (!isBlank(selectedTextInputId))
-            unFocusTextInput(selectedTextInputId);
-    }
-
-
     function unFocusTextInput(textInputId: string): void {
 
-        if (!isTextInputIdValid(textInputId))
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
             return;
-
-        const textInput = $("#" + textInputId);
 
         textInput.removeClass("textInputFocus");
     }
 
 
-    function hideSelectOptions(): void {
+    function hideSelectOptions(selectComponentId?: string): void {
 
-        const selectOptionsBoxes = $(".selectOptionsBox");
+        const selectOptionsBoxes = selectComponentId ? getJQueryElementById(selectComponentId + " .selectOptionsBox") : 
+                                                       getJQueryElementByClassName("selectOptionsBox");
+        if (!selectOptionsBoxes)
+            return;
 
         // iterate all select option boxes
         Array.from(selectOptionsBoxes).forEach(selectOptionsBoxElement => {
-            if (!selectOptionsBoxElement)
-                return;
-
             // hide if not hidden already
-            const selectOptionsBox = $("#" + selectOptionsBoxElement.id);
+            const selectOptionsBox = $(selectOptionsBoxElement);
             if (selectOptionsBox.css("display") !== "none")
                 selectOptionsBox.slideUp(100, "linear");
         })
     }
 
 
+    /**
+     * @param textInputId id of ```<TextInput />``` to check
+     * @returns true if element with given id exists in document and has className 'TextInput', else false
+     */
     function isTextInputIdValid(textInputId: string): boolean {
 
-        if (isBlank(textInputId))
-            return false;
-
-        const textInput = $("#" + textInputId);
-        // case: invalid id
-        if (!textInput.length)
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
             return false;
 
         // case: is no TextInput
@@ -297,21 +288,6 @@ export default function App() {
             return false;
 
         return true;
-    }
-            
-
-    function handleScroll(event): void {
-
-        const currentScrollY = window.scrollY;
-
-        const controlPanelHeight = $(".ControlPanel").css("height");
-        const isScrollUp = windowScrollY.current > currentScrollY;
-
-        // move controlPanel in view
-        $(".StylePanel").css("top", isScrollUp ? controlPanelHeight : 0);
-        
-        // update ref
-        windowScrollY.current = currentScrollY;
     }
     
 
@@ -338,6 +314,39 @@ export default function App() {
 
         return fileName;
     }
+    
+
+    function togglePopup(duration = 100): void {
+
+        const appPopup = $(appPopupRef.current);
+        appPopup.fadeToggle(duration);
+        $(appOverlayRef.current).fadeToggle(duration);
+
+        if (!appPopup.is(":visible"))
+            resetPopup();
+    }
+
+
+    function hidePopup(duration = 100): void {
+
+        $(appPopupRef.current).fadeOut(duration);
+        $(appOverlayRef.current).fadeOut(duration);
+
+        resetPopup(duration);
+    }
+
+
+    function hideAllPopups(duration = 100): void {
+
+        // TODO: replac with ref
+        $(".PopupContainer").parent(".flexCenter").fadeOut(duration);
+    }
+
+
+    function resetPopup(duration = 100): void {
+
+        setTimeout(() => setPopupContent(<></>), duration + 100);
+    }
 
     
     return (
@@ -347,11 +356,11 @@ export default function App() {
 
                     <NavBar />
 
-                    <div className="appOverlay hideGlobalPopup"></div>
+                    <div className="appOverlay hideAppPopup" ref={appOverlayRef}></div>
 
                     <div className="content">
-                        <div className="flexCenter">
-                            <PopupContainer>{popupContent}</PopupContainer>
+                        <div className="flexCenter" ref={appPopupRef}>
+                            <PopupContainer id={"App"} className="hideAppPopup">{popupContent}</PopupContainer>
                         </div>
 
                         <Routes>

@@ -7,14 +7,13 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, hideGlobalPopup, isBlank, isTextLongerThanInput, log, logWarn, setCssVariable, stringToNumber, toggleGlobalPopup } from "../../utils/basicUtils";
+import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
 import { FONT_FAMILIES, FONT_SIZES, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
 import Popup from "../helpers/popups/Popup";
 import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
 import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
-import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
 
 
 // TODO: add key combinations for most buttons
@@ -123,27 +122,27 @@ export default function StylePanel(props) {
 
     function handleColumnConfig(event): void {
 
-        appContext.setPopupContent(
-            <Popup id="" width="large" height="large">
+        documentContext.setPopupContent(
+            <Popup id="ColumnConfig" width="large" height="large">
                 <PopupColumnConfig />
             </Popup>
         );
 
         // toggle popup
-        toggleGlobalPopup(appContext.setPopupContent);
+        documentContext.togglePopup();
     }
 
 
     function handleOrientationConfig(event): void {
 
-        appContext.setPopupContent(
-            <Popup id="" width="large" height="large">
+        documentContext.setPopupContent(
+            <Popup id="Orientation" width="large" height="large">
                 <PopupOrientationConfig />
             </Popup>
         );
 
         // toggle popup
-        toggleGlobalPopup(appContext.setPopupContent);
+        documentContext.togglePopup();
     }
 
 

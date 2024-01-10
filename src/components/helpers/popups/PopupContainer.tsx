@@ -8,18 +8,18 @@ import "../../../assets/styles/PopupContainer.css";
  * @since 0.0.5
  */
 export default function PopupContainer(props: {
-    id?: string,
+    id: string,
     className?: string,
     children?,
-
+    onClick?
 }) {
 
-    const id = props.id ? "PopupContainer" + props.id : "PopupContainer";
-    const className = props.className ? "PopupContainer " + props.className : "PopupContainer";
+    const id = "PopupContainer" + props.id;
+    const className = "PopupContainer " + (props.className || "");
 
 
     return (
-        <div id={id} className={className + " flexCenter hideGlobalPopup"}>
+        <div id={id} className={className + " flexCenter"} onClick={props.onClick}>
             {props.children}
         </div>
     )

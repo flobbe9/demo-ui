@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log, moveCursor } from "../utils/basicUtils";
 import LoadingButton from "./helpers/Button";
-import { API_NAME, BUILDER_PATH, DOCUMENT_SUFFIX, isMobileWidth } from "../globalVariables";
+import { WEBSITE_NAME, BUILDER_PATH, DOCUMENT_SUFFIX, isMobileWidth } from "../globalVariables";
 import { AppContext } from "./App";
 import LeaveConfirmLink from "./LeaveConfirmLink";
 
@@ -70,7 +70,7 @@ export default function NavBar(props) {
             <div className="col-4 navSectionLeft textLeft flexLeft">
                 <LeaveConfirmLink className="navLink" to="/" pathsToConfirm={[BUILDER_PATH]}>
                     <img className="navImage dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
-                    <span className="navHeading ml-0 ml-sm-3">{API_NAME}</span>
+                    <span className="navHeading ml-0 ml-sm-3">{WEBSITE_NAME}</span>
                 </LeaveConfirmLink>
             </div>
 

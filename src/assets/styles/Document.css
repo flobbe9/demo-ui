@@ -1,3 +1,12 @@
 .Document {
     min-height: 100vh;
+
+    .documentOverlay {
+        background-color: rgb(0, 0, 0, 0.4);
+        display: none;
+        height: 100%;
+        position: absolute;
+        width: 100%;
+        z-index: 2; /* TODO: change this?*/
+    }
 }

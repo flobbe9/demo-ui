@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState, createContext } from "react";
+import React, { useContext, useEffect, useState, createContext, useRef } from "react";
 import "../../assets/styles/Document.css";
-import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getRandomString, getTabSpaces, hideGlobalPopup, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber, toggleGlobalPopup } from "../../utils/basicUtils";
+import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getRandomString, getTabSpaces, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE_ESCAPED } from "../../globalVariables";
@@ -11,6 +11,7 @@ import Popup from "../helpers/popups/Popup";
 import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
 import Button from "../helpers/Button";
 import { getJQueryElementById } from "../../utils/documentUtils";
+import PopupContainer from "../helpers/popups/PopupContainer";
 
 
 // TODO: add some kind of "back" button
@@ -27,6 +28,9 @@ export default function Document(props) {
 
     const appContext = useContext(AppContext);
 
+    const [escapePopup, setEscapePopup] = useState(true);
+    const [popupContent, setPopupContent] = useState<React.JSX.Element>();
+
     const [textInputBorderFlashing, setTextInputBorderFlashing] = useState(false);
 
     /** <Paragraph /> component listens to changes of these states and attempts to append or remove a <TextInput /> at the end */
@@ -35,6 +39,10 @@ export default function Document(props) {
     
     /** serves as notification for the singleColumnLines state in ```<Page />``` component to refresh */
     const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
+
+    const windowScrollY = useRef(0);
+    const documentPopupRef = useRef(null);
+    const documentOverlayRef = useRef(null);
 
     const context = {
         refreshSingleColumnLines, 
@@ -63,7 +71,11 @@ export default function Document(props) {
         getColumnFontSizesSum,
         getLastTextInputOfColumn,
 
-        isTextInputHeading
+        isTextInputHeading,
+
+        togglePopup,
+        hidePopup,
+        setPopupContent
     };
 
 
@@ -71,7 +83,10 @@ export default function Document(props) {
         if (API_ENV !== "dev")
             confirmPageUnload();
 
-        hideGlobalPopup(appContext.setPopupContent);
+        appContext.hidePopup();
+        hidePopup();
+        
+        window.addEventListener('scroll', handleScroll);
 
         setCssVariable("selectedColor", SELECT_COLOR);
         setCssVariable("appBackgroundColor", "white");
@@ -79,6 +94,16 @@ export default function Document(props) {
         if (appContext.isWindowWidthTooSmall())
             handleWindowTooSmall();
     }, []);
+
+
+    function handleDocumentClick(event): void {
+
+        const targetClassName = event.target.className;
+
+        // hide popup
+        if (targetClassName.includes("hideDocumentPopup") && escapePopup)
+            hidePopup();
+    }
 
 
     /**
@@ -516,54 +541,57 @@ export default function Document(props) {
 
     /**
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-     * @return index of last ```<Paragraph />``` component in ```<Column />``` or -1
+     * @return index of last ```<Paragraph />``` with a ```<TextInput />``` in it in given ```<Column />``` or -1
      */
-    // TODO: continue here
     function getParagraphIndexOfLastTextInputInColumn(documentId = appContext.selectedTextInputId): number {
 
-        const columnParagraphs = getColumnParagraphs(documentId);
-        if (!columnParagraphs) 
+        const lastTextInputOfColumn = getLastTextInputOfColumn(documentId);
+        if (!lastTextInputOfColumn)
             return -1;
-        
-        // iterate in reverse
-        for (let i = columnParagraphs.length - 1; i >= 0; i--) {
-            const paragraphElement = columnParagraphs.get(i);
-            if (!paragraphElement)
-                continue;
 
-            const paragraph = $(paragraphElement);
-            const childTextInput = paragraph.find(".TextInput");
+        const paragraph = lastTextInputOfColumn.parents(".Paragraph");
+        if (!paragraph.length)
+            return -1;
 
-            if (childTextInput.length)
-                return stringToNumber(getPartFromDocumentId(paragraphElement.id, 3));
-        }
-
-        return -1;
+        return stringToNumber(getPartFromDocumentId(paragraph.prop("id"), 3));
     }
 
 
     /**
-     * @param textInputId of any ```<TextInput />``` inside of column to get the last text input of
-     * @returns a JQuery of the last ```<TextInput />``` or null if not found
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @returns a JQuery of the last ```<TextInput />``` in given column or null if not found
      */
-    function getLastTextInputOfColumn(textInputId: string): JQuery | null {
+    function getLastTextInputOfColumn(documentId: string): JQuery | null {
 
-        const columnTextInputs = getColumnTextInputs(textInputId);
-        if (!columnTextInputs || !columnTextInputs.length) {
-            logWarn("'getLastTextInputOfColumn()' failed. 'columnTextInputs' is null");
+        const columnTextInputs = getColumnTextInputs(documentId);
+        if (!columnTextInputs || !columnTextInputs.length)
             return null;
-        }
 
-        return $("#" + columnTextInputs.get(columnTextInputs.length - 1)!.id);
+        return $(columnTextInputs.get(columnTextInputs.length - 1)!);
+    }
+
+
+    function handleScroll(event): void {
+
+        const currentScrollY = window.scrollY;
+
+        const controlPanelHeight = $(".ControlPanel").css("height");
+        const isScrollUp = windowScrollY.current > currentScrollY;
+
+        // move controlPanel in view
+        $(".StylePanel").css("top", isScrollUp ? controlPanelHeight : 0);
+        
+        // update ref
+        windowScrollY.current = currentScrollY;
     }
 
 
     function handleWindowTooSmall(): void {
 
         // warn about width
-        appContext.setPopupContent((
+        setPopupContent((
             <Popup id={id} height="medium" width="medium">
-                <PopupWarnConfirm hideThis={() => hideGlobalPopup(appContext.setPopupContent)} dontConfirm={true}>
+                <PopupWarnConfirm hideThis={() => hidePopup()} dontConfirm={true}>
                     <div className="textCenter">
                         Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
                         nicht identisch dargestellt werden.
@@ -574,7 +602,7 @@ export default function Document(props) {
                                 className="blackButton blackButtonContained"
                                 hoverBackgroundColor="rgb(100, 100, 100)"
                                 clickBackgroundColor="rgb(130, 130, 130)"
-                                handleClick={() => hideGlobalPopup(appContext.setPopupContent)}
+                                handleClick={() => hidePopup()}
                                 >
                             Alles klar
                         </Button>
@@ -583,13 +611,51 @@ export default function Document(props) {
             </Popup>
         )); 
 
-        toggleGlobalPopup(appContext.setPopupContent);
+        togglePopup();
     }
 
 
+    // TODO: replace all popup ups
+    function togglePopup(duration = 100): void {
+
+        const documentPopup = $(documentPopupRef.current);
+        documentPopup.fadeToggle(duration);
+        $(documentOverlayRef.current).fadeToggle(duration);
+
+        // case: is hidden now
+        if (!documentPopup.is(":visible"))
+            resetDocumentPopup(setPopupContent);
+    }
+
+
+    function hidePopup(duration = 100): void {
+
+        $(documentPopupRef.current).fadeOut(duration);
+        $(documentOverlayRef.current).fadeOut(duration);
+
+        resetDocumentPopup(duration);
+    }
+
+
+    function resetDocumentPopup(duration = 100): void {
+
+        setTimeout(() => {
+            setPopupContent(<></>);
+            
+        }, duration + 100);
+    }
+
+
+    // TODO: use forwardRef?
     return (
-        <div id={id} className={className}>
+        <div id={id} className={className} onClick={handleDocumentClick}>
             <DocumentContext.Provider value={context}>
+                <div className="documentOverlay hideDocumentPopup" ref={documentOverlayRef}></div>
+
+                <div className="flexCenter" ref={documentPopupRef}>
+                    <PopupContainer id={"Document"} className="hideDocumentPopup"></PopupContainer>
+                </div>
+                
                 <ControlPanel />
 
                 <StylePanel />
@@ -597,7 +663,6 @@ export default function Document(props) {
                 <div className="pageContainer">
                     {appContext.pages}
                 </div>
-
             </DocumentContext.Provider>
         </div>
     );

@@ -73,7 +73,7 @@ export default function PopupColumnConfig(props) {
     return (
         <div id={id} className={className}>
             <div className="popupHeader flexRightStart">
-                <i className="fa-solid fa-xmark fa-xl closeIcon hideGlobalPopup"></i>
+                <i className="fa-solid fa-xmark fa-xl closeIcon hideDocumentPopup"></i>
             </div>
             
             <div className="popupBody flexCenter">

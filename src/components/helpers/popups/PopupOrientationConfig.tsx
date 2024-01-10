@@ -4,10 +4,11 @@ import { AppContext } from "../../App";
 import { Orientation } from "../../../enums/Orientation";
 import RadioButton from "../../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hideGlobalPopup, log, togglePopupOverlay } from "../../../utils/basicUtils";
+import { log } from "../../../utils/basicUtils";
 import Button from "../Button";
 import Popup from "./Popup";
 import PopupWarnConfirm from "./PopupWarnConfirm";
+import { DocumentContext } from "../../document/Document";
 
 
 /**
@@ -22,6 +23,7 @@ export default function PopupOrientationConfig(props) {
     const warnPopupId = id + "Warning";
 
     const appContext = useContext(AppContext);
+    const documentContext = useContext(DocumentContext);
 
     const [orientation, setOrientation] = useState(appContext.orientation);
 
@@ -37,11 +39,9 @@ export default function PopupOrientationConfig(props) {
         appContext.setOrientation(orientation);
 
         appContext.setPages([]);
-        setTimeout(() => {
-            appContext.setPages(appContext.initPages());
-        }, 1);
+        setTimeout(() => appContext.setPages(appContext.initPages()), 1);
 
-        hideGlobalPopup(appContext.setPopupContent);
+        documentContext.hidePopup();
     }
 
 
@@ -49,19 +49,20 @@ export default function PopupOrientationConfig(props) {
 
         // case: selected same orientation
         if (orientation === appContext.orientation) {
-            hideGlobalPopup(appContext.setPopupContent);
+            documentContext.hidePopup();
             return;
         }
 
         $("#" + warnPopupId + "Popup").fadeToggle(100);
-        togglePopupOverlay();
+        // documentContext.togglePopupOverlay();
+        // TODO
     }
 
 
     return (
         <div id={id} className={className}> 
             <div className="popupHeader flexRightStart">
-                <i className="fa-solid fa-xmark fa-xl closeIcon hideGlobalPopup"></i>
+                <i className="fa-solid fa-xmark fa-xl closeIcon hideDocumentPopup"></i>
             </div>
             
             <div className="popupBody flexCenter">
@@ -113,7 +114,7 @@ export default function PopupOrientationConfig(props) {
 
                 <Popup id={warnPopupId} className="warnPopup" height="small" width="medium" style={{display: "none"}}>
                     <PopupWarnConfirm handleConfirm={handleSubmit} 
-                                        handleDecline={() => hideGlobalPopup(appContext.setPopupContent)}
+                                        handleDecline={() => documentContext.hidePopup()}
                                         hideThis={toggleWarnPopup}
                                         >
                         <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
