@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState, createContext, useRef } from "react";
 import "../../assets/styles/Document.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getRandomString, getTabSpaces, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { confirmPageUnload, flashClass, getJQueryElementById, getRandomString, getTabSpaces, insertString, isBlank, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE_ESCAPED, NUM_PAGES } from "../../globalVariables";
-import ControlPanel from "../ControlPanel";
+import ControlPanel from "./ControlPanel";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
 import Popup from "../helpers/popups/Popup";
 import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
 import Button from "../helpers/Button";
-import { getColumnIdByDocumentId, getJQueryElementById, getPageIdByDocumentId, isTextInputIdValid } from "../../utils/documentUtils";
+import { getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getFontSizeDiffInWord, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 import PopupContainer from "../helpers/popups/PopupContainer";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
@@ -710,7 +710,6 @@ export default function Document(props) {
     }
 
 
-    // TODO: use forwardRef?
     return (
         <div id={id} className={className} onClick={handleDocumentClick}>
             <DocumentContext.Provider value={context}>

@@ -5,8 +5,9 @@ import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
 import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLASS_NAME, getOriginalFontSizeByFakeFontSize } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { appendDocxSuffix, downloadFileByUrl, getDocumentId, getPartFromDocumentId, isBlank, log, logApiResponse, logError, logWarn, stringToNumber } from "../utils/basicUtils";
-import fetchJson from "../utils/fetch";
+import { downloadFileByUrl, isBlank, log, logApiResponse, logError, logWarn, stringToNumber } from "../utils/basicUtils";
+import { appendDocxSuffix, getDocumentId, getPartFromDocumentId } from "../utils/documentBuilderUtils";
+import fetchJson from "../utils/fetchUtils";
 
 
 const documentBuilderMapping = "/api/documentBuilder";

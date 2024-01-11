@@ -3,10 +3,11 @@ import "../../assets/styles/Page.css";
 import Column from "./Column";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, getRandomString, includesIgnoreCase, log, logWarn } from "../../utils/basicUtils";
+import { getRandomString, includesIgnoreCase, log, logWarn } from "../../utils/basicUtils";
 import { MAX_NUM_COLUMNS, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
 import { DocumentContext } from "./Document";
 import Paragraph from "./Paragraph";
+import { getDocumentId } from "../../utils/documentBuilderUtils";
 
 
 export default function Page(props: {

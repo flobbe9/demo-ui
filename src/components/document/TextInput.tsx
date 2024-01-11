@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getCursorIndex, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { getCursorIndex, getTabSpaces, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import { StyleProp, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
 import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, SINGLE_TAB_UNICODE_ESCAPED, TAB_UNICODE_ESCAPED } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
-import { getNextTextInput, getPrevTextInput, isTextInputIdValid } from "../../utils/documentUtils";
+import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 
 
 // IDEA: 
@@ -595,7 +595,6 @@ export default function TextInput(props: {
             onMouseOut={handleMousOut}
              >
             <label className={"textInputLabel " + dontHideConnectIconClassName} htmlFor={id}>
-                {/* connect column lines */}
                 <Button id={"ConnectLines" + id}
                         className={"connectIcon flexCenter " + dontHideConnectIconClassName}
                         title={props.isSingleColumnLine ? "Zeile aufspalten" : "Zeilen verbinden"}

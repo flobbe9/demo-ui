@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCase, getCSSValueAsNumber, getFontSizeDiffInWord, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { equalsIgnoreCase, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import { MAX_FONT_SIZE, MIN_FONT_SIZE, getFakeFontSizeByOriginalFontSize, getOriginalFontSizeByFakeFontSize, isMobileWidth } from "../../globalVariables";
+import { getCSSValueAsNumber } from "../../utils/documentBuilderUtils";
 
 
 /**

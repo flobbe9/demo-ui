@@ -7,13 +7,14 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashClass, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { flashClass, isBlank, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
-import { FONT_FAMILIES, FONT_SIZES, RAW_FONT_SIZES } from "../../globalVariables";
+import { FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
 import Popup from "../helpers/popups/Popup";
 import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
 import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
+import { getCSSValueAsNumber } from "../../utils/documentBuilderUtils";
 
 
 // TODO: add key combinations for most buttons

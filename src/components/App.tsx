@@ -6,11 +6,11 @@ import NavBar from "./NavBar";
 import Footer from "./Footer";
 import Menu from "./Menu";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, isBlank, log, stringToNumber } from "../utils/basicUtils";
+import { log } from "../utils/basicUtils";
 import PopupContainer from "./helpers/popups/PopupContainer";
 import { WEBSITE_NAME, BUILDER_PATH} from "../globalVariables";
 import Version from "./Version";
-import { getJQueryElementByClassName, getJQueryElementById } from "../utils/documentUtils";
+import { getJQueryElementByClassName, getJQueryElementById } from "../utils/basicUtils";
 
 
 /**

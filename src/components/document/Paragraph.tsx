@@ -2,10 +2,11 @@ import React, { useContext, useState, useEffect, createContext } from "react";
 import "../../assets/styles/Paragraph.css";
 import TextInput from "./TextInput";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, getRandomString, isBlank, log, stringToNumber } from "../../utils/basicUtils";
+import { getRandomString, isBlank, log, stringToNumber } from "../../utils/basicUtils";
 import { ColumnContext } from "./Column";
 import { DocumentContext } from "./Document";
 import { AppContext } from "../App";
+import { getDocumentId, getPartFromDocumentId } from "../../utils/documentBuilderUtils";
 
 
 export default function Paragraph(props: {

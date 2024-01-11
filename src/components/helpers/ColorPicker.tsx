@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/ColorPicker.css";
-import { isRGB, log } from "../../utils/basicUtils";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { log } from "../../utils/basicUtils";
+import { isRGB } from "../../utils/documentBuilderUtils";
 
 
 export default function ColorPicker(props: {

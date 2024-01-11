@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import "../assets/styles/ControlPanel.css";
-import { buildDocument, downloadDocument } from "../builder/Builder";
-import { AppContext } from "./App";
+import { buildDocument, downloadDocument } from "../../builder/Builder";
+import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { confirmPageUnload, isBlank, log, removeConfirmPageUnloadEvent } from "../utils/basicUtils";
-import Button from "./helpers/Button";
-import { API_ENV } from "../globalVariables";
-import { DocumentContext } from "./document/Document";
-import { adjustDocumentFileName } from "../utils/documentUtils";
+import { confirmPageUnload, isBlank, log, removeConfirmPageUnloadEvent } from "../../utils/basicUtils";
+import Button from "../helpers/Button";
+import { API_ENV } from "../../globalVariables";
+import { DocumentContext } from "./Document";
+import { adjustDocumentFileName } from "../../utils/documentBuilderUtils";
 
 
 // TODO: add print button
