@@ -40,9 +40,7 @@
         }
     }
 
-    .warnPopup {
-        display: none;
-        position: absolute;
+    .warnPopupContainer {
         z-index: 3;
     }
 }

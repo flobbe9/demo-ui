@@ -1,12 +1,24 @@
+:root {
+    --fullHeight: 70vh;
+    --fullWidth: 60vi;
+}
+
 .PopupContainer {
-    height: 70vh;
+    height: var(--fullHeight);
     position: fixed;
     top: 15%;
-    width: 60%;
+    width: var(--fullWidth);
     z-index: 2;
 
+    .matchPopupDimensions {
+        position: absolute;
+        height: fit-content;
+        width: fit-content;
+    }
+
+    /* .Popup */
     .fullWidth {
-        width: 100%;
+        width: var(--fullWidth);
     }
 
     .largeWidth {
@@ -22,7 +34,7 @@
     }
 
     .fullHeight {
-        height: 100%;
+        height: var(--fullHeight);
     }
 
     .largeHeight {

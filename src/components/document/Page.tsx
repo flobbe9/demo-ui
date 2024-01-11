@@ -103,7 +103,7 @@ export default function Page(props: {
     function toggleConnectWarnPopup(): void {
 
         // const warnPopup = 
-            // <Popup id={warnPopupId} className="warnPopup" height="small" width="medium" style={{display: "none"}}>
+            // <Popup id={warnPopupId} className="warnPopupContainer" height="small" width="medium" style={{display: "none"}}>
             //     <PopupWarnConfirm handleConfirm={handleSubmit} 
             //                         handleDecline={() => hideGlobalPopup(appContext.setPopupContent)}
             //                         hideThis={toggleWarnPopup}

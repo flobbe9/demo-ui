@@ -11,7 +11,9 @@ export default forwardRef(function PopupContainer(props: {
     id: string,
     className?: string,
     children?,
-    onClick?
+    onClick?,
+    style?: React.CSSProperties,
+    matchPopupDimensions?: boolean
 }, ref) {
 
     const id = "PopupContainer" + props.id;
@@ -19,7 +21,12 @@ export default forwardRef(function PopupContainer(props: {
 
 
     return (
-        <div id={id} className={className + " hidden flexCenter"} ref={ref} onClick={props.onClick}>
+        <div id={id} 
+            className={className + " hidden flexCenter " + (props.matchPopupDimensions ? "matchPopupDimensions" : "")} 
+            ref={ref} 
+            style={props.style} 
+            onClick={props.onClick}
+            >
             {props.children}
         </div>
     )

@@ -9,6 +9,7 @@ import Button from "../Button";
 import Popup from "./Popup";
 import PopupWarnConfirm from "./PopupWarnConfirm";
 import { DocumentContext } from "../../document/Document";
+import PopupContainer from "./PopupContainer";
 
 
 /**
@@ -20,12 +21,12 @@ export default function PopupOrientationConfig(props: {
     id?: string,
     className?: string,
     children?,
+    warnPopupContainerIdPart: string,
     toggleWarnPopup: (warnPopupId: string, duration?: number) => void
 }) {
 
     const className = "PopupOrientationConfig " + (props.className || "PopupOrientationConfig");
     const id = "PopupOrientationConfig " + (props.id || "PopupOrientationConfig");
-    const warnPopupId = "OrientationConfigWarning";
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
@@ -58,7 +59,7 @@ export default function PopupOrientationConfig(props: {
             return;
         }
 
-        props.toggleWarnPopup("Popup" + warnPopupId, duration);
+        props.toggleWarnPopup("PopupContainer" + props.warnPopupContainerIdPart, duration);
     }
 
 
@@ -115,15 +116,18 @@ export default function PopupOrientationConfig(props: {
                     </div>
                 </div>
 
-                <Popup id={warnPopupId} className="warnPopup" height="small" width="medium" style={{display: "none"}}>
-                    <PopupWarnConfirm handleConfirm={handleSubmit} 
-                                        handleDecline={toggleWarnPopup}
-                                        hideThis={toggleWarnPopup}
-                                        >
-                        <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
-                        <p className="textCenter">Fortfahren?</p>
-                    </PopupWarnConfirm>
-                </Popup>
+                <PopupContainer id={props.warnPopupContainerIdPart} className="warnPopupContainer" matchPopupDimensions={true}>
+                    <Popup id={props.warnPopupContainerIdPart} height="small" width="medium">
+                        <PopupWarnConfirm handleConfirm={handleSubmit} 
+                                            handleDecline={() => toggleWarnPopup()}
+                                            hideThis={() => toggleWarnPopup()}
+                                            
+                                            >
+                            <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
+                            <p className="textCenter">Fortfahren?</p>
+                        </PopupWarnConfirm>
+                    </Popup>
+                </PopupContainer>
             </div>
 
             <div className="popupFooter flexRight" >

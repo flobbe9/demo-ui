@@ -11,7 +11,6 @@ import WarnIcon from "../WarnIcon";
  * 
  * @since 0.0.5
  */
-// TODO: continue here: why does warn popup not render smoothly but orientation popup does?
 export default function PopupWarnConfirm(props: {
     id?: string,
     hideThis: () => void,

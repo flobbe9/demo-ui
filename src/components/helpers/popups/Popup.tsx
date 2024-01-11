@@ -10,7 +10,6 @@ import { log } from "../../../utils/basicUtils";
  * 
  * @since 0.0.5
  */
-// TODO: flashes weirdly on toggle
 export default forwardRef(function Popup(props: {
     id: string,
     className?: string,
@@ -23,21 +22,15 @@ export default forwardRef(function Popup(props: {
 }, ref) {
 
     const id = "Popup" + props.id;
-    const [className, setClassName] = useState("Popup");
+    const className = "Popup " + initClassName();
     
     const overlayRef = useRef(null);
     const childrenRef = useRef(null);
 
 
-    useEffect(() => {
-        initClassName();
+    function initClassName(): string {
 
-    }, []);
-
-
-    function initClassName(): void {
-
-        let newClassName = className + " ";
+        let newClassName = props.className + " ";
 
         if (props.height)
             newClassName += props.height + "Height ";
@@ -48,7 +41,7 @@ export default forwardRef(function Popup(props: {
         if (props.className)
             newClassName += props.className + " ";
 
-        setClassName(newClassName);
+        return newClassName;
     }
 
 

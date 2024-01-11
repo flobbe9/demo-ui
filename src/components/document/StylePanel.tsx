@@ -121,26 +121,33 @@ export default function StylePanel(props) {
     }
 
 
-    function handleColumnConfig(event): void {
+    function handleColumnConfigClick(event): void {
 
-        documentContext.setPopupContent(
-            <Popup id="Column" width="large" height="large" handleOverlayClick={() => toggleWarnPopup("PopupColumnConfigWarning")}>
-                <PopupColumnConfig toggleWarnPopup={toggleWarnPopup} />
-            </Popup>
-        );
+        const warnPopupContainerIdPart = "ColumnConfigWarning";
 
         // toggle popup
         documentContext.togglePopup();
+
+        documentContext.setPopupContent(
+            // pass the id of inner <PoupContainer /> for toggle effect
+            <Popup id="Column" width="large" height="large" handleOverlayClick={() => toggleWarnPopup("PopupContainer" + warnPopupContainerIdPart)}>
+                <PopupColumnConfig toggleWarnPopup={toggleWarnPopup} warnPopupContainerIdPart={warnPopupContainerIdPart} />
+            </Popup>
+        );
     }
 
 
-    function handleOrientationConfig(event): void {
+    function handleOrientationConfigClick(event): void {
+
+        const warnPopupContainerIdPart = "OrientationConfigWarning";
+
         // toggle popup
         documentContext.togglePopup(100);
 
         documentContext.setPopupContent(
-            <Popup id="Orientation" width="large" height="large" handleOverlayClick={() => toggleWarnPopup("PopupOrientationConfigWarning")}>
-                <PopupOrientationConfig toggleWarnPopup={toggleWarnPopup}/>
+            // pass the id of inner <PoupContainer /> for toggle effect
+            <Popup id="Orientation" width="large" height="large" handleOverlayClick={() => toggleWarnPopup("PopupContainer" + warnPopupContainerIdPart)}>
+                <PopupOrientationConfig toggleWarnPopup={toggleWarnPopup} warnPopupContainerIdPart={warnPopupContainerIdPart} />
             </Popup>
         );
     }
@@ -154,9 +161,9 @@ export default function StylePanel(props) {
      */
     function toggleWarnPopup(warnPopupId: string, duration = 100): void {
 
-        log(duration)
         const warnPopup = $("#" + warnPopupId);
         warnPopup.fadeToggle(duration);
+        warnPopup.css("display", "flex");
 
         const popupOverlay = warnPopup.parents(".Popup").children(".popupOverlay");
         popupOverlay.fadeToggle(duration);
@@ -344,8 +351,6 @@ export default function StylePanel(props) {
                                    >
                     <Button id={"OrientationConfig"}
                             className="mr-3"
-                            
-                            
                             boxStyle={{
                                 backgroundColor: boxBackgroundColor,
                                 border: boxBorder,
@@ -353,10 +358,9 @@ export default function StylePanel(props) {
                             }}
                             hoverBackgroundColor={hoverBackgroundColor}
                             clickBackgroundColor={checkedBackgroundColor}
-
                             disabled={disabled}
                             title={"Ausrichtung"}
-                            handleClick={handleOrientationConfig}
+                            handleClick={handleOrientationConfigClick}
                             >
                         <div className={id + "IconContainer"}>
                             <img className={id + "Icon"} src="portraitSheet.png" alt="portrait mode"/>
@@ -366,7 +370,6 @@ export default function StylePanel(props) {
                     </Button>
 
                     <Button id={"ColumnConfig"}
-
                             boxStyle={{
                                 backgroundColor: boxBackgroundColor,
                                 border: boxBorder,
@@ -378,10 +381,9 @@ export default function StylePanel(props) {
                             }}
                             hoverBackgroundColor={hoverBackgroundColor}
                             clickBackgroundColor={checkedBackgroundColor}
-
                             disabled={disabled}
                             title={"Spalten"}
-                            handleClick={handleColumnConfig}
+                            handleClick={handleColumnConfigClick}
                             >
                         <div className={id + "IconContainer"}>
                             <img className={id + "Icon"} src="columnIcon.png" alt="column icon" style={{opacity: 0.7}}/>
