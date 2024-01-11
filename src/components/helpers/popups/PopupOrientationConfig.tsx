@@ -16,16 +16,21 @@ import { DocumentContext } from "../../document/Document";
  * 
  * @since 0.0.5
  */
-export default function PopupOrientationConfig(props) {
+export default function PopupOrientationConfig(props: {
+    id?: string,
+    className?: string,
+    children?,
+    toggleWarnPopup: (warnPopupId: string, duration?: number) => void
+}) {
 
-    const className = props.className ? "PopupOrientationConfig " + props.className : "PopupOrientationConfig";
-    const id = props.id ? "PopupOrientationConfig " + props.id : "PopupOrientationConfig";
-    const warnPopupId = id + "Warning";
+    const className = "PopupOrientationConfig " + (props.className || "PopupOrientationConfig");
+    const id = "PopupOrientationConfig " + (props.id || "PopupOrientationConfig");
+    const warnPopupId = "OrientationConfigWarning";
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
 
-    const [orientation, setOrientation] = useState(appContext.orientation);
+    const [orientation, setOrientation] = useState(documentContext.orientation);
 
 
     function handleSelectOrientation(orientation: Orientation): void {
@@ -36,26 +41,24 @@ export default function PopupOrientationConfig(props) {
 
     function handleSubmit(event): void {
 
-        appContext.setOrientation(orientation);
+        documentContext.setOrientation(orientation);
 
-        appContext.setPages([]);
-        setTimeout(() => appContext.setPages(appContext.initPages()), 1);
+        documentContext.setPages([]);
+        setTimeout(() => documentContext.setPages(documentContext.initPages()), 1);
 
         documentContext.hidePopup();
     }
 
 
-    function toggleWarnPopup(): void {
+    function toggleWarnPopup(duration = 100): void {
 
         // case: selected same orientation
-        if (orientation === appContext.orientation) {
-            documentContext.hidePopup();
+        if (orientation === documentContext.orientation) {
+            documentContext.hidePopup(duration);
             return;
         }
 
-        $("#" + warnPopupId + "Popup").fadeToggle(100);
-        // documentContext.togglePopupOverlay();
-        // TODO
+        props.toggleWarnPopup("Popup" + warnPopupId, duration);
     }
 
 
@@ -114,7 +117,7 @@ export default function PopupOrientationConfig(props) {
 
                 <Popup id={warnPopupId} className="warnPopup" height="small" width="medium" style={{display: "none"}}>
                     <PopupWarnConfirm handleConfirm={handleSubmit} 
-                                        handleDecline={() => documentContext.hidePopup()}
+                                        handleDecline={toggleWarnPopup}
                                         hideThis={toggleWarnPopup}
                                         >
                         <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
@@ -126,12 +129,10 @@ export default function PopupOrientationConfig(props) {
             <div className="popupFooter flexRight" >
                 <Button id={id + "Submit"} 
                         className="blackButton blackButtonContained"
-
                         childrenStyle={{padding: "5px 10px"}}
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
-                        
-                        handleClick={toggleWarnPopup}
+                        handleClick={(event) => toggleWarnPopup()}
                         >
                     Anwenden
                 </Button>

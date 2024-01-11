@@ -171,7 +171,7 @@ export default function Button(props: {
         // animate in three steps
         overlay.animate({opacity: 0.3}, 100, "swing",
             () => overlay.animate({width: "toggle"}, 100, "swing", 
-                () => overlay.fadeOut(200, "swing")));
+                () => overlay.animate({opacity: 0}, 100, "swing")));
     }
 
     

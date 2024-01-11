@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "../../../assets/styles/Popup.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log, togglePopupOverlay } from "../../../utils/basicUtils";
+import { log } from "../../../utils/basicUtils";
 
 
 /**
@@ -11,7 +11,7 @@ import { log, togglePopupOverlay } from "../../../utils/basicUtils";
  * @since 0.0.5
  */
 // TODO: flashes weirdly on toggle
-export default function Popup(props: {
+export default forwardRef(function Popup(props: {
     id: string,
     className?: string,
     children?,
@@ -19,13 +19,14 @@ export default function Popup(props: {
 
     height: "small" | "medium" | "large" | "full",
     width: "small" | "medium" | "large" | "full",
-}) {
+    handleOverlayClick?: () => void
+}, ref) {
 
-
+    const id = "Popup" + props.id;
     const [className, setClassName] = useState("Popup");
-    const id = props.id + "Popup";
-    const overlayId = props.id + "PopupOverlay";
-    const childrenId = props.id + "PopupChildren";
+    
+    const overlayRef = useRef(null);
+    const childrenRef = useRef(null);
 
 
     useEffect(() => {
@@ -51,18 +52,11 @@ export default function Popup(props: {
     }
 
 
-    function handleOverlayClick(event): void {
-
-        togglePopupOverlay();
-        $("#" + id + " .Popup").fadeOut(100);
-    }
-
-
     return (
-        <div id={id} className={className} style={props.style}>
-            <div id={overlayId} className={"popupOverlay"} onClick={handleOverlayClick}></div>
+        <div id={id} className={className} style={props.style} ref={ref}>
+            <div className={"popupOverlay"} ref={overlayRef} onClick={props.handleOverlayClick}></div>
 
-            <div id={childrenId} className={"popupChildren"}>{props.children}</div>
+            <div className={"popupChildren"} ref={childrenRef}>{props.children}</div>
         </div>
     )
-}
+});

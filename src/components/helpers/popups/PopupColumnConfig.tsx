@@ -4,10 +4,11 @@ import { AppContext } from "../../App";
 import { Orientation } from "../../../enums/Orientation";
 import RadioButton from "../../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hideGlobalPopup, log, togglePopupOverlay } from "../../../utils/basicUtils";
+import { log} from "../../../utils/basicUtils";
 import Button from "../Button";
 import Popup from "./Popup";
 import PopupWarnConfirm from "./PopupWarnConfirm";
+import { DocumentContext } from "../../document/Document";
 
 
 /**
@@ -15,26 +16,32 @@ import PopupWarnConfirm from "./PopupWarnConfirm";
  * 
  * @since 0.0.5
  */
-export default function PopupColumnConfig(props) {
+export default function PopupColumnConfig(props: {
+    id?: string,
+    className?: string,
+    children?,
+    toggleWarnPopup: (warnPopupId: string, duration?: number) => void
+}) {
 
-    const className = props.className ? "PopupColumnConfig " + props.className : "PopupColumnConfig";
-    const id = props.id ? "PopupColumnConfig " + props.id : "PopupColumnConfig";
-    const warnPopupId = id + "Warn";
+    const className = "PopupColumnConfig " + (props.className || "");
+    const id = "PopupColumnConfig " + (props.id || "");
+    const warnPopupId = "ColumnConfigWarning";
 
     const appContext = useContext(AppContext);
+    const documentContext = useContext(DocumentContext);
 
     const [orientationClassName, setOrientationClassName] = useState("whiteButtonPortrait");
-    const [selectedNumColumns, setSelectedNumColumns] = useState(appContext.numColumns)
+    const [selectedNumColumns, setSelectedNumColumns] = useState(documentContext.numColumns)
 
 
     useEffect(() => {
-        if (appContext.orientation === Orientation.PORTRAIT.toString())
+        if (documentContext.orientation === Orientation.PORTRAIT.toString())
             setOrientationClassName("whiteButtonPortrait")
         
         else    
             setOrientationClassName("whiteButtonLandscape");
 
-    }, [appContext.orientation])
+    }, [documentContext.orientation])
 
 
     function handleSelectNumColumns(numColumns: number): void {
@@ -46,27 +53,26 @@ export default function PopupColumnConfig(props) {
     function handleSubmit(event): void {
 
         // update column state
-        appContext.setNumColumns(selectedNumColumns);
+        documentContext.setNumColumns(selectedNumColumns);
 
         // update pages state
-        appContext.setPages([]);
+        documentContext.setPages([]);
         setTimeout(() => 
-            appContext.setPages(appContext.initPages()), 1);
+            documentContext.setPages(documentContext.initPages()), 1);
 
-        hideGlobalPopup(appContext.setPopupContent);
+        documentContext.hidePopup();
     }
 
 
-    function toggleWarnPopup(): void {
+    function toggleWarnPopup(duration = 100): void {
 
         // case: selected same number
-        if (selectedNumColumns === appContext.numColumns) {
-            hideGlobalPopup(appContext.setPopupContent)
+        if (selectedNumColumns === documentContext.numColumns) {
+            documentContext.hidePopup()
             return;
         }
 
-        $("#" + warnPopupId + "Popup").fadeToggle(100);
-        togglePopupOverlay();
+        props.toggleWarnPopup("Popup" + warnPopupId, duration);
     }
 
 
@@ -161,7 +167,7 @@ export default function PopupColumnConfig(props) {
 
                 <Popup id={warnPopupId} className="warnPopup" height="small" width="medium" style={{display: "none"}}>
                     <PopupWarnConfirm handleConfirm={handleSubmit} 
-                                      handleDecline={() => hideGlobalPopup(appContext.setPopupContent)}
+                                      handleDecline={toggleWarnPopup}
                                       hideThis={toggleWarnPopup}
                                       >
                         <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
@@ -172,10 +178,8 @@ export default function PopupColumnConfig(props) {
 
             <div className="popupFooter flexRight">
                 <Button id={id + "Submit"} 
-                        handleClick={toggleWarnPopup}
-                        
+                        handleClick={(event) => toggleWarnPopup()}
                         className="blackButton blackButtonContained"
-
                         childrenStyle={{padding: "5px 10px"}}
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"

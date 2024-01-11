@@ -8,6 +8,7 @@ import { DocumentContext } from "./Document";
 import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, SINGLE_TAB_UNICODE_ESCAPED, TAB_UNICODE_ESCAPED } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
+import { getNextTextInput, getPrevTextInput, isTextInputIdValid } from "../../utils/documentUtils";
 
 
 // IDEA: 
@@ -50,7 +51,7 @@ export default function TextInput(props: {
 
         // focus first text input of document or singleColumnLine
         if (id === getDocumentId("TextInput", 0, "", 0, 0, 0) || props.isSingleColumnLine)
-            appContext.focusTextInput(id);
+            documentContext.focusTextInput(id);
 
     }, []);
 
@@ -69,29 +70,29 @@ export default function TextInput(props: {
 
 
     useEffect(() => {
-        if (id !== appContext.selectedTextInputId) 
-            appContext.unFocusTextInput(id);
+        if (id !== documentContext.selectedTextInputId) 
+            documentContext.unFocusTextInput(id);
         
-    }, [appContext.selectedTextInputId]);
+    }, [documentContext.selectedTextInputId]);
 
 
     useEffect(() => {
-        if (id === appContext.selectedTextInputId) 
-            appContext.focusTextInput(id, false);
+        if (id === documentContext.selectedTextInputId) 
+            documentContext.focusTextInput(id, false);
 
-    }, [appContext.selectedTextInputStyle]);
+    }, [documentContext.selectedTextInputStyle]);
 
 
     useEffect(() => {
-        if (id === appContext.selectedTextInputId)
+        if (id === documentContext.selectedTextInputId)
             handleFontSizeChange();
 
-    }, [appContext.selectedTextInputStyle.fontSize]);
+    }, [documentContext.selectedTextInputStyle.fontSize]);
 
 
     function handleFontSizeChange(): void {
 
-        appContext.focusTextInput(id, false);
+        documentContext.focusTextInput(id, false);
             
         const numLinesToAdd = documentContext.getNumLinesOverhead();
 
@@ -112,7 +113,7 @@ export default function TextInput(props: {
         let typedChar = event.key === "Tab" ? getTabSpaces() : event.key;
 
         // case: text too long when including typed char
-        if (isTextLongerThanInput(appContext.selectedTextInputId, documentContext.getTextInputOverhead(), typedChar) && 
+        if (isTextLongerThanInput(documentContext.selectedTextInputId, documentContext.getTextInputOverhead(), typedChar) && 
             isKeyAlphaNumeric(event.keyCode) && 
             appContext.pressedKey !== "Control")
             handleTextLongerThanLine(event);
@@ -143,8 +144,8 @@ export default function TextInput(props: {
     function handleMouseDown(event): void {
 
         // case: selected new text input
-        if (appContext.selectedTextInputId !== id) 
-            appContext.focusTextInput(id);
+        if (documentContext.selectedTextInputId !== id) 
+            documentContext.focusTextInput(id);
     }
 
 
@@ -303,10 +304,10 @@ export default function TextInput(props: {
         
         const lastTextInputInColumn = documentContext.getLastTextInputOfColumn(id);
         const thisTextInput = $(inputRef.current);
-        const nextTextInput = documentContext.getNextTextInput(id);
+        const nextTextInput = getNextTextInput(id);
 
         const isNotLastTextInputInColumn = lastTextInputInColumn.prop("id") !== id;
-        const isNextTextInputBlank = isBlank(nextTextInput.prop("value"));
+        const isNextTextInputBlank = !nextTextInput || isBlank(nextTextInput.prop("value"));
         const hasTextWhiteSpace = thisTextInput.prop("value").includes(" ");
 
         // case: can shift text to next line
@@ -345,7 +346,7 @@ export default function TextInput(props: {
 
         const textInputs: JQuery[] = [];
         
-        for (let i = 0; i < appContext.numColumns; i++) {
+        for (let i = 0; i < documentContext.numColumns; i++) {
             // only works because there's one text input per paragraph
             const textInputId = getDocumentId("TextInput", props.pageIndex, "", i, props.paragraphIndex, props.textInputIndex);
             
@@ -390,7 +391,7 @@ export default function TextInput(props: {
     function checkIsSingleColumnLineCandidate(): boolean {
 
         // case: no singleColumnLines possible
-        if (appContext.numColumns <= 1)
+        if (documentContext.numColumns <= 1)
             return false;
 
         // case: not on first page
@@ -400,7 +401,7 @@ export default function TextInput(props: {
         const isNoSingleColumnLine = !props.isSingleColumnLine;
         let prevTextInputIsSingleColumnLine = false;
 
-        const prevTextInput = documentContext.getPrevTextInput(id, false);
+        const prevTextInput = getPrevTextInput(id);
 
         // case: prev text input is singleColumnLine
         if (prevTextInput && prevTextInput.length)
@@ -424,7 +425,7 @@ export default function TextInput(props: {
 
     function isLeftColumn(textInputId = id): boolean {
 
-        appContext.isTextInputIdValid(textInputId);
+        isTextInputIdValid(textInputId);
 
         const columnIndex = stringToNumber(getPartFromDocumentId(textInputId, 2));
 
@@ -434,21 +435,21 @@ export default function TextInput(props: {
 
     function isMiddleColumn(textInputId = id): boolean {
 
-        appContext.isTextInputIdValid(textInputId);
+        isTextInputIdValid(textInputId);
 
         const columnIndex = stringToNumber(getPartFromDocumentId(textInputId, 2));
 
-        return columnIndex >= 1 && appContext.numColumns >= 3;
+        return columnIndex >= 1 && documentContext.numColumns >= 3;
     }
 
 
     function isRightColumn(textInputId = id): boolean {
 
-        appContext.isTextInputIdValid(textInputId);
+        isTextInputIdValid(textInputId);
 
         const columnIndex = stringToNumber(getPartFromDocumentId(textInputId, 2));
 
-        return columnIndex === appContext.numColumns - 1;
+        return columnIndex === documentContext.numColumns - 1;
     }
 
 
@@ -459,7 +460,7 @@ export default function TextInput(props: {
     function moveLastWordToNextTextInput(): void {
 
         const thisTextInput = $(inputRef.current);
-        const nextTextInput = documentContext.getNextTextInput(id);
+        const nextTextInput = getNextTextInput(id);
 
         // case: no next text input
         if (!nextTextInput)
@@ -490,7 +491,7 @@ export default function TextInput(props: {
      */
     function focusNextTextInput(copyStyles: boolean, stylePropsToOverride: [StyleProp, string | number][] = []): void {
 
-        const nextTextInput = documentContext.getNextTextInput(id);
+        const nextTextInput = getNextTextInput(id);
         
         // case: end of document
         if (!nextTextInput)
@@ -510,25 +511,25 @@ export default function TextInput(props: {
                     // override fontSize with nextTextInputFontSize (keep nextTextInputFontSize)
                     stylePropsToOverride?.push(["fontSize", getCSSValueAsNumber(nextTextInputFontSize, 2)]);
             
-            appContext.focusTextInput(nextTextInput.prop("id"), false);
-            appContext.setSelectedTextInputStyle(getTextInputStyle($("#" + id)), stylePropsToOverride);
+            documentContext.focusTextInput(nextTextInput.prop("id"), false);
+            documentContext.setSelectedTextInputStyle(getTextInputStyle($("#" + id)), stylePropsToOverride);
 
         // case: next text input not blank
         } else 
-            appContext.focusTextInput(nextTextInput.prop("id"), true);
+            documentContext.focusTextInput(nextTextInput.prop("id"), true);
     }
 
 
     function focusPrevTextInput(event): void {
 
-        const prevTextInput = documentContext.getPrevTextInput(id);
+        const prevTextInput = getPrevTextInput(id);
 
         // case: has no prev text input
         if (!prevTextInput) 
             return;
 
         event.preventDefault();
-        appContext.focusTextInput(prevTextInput.prop("id"), true);
+        documentContext.focusTextInput(prevTextInput.prop("id"), true);
 
         // move cursor to end of text
         const lastCharIndex = prevTextInput.prop("value").length;

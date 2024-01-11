@@ -3,7 +3,7 @@ import "../../assets/styles/Page.css";
 import Column from "./Column";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, getRandomString, hideGlobalPopup, includesIgnoreCase, log, logWarn } from "../../utils/basicUtils";
+import { getDocumentId, getPartFromDocumentId, getRandomString, includesIgnoreCase, log, logWarn } from "../../utils/basicUtils";
 import { MAX_NUM_COLUMNS, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
 import { DocumentContext } from "./Document";
 import Paragraph from "./Paragraph";
@@ -24,7 +24,7 @@ export default function Page(props: {
 
     const [columns, setColumns] = useState(initColumns());
     const [linesAsSingleColumn, setLinesAsSingleColumn] = useState<React.JSX.Element[]>([]);
-    const [orientationClassName, setOrientationClassName] = useState(appContext.orientation === "portrait" ? "pagePortrait" : "pageLandscape");
+    const [orientationClassName, setOrientationClassName] = useState(documentContext.orientation === "portrait" ? "pagePortrait" : "pageLandscape");
 
     const context = {
         connectColumnLines,
@@ -35,12 +35,12 @@ export default function Page(props: {
     function initColumns(): React.JSX.Element[] {
 
         // case: invalid num columns
-        if (appContext.numColumns > MAX_NUM_COLUMNS || appContext.numColumns < 1)
+        if (documentContext.numColumns > MAX_NUM_COLUMNS || documentContext.numColumns < 1)
             return [<Column key={0} pageIndex={props.pageIndex} columnIndex={0}/>];
 
         const columns: React.JSX.Element[] = [];
 
-        for (let i = 0; i < appContext.numColumns; i++) 
+        for (let i = 0; i < documentContext.numColumns; i++) 
             columns.push(<Column key={i} pageIndex={props.pageIndex} columnIndex={i}/>);
 
         return columns;
@@ -50,7 +50,7 @@ export default function Page(props: {
     function connectColumnLines(lineIndex: number): void {
 
         // case: no columns to connect
-        if (appContext.numColumns === 1 && props.pageIndex !== 0)
+        if (documentContext.numColumns === 1 && props.pageIndex !== 0)
             return;
 
         // hide column text inputs 
@@ -58,7 +58,7 @@ export default function Page(props: {
         textInputsToBeConnected.forEach((textInput, i) => 
             disableTextInput(textInput, i, lineIndex));
         
-        appContext.setNumLinesAsSingleColumn(appContext.numLinesAsSingleColumn + 1);
+        documentContext.setNumLinesAsSingleColumn(documentContext.numLinesAsSingleColumn + 1);
 
         // add singleColumnLine
         setLinesAsSingleColumn([...linesAsSingleColumn, createSingleColumnLine(lineIndex)]);
@@ -70,14 +70,14 @@ export default function Page(props: {
     function disconnectColumnLine(lineIndex: number): void {
 
         // case: no columns to connect
-        if (appContext.numColumns === 1 && props.pageIndex !== 0)
+        if (documentContext.numColumns === 1 && props.pageIndex !== 0)
             return;
 
-        for (let i = 0; i < appContext.numColumns; i++)
+        for (let i = 0; i < documentContext.numColumns; i++)
             // only works because there's one text input per paragraph
             enableTextInput(i, lineIndex, 0);
 
-        appContext.setNumLinesAsSingleColumn(appContext.numLinesAsSingleColumn - 1);
+        documentContext.setNumLinesAsSingleColumn(documentContext.numLinesAsSingleColumn - 1);
 
         // remove last singleColumn line
         linesAsSingleColumn.pop();
@@ -183,7 +183,7 @@ export default function Page(props: {
 
         const textInputsToBeConnected: JQuery[] = [];
 
-        for (let i = 0; i < appContext.numColumns; i++) {
+        for (let i = 0; i < documentContext.numColumns; i++) {
             const textInput = $("#" + getDocumentId("TextInput", props.pageIndex, "", i, paragraphIndex, textInputIndex));
             if (textInput.length)
                 textInputsToBeConnected.push(textInput);

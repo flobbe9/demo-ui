@@ -6,6 +6,8 @@ import { AppContext } from "./App";
 import { confirmPageUnload, isBlank, log, removeConfirmPageUnloadEvent } from "../utils/basicUtils";
 import Button from "./helpers/Button";
 import { API_ENV } from "../globalVariables";
+import { DocumentContext } from "./document/Document";
+import { adjustDocumentFileName } from "../utils/documentUtils";
 
 
 // TODO: add print button
@@ -26,13 +28,14 @@ export default function ControlPanel(props: {
     const [disabled, setDisabled] = useState(true);    
     
     const appContext = useContext(AppContext);
+    const documentContext = useContext(DocumentContext);
 
 
     useEffect(() => {
-        if (disabled && !isBlank(appContext.selectedTextInputId))
+        if (disabled && !isBlank(documentContext.selectedTextInputId))
             setDisabled(false);
         
-    }, [appContext.selectedTextInputId]);
+    }, [documentContext.selectedTextInputId]);
 
 
     async function buildAndDownloadDocument(): Promise<void> {
@@ -41,7 +44,7 @@ export default function ControlPanel(props: {
         removeConfirmPageUnloadEvent();
 
         // build
-        const buildResponse = await buildDocument(appContext.orientation, appContext.numColumns, appContext.documentFileName, appContext.numLinesAsSingleColumn);
+        const buildResponse = await buildDocument(documentContext.orientation, documentContext.numColumns, documentContext.documentFileName, documentContext.numLinesAsSingleColumn);
 
         // download
         if (buildResponse.status === 200)
@@ -61,9 +64,9 @@ export default function ControlPanel(props: {
         if (!input || !(inputValue = input.prop("value")))  
             return;
 
-        inputValue = appContext.adjustDocumentFileName(inputValue);
+        inputValue = adjustDocumentFileName(inputValue);
 
-        appContext.setDocumentFileName(inputValue);
+        documentContext.setDocumentFileName(inputValue);
     }
 
 
@@ -77,7 +80,7 @@ export default function ControlPanel(props: {
                     className={"fileNameInput"} 
                     ref={fileNameInputRef}
                     type="text" 
-                    defaultValue={appContext.documentFileName}
+                    defaultValue={documentContext.documentFileName}
                     onKeyUp={handleFileNameKeyUp}
                     />
             </div>  

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef} from "react";
 import "../../../assets/styles/PopupContainer.css";
 
 
@@ -7,20 +7,20 @@ import "../../../assets/styles/PopupContainer.css";
  * 
  * @since 0.0.5
  */
-export default function PopupContainer(props: {
+export default forwardRef(function PopupContainer(props: {
     id: string,
     className?: string,
     children?,
     onClick?
-}) {
+}, ref) {
 
     const id = "PopupContainer" + props.id;
     const className = "PopupContainer " + (props.className || "");
 
 
     return (
-        <div id={id} className={className + " flexCenter"} onClick={props.onClick}>
+        <div id={id} className={className + " hidden flexCenter"} ref={ref} onClick={props.onClick}>
             {props.children}
         </div>
     )
-}
+});

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import "../../assets/styles/Column.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getDocumentId, getRandomString, isBlank, log, toggleGlobalPopup } from "../../utils/basicUtils";
+import { getCSSValueAsNumber, getDocumentId, getRandomString, isBlank, log } from "../../utils/basicUtils";
 import Paragraph from "./Paragraph";
 import { AppContext } from "../App";
 import { DocumentContext } from "./Document";
@@ -47,7 +47,7 @@ export default function Column(props: {
     function initParagraphs(): React.JSX.Element[] {
 
         const paragraphs: React.JSX.Element[] = [];
-        const numParagraphs = getInitialNumParagraphs(appContext.orientation);
+        const numParagraphs = getInitialNumParagraphs(documentContext.orientation);
 
         for (let i = 0; i < numParagraphs; i++) 
             paragraphs.push(<Paragraph key={getRandomString()}
@@ -61,13 +61,13 @@ export default function Column(props: {
 
     function addSpaceBetweenColumns(): void {
 
-        if (appContext.numColumns > 1) {
+        if (documentContext.numColumns > 1) {
             // case: is first column
             if (props.columnIndex === 0)
                 $(componentRef.current).addClass("halfSpaceRightBetweenColumns")
 
             // case: is last column
-            else if (props.columnIndex === appContext.numColumns - 1)
+            else if (props.columnIndex === documentContext.numColumns - 1)
                 $(componentRef.current).addClass("halfSpaceLeftBetweenColumns")
             
             // case: is middle column

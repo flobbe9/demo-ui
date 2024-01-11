@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from "react"; 
 import "../../../assets/styles/PopupWarnConfirm.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { hideGlobalPopup, isBooleanFalsy, log, togglePopupOverlay } from "../../../utils/basicUtils";
+import { isBooleanFalsy, log, } from "../../../utils/basicUtils";
 import Button from "../Button";
 import WarnIcon from "../WarnIcon";
 
@@ -11,6 +11,7 @@ import WarnIcon from "../WarnIcon";
  * 
  * @since 0.0.5
  */
+// TODO: continue here: why does warn popup not render smoothly but orientation popup does?
 export default function PopupWarnConfirm(props: {
     id?: string,
     hideThis: () => void,
@@ -23,9 +24,9 @@ export default function PopupWarnConfirm(props: {
     dontConfirm?: boolean,
 }) {
 
-    const className = props.className ? "PopupWarnConfirm " + props.className : "PopupWarnConfirm";
+    const id = "PopupWarnConfirm" + (props.id || "");
+    const className = "PopupWarnConfirm " + (props.className || "PopupWarnConfirm");
     const childrenClassName = props.childrenClassName || "";
-    const id = props.id ? "PopupWarnConfirm " + props.id : "PopupWarnConfirm";
 
     const [dontConfirm, setDontConfirm] = useState(isBooleanFalsy(props.dontConfirm) ? false : props.dontConfirm);
 

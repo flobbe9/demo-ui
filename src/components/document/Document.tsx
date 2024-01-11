@@ -1,17 +1,20 @@
 import React, { useContext, useEffect, useState, createContext, useRef } from "react";
 import "../../assets/styles/Document.css";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { confirmPageUnload, flashClass, getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getPartFromDocumentId, getRandomString, getTabSpaces, insertString, isBlank, isTextLongerThanInput, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
-import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE_ESCAPED } from "../../globalVariables";
+import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE_ESCAPED, NUM_PAGES } from "../../globalVariables";
 import ControlPanel from "../ControlPanel";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
 import Popup from "../helpers/popups/Popup";
 import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
 import Button from "../helpers/Button";
-import { getJQueryElementById } from "../../utils/documentUtils";
+import { getColumnIdByDocumentId, getJQueryElementById, getPageIdByDocumentId, isTextInputIdValid } from "../../utils/documentUtils";
 import PopupContainer from "../helpers/popups/PopupContainer";
+import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
+import Page from "./Page";
 
 
 // TODO: add some kind of "back" button
@@ -19,7 +22,6 @@ import PopupContainer from "../helpers/popups/PopupContainer";
 // TODO: fix console errors
 
 // TODO: reduce jquery calls
-    // replace ids with refs if possible
     // somehow cache elements (especially collections) or save them as variables somewhere
 export default function Document(props) {
 
@@ -33,6 +35,15 @@ export default function Document(props) {
 
     const [textInputBorderFlashing, setTextInputBorderFlashing] = useState(false);
 
+    const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
+    const [selectedTextInputId, setSelectedTextInputId] = useState("");
+    const [selectedTextInputStyle, setSelectedTextInputStyleState] = useState(getDefaultStyle());
+
+    const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
+    const [numColumns, setNumColumns] = useState(1);
+    const [numLinesAsSingleColumn, setNumLinesAsSingleColumn] = useState(0);
+    const [documentFileName, setDocumentFileName] = useState("Dokument_1.docx");
+
     /** <Paragraph /> component listens to changes of these states and attempts to append or remove a <TextInput /> at the end */
     const [paragraphIdAppendTextInput, setParagraphIdAppendTextInput] = useState<[string[], number]>(); // [paragraphIds, numTextInputsToAppend]
     const [paragraphIdRemoveTextInput, setParagraphIdRemoveTextInput] = useState<[string[], number]>(); // [paragraphIds, numTextInputsToRemove]
@@ -45,15 +56,13 @@ export default function Document(props) {
     const documentOverlayRef = useRef(null);
 
     const context = {
+        isTextInputHeading,
         refreshSingleColumnLines, 
         setRefreshSingleColumnLines,
 
         handleTab,
         handleTextLongerThanLine,
         getTextInputOverhead,
-        getNextTextInput,
-        getPrevTextInput,
-        getColumnTextInputs,
         
         isFontSizeTooLarge,
         handleFontSizeTooLarge,
@@ -67,15 +76,32 @@ export default function Document(props) {
         getParagraphIdByDocumentId,
         getParagraphIdsForFontSizeChange,
 
-        checkIsColumnEmptyById,
+        getColumnTextInputs,
         getColumnFontSizesSum,
         getLastTextInputOfColumn,
-
-        isTextInputHeading,
+        checkIsColumnEmptyById,
 
         togglePopup,
         hidePopup,
-        setPopupContent
+        setPopupContent,
+
+        focusTextInput,
+        unFocusTextInput,
+
+        setSelectedTextInputStyle,
+        setPages,
+        initPages,
+        orientation,
+        setOrientation,
+        numColumns,
+        setNumColumns,
+        numLinesAsSingleColumn, 
+        setNumLinesAsSingleColumn,
+        selectedTextInputId,
+        setSelectedTextInputId,
+        selectedTextInputStyle,
+        documentFileName,
+        setDocumentFileName,
     };
 
 
@@ -84,7 +110,6 @@ export default function Document(props) {
             confirmPageUnload();
 
         appContext.hidePopup();
-        hidePopup();
         
         window.addEventListener('scroll', handleScroll);
 
@@ -93,6 +118,7 @@ export default function Document(props) {
 
         if (appContext.isWindowWidthTooSmall())
             handleWindowTooSmall();
+
     }, []);
 
 
@@ -107,29 +133,76 @@ export default function Document(props) {
 
 
     /**
-     * @returns true if no chars are found in any text input of selected column, else false (Tabs and spaces don't count as chars here)
+     * @param style to update selectedTextInputStyle with
+     * @param stylePropsToOverride style props to override in ```style``` param
      */
-    function checkIsColumnEmptyById(columnId: string): boolean {
+    function setSelectedTextInputStyle(style: Style, stylePropsToOverride?: [StyleProp, string | number][]): void {
 
-        if (isBlank(columnId))
-            return true;
+        // set specific props
+        if (stylePropsToOverride) 
+            stylePropsToOverride.forEach(([styleProp, value]) => style[styleProp.toString()] = value);
+        
+        setSelectedTextInputStyleState(style);
+    }
 
-        const columnTextInputs = getColumnTextInputs(columnId);
-        if (!columnTextInputs) 
-            return false;
 
-        let isEmpty = true;
+    /**
+     * @param textInputId id of valid ```<TextInput />``` to focus
+     * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` state will be updated with focused text input style
+     * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` will be applied to text input with ```selectedTextInputId```
+     * @param stylePropsToOverride list of style properties to override when copying styles 
+     */
+    function focusTextInput(textInputId: string, 
+                            updateSelectedTextInputStyle = true, 
+                            applySelectedTextInputStyle = true,
+                            stylePropsToOverride?: [StyleProp, string | number][]): void {
 
-        Array.from(columnTextInputs).forEach(textInputElement => {
-            const textInput = textInputElement as HTMLInputElement;
+        if (!isTextInputIdValid(textInputId))
+            return;
 
-            if (!isBlank(textInput.value)) {
-                isEmpty = false;
-                return;
-            }
-        });
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
+            return;
 
-        return isEmpty;
+        textInput.addClass("textInputFocus");
+
+        // id state
+        setSelectedTextInputId(textInputId);
+
+        // style state
+        if (updateSelectedTextInputStyle) 
+            setSelectedTextInputStyle(getTextInputStyle(textInput), stylePropsToOverride);
+
+        // style text input
+        if (applySelectedTextInputStyle)
+            applyTextInputStyle(textInputId, selectedTextInputStyle);
+
+        textInput.trigger("focus");
+    }
+
+
+    function unFocusTextInput(textInputId: string): void {
+
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
+            return;
+
+        textInput.removeClass("textInputFocus");
+    }
+        
+
+    function initPages(): React.JSX.Element[] {
+
+        const pages: React.JSX.Element[] = [];
+
+        for (let i = 0; i < NUM_PAGES; i++)
+            pages.push((
+                <div className="flexCenter" key={i}>
+                    <Page pageIndex={i} />
+                </div>
+            ));
+
+        return pages;
     }
 
 
@@ -141,19 +214,19 @@ export default function Document(props) {
         event.preventDefault();
 
         // case: text too long
-        if (isTextLongerThanInput(appContext.selectedTextInputId, getTextInputOverhead(), getTabSpaces())) {
-            handleTextLongerThanLine(appContext.selectedTextInputId);
+        if (isTextLongerThanInput(selectedTextInputId, getTextInputOverhead(), getTabSpaces())) {
+            handleTextLongerThanLine(selectedTextInputId);
             return;
         }
 
         // add tab after cursor
-        const selectedTextInput = $("#" + appContext.selectedTextInputId);
+        const selectedTextInput = $("#" + selectedTextInputId);
         const cursorIndex = selectedTextInput.prop("selectionStart");
         const newInputValue = insertString(selectedTextInput.prop("value"), TAB_UNICODE_ESCAPED, cursorIndex);
         selectedTextInput.prop("value", newInputValue);
 
         // move cursor to end of tab
-        moveCursor(appContext.selectedTextInputId, cursorIndex + 2, cursorIndex + 2);
+        moveCursor(selectedTextInputId, cursorIndex + 2, cursorIndex + 2);
     }
 
 
@@ -176,12 +249,17 @@ export default function Document(props) {
 
 
     /**
-     * @returns any space of selectedTextInput's width that cannot be occupied by the text input value (in px)
+     * @param textInputId id of the text input to check. Default is selectedTextInputId
+     * @returns any space of selectedTextInput element's width like padding etc. that cannot be occupied by the text input value (in px).
+     *          Return 0 if textInputId param is invalid
      */
-    function getTextInputOverhead(): number {
+    function getTextInputOverhead(textInputId = selectedTextInputId): number {
 
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
+            return 0;
+    
         // add up padding and border
-        const textInput = $("#" + appContext.selectedTextInputId);
         const paddingRight = getCSSValueAsNumber(textInput.css("paddingRight"), 2);
         const paddingLeft = getCSSValueAsNumber(textInput.css("paddingLeft"), 2);
         const borderRightWidth = getCSSValueAsNumber(textInput.css("borderRightWidth"), 2);
@@ -189,48 +267,29 @@ export default function Document(props) {
 
         return paddingRight + paddingLeft + borderRightWidth + borderLefttWidth;
     }
-
-
-    /**
-     * @param textInputId id of the current text input
-     * @returns JQuery of the next ```<TextInput>``` ```<input />``` tag or null if not found
-     */
-    function getNextTextInput(textInputId: string): JQuery | null {
-
-        const textInput = getJQueryElementById(textInputId);
-        if (!textInput)
-            return null;
-
-        const allTextInputs = $(".TextInput");
-        const index = allTextInputs.index(textInput);
-
-        // case: has no next text input
-        if (allTextInputs.length - 1 === index)
-            return null;
-
-        return $(allTextInputs.get(index + 1)!);
-    }
-
+    
 
     /**
-     * @param textInputId id of the current text input
-     * @param debug if true, some more warn messages will be logged in case of falsy varaibles
-     * @returns JQuery of the next ```<TextInput>``` ```<input />``` tag or null if not found
+     * @returns true if no chars are found in any text input of selected column, else false (Tabs and spaces don't count as chars here)
      */
-    function getPrevTextInput(textInputId: string, debug = true): JQuery | null {
+    function checkIsColumnEmptyById(documentId: string): boolean {
 
-        const textInput = getJQueryElementById(textInputId);
-        if (!textInput)
-            return null;
+        const columnTextInputs = getColumnTextInputs(documentId);
+        if (!columnTextInputs)
+            return false;
 
-        const allTextInputs = $(".TextInput");
-        const index = allTextInputs.index(textInput);
+        let isEmpty = true;
 
-        // case: has no prev text input
-        if (index === 0)
-            return null;
+        Array.from(columnTextInputs).forEach(textInputElement => {
+            const textInput = textInputElement as HTMLInputElement;
 
-        return $(allTextInputs.get(index - 1)!);
+            if (!isBlank(textInput.value)) {
+                isEmpty = false;
+                return;
+            }
+        });
+
+        return isEmpty;
     }
 
 
@@ -239,18 +298,21 @@ export default function Document(props) {
      * @returns jquery of all ```<TextInput />``` components inside given column or ```null``` if column was not found.
      *          Also include ```<TextInput />```components in page with className {@link SINGLE_COLUMN_LINE_CLASS_NAME}.
      */
-    function getColumnTextInputs(documentId = appContext.selectedTextInputId): JQuery | null {
+    function getColumnTextInputs(documentId = selectedTextInputId): JQuery | null {
 
         const docxElement = getJQueryElementById(documentId);
         if (!docxElement)
             return null;
         
         // get .TextInput
-        const columnId = appContext.getColumnIdByDocumentId(documentId);
+        const columnId = getColumnIdByDocumentId(documentId);
         let columnTextInputs = $("#" + columnId + " .TextInput");
         
         // get .SingleColumnLine
-        const pageId = appContext.getPageIdByTextInputId(documentId);
+        const pageId = getPageIdByDocumentId(documentId);
+        if (!pageId)
+            return null;
+
         const singleColumnLines = $("#" + pageId + " .TextInput." + SINGLE_COLUMN_LINE_CLASS_NAME);
         columnTextInputs = columnTextInputs.add(singleColumnLines);
 
@@ -262,13 +324,13 @@ export default function Document(props) {
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @returns jquery of all ```<TextInput />``` components inside given paragraph or ```null``` if paragraph was not found
      */
-    function getColumnParagraphs(documentId = appContext.selectedTextInputId): JQuery | null {
+    function getColumnParagraphs(documentId = selectedTextInputId): JQuery | null {
 
         const docxElement = getJQueryElementById(documentId);
         if (!docxElement)
             return null;
 
-        const columnId = appContext.getColumnIdByDocumentId(documentId);
+        const columnId = getColumnIdByDocumentId(documentId);
 
         return $("#" + columnId + " .Paragraph");
     }
@@ -280,7 +342,7 @@ export default function Document(props) {
      * 
      * @see getFontSizeDiffInWord
      */
-    function getColumnFontSizesSum(documentId = appContext.selectedTextInputId): number {
+    function getColumnFontSizesSum(documentId = selectedTextInputId): number {
 
         const columnTextInputs = getColumnTextInputs(documentId);
 
@@ -370,7 +432,7 @@ export default function Document(props) {
      * @returns false if the fontSize should not be changed, else true
      */
     // TODO: handle value too large
-    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = appContext.selectedTextInputId): boolean {
+    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId): boolean {
 
         const columnTextInputs = getColumnTextInputs(documentId);
         if (!columnTextInputs) {
@@ -390,7 +452,7 @@ export default function Document(props) {
                 areTextInputsBlank = false;
 
             // case: is focused
-            if (!areTextInputsToDeleteFocused && textInput.id === appContext.selectedTextInputId)
+            if (!areTextInputsToDeleteFocused && textInput.id === selectedTextInputId)
                 areTextInputsToDeleteFocused = true;
         });
 
@@ -403,7 +465,7 @@ export default function Document(props) {
         // case: last input not blank
         } else {
             if (flash)
-                flashClass(appContext.selectedTextInputId, "textInputFlash", "textInputFocus");
+                flashClass(selectedTextInputId, "textInputFlash", "textInputFocus");
 
             return false;
         }
@@ -417,7 +479,7 @@ export default function Document(props) {
      * @param textInputId to check
      * @returns true if ```<TextInput />``` has {@link SINGLE_COLUMN_LINE_CLASS_NAME}
      */
-    function isTextInputHeading(textInputId = appContext.selectedTextInputId): boolean {
+    function isTextInputHeading(textInputId = selectedTextInputId): boolean {
 
         if (isBlank(textInputId)) {
             logWarn("'isTextInputHeading()' failed. 'textInputId' is blank")
@@ -440,7 +502,7 @@ export default function Document(props) {
      * @param isSingleColumnLine true if text input component is heading
      * @returns array of paragraph ids that should be considered for font size change
      */
-    function getParagraphIdsForFontSizeChange(documentId = appContext.selectedTextInputId, paragraphIndex?: number, isSingleColumnLine = isTextInputHeading()): string[] {
+    function getParagraphIdsForFontSizeChange(documentId = selectedTextInputId, paragraphIndex?: number, isSingleColumnLine = isTextInputHeading()): string[] {
 
         const paragraphIds: string[] = [];
 
@@ -449,7 +511,7 @@ export default function Document(props) {
             const pageIndex = stringToNumber(getPartFromDocumentId(documentId, 1));
             
             // add lines to all columns
-            for (let i = 0; i < appContext.numColumns; i++)
+            for (let i = 0; i < numColumns; i++)
                 paragraphIds.push(getParagraphIdByDocumentId(getDocumentId("Column", pageIndex, "", i), paragraphIndex));
 
         // case: normal line
@@ -466,7 +528,7 @@ export default function Document(props) {
      * @returns a touple formatted like: ```[isFontSizeTooLarge, numLinesOverhead]``` where numLinesOverhead is the number
      *          of lines that should be removed to match the MAX_NUM_LINES.
      */
-    function isFontSizeTooLarge(documentId = appContext.selectedTextInputId, diff = 0): [boolean, number] {
+    function isFontSizeTooLarge(documentId = selectedTextInputId, diff = 0): [boolean, number] {
 
         const columnFontSizesSum = getColumnFontSizesSum(documentId);
         
@@ -475,7 +537,7 @@ export default function Document(props) {
 
         const numLinesOverhead = Math.abs(getNumLinesOverhead(documentId, diff, columnFontSizesSum));
 
-        const maxSum = appContext.orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
+        const maxSum = orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
 
         // case: adding numLinesOverhead would exceed max value
         if (columnFontSizesSum + numLinesOverhead > maxSum)
@@ -492,7 +554,7 @@ export default function Document(props) {
      * @returns number of lines with fontSize {@link DEFAULT_FONT_SIZE} by which the number of lines in the given ```<Column />``` differes from max num lines.
      *          Return -1 if no column is selected yet.
      */
-    function getNumLinesOverhead(documentId = appContext.selectedTextInputId, diff = 0, columnFontSizesSum?: number): number {
+    function getNumLinesOverhead(documentId = selectedTextInputId, diff = 0, columnFontSizesSum?: number): number {
 
         // case: no sum in param
         if (!columnFontSizesSum)
@@ -504,7 +566,7 @@ export default function Document(props) {
 
         columnFontSizesSum += diff;
         
-        const maxSum = appContext.orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
+        const maxSum = orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
         
         const totalDiff = maxSum - columnFontSizesSum;
 
@@ -517,7 +579,7 @@ export default function Document(props) {
      * @param paragraphIndex index of the paragraph inside the column, will be set to last paragraph in column if not present
      * @returns id of the paragraph found with given params. Contains -1 as paragraphIndex if paragraph wasn't found
      */
-    function getParagraphIdByDocumentId(documentId = appContext.selectedTextInputId, paragraphIndex?: number): string {
+    function getParagraphIdByDocumentId(documentId = selectedTextInputId, paragraphIndex?: number): string {
 
         // set default paragraph index to last paragraph in column
         if (!paragraphIndex) {
@@ -543,7 +605,7 @@ export default function Document(props) {
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @return index of last ```<Paragraph />``` with a ```<TextInput />``` in it in given ```<Column />``` or -1
      */
-    function getParagraphIndexOfLastTextInputInColumn(documentId = appContext.selectedTextInputId): number {
+    function getParagraphIndexOfLastTextInputInColumn(documentId = selectedTextInputId): number {
 
         const lastTextInputOfColumn = getLastTextInputOfColumn(documentId);
         if (!lastTextInputOfColumn)
@@ -588,10 +650,11 @@ export default function Document(props) {
 
     function handleWindowTooSmall(): void {
 
-        // warn about width
+        togglePopup(0);
+
         setPopupContent((
             <Popup id={id} height="medium" width="medium">
-                <PopupWarnConfirm hideThis={() => hidePopup()} dontConfirm={true}>
+                <PopupWarnConfirm hideThis={hidePopup} dontConfirm={true}>
                     <div className="textCenter">
                         Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
                         nicht identisch dargestellt werden.
@@ -602,7 +665,7 @@ export default function Document(props) {
                                 className="blackButton blackButtonContained"
                                 hoverBackgroundColor="rgb(100, 100, 100)"
                                 clickBackgroundColor="rgb(130, 130, 130)"
-                                handleClick={() => hidePopup()}
+                                handleClick={hidePopup}
                                 >
                             Alles klar
                         </Button>
@@ -610,16 +673,15 @@ export default function Document(props) {
                 </PopupWarnConfirm>
             </Popup>
         )); 
-
-        togglePopup();
     }
 
 
-    // TODO: replace all popup ups
     function togglePopup(duration = 100): void {
 
         const documentPopup = $(documentPopupRef.current);
         documentPopup.fadeToggle(duration);
+        documentPopup.css("display", "flex");
+
         $(documentOverlayRef.current).fadeToggle(duration);
 
         // case: is hidden now
@@ -630,7 +692,9 @@ export default function Document(props) {
 
     function hidePopup(duration = 100): void {
 
-        $(documentPopupRef.current).fadeOut(duration);
+        const documentPopup = $(documentPopupRef.current);
+        documentPopup.fadeOut(duration);
+
         $(documentOverlayRef.current).fadeOut(duration);
 
         resetDocumentPopup(duration);
@@ -652,8 +716,30 @@ export default function Document(props) {
             <DocumentContext.Provider value={context}>
                 <div className="documentOverlay hideDocumentPopup" ref={documentOverlayRef}></div>
 
-                <div className="flexCenter" ref={documentPopupRef}>
-                    <PopupContainer id={"Document"} className="hideDocumentPopup"></PopupContainer>
+                <div className="flexCenter">
+                    <PopupContainer id={"Document"} className="hideDocumentPopup" ref={documentPopupRef}>
+                        {popupContent}
+
+                        <Popup id={id} height="medium" width="medium" className="hidden">
+                            <PopupWarnConfirm hideThis={hidePopup} dontConfirm={true}>
+                                <div className="textCenter">
+                                    Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
+                                    nicht identisch dargestellt werden.
+                                </div>
+
+                                <div className="flexCenter mt-5">
+                                    <Button id={id + "Ok"}
+                                            className="blackButton blackButtonContained"
+                                            hoverBackgroundColor="rgb(100, 100, 100)"
+                                            clickBackgroundColor="rgb(130, 130, 130)"
+                                            handleClick={hidePopup}
+                                            >
+                                        Alles klar
+                                    </Button>
+                                </div>
+                            </PopupWarnConfirm>
+                        </Popup>
+                    </PopupContainer>
                 </div>
                 
                 <ControlPanel />
@@ -661,7 +747,7 @@ export default function Document(props) {
                 <StylePanel />
 
                 <div className="pageContainer">
-                    {appContext.pages}
+                    {pages}
                 </div>
             </DocumentContext.Provider>
         </div>

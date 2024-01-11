@@ -21,8 +21,8 @@ import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
 
 export default function StylePanel(props) {
 
-    const id = props.id ? "StylePanel" + props.id : "StylePanel";
-    const className = props.className ? "StylePanel " + props.className : "StylePanel";
+    const id = "StylePanel" + (props.id || "");
+    const className = "StylePanel " + (props.className || "");
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
@@ -42,20 +42,21 @@ export default function StylePanel(props) {
     useEffect(() => {
         if (appContext.isWindowWidthTooSmall()) 
             handleWindowWidthTooSmall();
+
     }, []);
 
 
     useEffect(() => {
-        if (disabled && !isBlank(appContext.selectedTextInputId))
+        if (disabled && !isBlank(documentContext.selectedTextInputId))
             setDisabled(false);
         
-    }, [appContext.selectedTextInputId]);
+    }, [documentContext.selectedTextInputId]);
 
     
     function handleFontFamilySelect(fontFamily: string): void {
 
-        appContext.selectedTextInputStyle.fontFamily = fontFamily;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.fontFamily = fontFamily;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
@@ -63,8 +64,8 @@ export default function StylePanel(props) {
 
         // TODO: calculation is inaccurate (off by two?)
         // case: max line space in column reached
-        const diff = getCSSValueAsNumber(fontSize, 2) - appContext.selectedTextInputStyle.fontSize;
-        const checkFontSize = documentContext.isFontSizeTooLarge(appContext.selectedTextInputId, diff);
+        const diff = getCSSValueAsNumber(fontSize, 2) - documentContext.selectedTextInputStyle.fontSize;
+        const checkFontSize = documentContext.isFontSizeTooLarge(documentContext.selectedTextInputId, diff);
         const isFontSizeTooLarge = checkFontSize[0];
         const deleteCount = checkFontSize[1];
 
@@ -74,43 +75,43 @@ export default function StylePanel(props) {
                 return;
         }
 
-        appContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleBoldSelect(bold: boolean): void {
 
-        appContext.selectedTextInputStyle.bold = bold;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.bold = bold;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleUnderlineSelect(underline: boolean): void {
         
-        appContext.selectedTextInputStyle.underline = underline;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.underline = underline;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleItalicSelect(italic: boolean): void {
         
-        appContext.selectedTextInputStyle.italic = italic;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.italic = italic;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleColorSelect(color: string): void {
         
-        appContext.selectedTextInputStyle.color = color;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.color = color;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleTextAlignSelect(textAlign: string): void {
 
-        appContext.selectedTextInputStyle.textAlign = textAlign;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.textAlign = textAlign;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
@@ -123,8 +124,8 @@ export default function StylePanel(props) {
     function handleColumnConfig(event): void {
 
         documentContext.setPopupContent(
-            <Popup id="ColumnConfig" width="large" height="large">
-                <PopupColumnConfig />
+            <Popup id="Column" width="large" height="large" handleOverlayClick={() => toggleWarnPopup("PopupColumnConfigWarning")}>
+                <PopupColumnConfig toggleWarnPopup={toggleWarnPopup} />
             </Popup>
         );
 
@@ -134,15 +135,31 @@ export default function StylePanel(props) {
 
 
     function handleOrientationConfig(event): void {
+        // toggle popup
+        documentContext.togglePopup(100);
 
         documentContext.setPopupContent(
-            <Popup id="Orientation" width="large" height="large">
-                <PopupOrientationConfig />
+            <Popup id="Orientation" width="large" height="large" handleOverlayClick={() => toggleWarnPopup("PopupOrientationConfigWarning")}>
+                <PopupOrientationConfig toggleWarnPopup={toggleWarnPopup}/>
             </Popup>
         );
+    }
 
-        // toggle popup
-        documentContext.togglePopup();
+
+    /**
+     * Toggle element with given id and the popup overlays of all  ```<Popup />``` parents.
+     * 
+     * @param warnPopupId complete id of ```<Popup />``` component holding the ```<WarnPopup />```
+     * @param duration of the jquery fade animation (in ms)
+     */
+    function toggleWarnPopup(warnPopupId: string, duration = 100): void {
+
+        log(duration)
+        const warnPopup = $("#" + warnPopupId);
+        warnPopup.fadeToggle(duration);
+
+        const popupOverlay = warnPopup.parents(".Popup").children(".popupOverlay");
+        popupOverlay.fadeToggle(duration);
     }
 
 
@@ -159,7 +176,7 @@ export default function StylePanel(props) {
                 <StylePanelSection hideRightBorder={true} componentStyle={{maxWidth: "215px"}}>
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
-                                label={appContext.selectedTextInputStyle.fontFamily}
+                                label={documentContext.selectedTextInputStyle.fontFamily}
                                 disabled={disabled}
                                 hoverBackgroundColor={hoverBackgroundColor}
                                 componentStyle={{width: "100%"}}
@@ -180,7 +197,7 @@ export default function StylePanel(props) {
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Checkbox id="Bold" 
                                   handleSelect={handleBoldSelect}
-                                  checked={appContext.selectedTextInputStyle.bold}
+                                  checked={documentContext.selectedTextInputStyle.bold}
                                   hoverBackgroundColor={hoverBackgroundColor}
                                   checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                   disabled={disabled}
@@ -194,7 +211,7 @@ export default function StylePanel(props) {
                         </Checkbox>
                         <Checkbox id="Underline" 
                                   handleSelect={handleUnderlineSelect}
-                                  checked={appContext.selectedTextInputStyle.underline}
+                                  checked={documentContext.selectedTextInputStyle.underline}
                                   hoverBackgroundColor={hoverBackgroundColor}
                                   checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                   disabled={disabled}
@@ -208,7 +225,7 @@ export default function StylePanel(props) {
                         </Checkbox>
                         <Checkbox id="Italic" 
                                   handleSelect={handleItalicSelect}
-                                  checked={appContext.selectedTextInputStyle.italic}
+                                  checked={documentContext.selectedTextInputStyle.italic}
                                   hoverBackgroundColor={hoverBackgroundColor}
                                   checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                   disabled={disabled}
@@ -224,7 +241,7 @@ export default function StylePanel(props) {
                         <div className="flexRight" style={{width: "100%"}}>
                             <ColorPicker id="StylePanelColor" 
                                         handleSelect={handleColorSelect} 
-                                        color={appContext.selectedTextInputStyle.color}
+                                        color={documentContext.selectedTextInputStyle.color}
                                         toggleStyle={toggleColorPickerStyle}
                                         hoverBackgroundColor={hoverBackgroundColor}
                                         disabled={disabled}
@@ -242,7 +259,7 @@ export default function StylePanel(props) {
                 <StylePanelSection hideRightBorder={false} componentStyle={{maxWidth: "150px"}}>
                     <div className="flexCenter" style={{height: "50%"}}>
                         <Select id="FontSize"
-                                label={appContext.selectedTextInputStyle.fontSize}
+                                label={documentContext.selectedTextInputStyle.fontSize}
                                 disabled={disabled}
                                 hoverBackgroundColor={hoverBackgroundColor}
                                 boxStyle={{
@@ -265,7 +282,7 @@ export default function StylePanel(props) {
                                     childrenClassName="flexCenter dontMarkText" 
                                     name={"TextAlign"} 
                                     value="START"
-                                    radioGroupValue={appContext.selectedTextInputStyle.textAlign}
+                                    radioGroupValue={documentContext.selectedTextInputStyle.textAlign}
                                     handleSelect={handleTextAlignSelect}
                                     title="Linksbündig" 
                                     disabled={disabled}
@@ -284,7 +301,7 @@ export default function StylePanel(props) {
                                     childrenClassName="flexCenter dontMarkText" 
                                     name={"TextAlign"} 
                                     value="CENTER"
-                                    radioGroupValue={appContext.selectedTextInputStyle.textAlign}
+                                    radioGroupValue={documentContext.selectedTextInputStyle.textAlign}
                                     handleSelect={handleTextAlignSelect}
                                     title="Zentriert" 
                                     disabled={disabled}
@@ -303,7 +320,7 @@ export default function StylePanel(props) {
                                     childrenClassName="flexCenter dontMarkText" 
                                     name={"TextAlign"} 
                                     value="RIGHT"
-                                    radioGroupValue={appContext.selectedTextInputStyle.textAlign}
+                                    radioGroupValue={documentContext.selectedTextInputStyle.textAlign}
                                     handleSelect={handleTextAlignSelect}
                                     title="Rechtsbündig" 
                                     disabled={disabled}
