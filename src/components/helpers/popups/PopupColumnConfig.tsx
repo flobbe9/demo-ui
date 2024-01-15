@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"; 
+import useCookie from "react-use-cookie";
 import "../../../assets/styles/PopupColumnConfig.css";
 import { AppContext } from "../../App";
 import { Orientation } from "../../../enums/Orientation";
@@ -10,6 +11,7 @@ import Popup from "./Popup";
 import PopupWarnConfirm from "./PopupWarnConfirm";
 import { DocumentContext } from "../../document/Document";
 import PopupContainer from "./PopupContainer";
+import { DONT_SHOW_AGAIN_COOKIE_NAME } from "../../../globalVariables";
 
 
 /**
@@ -33,6 +35,7 @@ export default function PopupColumnConfig(props: {
 
     const [orientationClassName, setOrientationClassName] = useState("whiteButtonPortrait");
     const [selectedNumColumns, setSelectedNumColumns] = useState(documentContext.numColumns)
+    const [dontShowAgainCookie, setDontShowAgainCookie] = useCookie(DONT_SHOW_AGAIN_COOKIE_NAME + "ColumnConfig", "false");
 
 
     useEffect(() => {
@@ -65,11 +68,17 @@ export default function PopupColumnConfig(props: {
     }
 
 
-    function toggleWarnPopup(duration = 100): void {
+    function toggleWarnPopup(event, duration = 100): void {
 
         // case: selected same number
         if (selectedNumColumns === documentContext.numColumns) {
             documentContext.hidePopup()
+            return;
+        }
+
+        // case: dont show again
+        if (dontShowAgainCookie === "true") {
+            handleSubmit(event)
             return;
         }
 
@@ -167,10 +176,14 @@ export default function PopupColumnConfig(props: {
                 </div>
 
                 <PopupContainer id={props.warnPopupContainerIdPart} className="warnPopupContainer" matchPopupDimensions={true}>
-                    <Popup id={props.warnPopupContainerIdPart} height="small" width="medium">
-                        <PopupWarnConfirm handleConfirm={handleSubmit} 
-                                        handleDecline={() => toggleWarnPopup()}
-                                        hideThis={() => toggleWarnPopup()}
+                    <Popup id={props.warnPopupContainerIdPart} height="medium" width="medium">
+                        <PopupWarnConfirm id="ColumnConfig" handleConfirm={handleSubmit} 
+                                        handleDecline={(event) => toggleWarnPopup(event)}
+                                        hideThis={(event) => toggleWarnPopup(event)}
+                                        displayDontShowAgainCheckbox={true}
+                                        checkboxContainerClassname="flexCenter mt-5"
+                                        dontShowAgainCookie={dontShowAgainCookie}
+                                        setDontShowAgainCookie={setDontShowAgainCookie}
                                         >
                             <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
                             <p className="textCenter">Fortfahren?</p>
@@ -181,7 +194,7 @@ export default function PopupColumnConfig(props: {
 
             <div className="popupFooter flexRight">
                 <Button id={id + "Submit"} 
-                        handleClick={(event) => toggleWarnPopup()}
+                        handleClick={(event) => toggleWarnPopup(event)}
                         className="blackButton blackButtonContained"
                         childrenStyle={{padding: "5px 10px"}}
                         hoverBackgroundColor="rgb(70, 70, 70)"

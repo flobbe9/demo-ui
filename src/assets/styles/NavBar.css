@@ -12,6 +12,7 @@
     
     .navSectionLeft {
         .navLink {
+            color: black;
             padding-right: 20px;
             text-decoration: none;
             transition: opacity 0.2s;

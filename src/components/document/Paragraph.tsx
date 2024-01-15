@@ -81,7 +81,6 @@ export default function Paragraph(props: {
      * If this paragraph has less textInputs than there are to remove, set state to prev textInput or (if
      * there is no prev text input) do nothing.
      */
-    // TODO: enable remove many
     function handleRemoveTextInput(): void {
 
         const paragraphIds = documentContext.paragraphIdRemoveTextInput[0];

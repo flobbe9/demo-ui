@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
-import "../assets/styles/ControlPanel.css";
+import "../../assets/styles/ControlPanel.css";
 import { buildDocument, downloadDocument } from "../../builder/Builder";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -44,7 +44,7 @@ export default function ControlPanel(props: {
         removeConfirmPageUnloadEvent();
 
         // build
-        const buildResponse = await buildDocument(documentContext.orientation, documentContext.numColumns, documentContext.documentFileName, documentContext.numLinesAsSingleColumn);
+        const buildResponse = await buildDocument(documentContext.orientation, documentContext.numColumns, documentContext.documentFileName, documentContext.numSingleColumnLines);
 
         // download
         if (buildResponse.status === 200)

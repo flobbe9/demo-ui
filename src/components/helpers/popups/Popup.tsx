@@ -10,6 +10,7 @@ import { log } from "../../../utils/basicUtils";
  * 
  * @since 0.0.5
  */
+// TODO: remove dimension props, style should be enough
 export default forwardRef(function Popup(props: {
     id: string,
     className?: string,

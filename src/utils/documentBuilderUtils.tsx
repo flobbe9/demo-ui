@@ -1,5 +1,5 @@
 import { DOCUMENT_SUFFIX, Side } from "../globalVariables";
-import { getJQueryElementById, getTextWidth, isBlank, isNumberFalsy, isStringNumeric, logError, logWarn, stringToNumber } from "./basicUtils";
+import { getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isNumberFalsy, isStringNumeric, log, logError, logWarn, stringToNumber } from "./basicUtils";
 
 
 /**
@@ -105,11 +105,12 @@ export function getColumnIdByDocumentId(documentId: string): string | null {
 
 /**
  * @param textInputId id of ```<TextInput />``` to check
+ * @param debug if true a warn log will be displayed in case of falsy id, default is true
  * @returns true if element with given id exists in document and has className 'TextInput', else false
  */
-export function isTextInputIdValid(textInputId: string): boolean {
+export function isTextInputIdValid(textInputId: string, debug = true): boolean {
 
-    const textInput = getJQueryElementById(textInputId);
+    const textInput = getJQueryElementById(textInputId, debug);
     if (!textInput)
         return false;
 
@@ -144,11 +145,12 @@ export function getNextTextInput(textInputId: string): JQuery | null {
 
 /**
  * @param textInputId id of the current text input
+ * @param debug if true a warn log will be displayed in case of falsy id, default is true
  * @returns JQuery of the next ```<TextInput>``` ```<input />``` tag or null if not found
  */
-export function getPrevTextInput(textInputId: string): JQuery | null {
+export function getPrevTextInput(textInputId: string, debug = true): JQuery | null {
 
-    const textInput = getJQueryElementById(textInputId);
+    const textInput = getJQueryElementById(textInputId, debug);
     if (!textInput)
         return null;
 
@@ -187,16 +189,23 @@ export function getFontSizeDiffInWord(fontSize: number): number {
  * @param testChars string that is not part of input value but should be included in value when calculating value's width
  * @returns true if width of text is greater than width of input
  */
-export function isTextLongerThanInput(textInputId: string, inputOverhead: number, testChars = ""): boolean {
+export function isTextLongerThanInput(textInputId: string, inputOverhead: number, testChars: string): boolean {
 
     const textInput = getJQueryElementById(textInputId);
     if (!textInput)
         return false;
 
-    const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - inputOverhead;
-    const textWidth = getTextWidth(textInput.prop("value") + testChars, textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
+    // insert test chars at correct position
+    const cursorIndex = getCursorIndex(textInputId);
+    let textInputValue = textInput.prop("value");
+    textInputValue = insertString(textInputValue, testChars, cursorIndex);
 
-    return textInputWidth < textWidth;
+    // measure width of text and tabs
+    const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - inputOverhead;
+    const textWidth = getTextWidth(textInputValue, textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
+    const totalTabWidth = getTotalTabWidthInText(textInputValue, textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
+
+    return textInputWidth < textWidth + totalTabWidth;
 }
 
 

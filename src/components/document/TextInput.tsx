@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCursorIndex, getTabSpaces, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { flashClass, getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import { StyleProp, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
-import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, SINGLE_TAB_UNICODE_ESCAPED, TAB_UNICODE_ESCAPED } from "../../globalVariables";
+import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
 import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
@@ -16,9 +16,8 @@ import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextI
     // strg a
     // strg c / strg v(?)
 
-// TODO: underline tabs
-// TODO: fix tab size
-// TODO: focus might have a performance issue, reduce getColumnTextInput calls!
+// TODO: add pictures
+// TODO: add table
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
@@ -31,7 +30,7 @@ export default function TextInput(props: {
 }) {
 
     const id = getDocumentId("TextInput", props.pageIndex, props.id ? props.id : "", props.columnIndex, props.paragraphIndex, props.textInputIndex);
-    const className = props.className ? "TextInput " + props.className : "TextInput";
+    const className = "TextInput " + (props.className || "");
 
     const inputRef = useRef(null);
     
@@ -41,6 +40,8 @@ export default function TextInput(props: {
 
     const [dontHideConnectIconClassName, setDontHideConnectIconClassName] = useState("");
     const [isSingleColumnLineCandidate, setIsSingleColumnLineCandidate] = useState(false);
+
+    const [textInputBorderFlashing, setTextInputBorderFlashing] = useState(false);
 
 
     useEffect(() => {
@@ -71,7 +72,7 @@ export default function TextInput(props: {
 
     useEffect(() => {
         if (id !== documentContext.selectedTextInputId) 
-            documentContext.unFocusTextInput(id);
+            documentContext.unFocusTextInput(id, false);
         
     }, [documentContext.selectedTextInputId]);
 
@@ -105,38 +106,29 @@ export default function TextInput(props: {
     }
 
 
-    // 53.8ms
-    // 148.3ms
     function handleKeyDown(event): void {
 
-        // char that was just typed
-        let typedChar = event.key === "Tab" ? getTabSpaces() : event.key;
+        const eventKey = event.key;
 
         // case: text too long when including typed char
-        if (isTextLongerThanInput(documentContext.selectedTextInputId, documentContext.getTextInputOverhead(), typedChar) && 
-            isKeyAlphaNumeric(event.keyCode) && 
-            appContext.pressedKey !== "Control")
+        if (isKeyAlphaNumeric(event.keyCode) && 
+            appContext.pressedKey !== "Control" &&
+            isTextLongerThanInput(documentContext.selectedTextInputId, getTextInputOverhead(), eventKey === "Tab" ? TAB_UNICODE : eventKey))
             handleTextLongerThanLine(event);
 
-        if (event.key === "Tab") 
+        if (eventKey === "Tab")
             handleTab(event);
         
-        else if (event.key === "Enter")
+        else if (eventKey === "Enter")
             focusNextTextInput(true);
 
-        else if (event.key === "ArrowDown")
+        else if (eventKey === "ArrowDown")
             focusNextTextInput(false);
 
-        else if (event.key === "ArrowUp")
+        else if (eventKey === "ArrowUp")
             focusPrevTextInput(event);
 
-        else if (event.key === "ArrowLeft")
-            handleArrowLeft(event);
-
-        else if (event.key === "ArrowRight")
-            handleArrowRight(event);
-
-        else if (event.key === "Backspace")
+        else if (eventKey === "Backspace")
             handleBackspace(event);
     }
 
@@ -148,12 +140,6 @@ export default function TextInput(props: {
             documentContext.focusTextInput(id);
     }
 
-
-    function handleClick(event): void {
-        
-        handleCursorInBetweenSingleTabUnicodes(event.target.id);
-    }
-    
 
     function handleMouseOver(event): void {
 
@@ -199,7 +185,7 @@ export default function TextInput(props: {
         }
 
         // show very left connect button
-        $("#ButtonConnectLines" + leftTextInputId).fadeIn(100);
+        $("#ButtonConnectLines" + leftTextInputId).fadeIn(0);
     }
 
 
@@ -221,97 +207,61 @@ export default function TextInput(props: {
     }
 
 
-    /**
-     * Move cursor left by one char if cursor is in between two connected tab unicodes. I.e. a click on cursor '|' in ```\t\t\t|\t```
-     * would move the cursor like ```\t\t|\t\t```
-     * @param textInputId id of text input to potentially move cursor of
-     */
-    function handleCursorInBetweenSingleTabUnicodes(textInputId: string): void {
-
-        const cursorIndex = getCursorIndex(textInputId);
-        const inputValue = $(inputRef.current!).prop("value");
-
-        // count single tab unicodes in front of cursor
-        let tabUnicodeCount = 0;
-        for (let i = cursorIndex - 1; i >= 0; i--) {
-            if (inputValue.charAt(i) !== SINGLE_TAB_UNICODE_ESCAPED)
-                break;
-
-            tabUnicodeCount++;
-        }
-
-        // is cursor between tab unicodes
-        const isCursorInBetweenTabUnicodes = inputValue.charAt(cursorIndex - 1) === SINGLE_TAB_UNICODE_ESCAPED && 
-                                             inputValue.charAt(cursorIndex) === SINGLE_TAB_UNICODE_ESCAPED;
-                          
-        // case: cursor between connected tab unicodes
-        if (isCursorInBetweenTabUnicodes && tabUnicodeCount % 2 === 1)
-            moveCursor(textInputId, cursorIndex - 1, cursorIndex - 1);
-    }
-
-
     function handleTab(event): void {
 
+        event.preventDefault();
+
         if (appContext.pressedKey === "Shift") {
-            event.preventDefault();
             handleBackspace(event);
 
-        } else 
-            documentContext.handleTab(event);
-    }
+        } else {
+            // case: text too long
+            if (isTextLongerThanInput(documentContext.selectedTextInputId, getTextInputOverhead(), TAB_UNICODE)) {
+                handleTextLongerThanLine(event);
+                return;
+            }
 
+            // add tab after cursor
+            const selectedTextInput = $("#" + documentContext.selectedTextInputId);
+            const cursorIndex = selectedTextInput.prop("selectionStart");
+            const newInputValue = insertString(selectedTextInput.prop("value"), TAB_UNICODE, cursorIndex);
+            selectedTextInput.prop("value", newInputValue);
 
-    function handleArrowLeft(event): void {
-
-        if (areCharsInFrontOfCursorTab()) {
-            const cursorIndex = getCursorIndex(event.target.id);
-            moveCursor(event.target.id, cursorIndex - 1, cursorIndex - 1);
-        }
-    }
-
-
-    function handleArrowRight(event): void {
-
-        if (areCharsAfterCursorTab()) {
-            const cursorIndex = getCursorIndex(event.target.id);
-            moveCursor(event.target.id, cursorIndex + 1, cursorIndex + 1);
+            // move cursor to end of tab
+            moveCursor(documentContext.selectedTextInputId, cursorIndex + 1);
         }
     }
 
 
     /**
-     * Remove tab unicodes. Move cursor to prev text input if at first char.
+     * Move cursor to prev text input if at first char.
      */
     function handleBackspace(event): void {
 
-        // case: is tab
         const cursorIndex = getCursorIndex(id);
-        if (areCharsInFrontOfCursorTab()) {
-            const input = $(inputRef.current!);
-            const value: string = input.prop("value");
-
-            // remove one unicode, let default behaivour remove the other
-            let newValue = replaceAtIndex(value, "", cursorIndex - 1, cursorIndex);
-            input.prop("value", newValue);
 
         // case: cursor at first char
-        } else if (cursorIndex === 0 && !isTextInputValueMarked(id)) 
+        if (cursorIndex === 0 && !isTextInputValueMarked(id)) 
             focusPrevTextInput(event);
     }
 
 
-    function handleTextLongerThanLine(event): void {
+    async function handleTextLongerThanLine(event): Promise<void> {
         
         const lastTextInputInColumn = documentContext.getLastTextInputOfColumn(id);
-        const thisTextInput = $(inputRef.current);
-        const nextTextInput = getNextTextInput(id);
 
+        const thisTextInput = $(inputRef.current);
+        const thisTextInputValue = thisTextInput.prop("value");
+
+        const nextTextInput = getNextTextInput(id);
+        
         const isNotLastTextInputInColumn = lastTextInputInColumn.prop("id") !== id;
         const isNextTextInputBlank = !nextTextInput || isBlank(nextTextInput.prop("value"));
-        const hasTextWhiteSpace = thisTextInput.prop("value").includes(" ");
+        const hasTextWhiteSpace = thisTextInputValue.includes(" ");
+        const cursorIndex = getCursorIndex(id);
 
         // case: can shift text to next line
-        if (isNotLastTextInputInColumn && isNextTextInputBlank) {
+        if (isNotLastTextInputInColumn && isNextTextInputBlank && cursorIndex === thisTextInputValue.length) {
             // case: dont shift text but continue in next input
             if (!hasTextWhiteSpace)
                 focusNextTextInput(true);
@@ -321,24 +271,24 @@ export default function TextInput(props: {
         // case: can't shift text to next line
         } else {
             event.preventDefault();
-            documentContext.handleTextLongerThanLine(id);
+
+            // case: border still flashing
+            if (textInputBorderFlashing)
+                return;
+
+            setTextInputBorderFlashing(true);
+            await flashClass(id, "textInputFlash", "textInputFocus", 200);
+            setTextInputBorderFlashing(false);
         }
     }
 
 
-    function handleConnectLines(event): void {
+    function handle_Dis_ConnectLines(event): void {
 
         $(".connectIcon").hide();
 
         // only works because there's one text input per paragraph
-        pageContext.connectColumnLines(props.paragraphIndex);
-    }
-
-
-    function handleDisconnectLines(event): void {
-
-        // only works because there's one text input per paragraph
-        pageContext.disconnectColumnLine(props.paragraphIndex);
+        pageContext.toggleConnectWarnPopup(props.paragraphIndex, props.isSingleColumnLine);
     }
 
 
@@ -357,25 +307,46 @@ export default function TextInput(props: {
 
         return textInputs;
     }
+    
+
+    /**
+     * @param textInputId id of the text input to check. Default is selectedTextInputId
+     * @returns any space of selectedTextInput element's width like padding etc. that cannot be occupied by the text input value (in px).
+     *          Return 0 if textInputId param is invalid
+     */
+    function getTextInputOverhead(textInputId = documentContext.selectedTextInputId): number {
+
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
+            return 0;
+    
+        // add up padding and border
+        const paddingRight = getCSSValueAsNumber(textInput.css("paddingRight"), 2);
+        const paddingLeft = getCSSValueAsNumber(textInput.css("paddingLeft"), 2);
+        const borderRightWidth = getCSSValueAsNumber(textInput.css("borderRightWidth"), 2);
+        const borderLefttWidth = getCSSValueAsNumber(textInput.css("borderLeftWidth"), 2);
+
+        return paddingRight + paddingLeft + borderRightWidth + borderLefttWidth;
+    }
 
 
     function toggleSingleColumnLineCandidateBorder(hide: boolean, textInputId = id): void {
         
         const thisTextInput = $("#" + textInputId);
 
-        if (isLeftColumn(textInputId))
+        if (isLeftColumn(textInputId, false))
             if (hide)
                 thisTextInput.removeClass("textInputLeftColumnConnect");
             else
                 thisTextInput.addClass("textInputLeftColumnConnect");
 
-        if (isMiddleColumn(textInputId))
+        if (isMiddleColumn(textInputId, false))
             if (hide)
                 thisTextInput.removeClass("textInputMiddleColumnConnect");
             else
                 thisTextInput.addClass("textInputMiddleColumnConnect");
 
-        if (isRightColumn(textInputId))
+        if (isRightColumn(textInputId, false))
             if (hide)
                 thisTextInput.removeClass("textInputRightColumnConnect");
             else
@@ -401,7 +372,7 @@ export default function TextInput(props: {
         const isNoSingleColumnLine = !props.isSingleColumnLine;
         let prevTextInputIsSingleColumnLine = false;
 
-        const prevTextInput = getPrevTextInput(id);
+        const prevTextInput = getPrevTextInput(id, false);
 
         // case: prev text input is singleColumnLine
         if (prevTextInput && prevTextInput.length)
@@ -423,9 +394,10 @@ export default function TextInput(props: {
     }
 
 
-    function isLeftColumn(textInputId = id): boolean {
+    function isLeftColumn(textInputId = id, debug = true): boolean {
 
-        isTextInputIdValid(textInputId);
+        if (!isTextInputIdValid(textInputId, debug))
+            return false;
 
         const columnIndex = stringToNumber(getPartFromDocumentId(textInputId, 2));
 
@@ -433,9 +405,10 @@ export default function TextInput(props: {
     }
 
 
-    function isMiddleColumn(textInputId = id): boolean {
+    function isMiddleColumn(textInputId = id, debug = true): boolean {
 
-        isTextInputIdValid(textInputId);
+        if (!isTextInputIdValid(textInputId, debug))
+            return false;
 
         const columnIndex = stringToNumber(getPartFromDocumentId(textInputId, 2));
 
@@ -443,9 +416,10 @@ export default function TextInput(props: {
     }
 
 
-    function isRightColumn(textInputId = id): boolean {
+    function isRightColumn(textInputId = id, debug = true): boolean {
 
-        isTextInputIdValid(textInputId);
+        if (!isTextInputIdValid(textInputId, debug))
+            return false;
 
         const columnIndex = stringToNumber(getPartFromDocumentId(textInputId, 2));
 
@@ -533,12 +507,12 @@ export default function TextInput(props: {
 
         // move cursor to end of text
         const lastCharIndex = prevTextInput.prop("value").length;
-        moveCursor(prevTextInput.prop("id"), lastCharIndex, lastCharIndex);
+        moveCursor(prevTextInput.prop("id"), lastCharIndex);
     }
 
 
     /**
-     * @returns true if ```2 chars in front of cursor === TAB_UNICODE_ESCAPED```.
+     * @returns true if ```char in front of cursor === TAB_UNICODE```.
      */
     function areCharsInFrontOfCursorTab(): boolean {
 
@@ -550,16 +524,16 @@ export default function TextInput(props: {
         if (isTextInputValueMarked(input.prop("id")))
             return false;
         
-        // get 2 chars in front of cursor
+        // get char in front of cursor
         const cursorIndex = input.prop("selectionEnd");
-        const charsInFrontOfCursor = value.charAt(cursorIndex - 1) + value.charAt(cursorIndex - 2);
+        const charsInFrontOfCursor = value.charAt(cursorIndex - 1);
 
-        return charsInFrontOfCursor === TAB_UNICODE_ESCAPED;
+        return charsInFrontOfCursor === TAB_UNICODE;
     }
 
 
     /**
-     * @returns true if ```2 chars after cursor === TAB_UNICODE_ESCAPED```.
+     * @returns true if ```2 chars after cursor === TAB_UNICODE```.
      */
     function areCharsAfterCursorTab(): boolean {
 
@@ -571,7 +545,7 @@ export default function TextInput(props: {
         const cursorIndex = input.prop("selectionStart");
         const charsInFrontOfCursor = value.charAt(cursorIndex) + value.charAt(cursorIndex + 1);
 
-        return charsInFrontOfCursor === TAB_UNICODE_ESCAPED;
+        return charsInFrontOfCursor === TAB_UNICODE;
     }
 
 
@@ -614,19 +588,19 @@ export default function TextInput(props: {
                         hoverBackgroundColor={props.isSingleColumnLine ? "rgb(255, 180, 160)" : "rgb(160, 180, 255)"}
                         clickBackgroundColor="rgb(220, 220, 220)"
 
-                        handleClick={props.isSingleColumnLine ? handleDisconnectLines : handleConnectLines} 
+                        handleClick={handle_Dis_ConnectLines} 
                         >
                     <i className={"fa-solid fa-link " + dontHideConnectIconClassName + (props.isSingleColumnLine ?  "hidden" : "")}></i>
                     <i className={"fa-solid fa-link-slash " + dontHideConnectIconClassName + (props.isSingleColumnLine ? "" : " hidden")}></i>
                 </Button>
             </label>
 
+            
             <input id={id} 
                 className={className + " " + dontHideConnectIconClassName} 
                 ref={inputRef} 
                 type="text" 
                 onMouseDown={handleMouseDown}
-                onClick={handleClick}
                 onKeyDown={handleKeyDown}
                 />
         </div>

@@ -64,19 +64,18 @@ export default function NavBar(props) {
     }
 
 
-    // TODO: optimize for mobile
     return (
         <div id={id} className={className + " dontMarkText flex"}>
             <div className="col-4 navSectionLeft textLeft flexLeft">
-                <LeaveConfirmLink className="navLink" to="/" pathsToConfirm={[BUILDER_PATH]}>
+                <Link className="navLink" to="/">
                     <img className="navImage dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
                     <span className="navHeading ml-0 ml-sm-3">{WEBSITE_NAME}</span>
-                </LeaveConfirmLink>
+                </Link>
             </div>
 
             <div className={"col-4 navSectionCenter textCenter " + flexClass}>
-                <LeaveConfirmLink className="navLink" to="/" pathsToConfirm={[BUILDER_PATH]}>
-                    <span>Home</span>
+                <LeaveConfirmLink className="navLink" to="/menu" pathsToConfirm={[BUILDER_PATH]}>
+                    <span>Menu</span>
                 </LeaveConfirmLink>
             </div>
 

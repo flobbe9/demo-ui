@@ -1,5 +1,5 @@
 import React from "react";
-import { getFontSizeDiffInWord } from "./utils/basicUtils";
+import { getFontSizeDiffInWord } from "./utils/documentBuilderUtils";
 
 
 export const WEBSITE_NAME = "" + process.env.REACT_APP_WEBSITE_NAME;
@@ -10,6 +10,8 @@ export const API_ENV = "" + process.env.REACT_APP_ENV;
 export const API_VERSION = "" + process.env.REACT_APP_VERSION;
 
 export const NUM_PAGES = 2;
+export const PAGE_WIDTH_PORTRAIT = "778px";
+export const PAGE_WIDTH_LANDSCAPE = "1133px";
 
 export const MAX_NUM_COLUMNS = 3;
 
@@ -98,22 +100,17 @@ export const DEFAULT_FONT_SIZE = 14;
 const numFillerLines = 1;
 
 /** assuming a fontSize of 14 */
-export const NUM_LINES_PROTRAIT = 44 - numFillerLines;
+export const NUM_LINES_PROTRAIT = 41 - numFillerLines;
 /** assuming a fontSize of 19 */
 export const MAX_FONT_SIZE_SUM_PORTRAIT = NUM_LINES_PROTRAIT * DEFAULT_FONT_SIZE;
 
 /** assuming a fontSize of 14 */
-export const NUM_LINES_LANDSCAPE = 31 - numFillerLines;
+export const NUM_LINES_LANDSCAPE = 29 - numFillerLines;
 /** assuming a fontSize of 19 */
 export const MAX_FONT_SIZE_SUM_LANDSCAPE = NUM_LINES_LANDSCAPE * DEFAULT_FONT_SIZE;
 
-
-export const MAX_NUM_TABS = 12;
-// TODO: this is inaccurate
-export const SPACES_PER_TAB = 16;
-export const TAB_UNICODE = "0x09";
-export const SINGLE_TAB_UNICODE_ESCAPED = "\x09";
-export const TAB_UNICODE_ESCAPED = "\x09\x09";
+export const NUM_SPACES_PER_TAB = 8;
+export const TAB_UNICODE = "\t";
 
 
 /**
@@ -154,9 +151,11 @@ export const SELECTED_STYLE: React.CSSProperties = {
 export const DOCUMENT_SUFFIX = ".docx";
 
 
-export const BUILDER_PATH = "/build";
+export const BUILDER_PATH = "/";
 
 export const SINGLE_COLUMN_LINE_CLASS_NAME = "SingleColumnLine";
+
+export const DONT_SHOW_AGAIN_COOKIE_NAME = "dontShowAgain";
 
 
 // ------------------- Archive

@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import "../../assets/styles/Column.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getDocumentId, getRandomString, isBlank, log } from "../../utils/basicUtils";
+import { getRandomString, isBlank, log } from "../../utils/basicUtils";
 import Paragraph from "./Paragraph";
 import { AppContext } from "../App";
 import { DocumentContext } from "./Document";
 import { NUM_LINES_LANDSCAPE, NUM_LINES_PROTRAIT } from "../../globalVariables";
 import { Orientation } from "../../enums/Orientation";
 import { PageContext } from "./Page";
+import { getDocumentId } from "../../utils/documentBuilderUtils";
 
 
 export default function Column(props: {

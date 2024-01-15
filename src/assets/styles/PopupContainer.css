@@ -15,37 +15,4 @@
         height: fit-content;
         width: fit-content;
     }
-
-    /* .Popup */
-    .fullWidth {
-        width: var(--fullWidth);
-    }
-
-    .largeWidth {
-        width: 450px;
-    }
-
-    .mediumWidth {
-        width: 300px;
-    }
-
-    .smallWidth {
-        max-width: 200px;
-    }
-
-    .fullHeight {
-        height: var(--fullHeight);
-    }
-
-    .largeHeight {
-        height: 450px;
-    }
-
-    .mediumHeight {
-        height: 300px;
-    }
-
-    .smallHeight {
-        height: 200px;
-    }
 }

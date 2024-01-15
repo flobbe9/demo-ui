@@ -3,7 +3,7 @@ import Style, { getDefaultStyle } from "./Style";
 
 
 /**
- * Interface defining one line in a word document as defined in vorspiel_backend.
+ * Interface defining one line in a word document as defined in document_builder api.
  * 
  * @since 0.0.5
  */

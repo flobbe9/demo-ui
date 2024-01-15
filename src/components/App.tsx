@@ -32,6 +32,7 @@ import { getJQueryElementByClassName, getJQueryElementById } from "../utils/basi
  * @returns any content of this website
  * @since 0.0.1
  */
+// TODO: root 404
 export default function App() {
 
     // use this when backend login is implemented (https://www.baeldung.com/spring-security-csrf)
@@ -194,7 +195,7 @@ export default function App() {
                         </div>
 
                         <Routes>
-                            <Route path="/" element={<Menu />} />
+                            <Route path="/menu" element={<Menu />} />
                             <Route path={BUILDER_PATH} element={<Document />} />
                             <Route path={"/version"} element={<Version />} />
                             {/* <Route path="/login" element={<Login />} /> */}

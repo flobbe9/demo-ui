@@ -1,11 +1,12 @@
 import { BreakType } from "../enums/Breaktype";
 import { DEFAULT_FONT_SIZE } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getFontSizeDiffInWord, isBlank, isRGB, log, logError, rgbStringToHex, stringToNumber } from "../utils/basicUtils";
+import { isBlank, log, logError, stringToNumber } from "../utils/basicUtils";
+import { getCSSValueAsNumber, getFontSizeDiffInWord, isRGB, rgbStringToHex } from "../utils/documentBuilderUtils";
 
 
 /**
- * Interface defining a style object as defined in vorspiel_backend.
+ * Interface defining a style object as defined in document_builder api.
  * 
  * @since 0.0.5
  */

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, forwardRef } from "react";
 import "../../assets/styles/Checkbox.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../../utils/basicUtils";

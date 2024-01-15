@@ -1,5 +1,5 @@
 /**
- * Interface defining table dimensions (copied from vorspiel_backend).
+ * Interface defining table dimensions (copied from document_builder api).
  * 
  * @since 0.0.5
  */

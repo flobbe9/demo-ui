@@ -41,6 +41,34 @@
         }
     }
 
+    .subtlePopupContainer {
+        height: fit-content;
+        position: absolute;
+        right: 15px;
+        top: 10px;
+        width: fit-content;
+        z-index: 2;
+
+        .Popup {
+            font-size: 0.9em;
+            line-height: normal;
+            overflow: auto;
+            padding: 10px;
+            max-width: 200px;
+            max-height: 300px;
+        }
+
+        #PopupSubtleWarn {
+            display: none;
+            background-color: rgb(255, 221, 127);
+        }
+
+        #PopupSubtleError {
+            display: none;
+            background-color: rgb(255, 130, 130);
+        }
+    }
+
     ::-moz-selection {
         background: rgb(172, 172, 172);
     }

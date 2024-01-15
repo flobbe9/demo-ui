@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react"; 
+import useCookie from "react-use-cookie";
 import "../../../assets/styles/PopupOrientationConfig.css";
 import { AppContext } from "../../App";
 import { Orientation } from "../../../enums/Orientation";
@@ -10,6 +11,7 @@ import Popup from "./Popup";
 import PopupWarnConfirm from "./PopupWarnConfirm";
 import { DocumentContext } from "../../document/Document";
 import PopupContainer from "./PopupContainer";
+import { DONT_SHOW_AGAIN_COOKIE_NAME } from "../../../globalVariables";
 
 
 /**
@@ -32,6 +34,7 @@ export default function PopupOrientationConfig(props: {
     const documentContext = useContext(DocumentContext);
 
     const [orientation, setOrientation] = useState(documentContext.orientation);
+    const [dontShowAgainCookie, setDontShowAgainCookie] = useCookie(DONT_SHOW_AGAIN_COOKIE_NAME + "OrientationConfig", "false");
 
 
     function handleSelectOrientation(orientation: Orientation): void {
@@ -44,18 +47,28 @@ export default function PopupOrientationConfig(props: {
 
         documentContext.setOrientation(orientation);
 
-        documentContext.setPages([]);
-        setTimeout(() => documentContext.setPages(documentContext.initPages()), 1);
+        documentContext.hidePopup(0);
 
-        documentContext.hidePopup();
+        // wait for popup to be hidden
+        setTimeout(() => {
+            // reset all pages
+            documentContext.setPages([]);
+            setTimeout(() => documentContext.setPages(documentContext.initPages()), 0.1);
+        }, 100);
     }
 
 
-    function toggleWarnPopup(duration = 100): void {
+    function toggleWarnPopup(event, duration = 100): void {
 
         // case: selected same orientation
         if (orientation === documentContext.orientation) {
             documentContext.hidePopup(duration);
+            return;
+        }
+
+        // case: dont show again
+        if (dontShowAgainCookie === "true") {
+            handleSubmit(event)
             return;
         }
 
@@ -117,11 +130,15 @@ export default function PopupOrientationConfig(props: {
                 </div>
 
                 <PopupContainer id={props.warnPopupContainerIdPart} className="warnPopupContainer" matchPopupDimensions={true}>
-                    <Popup id={props.warnPopupContainerIdPart} height="small" width="medium">
-                        <PopupWarnConfirm handleConfirm={handleSubmit} 
-                                            handleDecline={() => toggleWarnPopup()}
-                                            hideThis={() => toggleWarnPopup()}
-                                            
+                    <Popup id={props.warnPopupContainerIdPart} height="medium" width="medium">
+                        <PopupWarnConfirm id="OrientationConfig"
+                                            handleConfirm={handleSubmit} 
+                                            handleDecline={(event) => toggleWarnPopup(event)}
+                                            hideThis={(event) => toggleWarnPopup(event)}
+                                            displayDontShowAgainCheckbox={true}
+                                            checkboxContainerClassname="flexCenter mt-5"
+                                            dontShowAgainCookie={dontShowAgainCookie}
+                                            setDontShowAgainCookie={setDontShowAgainCookie}
                                             >
                             <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
                             <p className="textCenter">Fortfahren?</p>
@@ -136,7 +153,7 @@ export default function PopupOrientationConfig(props: {
                         childrenStyle={{padding: "5px 10px"}}
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
-                        handleClick={(event) => toggleWarnPopup()}
+                        handleClick={(event) => toggleWarnPopup(event)}
                         >
                     Anwenden
                 </Button>

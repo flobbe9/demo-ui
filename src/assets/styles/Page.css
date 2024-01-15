@@ -1,3 +1,9 @@
+:root {
+    /* these are set on document render */
+    --pageWidthPortrait: 778px;
+    --pageWidthLandscape: 1133px;
+}
+
 .Page {
     background-color: white;
     margin: 20px 0 70px;
@@ -8,18 +14,22 @@
     }
 }
 
+/* page dimensions, don't change!!! */
 .pagePortrait {
     /* height: 1500px !important; */
-    /* height: 1580px !important; */
-    height: 1660px !important;
-    padding: 33px !important;
-    width: 685px !important;
+    height: 1580px !important;
+    /* height: 1660px !important; */
+    /* padding: 33px 43px !important; */
+    padding: 33px 90px !important;
+    /* width: 685px !important; */
+    width: var(--pageWidthPortrait) !important;
 }
 
 .pageLandscape {
     /* height: 1057px !important; */
     /* height: 1100px !important; */
     height: 1180px !important;
-    padding: 33px !important;
-    width: 1019px !important;
+    padding: 33px 90px !important;
+    /* width: 1019px !important; */
+    width: var(--pageWidthLandscape) !important;
 }

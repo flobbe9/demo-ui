@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import useCookie from "react-use-cookie";
 import "../../assets/styles/StylePanel.css";
 import StylePanelSection from "./StylePanelSection";
 import Checkbox from "../helpers/Checkbox";
@@ -9,16 +10,13 @@ import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { flashClass, isBlank, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
-import { FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
+import { DONT_SHOW_AGAIN_COOKIE_NAME, FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
 import Popup from "../helpers/popups/Popup";
 import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
 import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
 import { getCSSValueAsNumber } from "../../utils/documentBuilderUtils";
 
-
-// TODO: add key combinations for most buttons
-    // set title to combination
 
 export default function StylePanel(props) {
 
@@ -64,12 +62,12 @@ export default function StylePanel(props) {
     function handleFontSizeSelect(fontSize: string): void {
 
         // TODO: calculation is inaccurate (off by two?)
-        // case: max line space in column reached
         const diff = getCSSValueAsNumber(fontSize, 2) - documentContext.selectedTextInputStyle.fontSize;
         const checkFontSize = documentContext.isFontSizeTooLarge(documentContext.selectedTextInputId, diff);
         const isFontSizeTooLarge = checkFontSize[0];
         const deleteCount = checkFontSize[1];
-
+        
+        // case: line height too large for page
         if (isFontSizeTooLarge) {
             // case: dont increase font size
             if (!documentContext.handleFontSizeTooLarge(true, deleteCount))
@@ -277,7 +275,8 @@ export default function StylePanel(props) {
                                 optionsBoxStyle={{
                                     border: boxBorder,
                                     backgroundColor: "rgb(235, 235, 235)",                                    
-                                    maxHeight: "50vb"}}
+                                    maxHeight: "50vb"
+                                }}
                                 handleSelect={handleFontSizeSelect}
                                 title="Schriftgröße"
                                 options={RAW_FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
@@ -360,7 +359,7 @@ export default function StylePanel(props) {
                             hoverBackgroundColor={hoverBackgroundColor}
                             clickBackgroundColor={checkedBackgroundColor}
                             disabled={disabled}
-                            title={"Ausrichtung"}
+                            title={"Ausrichtung der Seiten"}
                             handleClick={handleOrientationConfigClick}
                             >
                         <div className={id + "IconContainer"}>
@@ -383,7 +382,7 @@ export default function StylePanel(props) {
                             hoverBackgroundColor={hoverBackgroundColor}
                             clickBackgroundColor={checkedBackgroundColor}
                             disabled={disabled}
-                            title={"Spalten"}
+                            title={"Anzahl der Spalten"}
                             handleClick={handleColumnConfigClick}
                             >
                         <div className={id + "IconContainer"}>
@@ -392,6 +391,17 @@ export default function StylePanel(props) {
                         Spalten
                     </Button>
                 </StylePanelSection>
+            </div>
+            
+            {/* subtle popup */}
+            <div className="subtlePopupContainer">
+                <Popup id="SubtleWarn">
+                    {documentContext.subtlePopupContent}
+                </Popup>
+
+                <Popup id="SubtleError">
+                    {documentContext.subtlePopupContent}
+                </Popup>
             </div>
         </div>
     )

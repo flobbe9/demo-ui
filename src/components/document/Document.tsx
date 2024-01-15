@@ -1,17 +1,14 @@
 import React, { useContext, useEffect, useState, createContext, useRef } from "react";
 import "../../assets/styles/Document.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { confirmPageUnload, flashClass, getJQueryElementById, getRandomString, getTabSpaces, insertString, isBlank, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { confirmPageUnload, flashClass, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
-import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE_ESCAPED, NUM_PAGES } from "../../globalVariables";
+import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE } from "../../globalVariables";
 import ControlPanel from "./ControlPanel";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
-import Popup from "../helpers/popups/Popup";
-import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
-import Button from "../helpers/Button";
-import { getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getFontSizeDiffInWord, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
+import { getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getFontSizeDiffInWord, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import PopupContainer from "../helpers/popups/PopupContainer";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
@@ -21,8 +18,6 @@ import Page from "./Page";
 // TODO: update to bootstrap 5
 // TODO: fix console errors
 
-// TODO: reduce jquery calls
-    // somehow cache elements (especially collections) or save them as variables somewhere
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -32,8 +27,8 @@ export default function Document(props) {
 
     const [escapePopup, setEscapePopup] = useState(true);
     const [popupContent, setPopupContent] = useState<React.JSX.Element>();
+    const [subtlePopupContent, setSubtlePopupContent] = useState("");
 
-    const [textInputBorderFlashing, setTextInputBorderFlashing] = useState(false);
 
     const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
@@ -41,7 +36,7 @@ export default function Document(props) {
 
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
-    const [numLinesAsSingleColumn, setNumLinesAsSingleColumn] = useState(0);
+    const [numSingleColumnLines, setNumSingleColumnLines] = useState(0);
     const [documentFileName, setDocumentFileName] = useState("Dokument_1.docx");
 
     /** <Paragraph /> component listens to changes of these states and attempts to append or remove a <TextInput /> at the end */
@@ -60,10 +55,6 @@ export default function Document(props) {
         refreshSingleColumnLines, 
         setRefreshSingleColumnLines,
 
-        handleTab,
-        handleTextLongerThanLine,
-        getTextInputOverhead,
-        
         isFontSizeTooLarge,
         handleFontSizeTooLarge,
         getNumLinesOverhead,
@@ -83,7 +74,11 @@ export default function Document(props) {
 
         togglePopup,
         hidePopup,
+        popupContent,
         setPopupContent,
+        showSubtlePopup,
+        subtlePopupContent,
+        setSubtlePopupContent,
 
         focusTextInput,
         unFocusTextInput,
@@ -95,8 +90,8 @@ export default function Document(props) {
         setOrientation,
         numColumns,
         setNumColumns,
-        numLinesAsSingleColumn, 
-        setNumLinesAsSingleColumn,
+        numSingleColumnLines, 
+        setNumSingleColumnLines,
         selectedTextInputId,
         setSelectedTextInputId,
         selectedTextInputStyle,
@@ -115,9 +110,8 @@ export default function Document(props) {
 
         setCssVariable("selectedColor", SELECT_COLOR);
         setCssVariable("appBackgroundColor", "white");
-
-        if (appContext.isWindowWidthTooSmall())
-            handleWindowTooSmall();
+        setCssVariable("pageWidthPortrait", PAGE_WIDTH_PORTRAIT);
+        setCssVariable("pageWidthLandscape", PAGE_WIDTH_LANDSCAPE);
 
     }, []);
 
@@ -181,9 +175,9 @@ export default function Document(props) {
     }
 
 
-    function unFocusTextInput(textInputId: string): void {
+    function unFocusTextInput(textInputId: string, debug = true): void {
 
-        const textInput = getJQueryElementById(textInputId);
+        const textInput = getJQueryElementById(textInputId, debug);
         if (!textInput)
             return;
 
@@ -203,69 +197,6 @@ export default function Document(props) {
             ));
 
         return pages;
-    }
-
-
-    /**
-     * Add {@link TAB_UNICODE_ESCAPED} to ```selectedTextInput```. Prevent default event.
-     */
-    function handleTab(event): void {
-
-        event.preventDefault();
-
-        // case: text too long
-        if (isTextLongerThanInput(selectedTextInputId, getTextInputOverhead(), getTabSpaces())) {
-            handleTextLongerThanLine(selectedTextInputId);
-            return;
-        }
-
-        // add tab after cursor
-        const selectedTextInput = $("#" + selectedTextInputId);
-        const cursorIndex = selectedTextInput.prop("selectionStart");
-        const newInputValue = insertString(selectedTextInput.prop("value"), TAB_UNICODE_ESCAPED, cursorIndex);
-        selectedTextInput.prop("value", newInputValue);
-
-        // move cursor to end of tab
-        moveCursor(selectedTextInputId, cursorIndex + 2, cursorIndex + 2);
-    }
-
-
-    /**
-     * Flash border bottom color of text input and go back to border color from before. Use ```textInputborderFlashing``` state to
-     * prevent flashing after event action.
-     *
-     * @param textInputId id of text input where text is too long
-     */
-    async function handleTextLongerThanLine(textInputId: string): Promise<void> {
-
-        // case: border still flashing
-        if (textInputBorderFlashing)
-            return;
-
-        setTextInputBorderFlashing(true);
-        await flashClass(textInputId, "textInputFlash", "textInputFocus", 200);
-        setTextInputBorderFlashing(false);
-    }
-
-
-    /**
-     * @param textInputId id of the text input to check. Default is selectedTextInputId
-     * @returns any space of selectedTextInput element's width like padding etc. that cannot be occupied by the text input value (in px).
-     *          Return 0 if textInputId param is invalid
-     */
-    function getTextInputOverhead(textInputId = selectedTextInputId): number {
-
-        const textInput = getJQueryElementById(textInputId);
-        if (!textInput)
-            return 0;
-    
-        // add up padding and border
-        const paddingRight = getCSSValueAsNumber(textInput.css("paddingRight"), 2);
-        const paddingLeft = getCSSValueAsNumber(textInput.css("paddingLeft"), 2);
-        const borderRightWidth = getCSSValueAsNumber(textInput.css("borderRightWidth"), 2);
-        const borderLefttWidth = getCSSValueAsNumber(textInput.css("borderLeftWidth"), 2);
-
-        return paddingRight + paddingLeft + borderRightWidth + borderLefttWidth;
     }
     
 
@@ -464,13 +395,15 @@ export default function Document(props) {
 
         // case: last input not blank
         } else {
-            if (flash)
+            // case: warn user
+            if (flash) {
                 flashClass(selectedTextInputId, "textInputFlash", "textInputFocus");
+                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche ein paar der unteren Zeilen auf dieser Seite, um die Schriftgröße zu ändern.");
+            }
 
             return false;
         }
 
-        // TODO: add some subtle popup saying something like "fontsize too large. clear the last line in column"
         return true;
     }
 
@@ -648,34 +581,6 @@ export default function Document(props) {
     }
 
 
-    function handleWindowTooSmall(): void {
-
-        togglePopup(0);
-
-        setPopupContent((
-            <Popup id={id} height="medium" width="medium">
-                <PopupWarnConfirm hideThis={hidePopup} dontConfirm={true}>
-                    <div className="textCenter">
-                        Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
-                        nicht identisch dargestellt werden.
-                    </div>
-
-                    <div className="flexCenter mt-5">
-                        <Button id={id + "Ok"}
-                                className="blackButton blackButtonContained"
-                                hoverBackgroundColor="rgb(100, 100, 100)"
-                                clickBackgroundColor="rgb(130, 130, 130)"
-                                handleClick={hidePopup}
-                                >
-                            Alles klar
-                        </Button>
-                    </div>
-                </PopupWarnConfirm>
-            </Popup>
-        )); 
-    }
-
-
     function togglePopup(duration = 100): void {
 
         const documentPopup = $(documentPopupRef.current);
@@ -710,34 +615,46 @@ export default function Document(props) {
     }
 
 
+    /**
+     * @param summary heading to display inside popup, may be a plain string or html
+     * @param content content to display inside popup, may be a plain string or html
+     * @param warn if true, the popup will be styles as warn popup, else as error popup, default is true (warn style)
+     * @param duration time in ms that the popup should fade in, default is 100
+     * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 2000
+     */
+    function showSubtlePopup(summary: string | React.JSX.Element, content: string | React.JSX.Element, warn = true, duration = 100, holdTime = 3000): void {
+
+        const subtlePopup = getJQueryElementById("PopupSubtle" + (warn ? "Warn" : "Error"));
+        if (!subtlePopup)
+            return;
+
+        // case: is displayed already
+        if (subtlePopup.is(":visible")) 
+            return;
+
+        subtlePopup.fadeIn(duration);
+
+        const fadeOutCallback = setTimeout(() => subtlePopup.fadeOut(holdTime), holdTime);
+        
+        // TODO: continue here, clear timeout on hover, start timeout on mouseout
+        setSubtlePopupContent(
+            <div onMouseMove={() => clearTimeout(fadeOutCallback)} onMouseOut={() => setTimeout(() => subtlePopup.fadeOut(holdTime), holdTime)}>
+                <h6>{summary}</h6>
+                <div>{content}</div>
+            </div>
+        );
+    }
+
+
     return (
         <div id={id} className={className} onClick={handleDocumentClick}>
             <DocumentContext.Provider value={context}>
                 <div className="documentOverlay hideDocumentPopup" ref={documentOverlayRef}></div>
 
+                {/* document popup */}
                 <div className="flexCenter">
                     <PopupContainer id={"Document"} className="hideDocumentPopup" ref={documentPopupRef}>
                         {popupContent}
-
-                        <Popup id={id} height="medium" width="medium" className="hidden">
-                            <PopupWarnConfirm hideThis={hidePopup} dontConfirm={true}>
-                                <div className="textCenter">
-                                    Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
-                                    nicht identisch dargestellt werden.
-                                </div>
-
-                                <div className="flexCenter mt-5">
-                                    <Button id={id + "Ok"}
-                                            className="blackButton blackButtonContained"
-                                            hoverBackgroundColor="rgb(100, 100, 100)"
-                                            clickBackgroundColor="rgb(130, 130, 130)"
-                                            handleClick={hidePopup}
-                                            >
-                                        Alles klar
-                                    </Button>
-                                </div>
-                            </PopupWarnConfirm>
-                        </Popup>
                     </PopupContainer>
                 </div>
                 

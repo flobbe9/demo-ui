@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCase, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { equalsIgnoreCase, flashClass, flashCss, getJQueryElementById, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import { MAX_FONT_SIZE, MIN_FONT_SIZE, getFakeFontSizeByOriginalFontSize, getOriginalFontSizeByFakeFontSize, isMobileWidth } from "../../globalVariables";
 import { getCSSValueAsNumber } from "../../utils/documentBuilderUtils";
@@ -159,8 +159,8 @@ export default function Select(props: {
         } else
             isValid = validateLabelInput(inputValue, !isFontSize);
 
-        // select if is valid
         if (isValid) {
+            // select
             handleSelect(event, isFontSize ? inputValue + "px" : inputValue, inputValue);
 
             // refocus on select input
@@ -253,7 +253,8 @@ export default function Select(props: {
              >
 
             {/* selected option box */}
-            <div className="selectBox flexLeft dontHideSelect" 
+            <div id={"selectBox" + props.id}
+                 className="selectBox flexLeft dontHideSelect" 
                  ref={boxRef} 
                  style={props.boxStyle}
                  onClick={handleClick}

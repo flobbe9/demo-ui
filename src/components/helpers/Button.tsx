@@ -10,7 +10,6 @@ import { isBooleanFalsy, log } from "../../utils/basicUtils";
  * 
  * @since 0.0.5
  */
-// TODO: add more className props
 export default function Button(props: {
     id: string,
 
@@ -187,12 +186,12 @@ export default function Button(props: {
                 title={props.title}
                 >
             {/* hidden */}
-            <div className={"buttonOverlay buttonChildren " + props.childrenClassName} ref={buttonOverlayRef} style={props.childrenStyle}>
+            <div className={"buttonOverlay buttonChildren " + (props.childrenClassName || "")} ref={buttonOverlayRef} style={props.childrenStyle}>
                 <div className="hiddenChildren">{children}</div>
             </div>
 
             {/* visible */}
-            <div className={"buttonChildren dontMarkText " + props.childrenClassName} ref={buttonChildrenRef} style={props.childrenStyle}>
+            <div className={"buttonChildren dontMarkText " + (props.childrenClassName || "")} ref={buttonChildrenRef} style={props.childrenStyle}>
                 {children}
             </div>
         </button>

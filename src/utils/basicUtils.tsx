@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { ApiExceptionFormat } from "../abstract/ApiExceptionFormat";
-import { SPACES_PER_TAB, TAB_UNICODE_ESCAPED } from "../globalVariables";
+import { NUM_SPACES_PER_TAB, TAB_UNICODE } from "../globalVariables";
 import { getCSSValueAsNumber } from "./documentBuilderUtils";
 
 
@@ -56,13 +56,16 @@ export function logApiError(message: string, error: Error): void {
 
 /**
  * @param id to find in html document
+ * @param debug if true a warn log will be displayed in case of falsy id, default is true
  * @returns a JQuery with all matching elements or null if no results
  */
-export function getJQueryElementById(id: string): JQuery | null {
+export function getJQueryElementById(id: string, debug = true): JQuery | null {
 
     // case: blank
     if (isBlank(id)) {
-        logWarn("id blank: " + id);
+        if (debug)
+            logWarn("id blank: " + id);
+
         return null;
     }
 
@@ -70,7 +73,9 @@ export function getJQueryElementById(id: string): JQuery | null {
 
     // case: not present
     if (!element.length) {
-        logWarn("falsy id: " + id);
+        if (debug)
+            logWarn("falsy id: " + id);
+
         return null;
     }
 
@@ -80,13 +85,16 @@ export function getJQueryElementById(id: string): JQuery | null {
 
 /**
  * @param className to find in html document
+ * @param debug if true a warn log will be displayed in case of falsy id, default is true
  * @returns a JQuery with all matching elements or null if no results
  */
-export function getJQueryElementByClassName(className: string): JQuery | null {
+export function getJQueryElementByClassName(className: string, debug = true): JQuery | null {
 
     // case: blank
     if (isBlank(className)) {
-        logWarn("className blank: " + className);
+        if (debug)
+            logWarn("className blank: " + className);
+        
         return null;
     }
 
@@ -94,7 +102,9 @@ export function getJQueryElementByClassName(className: string): JQuery | null {
 
     // case: not present
     if (!element.length) {
-        logWarn("falsy className: " + className);
+        if (debug)
+            logWarn("falsy className: " + className);
+
         return null;
     }
 
@@ -129,6 +139,10 @@ export function isBooleanFalsy(bool: boolean | null | undefined) {
 }
 
 
+/**
+ * @param str string to check
+ * @returns true if given string is empty or only contains white space chars
+ */
 export function isBlank(str: string): boolean {
 
     if (!str && str !== "") {
@@ -137,6 +151,21 @@ export function isBlank(str: string): boolean {
     }
 
     str = str.trim();
+
+    return str.length === 0;
+}
+
+
+/**
+ * @param str to check
+ * @returns true if and only if ```str.length === 0``` is true 
+ */
+export function isEmpty(str: string): boolean {
+
+    if (!str && str !== "") {
+        logError("Falsy input str: " + str);
+        return false;
+    }
 
     return str.length === 0;
 }
@@ -191,7 +220,15 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 }
 
 
-export function moveCursor(textInputId: string, start = 0, end = 0): void {
+/**
+ * Move cursor a text input element. If ```start === end``` the cursor will be shifted normally to given position.
+ * If ```start !== end``` the text between the indices will be marked.
+ * 
+ * @param textInputId id of text input element to move the cursor in
+ * @param start index of selection start, default is 0
+ * @param end index of selection end, default is ```start``` param
+ */
+export function moveCursor(textInputId: string, start = 0, end = start): void {
 
     const textInput = getJQueryElementById(textInputId);
     if (!textInput)
@@ -231,10 +268,13 @@ function confirmPageUnloadEvent(event): void {
  * @param text to measure
  * @param fontSize of text, unit should be included
  * @param fontFamily of text
- * @param fontWeight of text, default is "norml"
- * @returns width of text in unit of fontSize
+ * @param fontWeight of text, default is "normal"
+ * @returns width of text in unit of fontSize (not considering tabs {@link TAB_UNICODE}, use {@link getTotalTabWidthInText()} for tht)
  */
-export function getTextWidth(text: string, fontSize: string, fontFamily: string, fontWeight = "normal"): number { 
+export function getTextWidth(text: string, fontSize: string | number, fontFamily: string, fontWeight = "normal"): number { 
+
+    if (isEmpty(text))
+        return 0;
      
     const font = fontWeight + " " + fontSize + " " + fontFamily;
     
@@ -242,25 +282,88 @@ export function getTextWidth(text: string, fontSize: string, fontFamily: string,
     const context = canvas.getContext("2d")!; 
     context.font = font; 
 
-    // replace tab unicode with equivalent amount of spaces
-    text = text.replaceAll(TAB_UNICODE_ESCAPED, getTabSpaces());
+    // dont measure tabs as this would be inaccurate
+    text = text.replaceAll(TAB_UNICODE, "");
 
-    const width = context.measureText(text).width;
-    
+    let width = context.measureText(text).width;
+
     return width;
 } 
 
 
 /**
- * @returns a string with {@link SPACES_PER_TAB} amount of white space chars
+ * @param fontSize used when measuring the tab chars
+ * @param fontFamily used when measuring the tab chars
+ * @param fontWeight used when measuring the tab chars
+ * @returns the width of a string with {@link NUM_SPACES_PER_TAB} spaces and given styles
  */
-export function getTabSpaces(): string {
+export function getSingleTabWidth(fontSize: string | number, fontFamily: string, fontWeight = "normal"): number {
 
-    let spaceChars = "";
-    for (let i = 0; i < SPACES_PER_TAB; i++) 
-        spaceChars += " "
+    let tabChars = "";
+    for (let i = 0; i < NUM_SPACES_PER_TAB; i++) 
+        tabChars += " ";
 
-    return spaceChars;
+    return getTextWidth(tabChars, fontSize, fontFamily, fontWeight);
+}
+
+
+/**
+ * @param text to measure the tab width of
+ * @param fontSize used when measuring the tab chars
+ * @param fontFamily used when measuring the tab chars
+ * @param fontWeight used when measuring the tab chars
+ * @returns the actual width of and only of all tabs in given text, considering that the tab size decreases
+ *          when other chars are typed in the same range
+ */
+export function getTotalTabWidthInText(text: string, fontSize: string | number, fontFamily: string, fontWeight = "normal"): number {
+
+    // case: empty text
+    if (isEmpty(text))
+        return 0;
+
+    const singleTabWidth = getSingleTabWidth(fontSize, fontFamily, fontWeight);
+
+    let totalTabWidth = 0;
+
+    const sequences = text.split(TAB_UNICODE);
+    let containsOnlyTabs = true;
+
+    sequences.forEach((sequence, sequenceIndex) => {
+        // case: sequence is tab
+        const isLastSequence = sequenceIndex === sequences.length - 1;
+
+        if (isEmpty(sequence) && !isLastSequence) {
+            totalTabWidth += singleTabWidth;
+            return;
+
+        } else 
+            containsOnlyTabs = false;
+
+        let sequenceWidthWithoutTab = getTextWidth(sequence, fontSize.toString(), fontFamily, fontWeight);
+
+        // case: sequence length less than equal tab size
+        if (!isLastSequence) {
+            // even out browser inaccuracy for text that is close but not equal to tab size
+            const diff = sequenceWidthWithoutTab - singleTabWidth;
+            if (diff > -4 && diff <=0) 
+                sequenceWidthWithoutTab += 4.3;
+
+            // case: text width greater than tab size
+            if (sequenceWidthWithoutTab > singleTabWidth)
+                sequenceWidthWithoutTab = sequenceWidthWithoutTab % singleTabWidth;
+            
+            // find actual tab width
+            const actualTabWidth = singleTabWidth - sequenceWidthWithoutTab;
+            totalTabWidth += actualTabWidth;
+        }
+    });
+
+    // case: only tabs in text
+    if (containsOnlyTabs)
+        // even out tab sequence that is falsy added due to split() method
+        totalTabWidth -= singleTabWidth;
+
+    return totalTabWidth;
 }
 
 
@@ -271,7 +374,7 @@ export function getTabSpaces(): string {
  */
 export function downloadFileByUrl(url: string) {
 
-    if (!isBlank(url)) {
+    if (isBlank(url)) {
         logWarn("Failed to download file by url. 'url' is falsy");
         return;
     }
@@ -331,27 +434,69 @@ export function removeConfirmPageUnloadEvent(): void {
  * @param elementId id of element to flash the className of
  * @param addClass className the element has while flashing 
  * @param removeClass className the element should loose while flashing and get back afterwards
- * @param holdTime time in ms that the border stays with given addClass and without given removeClass
+ * @param holdTime time in ms that the border stays with given addClass and without given removeClass, default is 1000
  * @return promise that resolves once animation is finished
  */
 export async function flashClass(elementId: string, addClass: string, removeClass: string, holdTime = 1000) {
 
-    const element = $("#" + elementId);
-    if (!element.length) {
-        logWarn("flashClass() failed")
-        return;
-    }
-
     return new Promise((res, rej) => {
+        const element = getJQueryElementById(elementId);
+        if (!element) {
+            rej("'elementId' falsy: " + elementId);
+            return;
+        }
         // remove old class
-        res(element.removeClass(removeClass));
+        element.removeClass(removeClass);
 
         // add flash class shortly
-        res(element.addClass(addClass));
+        element.addClass(addClass);
+        
+        const resetCallback = () => {
+            element.removeClass(addClass)
+            element.addClass(removeClass);
+        }
+
+        // reset
+        setTimeout(() => res(resetCallback()), holdTime);
+    });
+}
+
+
+/**
+ * Add given css object to given element for given amount of time and reset css values afterwards.
+ * 
+ * @param elementId id of element to flash the syle of
+ * @param flashCss css object (key and value are strings) to apply to given element
+ * @param holdTime time in ms to apply the styles before resetting them
+ * @returns a Promise which resolves once styles are reset
+ */
+export async function flashCss(elementId: string, flashCss: Record<string, string>, holdTime = 1000): Promise<void> {
+    
+    return new Promise((res, rej) => {
+        const element = getJQueryElementById(elementId);
+        if (!element) {
+            rej("'elementId' falsy: " + elementId);
+            return;
+        }
+
+        const initCss: Record<string, string> = {};
+
+        // set flash styles
+        Object.entries(flashCss).forEach(([cssProp, cssVal]) => {
+            // save init css entry
+            initCss[cssProp] = element.css(cssProp);
+
+            // set flash css value
+            element.css(cssProp, cssVal);
+        })
+
+        // reset flash styles
         setTimeout(() => {
-            res(element.removeClass(addClass));
-            res(element.addClass(removeClass));
-        }, holdTime);
+            res(
+                Object.entries(initCss).forEach(([cssProp, cssVal]) => 
+                    element.css(cssProp, cssVal))
+            );
+        }, holdTime)
     });
 }
 

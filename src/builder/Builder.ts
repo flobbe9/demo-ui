@@ -37,7 +37,7 @@ export async function downloadDocument(pdf: boolean) {
  * @param docxFileName full name of the document (including suffix)
  * @return promise of json response
  */
-export async function buildDocument(orientation: Orientation, numColumns: number, docxFileName: string, numLinesAsSingleColumn = 0): Promise<any> {
+export async function buildDocument(orientation: Orientation, numColumns: number, docxFileName: string, numSingleColumnLines = 0): Promise<any> {
 
     const fileName = docxFileName ? appendDocxSuffix(docxFileName) : "Dokument_1.docx";
 
@@ -45,9 +45,9 @@ export async function buildDocument(orientation: Orientation, numColumns: number
         content: buildContent(numColumns),
         tableConfigs: [],
         landscape: orientation === Orientation.LANDSCAPE,
+        fileName: fileName,
         numColumns: numColumns,
-        numLinesAsSingleColumn: numLinesAsSingleColumn,
-        fileName: fileName
+        numSingleColumnLines: numSingleColumnLines
     }
 
     // TODO
@@ -104,7 +104,6 @@ function buildContent(numColumns: number): BasicParagraph[] {
  * @param numColumns number of columns in document
  * @see BasicParagraph
  */
-// TODO: dont add empty paragraph on top of colum of first page if headings are present 
 function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps: BasicParagraph[], numColumns: number): void {
 
     const columnId = getDocumentId("Column", pageIndex, "", columnIndex);

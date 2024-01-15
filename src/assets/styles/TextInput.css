@@ -40,8 +40,6 @@
     }
 
     .textInputLeftColumnConnect {
-        transition: border-color 0.2s;
-
         border-left: var(--connectLinesBorder);
         border-top: var(--connectLinesBorder);
         border-bottom: var(--connectLinesBorder);
@@ -59,8 +57,6 @@
     }
 
     .textInputMiddleColumnConnect {
-        transition: border-color 0.2s;
-
         border-top: var(--connectLinesBorder);
         border-bottom: var(--connectLinesBorder);
 
@@ -77,8 +73,6 @@
     }
 
     .textInputRightColumnConnect {
-        transition: border-color 0.2s;
-
         border-right: var(--connectLinesBorder);
         border-top: var(--connectLinesBorder);
         border-bottom: var(--connectLinesBorder);  
@@ -97,7 +91,7 @@
 
     .textInputSingleColumnDisconnect {
         border: var(--connectLinesBorder);
-        transition: border-color 0.2s;
+        
         margin-bottom: 0;
 
         &.textInputFocus {
