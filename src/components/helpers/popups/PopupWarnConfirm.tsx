@@ -28,7 +28,6 @@ export default function PopupWarnConfirm(props: {
     /** if true a checkbox with "dont show again" is displayed */
     displayDontShowAgainCheckbox?: boolean
     /** cookie and setter to save user selection. Will be used on confirm "yes" only */
-    dontShowAgainCookie?: string
     setDontShowAgainCookie?: (newCookie: string, options?: cookieOptions) => void
 }) {
 
@@ -48,25 +47,46 @@ export default function PopupWarnConfirm(props: {
             return;
         }
 
-        // update checkbox selection
-        if (props.setDontShowAgainCookie && isDontShowAgain) 
-            props.setDontShowAgainCookie("true", {days:  365});
-        
+        handleCheckboxChecked();
+
         props.handleConfirm();
+    }
+
+
+    function handleCheckboxChecked(isChecked?: boolean): void {
+
+        let dontShowAgain = isDontShowAgain;
+
+        // case: no confirm button
+        if (props.dontConfirm && !isBooleanFalsy(isChecked)) {
+            setIsDontShowAgain(isChecked);
+            dontShowAgain = isChecked!;
+        }
+
+        // update checkbox selection
+        if (props.setDontShowAgainCookie) 
+            props.setDontShowAgainCookie(dontShowAgain ? "true" : "false", {days:  365});
     }
 
 
     return (
         <div id={id} className={className}> 
-            <div className="popupHeader flexCenter">
-                <WarnIcon size="small"
-                        iconContainerStyle={{
-                            borderColor: "orange",
-                            color: "orange",
-                        }}
-                        hover={false}
-                         />
-                <i className="fa-solid fa-xmark fa-xl closeIcon" onClick={props.hideThis}></i>
+            <div className="popupHeader flex">
+                <div className="col-4">
+                    {/* placeholder */}
+                </div>
+                <div className="col-4 flexCenterStart">
+                    <WarnIcon size="small"
+                            iconContainerStyle={{
+                                borderColor: "orange",
+                                color: "orange",
+                            }}
+                            hover={false}
+                            />
+                </div>
+                <div className="col-4 flexRightStart pr-0">
+                    <i className="fa-solid fa-xmark fa-xl closeIcon" onClick={props.hideThis}></i>
+                </div>
             </div>
 
             <div className={"popupBody " + childrenClassName}>
@@ -78,7 +98,7 @@ export default function PopupWarnConfirm(props: {
                         <Checkbox id={"DontShowAgainCheckbox"} 
                                   className="flexCenter mr-1"
                                   checked={isDontShowAgain} 
-                                  handleSelect={setIsDontShowAgain}
+                                  handleSelect={props.dontConfirm ? handleCheckboxChecked : setIsDontShowAgain}
                                   boxStyle={{
                                     border: "1px solid rgb(200, 200, 200)",
                                     borderRadius: "3px",

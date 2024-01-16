@@ -6,10 +6,6 @@
     top: 0;
     z-index: 1;
 
-    .controlPanelItem {
-        min-width: 145px;
-    }
-
     .fileNameInput {
         border: none;
         border-radius: 3px;

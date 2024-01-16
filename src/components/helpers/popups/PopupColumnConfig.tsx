@@ -182,7 +182,6 @@ export default function PopupColumnConfig(props: {
                                         hideThis={(event) => toggleWarnPopup(event)}
                                         displayDontShowAgainCheckbox={true}
                                         checkboxContainerClassname="flexCenter mt-5"
-                                        dontShowAgainCookie={dontShowAgainCookie}
                                         setDontShowAgainCookie={setDontShowAgainCookie}
                                         >
                             <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>

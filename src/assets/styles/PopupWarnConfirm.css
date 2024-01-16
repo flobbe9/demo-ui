@@ -3,18 +3,10 @@
     position: relative;
     width: 100%;
     border-radius: 7px;
-    padding: 10px;
     opacity: 1;
 
     .popupHeader {
         height: 15% !important;
-
-        .closeIcon {
-            /* font-size: 2em; */
-            position: absolute;
-            right: 2%;
-            top: 2%;
-        }
     }
 
     .popupBody {

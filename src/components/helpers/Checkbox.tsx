@@ -14,7 +14,7 @@ import { log } from "../../utils/basicUtils";
 export default function Checkbox(props: {
     id: string, 
     checked: boolean,
-    handleSelect,
+    handleSelect: (isChecked: boolean) => void,
     
     hoverBackgroundColor?: string,
     checkedStyle?: React.CSSProperties,

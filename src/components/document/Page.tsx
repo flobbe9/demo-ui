@@ -89,8 +89,6 @@ export default function Page(props: {
                 <PopupWarnConfirm id={dontShowAgainWindowWidthWarningCookieId.current} 
                                   hideThis={documentContext.hidePopup} 
                                   dontConfirm={true}
-                                  displayDontShowAgainCheckbox={true}
-                                  checkboxContainerClassname="flexCenter mt-3"
                                   >
                     <div className="textCenter">
                         Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
@@ -102,10 +100,7 @@ export default function Page(props: {
                                 className="blackButton blackButtonContained"
                                 hoverBackgroundColor="rgb(100, 100, 100)"
                                 clickBackgroundColor="rgb(130, 130, 130)"
-                                handleClick={() => {
-                                    documentContext.hidePopup();
-                                    setDontShowAgainWindowWidthWarningCookie("true");
-                                }}
+                                handleClick={() => documentContext.hidePopup()}
                                 >
                             Alles klar
                         </Button>
@@ -207,7 +202,6 @@ export default function Page(props: {
                                     hideThis={documentContext.hidePopup}
                                     displayDontShowAgainCheckbox={true}
                                     checkboxContainerClassname="flexCenter mt-5"
-                                    dontShowAgainCookie={dontShowAgainConnectWarningCookie}
                                     setDontShowAgainCookie={setDontShowAgainConnectWarningCookie}
                                     >
                     <p className="textCenter">Der Inhalt dieser Zeile wird <strong>gelöscht</strong> werden.</p>

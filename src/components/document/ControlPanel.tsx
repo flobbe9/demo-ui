@@ -38,7 +38,7 @@ export default function ControlPanel(props: {
     }, [documentContext.selectedTextInputId]);
 
 
-    async function buildAndDownloadDocument(): Promise<void> {
+    async function buildAndDownloadDocument(pdf = false): Promise<void> {
 
         // remove confirm unload event
         removeConfirmPageUnloadEvent();
@@ -48,7 +48,7 @@ export default function ControlPanel(props: {
 
         // download
         if (buildResponse.status === 200)
-            downloadDocument(false);
+            downloadDocument(pdf);
 
         // add back confirm unload event
         if (API_ENV !== "dev")
@@ -85,7 +85,7 @@ export default function ControlPanel(props: {
                     />
             </div>  
             
-            <div className="col-4 controlPanelItem flexRight">
+            <div className="col-12 col-md-7 col-lg-4 controlPanelItem flexRight">
                 <Button id={"SaveDocument"}
                         className="blackButton blackButtonContained mr-5"
                         
@@ -126,7 +126,7 @@ export default function ControlPanel(props: {
                 <Button id={"DownloadDocument"}
                         className="mr-3"
 
-                        handlePromise={buildAndDownloadDocument}
+                        handlePromise={() => buildAndDownloadDocument(true)}
                         title="Als PDF herunterladen"
                         disabled={true}
                         rendered={false}

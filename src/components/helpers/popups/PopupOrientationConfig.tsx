@@ -84,9 +84,9 @@ export default function PopupOrientationConfig(props: {
             
             <div className="popupBody flexCenter">
                 <div id="orientationContainer" className="orientationContainer flexCenter dontMarkText">
-                    <div className="mr-0 mr-sm-3">
+                    <div className="col-12 col-sm-6">
                         <RadioButton id="Portrait"
-                                    className="radioContainer" 
+                                    className="flexCenter" 
                                     labelClassName="whiteButton whiteButtonPortrait"
                                     childrenClassName="flexCenterStart"
                                     name="Orientation" 
@@ -106,9 +106,9 @@ export default function PopupOrientationConfig(props: {
                         <div className="textCenter">Hoch-Format</div>
                     </div>
                     
-                    <div>
+                    <div className="col-12 col-sm-6 mt-3 mt-sm-0">
                         <RadioButton id="Landscape"
-                                    className="radioContainer"
+                                    className="flexCenter"
                                     labelClassName="whiteButton whiteButtonLandscape"
                                     childrenClassName="flexCenterStart"
                                     name="Orientation"
@@ -137,7 +137,6 @@ export default function PopupOrientationConfig(props: {
                                             hideThis={(event) => toggleWarnPopup(event)}
                                             displayDontShowAgainCheckbox={true}
                                             checkboxContainerClassname="flexCenter mt-5"
-                                            dontShowAgainCookie={dontShowAgainCookie}
                                             setDontShowAgainCookie={setDontShowAgainCookie}
                                             >
                             <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
