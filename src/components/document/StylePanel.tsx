@@ -395,11 +395,11 @@ export default function StylePanel(props) {
             
             {/* subtle popup */}
             <div className="subtlePopupContainer">
-                <Popup id="SubtleWarn">
+                <Popup id="SubtleWarn" className="Subtle dontHideSubtlePopup">
                     {documentContext.subtlePopupContent}
                 </Popup>
 
-                <Popup id="SubtleError">
+                <Popup id="SubtleError" className="Subtle dontHideSubtlePopup" >
                     {documentContext.subtlePopupContent}
                 </Popup>
             </div>

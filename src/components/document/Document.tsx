@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, createContext, useRef } from "react";
 import "../../assets/styles/Document.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { confirmPageUnload, flashClass, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { confirmPageUnload, flashClass, getJQueryElementByClassName, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE } from "../../globalVariables";
@@ -28,7 +28,7 @@ export default function Document(props) {
     const [escapePopup, setEscapePopup] = useState(true);
     const [popupContent, setPopupContent] = useState<React.JSX.Element>();
     const [subtlePopupContent, setSubtlePopupContent] = useState("");
-
+    const [subtlePopupId, setSubtlePopupId] = useState("");
 
     const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
@@ -49,6 +49,7 @@ export default function Document(props) {
     const windowScrollY = useRef(0);
     const documentPopupRef = useRef(null);
     const documentOverlayRef = useRef(null);
+
 
     const context = {
         isTextInputHeading,
@@ -398,7 +399,7 @@ export default function Document(props) {
             // case: warn user
             if (flash) {
                 flashClass(selectedTextInputId, "textInputFlash", "textInputFocus");
-                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche ein paar der unteren Zeilen auf dieser Seite, um die Schriftgröße zu ändern.");
+                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite, um die Schriftgröße zu ändern.");
             }
 
             return false;
@@ -566,6 +567,34 @@ export default function Document(props) {
     }
 
 
+    function handleDocumentMouseMove(event): void {
+
+        handleSubtlePopupMouseMove(event);
+    }
+
+
+    /**
+     * Stop subtle popup animations on mouseover and display it instead. Fade it out on mouseout. 
+     */
+    function handleSubtlePopupMouseMove(event): void {
+
+        const subtlePopup = getJQueryElementById(subtlePopupId, false);
+        if (!subtlePopup)
+            return;
+
+        const subtlePopupOpacity = subtlePopup.css("opacity");
+
+        // keep popup visible if not hidden completely
+        if ( event.target.className.includes("dontHideSubtlePopup") && subtlePopupOpacity !== "0") {
+            subtlePopup.stop(true);
+            subtlePopup.css("opacity", 1);
+
+        // hide if completely visible
+        } else if (subtlePopupOpacity === "1")
+            subtlePopup.animate({opacity: 0}, 1000);
+    }
+
+
     function handleScroll(event): void {
 
         const currentScrollY = window.scrollY;
@@ -616,38 +645,44 @@ export default function Document(props) {
 
 
     /**
-     * @param summary heading to display inside popup, may be a plain string or html
-     * @param content content to display inside popup, may be a plain string or html
+     * Display subtle popup, set content and set timeout to fade out.
+     * 
+     * @param summary heading to display inside popup, may be a plain string
+     * @param content content to display inside popup, may be a plain string
      * @param warn if true, the popup will be styles as warn popup, else as error popup, default is true (warn style)
      * @param duration time in ms that the popup should fade in, default is 100
-     * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 2000
+     * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
      */
-    function showSubtlePopup(summary: string | React.JSX.Element, content: string | React.JSX.Element, warn = true, duration = 100, holdTime = 3000): void {
+    function showSubtlePopup(summary: string, content: string, warn = true, duration = 100, holdTime = 3000): void {
 
         const subtlePopup = getJQueryElementById("PopupSubtle" + (warn ? "Warn" : "Error"));
         if (!subtlePopup)
             return;
 
-        // case: is displayed already
-        if (subtlePopup.is(":visible")) 
+        // case: visible already
+        if (subtlePopup.css("opacity") !== "0")
             return;
 
-        subtlePopup.fadeIn(duration);
+        setSubtlePopupId(subtlePopup.prop("id"));
 
-        const fadeOutCallback = setTimeout(() => subtlePopup.fadeOut(holdTime), holdTime);
-        
-        // TODO: continue here, clear timeout on hover, start timeout on mouseout
+        // show popup, dont set opacity to 1
+        subtlePopup.animate({opacity: 0.999}, duration);
+
+        // fadeout
+        setTimeout(() => subtlePopup.animate({opacity: 0}, holdTime), holdTime);
+
+        // set content
         setSubtlePopupContent(
-            <div onMouseMove={() => clearTimeout(fadeOutCallback)} onMouseOut={() => setTimeout(() => subtlePopup.fadeOut(holdTime), holdTime)}>
-                <h6>{summary}</h6>
-                <div>{content}</div>
+            <div className="dontHideSubtlePopup">
+                <h6 className="dontHideSubtlePopup">{summary}</h6>
+                <div className="dontHideSubtlePopup">{content}</div>
             </div>
         );
     }
 
 
     return (
-        <div id={id} className={className} onClick={handleDocumentClick}>
+        <div id={id} className={className} onClick={handleDocumentClick} onMouseMove={handleDocumentMouseMove}>
             <DocumentContext.Provider value={context}>
                 <div className="documentOverlay hideDocumentPopup" ref={documentOverlayRef}></div>
 
