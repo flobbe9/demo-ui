@@ -10,9 +10,6 @@ import { DocumentContext } from "./Document";
 import { adjustDocumentFileName } from "../../utils/documentBuilderUtils";
 
 
-// TODO: add print button
-// TODO: add save button
-// TODO: mobile mode
 export default function ControlPanel(props: {
     id?: string,
     className?: string,

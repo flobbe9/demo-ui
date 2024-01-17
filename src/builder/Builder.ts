@@ -20,7 +20,7 @@ const documentBuilderMapping = "/api/documentBuilder";
  *  
  * @param pdf if true, a pdf file is returned by backend
  */
-export async function downloadDocument(pdf: boolean) {
+export function downloadDocument(pdf: boolean) {
     
     const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf;
 

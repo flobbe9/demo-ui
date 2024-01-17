@@ -184,9 +184,22 @@ Link {
         text-align: right;
     }
 
+    .link {
+        text-decoration: none;
+    }
+
     .whiteLink {
         color: white;
         text-decoration: none;
+    }
+
+    .blackLink {
+        color: black;
+        text-decoration: none;
+    }
+
+    .dontBreakText {
+        white-space: nowrap;
     }
 
     .hidden {
@@ -217,11 +230,13 @@ Link {
 }
 
 
+/* Animations, dont delete! */
 @keyframes rotating {
     from {transform: rotate(0deg)}
     to {transform: rotate(360deg)} 
 }
 
+/* 
 @keyframes heightPulse {
     0% {height: 50px}
 
@@ -240,4 +255,4 @@ Link {
     35% {background-color: rgb(167, 167, 167)}
 
     40% {background-color: transparent}
-}
+} */

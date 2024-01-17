@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, forwardRef } from "react";
 import "../../../assets/styles/Popup.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../../../utils/basicUtils";
+import { PopupSize, isPopupSize } from "../../../abstract/PopupSize";
 
 
 /**
@@ -10,20 +11,21 @@ import { log } from "../../../utils/basicUtils";
  * 
  * @since 0.0.5
  */
-// TODO: remove dimension props, style should be enough
 export default forwardRef(function Popup(props: {
     id: string,
     className?: string,
     children?,
     style?: React.CSSProperties,
 
-    height: "small" | "medium" | "large" | "full",
-    width: "small" | "medium" | "large" | "full",
+    height: PopupSize | string,
+    width: PopupSize | string,
     handleOverlayClick?: () => void
 }, ref) {
 
     const id = "Popup" + props.id;
-    const className = "Popup " + initClassName();
+
+    const [style, setStyle] = useState(initStyle());
+    const [className, setClassName] = useState("Popup " + initClassName());
     
     const overlayRef = useRef(null);
     const childrenRef = useRef(null);
@@ -33,10 +35,10 @@ export default forwardRef(function Popup(props: {
 
         let newClassName = props.className + " ";
 
-        if (props.height)
+        if (isPopupSize(props.height))
             newClassName += props.height + "Height ";
 
-        if (props.width)
+        if (isPopupSize(props.width))
             newClassName += props.width + "Width ";
 
         if (props.className)
@@ -46,8 +48,26 @@ export default forwardRef(function Popup(props: {
     }
 
 
+    function initStyle() {
+
+        let style = props.style || {};
+
+        if (!isPopupSize(props.height))
+            style = { ...style, height: props.height };
+
+        if (!isPopupSize(props.width))
+            style = { ...style, width: props.width };
+        
+        return style;
+    }
+
+
     return (
-        <div id={id} className={className} style={props.style} ref={ref}>
+        <div id={id} 
+             className={className} 
+             style={style}
+             ref={ref}
+             >
             <div className={"popupOverlay"} ref={overlayRef} onClick={props.handleOverlayClick}></div>
 
             <div className={"popupChildren"} ref={childrenRef}>{props.children}</div>

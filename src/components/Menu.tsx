@@ -22,7 +22,7 @@ export default function Menu(props) {
 
 
     useEffect(() => {
-        appContext.hidePopup();
+        appContext.hideStuff();
 
         setCssVariable("appBackgroundColor", "rgb(228, 228, 228)");
 

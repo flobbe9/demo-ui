@@ -1,12 +1,12 @@
-import React, { useEffect, useContext, useRef, useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import "../assets/styles/NavBar.css"
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log, moveCursor } from "../utils/basicUtils";
 import LoadingButton from "./helpers/Button";
-import { WEBSITE_NAME, BUILDER_PATH, DOCUMENT_SUFFIX, isMobileWidth } from "../globalVariables";
+import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth } from "../globalVariables";
 import { AppContext } from "./App";
-import LeaveConfirmLink from "./LeaveConfirmLink";
+import LeaveConfirmLink from "./helpers/LeaveConfirmLink";
 
 
 /**
@@ -17,12 +17,9 @@ export default function NavBar(props) {
     const id = props.id ? "NavBar" + props.id : "NavBar";
     const className = props.className ? "NavBar " + props.className : "NavBar";
 
-    const [flexClass, setFlexClass] = useState("flexCenter");
-
-    const location = useLocation();
-
     const appContext = useContext(AppContext);
-    const fileNameInputRef = useRef(null);
+    
+    const [isMobileView, setIsMobileView] = useState(appContext.isWindowWidthTooSmall());
 
 
     useEffect(() => {
@@ -37,8 +34,6 @@ export default function NavBar(props) {
             $(".navSectionRight").css("width", "10%");
         }
 
-        if (appContext.isWindowWidthTooSmall())
-            setFlexClass("flexLeft");
     }, []);
 
     
@@ -49,40 +44,49 @@ export default function NavBar(props) {
 
     async function handleClickMobileItem(event): Promise<void> {
 
-        const mobileItem = $(event.target)
+        let mobileItem = $(event.target)
+
+        // case: selected child
+        if (!event.target.className.includes("navSectionRightMobileItem"))
+            mobileItem = mobileItem.parent(".navSectionRightMobileItem");
+
         const initBackgroundColor = mobileItem.css("backgroundColor")
         const initColor = mobileItem.css("color");
+
         mobileItem.animate({
             backgroundColor: "#ffe4c4", // bisque
             color: "black"
-        }, 100, () => {
+        }, 150, () => {
             mobileItem.animate({
                 backgroundColor: initBackgroundColor,
                 color: initColor
-            });
+            }, 150);
         });
     }
 
 
     return (
         <div id={id} className={className + " dontMarkText flex"}>
-            <div className="col-4 navSectionLeft textLeft flexLeft">
+            <div className="col-7 col-sm-4 navSectionLeft textLeft flexLeft">
                 <Link className="navLink" to="/">
-                    <img className="navImage dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
-                    <span className="navHeading ml-0 ml-sm-3">{WEBSITE_NAME}</span>
+                    <img className="navImage dontMarkText mr-2" src="/favicon.png" alt="" height="60px" width="65px"/>
+                    <span className="navHeading dontBreakText">{WEBSITE_NAME}</span>
                 </Link>
             </div>
 
-            <div className={"col-4 navSectionCenter textCenter " + flexClass}>
-                <LeaveConfirmLink className="navLink" to="/menu" pathsToConfirm={[BUILDER_PATH]}>
-                    <span>Menu</span>
-                </LeaveConfirmLink>
+            <div className={"col-1 col-sm-4 navSectionCenter textLeft"}>
+                <div className={(isMobileView ? "hidden" : "")}>
+                    <LeaveConfirmLink className="navLink" to="/menu" pathsToConfirm={[BUILDER_PATH]}>
+                        Menu
+                    </LeaveConfirmLink>
+                </div>
             </div>
 
-            <div className="col-4 navSectionRight textRight">
-                <i className="navMenuIcon fa fa-bars fa-lg hidden dontHideNavSectionRightMobile" onClick={handleClickMenuIcon}></i>
+            <div className="col-4 col-sm-4 navSectionRight textRight">
+                
                 {/* TODO: add functionality */}
-                <div className="navSectionRightDesktop">
+                {/* desktop mode */}
+                <div className={"navSectionRightDesktop " + (isMobileView ? "hidden" : "")}>
                     <LoadingButton 
                                 id={"Register"}
                                 boxStyle={{
@@ -115,16 +119,34 @@ export default function NavBar(props) {
                 </div>
 
                 {/* TODO: add functionality */}
-                {/* mobile menu */}
+                {/* mobile mode*/}
+                <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile " + (isMobileView ? "" : "hidden")} onClick={handleClickMenuIcon}></i>
                 <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile">
                     <div id="navSectionRightMobileItem-1" 
                          className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
-                         onClick={handleClickMobileItem}>
+                         onClick={handleClickMobileItem}
+                         >
                         Register
                     </div>
 
-                    <div id="navSectionRightMobileItem-2" className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" onClick={handleClickMobileItem}>
+                    <div id="navSectionRightMobileItem-2" 
+                         className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
+                         onClick={handleClickMobileItem}
+                         >
                         Login
+                    </div>
+
+                    <div id="navSectionRightMobileItem-3" 
+                         className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
+                         onClick={handleClickMobileItem}
+                         >
+                        <LeaveConfirmLink className="whiteLink dontHideNavSectionRightMobile" 
+                                          to="/menu" 
+                                          pathsToConfirm={["/"]}
+                                          style={{width: "100%"}}
+                                          >
+                            Menu
+                        </LeaveConfirmLink>
                     </div>
                 </div>
             </div>

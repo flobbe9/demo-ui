@@ -185,11 +185,11 @@ export function getFontSizeDiffInWord(fontSize: number): number {
 
 /**
  * @param textInputId id of text input to compare text width to
- * @param inputOverhead amount of pixels of input's width that should not be considered for calculation, i.e. padding or border.
  * @param testChars string that is not part of input value but should be included in value when calculating value's width
+ * @param fontSize to use when calculating the text width instead of the font size of given text input
  * @returns true if width of text is greater than width of input
  */
-export function isTextLongerThanInput(textInputId: string, inputOverhead: number, testChars: string): boolean {
+export function isTextLongerThanInput(textInputId: string, testChars: string, fontSize?: string): boolean {
 
     const textInput = getJQueryElementById(textInputId);
     if (!textInput)
@@ -201,13 +201,33 @@ export function isTextLongerThanInput(textInputId: string, inputOverhead: number
     textInputValue = insertString(textInputValue, testChars, cursorIndex);
 
     // measure width of text and tabs
-    const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - inputOverhead;
-    const textWidth = getTextWidth(textInputValue, textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
-    const totalTabWidth = getTotalTabWidthInText(textInputValue, textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
+    const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - getTextInputOverhead(textInputId);
+    const textWidth = getTextWidth(textInputValue, fontSize || textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
+    const totalTabWidth = getTotalTabWidthInText(textInputValue, fontSize || textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
 
     return textInputWidth < textWidth + totalTabWidth;
 }
+    
 
+/**
+ * @param textInputId id of the text input to check
+ * @returns any space of selectedTextInput element's width like padding etc. that cannot be occupied by the text input value (in px).
+ *          Return 0 if textInputId param is invalid
+ */
+export function getTextInputOverhead(textInputId: string): number {
+
+    const textInput = getJQueryElementById(textInputId);
+    if (!textInput)
+        return 0;
+
+    // add up padding and border
+    const paddingRight = getCSSValueAsNumber(textInput.css("paddingRight"), 2);
+    const paddingLeft = getCSSValueAsNumber(textInput.css("paddingLeft"), 2);
+    const borderRightWidth = getCSSValueAsNumber(textInput.css("borderRightWidth"), 2);
+    const borderLefttWidth = getCSSValueAsNumber(textInput.css("borderLeftWidth"), 2);
+
+    return paddingRight + paddingLeft + borderRightWidth + borderLefttWidth;
+}
 
 /**
  * Append {@link DOCUMENT_SUFFIX} if last chars dont match it.

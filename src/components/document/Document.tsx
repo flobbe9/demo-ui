@@ -56,7 +56,7 @@ export default function Document(props) {
         refreshSingleColumnLines, 
         setRefreshSingleColumnLines,
 
-        isFontSizeTooLarge,
+        isFontSizeTooLargeForColumn,
         handleFontSizeTooLarge,
         getNumLinesOverhead,
         appendTextInput,
@@ -105,7 +105,7 @@ export default function Document(props) {
         if (API_ENV !== "dev")
             confirmPageUnload();
 
-        appContext.hidePopup();
+        appContext.hideStuff();
         
         window.addEventListener('scroll', handleScroll);
 
@@ -363,7 +363,6 @@ export default function Document(props) {
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @returns false if the fontSize should not be changed, else true
      */
-    // TODO: handle value too large
     function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId): boolean {
 
         const columnTextInputs = getColumnTextInputs(documentId);
@@ -399,7 +398,7 @@ export default function Document(props) {
             // case: warn user
             if (flash) {
                 flashClass(selectedTextInputId, "textInputFlash", "textInputFocus");
-                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite, um die Schriftgröße zu ändern.");
+                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite und versuche es dann erneut.");
             }
 
             return false;
@@ -459,13 +458,14 @@ export default function Document(props) {
     /**
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxSum```. Will be added to ```columnFontSizesSum```. 
-     * @returns a touple formatted like: ```[isFontSizeTooLarge, numLinesOverhead]``` where numLinesOverhead is the number
+     * @returns a touple formatted like: ```[isFontSizeTooLargeForColumn, numLinesOverhead]``` where numLinesOverhead is the number
      *          of lines that should be removed to match the MAX_NUM_LINES.
      */
-    function isFontSizeTooLarge(documentId = selectedTextInputId, diff = 0): [boolean, number] {
+    function isFontSizeTooLargeForColumn(documentId = selectedTextInputId, diff = 0): [boolean, number] {
 
         const columnFontSizesSum = getColumnFontSizesSum(documentId);
         
+        // case: font size sum in column not too large
         if (columnFontSizesSum === -1)
             return [false, -1];
 
@@ -473,7 +473,7 @@ export default function Document(props) {
 
         const maxSum = orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
 
-        // case: adding numLinesOverhead would exceed max value
+        // case: adding the numLinesOverhead would exceed max value
         if (columnFontSizesSum + numLinesOverhead > maxSum)
             return [true, numLinesOverhead];
 
@@ -687,7 +687,7 @@ export default function Document(props) {
                 <div className="documentOverlay hideDocumentPopup" ref={documentOverlayRef}></div>
 
                 {/* document popup */}
-                <div className="flexCenter">
+                <div className="flexCenter test">
                     <PopupContainer id={"Document"} className="hideDocumentPopup" ref={documentPopupRef}>
                         {popupContent}
                     </PopupContainer>

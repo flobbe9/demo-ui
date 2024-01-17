@@ -11,6 +11,7 @@ import PopupContainer from "./helpers/popups/PopupContainer";
 import { WEBSITE_NAME, BUILDER_PATH} from "../globalVariables";
 import Version from "./Version";
 import { getJQueryElementByClassName, getJQueryElementById } from "../utils/basicUtils";
+import NotFound from "./error_pages/NotFound";
 
 
 /**
@@ -54,7 +55,8 @@ export default function App() {
         hidePopup,
         hideSelectOptions,
         pressedKey,
-        isWindowWidthTooSmall
+        isWindowWidthTooSmall,
+        hideStuff
     }
 
 
@@ -66,26 +68,9 @@ export default function App() {
     }, []);
 
 
-
     function handleClick(event): void {
 
-        const targetClassName = event.target.className;
-
-        // hide popup
-        if (targetClassName.includes("hideAppPopup") && escapePopup)
-            hidePopup();
-
-        // hide select options
-        if (!targetClassName.includes("dontHideSelect")) 
-            hideSelectOptions();
-
-        // hide nav menu mobile
-        if (!targetClassName.includes("dontHideNavSectionRightMobile")) 
-            $(".navSectionRightMobile").slideUp(200);
-
-        // hide warn info popup
-        if (!targetClassName.includes("dontHideWarnIcon"))
-            $(".WarnIcon .miniPopup").hide();
+        hideStuff(event);
     }
 
 
@@ -113,6 +98,34 @@ export default function App() {
 
         if (event.key === "Shift")
             setPressedKey("");
+    }
+
+
+    /**
+     * Hide popups, menus and such on event or, if not present, unconditionally.
+     * 
+     * @param event to use the className of
+     */
+    function hideStuff(event?): void {
+
+        const targetClassName = event ? event.target.className : "";
+
+        // hide popup
+        if ((targetClassName.includes("hideAppPopup") && escapePopup) || !event)
+            hidePopup();
+
+        // hide select options
+        // TODO: try to move this to document context
+        if (!targetClassName.includes("dontHideSelect") || !event) 
+            hideSelectOptions();
+
+        // hide nav menu mobile
+        if (!targetClassName.includes("dontHideNavSectionRightMobile") || !event) 
+            $(".navSectionRightMobile").slideUp(200);
+
+        // hide warn info popup
+        if (!targetClassName.includes("dontHideWarnIcon") || !event)
+            $(".WarnIcon .miniPopup").hide();
     }
 
 
@@ -200,7 +213,7 @@ export default function App() {
                             <Route path={"/version"} element={<Version />} />
                             {/* <Route path="/login" element={<Login />} /> */}
                             {/* <Route path="/confirmAccount" element={<AccountConfirmed />} /> */}
-                            {/* <Route path="*" element={<NotFound />} /> */}
+                            <Route path="*" element={<NotFound />} />
                         </Routes>
                     </div>
                     

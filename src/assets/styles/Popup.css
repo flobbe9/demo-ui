@@ -46,7 +46,6 @@
     }
 }
 
-/* Dimensions, TODO: remove these*/
 .fullWidth {
     width: var(--fullWidth);
 }

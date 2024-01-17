@@ -10,19 +10,17 @@
     font-size: 20px;
     padding: var(--marginNavBarInside);
     
-    .navSectionLeft {
-        .navLink {
-            color: black;
-            padding-right: 20px;
-            text-decoration: none;
-            transition: opacity 0.2s;
-            
-            &:hover {
-                opacity: 0.5;
-            }
+    .navLink {
+        color: black;
+        text-decoration: none;
+        transition: opacity 0.2s;
+        width: fit-content;
+        
+        &:hover {
+            opacity: 0.5;
         }
     }
-        
+
     .navSectionRight {
         .navButton {
             margin-left: 10px;
@@ -49,7 +47,7 @@
             position: absolute;
             right: calc(var(--marginNavBarInside) * 2);
             width: 150px;
-            z-index: 2;
+            z-index: 3;
 
             .navSectionRightMobileItem {
                 border-radius: 3px;

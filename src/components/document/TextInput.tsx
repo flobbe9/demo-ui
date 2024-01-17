@@ -8,7 +8,7 @@ import { DocumentContext } from "./Document";
 import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
-import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
+import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextInput, getPartFromDocumentId, getPrevTextInput, getTextInputOverhead, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 
 
 // IDEA: 
@@ -111,10 +111,9 @@ export default function TextInput(props: {
         const eventKey = event.key;
 
         // case: text too long when including typed char
-        if (isKeyAlphaNumeric(event.keyCode) && 
-            appContext.pressedKey !== "Control" &&
-            isTextLongerThanInput(documentContext.selectedTextInputId, getTextInputOverhead(), eventKey === "Tab" ? TAB_UNICODE : eventKey))
-            handleTextLongerThanLine(event);
+        if (isKeyAlphaNumeric(event.keyCode) && (appContext.pressedKey !== "Control")) 
+            if (isTextLongerThanInput(documentContext.selectedTextInputId, eventKey === "Tab" ? TAB_UNICODE : eventKey))
+                handleTextLongerThanLine(event);
 
         if (eventKey === "Tab")
             handleTab(event);
@@ -130,6 +129,15 @@ export default function TextInput(props: {
 
         else if (eventKey === "Backspace")
             handleBackspace(event);
+    }
+
+
+    function handlePaste(event): void {
+
+        const pastedText = event.clipboardData.getData("text") || "";
+
+        if (isTextLongerThanInput(documentContext.selectedTextInputId, pastedText))
+            handleTextLongerThanLine(event);
     }
 
 
@@ -216,7 +224,7 @@ export default function TextInput(props: {
 
         } else {
             // case: text too long
-            if (isTextLongerThanInput(documentContext.selectedTextInputId, getTextInputOverhead(), TAB_UNICODE)) {
+            if (isTextLongerThanInput(documentContext.selectedTextInputId, TAB_UNICODE)) {
                 handleTextLongerThanLine(event);
                 return;
             }
@@ -306,27 +314,6 @@ export default function TextInput(props: {
         }
 
         return textInputs;
-    }
-    
-
-    /**
-     * @param textInputId id of the text input to check. Default is selectedTextInputId
-     * @returns any space of selectedTextInput element's width like padding etc. that cannot be occupied by the text input value (in px).
-     *          Return 0 if textInputId param is invalid
-     */
-    function getTextInputOverhead(textInputId = documentContext.selectedTextInputId): number {
-
-        const textInput = getJQueryElementById(textInputId);
-        if (!textInput)
-            return 0;
-    
-        // add up padding and border
-        const paddingRight = getCSSValueAsNumber(textInput.css("paddingRight"), 2);
-        const paddingLeft = getCSSValueAsNumber(textInput.css("paddingLeft"), 2);
-        const borderRightWidth = getCSSValueAsNumber(textInput.css("borderRightWidth"), 2);
-        const borderLefttWidth = getCSSValueAsNumber(textInput.css("borderLeftWidth"), 2);
-
-        return paddingRight + paddingLeft + borderRightWidth + borderLefttWidth;
     }
 
 
@@ -476,7 +463,7 @@ export default function TextInput(props: {
 
         // case: next text input blank
         if (copyStyles && isBlank(nextTextInput.prop("value"))) {
-            const checkFontSize = documentContext.isFontSizeTooLarge(nextTextInputId); 
+            const checkFontSize = documentContext.isFontSizeTooLargeForColumn(nextTextInputId); 
             
             // case: font size too large
             if (checkFontSize[0]) 
@@ -602,6 +589,7 @@ export default function TextInput(props: {
                 type="text" 
                 onMouseDown={handleMouseDown}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 />
         </div>
     )

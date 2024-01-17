@@ -275,7 +275,7 @@ export function getTextWidth(text: string, fontSize: string | number, fontFamily
 
     if (isEmpty(text))
         return 0;
-     
+    
     const font = fontWeight + " " + fontSize + " " + fontFamily;
     
     const canvas = document.createElement("canvas"); 

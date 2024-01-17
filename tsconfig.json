@@ -2,11 +2,10 @@
     "compilerOptions": {
       "jsx": "react",
       "target": "es2017",
-      "module": "node16",
+      "module": "NodeNext",
       "strictNullChecks": true,
       "esModuleInterop": true,
       "noEmit": true,
-      "allowImportingTsExtensions": true,
       "lib": ["ES2022", "DOM"]
     },
 }

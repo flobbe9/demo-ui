@@ -1,5 +1,5 @@
 import React from "react";
-import "../assets/styles/LeavConfirm.css";
+import "../../assets/styles/LeavConfirmLink.css";
 import { Link, useLocation } from "react-router-dom";
 
 

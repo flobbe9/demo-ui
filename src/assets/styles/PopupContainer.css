@@ -7,7 +7,6 @@
     height: var(--fullHeight);
     position: fixed;
     top: 15%;
-    width: var(--fullWidth);
     z-index: 2;
 
     .matchPopupDimensions {

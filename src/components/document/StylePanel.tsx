@@ -15,7 +15,7 @@ import Button from "../helpers/Button";
 import Popup from "../helpers/popups/Popup";
 import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
 import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
-import { getCSSValueAsNumber } from "../../utils/documentBuilderUtils";
+import { getCSSValueAsNumber, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 
 
 export default function StylePanel(props) {
@@ -60,15 +60,22 @@ export default function StylePanel(props) {
 
 
     function handleFontSizeSelect(fontSize: string): void {
+        
+        // case: text too long for text input length      
+        const isFontSizeTooLargeForTextInput = isTextLongerThanInput(documentContext.selectedTextInputId, "", fontSize + "px");
+        if (isFontSizeTooLargeForTextInput) {
+            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.");
+            return;
+        }
 
         // TODO: calculation is inaccurate (off by two?)
         const diff = getCSSValueAsNumber(fontSize, 2) - documentContext.selectedTextInputStyle.fontSize;
-        const checkFontSize = documentContext.isFontSizeTooLarge(documentContext.selectedTextInputId, diff);
-        const isFontSizeTooLarge = checkFontSize[0];
+        const checkFontSize = documentContext.isFontSizeTooLargeForColumn(documentContext.selectedTextInputId, diff);
+        const isFontSizeTooLargeForColumn = checkFontSize[0];
         const deleteCount = checkFontSize[1];
         
-        // case: line height too large for page
-        if (isFontSizeTooLarge) {
+        // case: line height too large for column height
+        if (isFontSizeTooLargeForColumn) {
             // case: dont increase font size
             if (!documentContext.handleFontSizeTooLarge(true, deleteCount))
                 return;
@@ -373,11 +380,8 @@ export default function StylePanel(props) {
                             boxStyle={{
                                 backgroundColor: boxBackgroundColor,
                                 border: boxBorder,
-                                boxShadow: "none"
-                            }}
-                            childrenStyle={{
-                                paddingRight: "15px",
-                                paddingLeft: "15px"
+                                boxShadow: "none",
+                                height: "96px"
                             }}
                             hoverBackgroundColor={hoverBackgroundColor}
                             clickBackgroundColor={checkedBackgroundColor}
@@ -385,8 +389,8 @@ export default function StylePanel(props) {
                             title={"Anzahl der Spalten"}
                             handleClick={handleColumnConfigClick}
                             >
-                        <div className={id + "IconContainer"}>
-                            <img className={id + "Icon"} src="columnIcon.png" alt="column icon" style={{opacity: 0.7}}/>
+                        <div className={id + "IconContainer mb-2"}>
+                            <img className={id + "Icon"} src="columnIcon.png" alt="column icon" style={{opacity: 0.7, height: "40px"}}/>
                         </div>
                         Spalten
                     </Button>
