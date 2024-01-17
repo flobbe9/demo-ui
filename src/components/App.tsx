@@ -53,7 +53,6 @@ export default function App() {
         setPopupContent,
         togglePopup,
         hidePopup,
-        hideSelectOptions,
         pressedKey,
         isWindowWidthTooSmall,
         hideStuff
@@ -76,12 +75,9 @@ export default function App() {
 
     function handleGlobalKeyDown(event): void {
 
-        if (event.key === "Escape") {
+        if (event.key === "Escape")
             if (escapePopup)
                 hideAllPopups();
-
-            hideSelectOptions();
-        }
 
         if (event.key === "Control")
             setPressedKey("Control");
@@ -110,39 +106,21 @@ export default function App() {
 
         const targetClassName = event ? event.target.className : "";
 
-        // hide popup
-        if ((targetClassName.includes("hideAppPopup") && escapePopup) || !event)
-            hidePopup();
+        // hide all popups
+        if (!event)
+            hideAllPopups();
 
-        // hide select options
-        // TODO: try to move this to document context
-        if (!targetClassName.includes("dontHideSelect") || !event) 
-            hideSelectOptions();
+        // hide popup
+        if ((targetClassName.includes("hideAppPopup") && escapePopup))
+            hidePopup();
 
         // hide nav menu mobile
         if (!targetClassName.includes("dontHideNavSectionRightMobile") || !event) 
             $(".navSectionRightMobile").slideUp(200);
 
         // hide warn info popup
-        if (!targetClassName.includes("dontHideWarnIcon") || !event)
+        if (!targetClassName.includes("dontHideWarnIcon"))
             $(".WarnIcon .miniPopup").hide();
-    }
-
-
-    function hideSelectOptions(selectComponentId?: string): void {
-
-        const selectOptionsBoxes = selectComponentId ? getJQueryElementById(selectComponentId + " .selectOptionsBox") : 
-                                                       getJQueryElementByClassName("selectOptionsBox");
-        if (!selectOptionsBoxes)
-            return;
-
-        // iterate all select option boxes
-        Array.from(selectOptionsBoxes).forEach(selectOptionsBoxElement => {
-            // hide if not hidden already
-            const selectOptionsBox = $(selectOptionsBoxElement);
-            if (selectOptionsBox.css("display") !== "none")
-                selectOptionsBox.slideUp(100, "linear");
-        })
     }
 
 

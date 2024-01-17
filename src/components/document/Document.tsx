@@ -80,6 +80,7 @@ export default function Document(props) {
         showSubtlePopup,
         subtlePopupContent,
         setSubtlePopupContent,
+        hideSelectOptions,
 
         focusTextInput,
         unFocusTextInput,
@@ -108,6 +109,10 @@ export default function Document(props) {
         appContext.hideStuff();
         
         window.addEventListener('scroll', handleScroll);
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "Escape")
+                hideSelectOptions();
+        })
 
         setCssVariable("selectedColor", SELECT_COLOR);
         setCssVariable("appBackgroundColor", "white");
@@ -124,6 +129,9 @@ export default function Document(props) {
         // hide popup
         if (targetClassName.includes("hideDocumentPopup") && escapePopup)
             hidePopup();
+                
+        if (!targetClassName.includes("dontHideSelect")) 
+            hideSelectOptions();
     }
 
 
@@ -678,6 +686,23 @@ export default function Document(props) {
                 <div className="dontHideSubtlePopup">{content}</div>
             </div>
         );
+    }
+
+    
+    function hideSelectOptions(selectComponentId?: string): void {
+
+        const selectOptionsBoxes = selectComponentId ? getJQueryElementById(selectComponentId + " .selectOptionsBox") : 
+                                                       getJQueryElementByClassName("selectOptionsBox");
+        if (!selectOptionsBoxes)
+            return;
+
+        // iterate all select option boxes
+        Array.from(selectOptionsBoxes).forEach(selectOptionsBoxElement => {
+            // hide if not hidden already
+            const selectOptionsBox = $(selectOptionsBoxElement);
+            if (selectOptionsBox.css("display") !== "none")
+                selectOptionsBox.slideUp(100, "linear");
+        })
     }
 
 

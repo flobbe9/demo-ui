@@ -5,6 +5,7 @@ import { equalsIgnoreCase, flashClass, flashCss, getJQueryElementById, includesI
 import { AppContext } from "../App";
 import { MAX_FONT_SIZE, MIN_FONT_SIZE, getFakeFontSizeByOriginalFontSize, getOriginalFontSizeByFakeFontSize, isMobileWidth } from "../../globalVariables";
 import { getCSSValueAsNumber } from "../../utils/documentBuilderUtils";
+import { DocumentContext } from "../document/Document";
 
 
 /**
@@ -50,6 +51,7 @@ export default function Select(props: {
     const optionsBoxRef = useRef(null);
 
     const appContext = useContext(AppContext);
+    const documentContext = useContext(DocumentContext);
 
 
     useEffect(() => {
@@ -146,7 +148,7 @@ export default function Select(props: {
     function handleLabelKeyUp(event): void {
 
         if (event.key === "Enter")
-            appContext.hideSelectOptions();
+            documentContext.hideSelectOptions();
         
         const inputValue = $(labelRef.current!).prop("value");
 
