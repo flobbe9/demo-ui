@@ -2,6 +2,7 @@ import $ from "jquery";
 import { ApiExceptionFormat } from "../abstract/ApiExceptionFormat";
 import { NUM_SPACES_PER_TAB, TAB_UNICODE } from "../globalVariables";
 import { getCSSValueAsNumber } from "./documentBuilderUtils";
+import { fetchAnyReturnBlobUrl } from "./fetchUtils";
 
 
 export function log(text?: any, debug = false): void {
@@ -42,15 +43,14 @@ export function logError(text?: any): void {
 }
 
 
-export function logApiResponse(error: ApiExceptionFormat): void {
+/**
+ * Log the 'error' property, the 'status' property and the 'message' property of given api response including the stacktrace.
+ * 
+ * @param response idealy formatted as {@link ApiExceptionFormat}
+ */
+export function logApiResponse(response: ApiExceptionFormat): void {
 
-    logError(error.error + ": " + error.message);
-}
-
-
-export function logApiError(message: string, error: Error): void {
-    
-    logError(message + ". " + error.message);
+    logError(response.error + "(" + response.status + "): " + response.message + (response.path ? " " + response.path : ""));
 }
 
 
@@ -368,25 +368,54 @@ export function getTotalTabWidthInText(text: string, fontSize: string | number, 
 
 
 /**
- * Create a hidden ```<a href="url" download></a>``` element, click it and remove it from the dom afterwards.
+ * Create a hidden ```<a href="url" download></a>``` element, click it and remove it from the dom afterwards. Optionally handle
+ * given url with {@link fetchAnyReturnBlobUrl} first.
  * 
  * @param url to make the download request to
+ * @param fileName name of file to use for download. If empty, the response header will be searched for a filename
+ * @param fetchBlob if true, the given url will be handled by {@link fetchAnyReturnBlobUrl} method first, before beeing passed to ```<a></a>``` tag. 
+ *                  In that case, the fileName param should be passed as well or no fileName will be specified at all.
+ *                  If false, the given url will be passed directly to ```<a></a>``` tag.
+ *                  Default is true
+ * @param method http method to use for fetch. Default is "get"
+ * @param body to send with the request
+ * @param headers json object with strings as keys and values
  */
-export function downloadFileByUrl(url: string) {
+export async function downloadFileByUrl(url: string, 
+                                        fileName?: string, 
+                                        fetchBlob = true,
+                                        method = "get", 
+                                        body?: object, 
+                                        headers = {"Content-Type": "application/octet-stream"} 
+                                        ): Promise<void> {
 
-    if (isBlank(url)) {
-        logWarn("Failed to download file by url. 'url' is falsy");
-        return;
+    // case: fetch blob first
+    if (fetchBlob) {
+        const response = await fetchAnyReturnBlobUrl(url, method, body, headers);
+
+        // case: successfully generated url from blob
+        if (typeof response === "string")
+            url = response;
+        else
+            return;
     }
 
+    // create link
     const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', url);
-    
+
+    // add props
+    linkElement.href = url;
+    if (fileName)
+        linkElement.download = fileName;
     linkElement.style.display = 'none';
+
+    // append
     document.body.appendChild(linkElement);
   
+    // trigger link
     linkElement.click();
   
+    // remove
     document.body.removeChild(linkElement);
 }
 

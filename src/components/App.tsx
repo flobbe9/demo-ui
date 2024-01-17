@@ -33,7 +33,6 @@ import NotFound from "./error_pages/NotFound";
  * @returns any content of this website
  * @since 0.0.1
  */
-// TODO: root 404
 export default function App() {
 
     // use this when backend login is implemented (https://www.baeldung.com/spring-security-csrf)

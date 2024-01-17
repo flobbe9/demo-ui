@@ -19,13 +19,13 @@ const documentBuilderMapping = "/api/documentBuilder";
  * Send request to backend to download document either as pdf or docx file.
  *  
  * @param pdf if true, a pdf file is returned by backend
+ * @param fileName name of file to use for download. If empty, the response header will be searched for a filename
  */
-export function downloadDocument(pdf: boolean) {
+export function downloadDocument(pdf: boolean, fileName?: string): void {
     
     const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf;
 
-    // TODO: dont stay on localhost:4001 in case of error
-    downloadFileByUrl(url);
+    downloadFileByUrl(url, fileName);
 }
 
 
@@ -50,15 +50,7 @@ export async function buildDocument(orientation: Orientation, numColumns: number
         numSingleColumnLines: numSingleColumnLines
     }
 
-    // TODO
-    // case: is table
-
-    const jsonResponse = await fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/buildAndWrite", "post", body);
-
-    if (jsonResponse.status !== 200)
-        logApiResponse(jsonResponse);
-
-    return jsonResponse;
+    return fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/buildAndWrite", "post", body);
 }
 
 

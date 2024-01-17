@@ -5,7 +5,7 @@
  */
 export interface ApiExceptionFormat {
     status: number,
-    error: string,
+    error: string | null,
     message: string,
     path: string
 }
