@@ -8,6 +8,7 @@ import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLAS
 import { downloadFileByUrl, isBlank, log, logApiResponse, logError, logWarn, stringToNumber } from "../utils/basicUtils";
 import { appendDocxSuffix, getDocumentId, getPartFromDocumentId } from "../utils/documentBuilderUtils";
 import fetchJson from "../utils/fetchUtils";
+import { ApiExceptionFormat } from '../abstract/ApiExceptionFormat';
 
 
 const documentBuilderMapping = "/api/documentBuilder";
@@ -20,12 +21,13 @@ const documentBuilderMapping = "/api/documentBuilder";
  *  
  * @param pdf if true, a pdf file is returned by backend
  * @param fileName name of file to use for download. If empty, the response header will be searched for a filename
+ * @returns error response as {@link ApiExceptionFormat} or nothing if all went well 
  */
-export function downloadDocument(pdf: boolean, fileName?: string): void {
+export async function downloadDocument(pdf: boolean, fileName?: string): Promise<ApiExceptionFormat | void> {
     
     const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf;
 
-    downloadFileByUrl(url, fileName);
+    return await downloadFileByUrl(url, fileName);
 }
 
 

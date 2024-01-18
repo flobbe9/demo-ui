@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, createContext, useRef } from "react";
 import "../../assets/styles/Document.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { confirmPageUnload, flashClass, getJQueryElementByClassName, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { confirmPageUnload, flashClass, getJQueryElementByClassName, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, removeConfirmPageUnloadEvent, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE } from "../../globalVariables";
@@ -12,6 +12,7 @@ import { getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getFontSiz
 import PopupContainer from "../helpers/popups/PopupContainer";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
+import { buildDocument, downloadDocument } from "../../builder/builder";
 
 
 // TODO: add some kind of "back" button
@@ -100,6 +101,8 @@ export default function Document(props) {
         selectedTextInputStyle,
         documentFileName,
         setDocumentFileName,
+
+        buildAndDownloadDocument,
     };
 
 
@@ -594,13 +597,13 @@ export default function Document(props) {
         const subtlePopupOpacity = subtlePopup.css("opacity");
 
         // keep popup visible if not hidden completely
-        if ( event.target.className.includes("dontHideSubtlePopup") && subtlePopupOpacity !== "0") {
+        if (event.target.className.includes("dontHideSubtlePopup") && subtlePopupOpacity !== "0") {
             subtlePopup.stop(true);
             subtlePopup.css("opacity", 1);
 
         // hide if completely visible
         } else if (subtlePopupOpacity === "1")
-            subtlePopup.animate({opacity: 0}, 1000);
+            subtlePopup.animate({opacity: 0}, 3000);
     }
 
 
@@ -616,6 +619,39 @@ export default function Document(props) {
         
         // update ref
         windowScrollY.current = currentScrollY;
+    }
+
+
+    /**
+     * Combine build and download document methods and handle errors.
+     * 
+     * @param pdf if true, the api will return document as .pdf
+     */
+    async function buildAndDownloadDocument(pdf = false): Promise<void> {
+
+        // remove confirm unload event
+        removeConfirmPageUnloadEvent();
+
+        // build
+        const buildResponse = await buildDocument(orientation, numColumns, documentFileName, numSingleColumnLines);
+
+        // case: build failed
+        if (buildResponse.status !== 200)
+            showSubtlePopup("Kann Dokument nicht erstellen", "Da ist etwas beim Erstellen des Dokumentes schiefgelaufen. Versche es erneut oder lade die Seite neu.", false);
+
+        // case: build successful
+        else {
+            // download
+            const downloadResponse = await downloadDocument(pdf, documentFileName);
+
+            // case: download failed
+            if (downloadResponse && downloadResponse.status !== 200)
+                showSubtlePopup("Kann Dokument nicht herunterladen", "Da ist etwas beim Herunterladen des Dokumentes schiefgelaufen. Versche es erneut oder lade die Seite neu.", false);
+        }
+
+        // add back confirm unload event
+        if (API_ENV !== "dev")
+            confirmPageUnload();
     }
 
 

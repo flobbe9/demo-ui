@@ -50,7 +50,7 @@ export function logError(text?: any): void {
  */
 export function logApiResponse(response: ApiExceptionFormat): void {
 
-    logError(response.error + "(" + response.status + "): " + response.message + (response.path ? " " + response.path : ""));
+    logError(getTimeStamp() + " " +  response.error + "(" + response.status + "): " + response.message + (response.path ? " " + response.path : ""));
 }
 
 
@@ -382,6 +382,7 @@ export function getTotalTabWidthInText(text: string, fontSize: string | number, 
  * @param method http method to use for fetch. Default is "get"
  * @param body to send with the request
  * @param headers json object with strings as keys and values
+ * @returns error response as {@link ApiExceptionFormat} if ```fetchBlob``` or nothing if all went well 
  */
 export async function downloadFileByUrl(url: string, 
                                         fileName?: string, 
@@ -389,7 +390,7 @@ export async function downloadFileByUrl(url: string,
                                         method = "get", 
                                         body?: object, 
                                         headers = {"Content-Type": "application/octet-stream"} 
-                                        ): Promise<void> {
+                                        ): Promise<ApiExceptionFormat | void> {
 
     // case: fetch blob first
     if (fetchBlob) {
@@ -399,10 +400,9 @@ export async function downloadFileByUrl(url: string,
         if (typeof response === "string")
             url = response;
         else
-            return;
+            return response;
     }
 
-    // create link
     // create link
     const linkElement = document.createElement('a');
 
@@ -418,15 +418,11 @@ export async function downloadFileByUrl(url: string,
     linkElement.style.display = 'none';
 
     // append
-
-    // append
     document.body.appendChild(linkElement);
   
     // trigger link
-    // trigger link
     linkElement.click();
   
-    // remove
     // remove
     document.body.removeChild(linkElement);
 }
@@ -680,24 +676,29 @@ function matchString(str: string, regexp: RegExp): boolean {
     return matches
 }
 
-// BUG: does not work
+
 /**
- * @param keyName of event key to trigger (i.e. 'A' or 'Backspace')
- * @param eventTargetId id of the html element to trigger the event on
+ * @param date to format, default is now (```new Date()```)
+ * @returns nicely formatted string formatted like ```year-month-date hours:minutes:seconds:milliseconds```
  */
-export function triggerKeyEvent(keyName: string, eventTargetId: string): void {
+function getTimeStamp(date = new Date()): string {
 
-    if (isBlank(eventTargetId)) {
-        logWarn("Failed to trigger key event for key code " + keyName + ". 'eventTargetId' is blank");
-        return;
-    }
+    return date.getFullYear() + "-" + prepend0ToNumber(date.getMonth() + 1) + "-" + prepend0ToNumber(date.getDate()) + " " + 
+           prepend0ToNumber(date.getHours()) + ":" + prepend0ToNumber(date.getMinutes()) + ":" + prepend0ToNumber(date.getSeconds()) + ":" + date.getMilliseconds();
+}
 
-    if (isBlank(keyName)) {
-        logWarn("Failed to trigger key event for key code " + keyName + ". 'keyName' is blank");
-        return;
-    }
 
-    const event = $.Event('keydown');
-    event.key = keyName;
-    $("#" + eventTargetId).trigger(event);
+/**
+ * @param num to prepend a 0 to
+ * @returns a string representation of given number with a 0 prended if the number has only one digit
+ */
+function prepend0ToNumber(num: number): string {
+
+    let str = num.toString();
+
+    // case: one digit only
+    if (num / 10 < 1)
+        str = "0" + str;
+
+    return str;
 }

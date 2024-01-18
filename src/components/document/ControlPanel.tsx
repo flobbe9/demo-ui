@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import "../../assets/styles/ControlPanel.css";
-import { buildDocument, downloadDocument } from "../../builder/Builder";
+import { buildDocument, downloadDocument } from "../../builder/builder";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { confirmPageUnload, isBlank, log, removeConfirmPageUnloadEvent } from "../../utils/basicUtils";
@@ -33,24 +33,6 @@ export default function ControlPanel(props: {
             setDisabled(false);
         
     }, [documentContext.selectedTextInputId]);
-
-
-    async function buildAndDownloadDocument(pdf = false): Promise<void> {
-
-        // remove confirm unload event
-        removeConfirmPageUnloadEvent();
-
-        // build
-        const buildResponse = await buildDocument(documentContext.orientation, documentContext.numColumns, documentContext.documentFileName, documentContext.numSingleColumnLines);
-
-        // download
-        if (buildResponse.status === 200)
-            downloadDocument(pdf, documentContext.documentFileName);
-
-        // add back confirm unload event
-        if (API_ENV !== "dev")
-            confirmPageUnload();
-    }
 
 
     function handleFileNameKeyUp(event): void {
@@ -103,7 +85,7 @@ export default function ControlPanel(props: {
                 <Button id={"DownloadDocument"}
                         className="mr-3"
                         
-                        handlePromise={buildAndDownloadDocument}
+                        handlePromise={documentContext.buildAndDownloadDocument}
                         title="Als Word Dokument herunterladen"
                         disabled={disabled}
 
@@ -123,7 +105,7 @@ export default function ControlPanel(props: {
                 <Button id={"DownloadDocument"}
                         className="mr-3"
 
-                        handlePromise={() => buildAndDownloadDocument(true)}
+                        handlePromise={() => documentContext.buildAndDownloadDocument(true)}
                         title="Als PDF herunterladen"
                         disabled={true}
                         rendered={false}
