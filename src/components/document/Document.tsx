@@ -18,6 +18,7 @@ import Page from "./Page";
 // TODO: update to bootstrap 5
 // TODO: fix console errors
 
+// TODO: improove design
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";

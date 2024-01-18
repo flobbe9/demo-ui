@@ -45,7 +45,7 @@ export default function ControlPanel(props: {
 
         // download
         if (buildResponse.status === 200)
-            downloadDocument(pdf);
+            downloadDocument(pdf, documentContext.documentFileName);
 
         // add back confirm unload event
         if (API_ENV !== "dev")
