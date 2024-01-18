@@ -370,6 +370,8 @@ export function getTotalTabWidthInText(text: string, fontSize: string | number, 
 /**
  * Create a hidden ```<a href="url" download></a>``` element, click it and remove it from the dom afterwards. Optionally handle
  * given url with {@link fetchAnyReturnBlobUrl} first.
+ * Create a hidden ```<a href="url" download></a>``` element, click it and remove it from the dom afterwards. Optionally handle
+ * given url with {@link fetchAnyReturnBlobUrl} first.
  * 
  * @param url to make the download request to
  * @param fileName name of file to use for download. If empty, the response header will be searched for a filename
@@ -401,7 +403,13 @@ export async function downloadFileByUrl(url: string,
     }
 
     // create link
+    // create link
     const linkElement = document.createElement('a');
+
+    // add props
+    linkElement.href = url;
+    if (fileName)
+        linkElement.download = fileName;
 
     // add props
     linkElement.href = url;
@@ -410,11 +418,15 @@ export async function downloadFileByUrl(url: string,
     linkElement.style.display = 'none';
 
     // append
+
+    // append
     document.body.appendChild(linkElement);
   
     // trigger link
+    // trigger link
     linkElement.click();
   
+    // remove
     // remove
     document.body.removeChild(linkElement);
 }
