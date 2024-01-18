@@ -50,78 +50,87 @@ export default function ControlPanel(props: {
 
 
     return (
-        <div id={id} className={className + " flex"}>
-            <div className="col-4 controlPanelItem flexLeft">
+        <div id={id} className={className}>
+            <div className="boxShadowContainer flex">
+                <div className="col-4 controlPanelItem flexLeft">
+                    {/* <Button id={"SaveDocument"}
+                            className="blackButton blackButtonContained flexLeft mr-5"
+                            childrenClassName="flexLeft"
+                            
+                            title="Dokument speichern"
+                            disabled={false}
+                            // rendered={false}
+
+                            boxStyle={{height: "fit-content"}}
+                            childrenStyle={{
+                                padding: "3px 9px",
+                                width: "110px"
+                            }}
+                            hoverBackgroundColor="rgb(50, 50, 50)"
+                            clickBackgroundColor="rgb(150, 150, 150)"
+                            >
+                        <i className="fa-regular fa-floppy-disk mr-1"></i> 
+                        <span>Speichern</span>
+                    </Button>              */}
+                    <i className={"burgerButtonIcon fa fa-bars fa-lg"}></i>
+                </div>
+
+                <div className="col-4 controlPanelItem flexCenter">
+                    <input id="fileNameInput"
+                        className={"fileNameInput"} 
+                        ref={fileNameInputRef}
+                        type="text" 
+                        defaultValue={documentContext.documentFileName}
+                        onKeyUp={handleFileNameKeyUp}
+                        />
+                </div>  
+                
+                <div className="col-12 col-md-7 col-lg-4 controlPanelItem flexRight">
+                     <Button id={"DownloadDocument"}
+                            className="mr-3"
+                            
+                            handlePromise={documentContext.buildAndDownloadDocument}
+                            title="Als Word Dokument herunterladen"
+                            disabled={disabled}
+
+                            boxStyle={{backgroundColor: "blue"}}
+                            childrenStyle={{
+                                color: "white",
+                                padding: "3px 9px",
+                                width: "80px"
+                            }}
+                            hoverBackgroundColor="rgb(80, 80, 255)"
+                            clickBackgroundColor="rgb(80, 80, 255)"
+                            >
+                        <i className="fa-solid fa-file-arrow-down fa-lg mr-2"></i>
+
+                        <span>Word</span>
+                    </Button>   
+
+                            {/*
+                    <Button id={"DownloadDocument"}
+                            className="mr-3"
+                            childrenClassName="flexLeft"
+
+                            handlePromise={() => documentContext.buildAndDownloadDocument(true)}
+                            title="Als PDF herunterladen"
+                            disabled={true}
+                            // rendered={false}
+
+                            boxStyle={{backgroundColor: "red"}}
+                            childrenStyle={{
+                                color: "white",
+                                padding: "3px 9px",
+                                width: "80px"
+                            }}
+                            hoverBackgroundColor="rgb(255, 135, 135)"
+                            clickBackgroundColor="rgb(255, 80, 80)"
+                            >
+                        <i className="fa-solid fa-file-arrow-down fa-lg mr-2"></i>
+                        <span>Pdf</span>
+                    </Button>   */}
+                </div>  
             </div>
-
-            <div className="col-4 controlPanelItem flexCenter">
-                <input id="fileNameInput"
-                    className={"fileNameInput"} 
-                    ref={fileNameInputRef}
-                    type="text" 
-                    defaultValue={documentContext.documentFileName}
-                    onKeyUp={handleFileNameKeyUp}
-                    />
-            </div>  
-            
-            <div className="col-12 col-md-7 col-lg-4 controlPanelItem flexRight">
-                <Button id={"SaveDocument"}
-                        className="blackButton blackButtonContained mr-5"
-                        
-                        title="Dokument speichern"
-                        disabled={true}
-                        rendered={false}
-
-                        childrenStyle={{
-                            padding: "3px 9px"
-                        }}
-                        hoverBackgroundColor="rgb(50, 50, 50)"
-                        clickBackgroundColor="rgb(150, 150, 150)"
-                        >
-                    <i className="fa-regular fa-floppy-disk mr-1"></i> 
-                    <span>Save</span>
-                </Button>             
-
-                <Button id={"DownloadDocument"}
-                        className="mr-3"
-                        
-                        handlePromise={documentContext.buildAndDownloadDocument}
-                        title="Als Word Dokument herunterladen"
-                        disabled={disabled}
-
-                        boxStyle={{backgroundColor: "blue"}}
-                        childrenStyle={{
-                            color: "white",
-                            padding: "3px 9px"
-                        }}
-                        hoverBackgroundColor="rgb(80, 80, 255)"
-                        clickBackgroundColor="rgb(80, 80, 255)"
-                        >
-                    <i className="fa-solid fa-file-arrow-down fa-lg mr-2"></i>
-
-                    <span>Word</span>
-                </Button>   
-
-                <Button id={"DownloadDocument"}
-                        className="mr-3"
-
-                        handlePromise={() => documentContext.buildAndDownloadDocument(true)}
-                        title="Als PDF herunterladen"
-                        disabled={true}
-                        rendered={false}
-
-                        boxStyle={{backgroundColor: "red"}}
-                        childrenStyle={{
-                            color: "white",
-                            padding: "3px 9px"
-                        }}
-                        hoverBackgroundColor="rgb(255, 135, 135)"
-                        clickBackgroundColor="rgb(255, 80, 80)"
-                        >
-                    <i className="fa-solid fa-file-arrow-down fa-lg mr-2"></i>
-                    <span>Pdf</span>
-                </Button>  
-            </div>  
         </div>
     )
 }

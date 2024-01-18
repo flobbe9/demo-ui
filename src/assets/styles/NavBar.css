@@ -3,12 +3,16 @@
 }
 
 .NavBar {
-    align-items: center;
-    background-color: bisque;
-    box-shadow: 0 1px 5px -2px black;
-    display: flex;
+    background-color: white;
     font-size: 20px;
-    padding: var(--marginNavBarInside);
+    /* height: 80px; */
+    z-index: 2;
+    
+    .boxShadowContainer {
+        background-color: bisque;
+        /* box-shadow: 0px 5px 10px 0px rgb(184, 184, 184); */
+        padding: var(--marginNavBarInside) 0;
+    }
     
     .navLink {
         color: black;

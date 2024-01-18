@@ -139,7 +139,8 @@ export function isMobileWidth(): boolean {
 }
 
 
-export const SELECT_COLOR = "rgb(0, 226, 226)";
+// export const SELECT_COLOR = "rgb(0, 226, 226)";
+export const SELECT_COLOR = "black";
 
 
 export const SELECTED_STYLE: React.CSSProperties = {

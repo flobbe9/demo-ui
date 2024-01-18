@@ -84,7 +84,7 @@ export default function PopupOrientationConfig(props: {
             
             <div className="popupBody flexCenter">
                 <div id="orientationContainer" className="orientationContainer flexCenter dontMarkText">
-                    <div className="col-12 col-sm-6">
+                    <div className="col-12 col-sm-5">
                         <RadioButton id="Portrait"
                                     className="flexCenter" 
                                     labelClassName="whiteButton whiteButtonPortrait"
@@ -106,7 +106,7 @@ export default function PopupOrientationConfig(props: {
                         <div className="textCenter">Hoch-Format</div>
                     </div>
                     
-                    <div className="col-12 col-sm-6 mt-3 mt-sm-0">
+                    <div className="col-12 col-sm-7  mt-3 mt-sm-0">
                         <RadioButton id="Landscape"
                                     className="flexCenter"
                                     labelClassName="whiteButton whiteButtonLandscape"

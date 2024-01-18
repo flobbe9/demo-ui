@@ -1,26 +1,35 @@
 .ControlPanel {
-    background-color: white;
-    overflow: auto;
-    padding: 5px;
+    background-color: black;
     position: sticky;
+    /* height: 65px; */
     top: 0;
     z-index: 1;
 
-    .fileNameInput {
-        border: none;
-        border-radius: 3px;
-        min-width: 191px;
-        opacity: 0.4;
-        padding: 5px;
-        transition: background-color 0.2s, opacity 0.2s;
+    .boxShadowContainer {
+        /* box-shadow: 0px 10px 10px 0px rgb(189, 189, 189); */
+        padding: 5px 0;
+        overflow: auto;
 
-        &:focus {
-            outline: none;
+        .burgerButtonIcon {
+            color: rgb(233, 233, 233);
         }
         
-        &:hover {
-            background-color: rgb(233, 233, 233);
-            opacity: 1;
+        .fileNameInput {
+            border: none;
+            border-radius: 3px;
+            min-width: 191px;
+            opacity: 0.4;
+            padding: 3px;
+            transition: background-color 0.2s, opacity 0.2s;
+
+            &:focus {
+                outline: none;
+            }
+            
+            &:hover {
+                background-color: rgb(233, 233, 233);
+                opacity: 1;
+            }
         }
     }
 }

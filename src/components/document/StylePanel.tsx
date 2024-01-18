@@ -18,6 +18,13 @@ import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
 import { getCSSValueAsNumber, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 
 
+/**
+ * Panel on top of <Document /> with all document options (styling etc.).
+ * 
+ * @since 0.0.1
+ */
+// TODO: add hide option, or dont fix
+
 export default function StylePanel(props) {
 
     const id = "StylePanel" + (props.id || "");
@@ -32,10 +39,10 @@ export default function StylePanel(props) {
     const stylePanelRef = useRef(null);
     const sectionContainerRef = useRef(null);
 
-    const boxBackgroundColor = "rgb(240, 240, 240)";
-    const boxBorder = "1px solid white";
-    const hoverBackgroundColor = "rgb(225, 225, 225)";
-    const checkedBackgroundColor = "rgb(200, 200, 200)";
+    const boxBackgroundColor = "rgb(255, 255, 255)";
+    const boxBorder = "1px solid rgb(200, 200, 200)";
+    const hoverBackgroundColor = "rgb(245, 245, 245)";
+    const checkedBackgroundColor = "rgb(233, 233, 233)";
 
 
     useEffect(() => {
@@ -188,6 +195,7 @@ export default function StylePanel(props) {
             <div className={"sectionContainer " + flexClass + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
                 <StylePanelSection hideRightBorder={true} componentStyle={{maxWidth: "215px"}}>
                     <div className="flexLeft" style={{height: "50%"}}>
+                        {/* TODO: display every option in given font family */}
                         <Select id="FontFamily" 
                                 label={documentContext.selectedTextInputStyle.fontFamily}
                                 disabled={disabled}
@@ -398,12 +406,9 @@ export default function StylePanel(props) {
             </div>
             
             {/* subtle popup */}
+            {/* TODO: hover does not work */}
             <div className="subtlePopupContainer">
-                <Popup id="SubtleWarn" className="Subtle dontHideSubtlePopup">
-                    {documentContext.subtlePopupContent}
-                </Popup>
-
-                <Popup id="SubtleError" className="Subtle dontHideSubtlePopup" >
+                <Popup id={documentContext.subtlePopupId} className="Subtle dontHideSubtlePopup">
                     {documentContext.subtlePopupContent}
                 </Popup>
             </div>

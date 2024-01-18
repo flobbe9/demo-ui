@@ -20,6 +20,7 @@ import { buildDocument, downloadDocument } from "../../builder/builder";
 // TODO: fix console errors
 
 // TODO: improove design
+// TODO: still performance issues with key down
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -30,7 +31,7 @@ export default function Document(props) {
     const [escapePopup, setEscapePopup] = useState(true);
     const [popupContent, setPopupContent] = useState<React.JSX.Element>();
     const [subtlePopupContent, setSubtlePopupContent] = useState("");
-    const [subtlePopupId, setSubtlePopupId] = useState("");
+    const [subtlePopupId, setSubtlePopupId] = useState("SubtleInfo");
 
     const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
@@ -79,6 +80,7 @@ export default function Document(props) {
         hidePopup,
         popupContent,
         setPopupContent,
+        subtlePopupId,
         showSubtlePopup,
         subtlePopupContent,
         setSubtlePopupContent,
@@ -112,16 +114,22 @@ export default function Document(props) {
 
         appContext.hideStuff();
         
-        window.addEventListener('scroll', handleScroll);
-        window.addEventListener("keydown", (event) => {
-            if (event.key === "Escape")
-                hideSelectOptions();
-        })
+        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("keydown", handleKeyDown);
 
         setCssVariable("selectedColor", SELECT_COLOR);
         setCssVariable("appBackgroundColor", "white");
         setCssVariable("pageWidthPortrait", PAGE_WIDTH_PORTRAIT);
         setCssVariable("pageWidthLandscape", PAGE_WIDTH_LANDSCAPE);
+
+        // clean up
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("keydown", handleKeyDown);
+            
+            if (API_ENV !== "dev")
+                removeConfirmPageUnloadEvent();
+        }
 
     }, []);
 
@@ -622,6 +630,13 @@ export default function Document(props) {
     }
 
 
+    function handleKeyDown(event): void {
+
+        if (event.key === "Escape")
+            hideSelectOptions();
+    }
+
+
     /**
      * Combine build and download document methods and handle errors.
      * 
@@ -698,9 +713,10 @@ export default function Document(props) {
      * @param duration time in ms that the popup should fade in, default is 100
      * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
      */
+    // TODO: add info and success options
     function showSubtlePopup(summary: string, content: string, warn = true, duration = 100, holdTime = 3000): void {
 
-        const subtlePopup = getJQueryElementById("PopupSubtle" + (warn ? "Warn" : "Error"));
+        const subtlePopup = getJQueryElementByClassName("Popup.Subtle");
         if (!subtlePopup)
             return;
 
@@ -708,7 +724,7 @@ export default function Document(props) {
         if (subtlePopup.css("opacity") !== "0")
             return;
 
-        setSubtlePopupId(subtlePopup.prop("id"));
+        setSubtlePopupId("Subtle" + (warn ? "Warn" : "Error"));
 
         // show popup, dont set opacity to 1
         subtlePopup.animate({opacity: 0.999}, duration);

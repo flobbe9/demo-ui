@@ -66,87 +66,89 @@ export default function NavBar(props) {
 
 
     return (
-        <div id={id} className={className + " dontMarkText flex"}>
-            <div className="col-7 col-sm-4 navSectionLeft textLeft flexLeft">
-                <Link className="navLink" to="/">
-                    <img className="navImage dontMarkText mr-2" src="/favicon.png" alt="" height="60px" width="65px"/>
-                    <span className="navHeading dontBreakText">{WEBSITE_NAME}</span>
-                </Link>
-            </div>
-
-            <div className={"col-1 col-sm-4 navSectionCenter textLeft"}>
-                <div className={(isMobileView ? "hidden" : "")}>
-                    <LeaveConfirmLink className="navLink" to="/menu" pathsToConfirm={[BUILDER_PATH]}>
-                        Menu
-                    </LeaveConfirmLink>
-                </div>
-            </div>
-
-            <div className="col-4 col-sm-4 navSectionRight textRight">
-                
-                {/* TODO: add functionality */}
-                {/* desktop mode */}
-                <div className={"navSectionRightDesktop " + (isMobileView ? "hidden" : "")}>
-                    <LoadingButton 
-                                id={"Register"}
-                                boxStyle={{
-                                    backgroundColor: "transparent", 
-                                    border: "1px solid grey", 
-                                    marginRight: "15px", 
-                                }}
-                                hoverBackgroundColor={"rgb(255, 238, 214)"} 
-                                clickBackgroundColor={"rgb(180, 180, 180)"}
-                                disabled={true}
-                                rendered={false}
-                                >
-                        Registrieren
-                    </LoadingButton>
-                                
-                    <LoadingButton 
-                                id={"Login"}
-                                boxStyle={{
-                                    backgroundColor: "black",
-                                    color: "bisque", 
-                                }}
-                                childrenStyle={{width: "100px"}}
-                                hoverBackgroundColor={"rgb(60, 60, 60)"} 
-                                clickBackgroundColor={"rgb(200, 200, 200)"}
-                                disabled={true}
-                                rendered={false}
-                                >
-                        Login
-                    </LoadingButton>
+        <div id={id} className={className + " dontMarkText"}>
+            <div className="boxShadowContainer flex">
+                <div className="col-7 col-sm-4 navSectionLeft textLeft flexLeft">
+                    <Link className="navLink" to="/">
+                        <img className="navImage dontMarkText mr-2" src="/favicon.png" alt="" height="40px" width="40px"/>
+                        <span className="navHeading dontBreakText">{WEBSITE_NAME}</span>
+                    </Link>
                 </div>
 
-                {/* TODO: add functionality */}
-                {/* mobile mode*/}
-                <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile " + (isMobileView ? "" : "hidden")} onClick={handleClickMenuIcon}></i>
-                <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile">
-                    <div id="navSectionRightMobileItem-1" 
-                         className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
-                         onClick={handleClickMobileItem}
-                         >
-                        Register
+                <div className={"col-1 col-sm-4 navSectionCenter flexLeft"}>
+                    <div className={(isMobileView ? "hidden" : "")}>
+                        {/* <LeaveConfirmLink className="navLink" to="/home" pathsToConfirm={[BUILDER_PATH]}>
+                            Home
+                        </LeaveConfirmLink> */}
+                    </div>
+                </div>
+
+                <div className="col-4 col-sm-4 navSectionRight textRight">
+                    
+                    {/* TODO: add functionality */}
+                    {/* desktop mode */}
+                    <div className={"navSectionRightDesktop " + (isMobileView ? "hidden" : "")}>
+                        <LoadingButton 
+                                    id={"Register"}
+                                    boxStyle={{
+                                        backgroundColor: "transparent", 
+                                        border: "1px solid grey", 
+                                        marginRight: "15px", 
+                                    }}
+                                    hoverBackgroundColor={"rgb(255, 238, 214)"} 
+                                    clickBackgroundColor={"rgb(180, 180, 180)"}
+                                    disabled={true}
+                                    rendered={false}
+                                    >
+                            Registrieren
+                        </LoadingButton>
+                                    
+                        <LoadingButton 
+                                    id={"Login"}
+                                    boxStyle={{
+                                        backgroundColor: "black",
+                                        color: "bisque", 
+                                    }}
+                                    childrenStyle={{width: "100px"}}
+                                    hoverBackgroundColor={"rgb(60, 60, 60)"} 
+                                    clickBackgroundColor={"rgb(200, 200, 200)"}
+                                    disabled={true}
+                                    rendered={false}
+                                    >
+                            Login
+                        </LoadingButton>
                     </div>
 
-                    <div id="navSectionRightMobileItem-2" 
-                         className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
-                         onClick={handleClickMobileItem}
-                         >
-                        Login
-                    </div>
+                    {/* TODO: add functionality */}
+                    {/* mobile mode*/}
+                    <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile " + (isMobileView ? "" : "hidden")} onClick={handleClickMenuIcon}></i>
+                    <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile">
+                        <div id="navSectionRightMobileItem-1" 
+                            className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
+                            onClick={handleClickMobileItem}
+                            >
+                            Register
+                        </div>
 
-                    <div id="navSectionRightMobileItem-3" 
-                         className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
-                         onClick={handleClickMobileItem}
-                         >
-                        <LeaveConfirmLink className="whiteLink dontHideNavSectionRightMobile" 
-                                          to="/menu" 
-                                          pathsToConfirm={["/"]}
-                                          style={{width: "100%"}}
-                                          >
-                            Menu
-                        </LeaveConfirmLink>
+                        <div id="navSectionRightMobileItem-2" 
+                            className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
+                            onClick={handleClickMobileItem}
+                            >
+                            Login
+                        </div>
+
+                        <div id="navSectionRightMobileItem-3" 
+                            className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
+                            onClick={handleClickMobileItem}
+                            >
+                            <LeaveConfirmLink className="whiteLink dontHideNavSectionRightMobile" 
+                                            to="/home" 
+                                            pathsToConfirm={["/"]}
+                                            style={{width: "100%"}}
+                                            >
+                                Home
+                            </LeaveConfirmLink>
+                        </div>
                     </div>
                 </div>
             </div>

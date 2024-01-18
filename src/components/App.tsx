@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Document from "./document/Document";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
-import Menu from "./Menu";
+import Home from "./Home";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../utils/basicUtils";
 import PopupContainer from "./helpers/popups/PopupContainer";
@@ -63,6 +63,12 @@ export default function App() {
         document.addEventListener("keyup", handleGlobalKeyUp);
 
         document.title = WEBSITE_NAME;
+
+        // clean up
+        return () => {
+            document.removeEventListener("keydown", handleGlobalKeyDown);
+            document.removeEventListener("keyup", handleGlobalKeyUp);
+        }
     }, []);
 
 
@@ -185,7 +191,7 @@ export default function App() {
                         </div>
 
                         <Routes>
-                            <Route path="/menu" element={<Menu />} />
+                            <Route path="/home" element={<Home />} />
                             <Route path={BUILDER_PATH} element={<Document />} />
                             {/* <Route path="/login" element={<Login />} /> */}
                             {/* <Route path="/confirmAccount" element={<AccountConfirmed />} /> */}

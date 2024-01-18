@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import "../assets/styles/Menu.css";
+import "../assets/styles/Home.css";
 import { setCssVariable } from "../utils/basicUtils";
 import { AppContext } from "./App";
 import Button from "./helpers/Button";
@@ -11,10 +11,10 @@ import { Link } from "react-router-dom";
  *
  * @since 0.0.5
  */
-export default function Menu(props) {
+export default function Home(props) {
 
-    const id = props.id ? "Menu" + props.id : "Menu";
-    const className = props.className ? "Menu " + props.className : "Menu";
+    const id = props.id ? "Home" + props.id : "Home";
+    const className = props.className ? "Home " + props.className : "Home";
 
     const [savedDocuments, setSavedDocuments] = useState(initSavedDocuments());
 
