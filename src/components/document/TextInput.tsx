@@ -18,6 +18,7 @@ import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextI
 
 // TODO: add pictures
 // TODO: add table
+
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,

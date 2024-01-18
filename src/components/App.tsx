@@ -187,7 +187,6 @@ export default function App() {
                         <Routes>
                             <Route path="/menu" element={<Menu />} />
                             <Route path={BUILDER_PATH} element={<Document />} />
-                            <Route path={"/version"} element={<Version />} />
                             {/* <Route path="/login" element={<Login />} /> */}
                             {/* <Route path="/confirmAccount" element={<AccountConfirmed />} /> */}
                             <Route path="*" element={<NotFound />} />
