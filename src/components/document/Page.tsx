@@ -306,9 +306,12 @@ export default function Page(props: {
 
         const targetClassName = event.target.className;
 
-        // hide connect icon of text inputs
+        // hide connect / disconnect icon of text inputs
         if (!includesIgnoreCase(targetClassName, "dontHideConnectIcon"))
-            $(".connectIcon").fadeOut(100);
+            $(".connectIcon.dontHideConnectIcon").hide();
+
+        if (!includesIgnoreCase(targetClassName, "dontHideDisConnectIcon"))
+            $(".connectIcon.dontHideDisConnectIcon").hide();
     }
 
 

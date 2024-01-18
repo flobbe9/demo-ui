@@ -65,9 +65,12 @@ export default function TextInput(props: {
         // update state
         setIsSingleColumnLineCandidate(isSingleColumnLineCandidate);
 
-        // update classes
-        if (isSingleColumnLineCandidate || props.isSingleColumnLine)
+        // update classes, those are checked on hover in Page component
+        if (isSingleColumnLineCandidate)
             setDontHideConnectIconClassName("dontHideConnectIcon");
+
+        else if (props.isSingleColumnLine)
+            setDontHideConnectIconClassName("dontHideDisConnectIcon");
 
     }, [documentContext.refreshSingleColumnLines])
 
@@ -497,44 +500,6 @@ export default function TextInput(props: {
         // move cursor to end of text
         const lastCharIndex = prevTextInput.prop("value").length;
         moveCursor(prevTextInput.prop("id"), lastCharIndex);
-    }
-
-
-    /**
-     * @returns true if ```char in front of cursor === TAB_UNICODE```.
-     */
-    function areCharsInFrontOfCursorTab(): boolean {
-
-        // get input value
-        const input = $(inputRef.current!);
-        const value: string = input.prop("value");
-
-        // case: text is marked
-        if (isTextInputValueMarked(input.prop("id")))
-            return false;
-        
-        // get char in front of cursor
-        const cursorIndex = input.prop("selectionEnd");
-        const charsInFrontOfCursor = value.charAt(cursorIndex - 1);
-
-        return charsInFrontOfCursor === TAB_UNICODE;
-    }
-
-
-    /**
-     * @returns true if ```2 chars after cursor === TAB_UNICODE```.
-     */
-    function areCharsAfterCursorTab(): boolean {
-
-        // get input value
-        const input = $(inputRef.current!);
-        const value: string = input.prop("value");
-        
-        // get 2 chars after cursor
-        const cursorIndex = input.prop("selectionStart");
-        const charsInFrontOfCursor = value.charAt(cursorIndex) + value.charAt(cursorIndex + 1);
-
-        return charsInFrontOfCursor === TAB_UNICODE;
     }
 
 
