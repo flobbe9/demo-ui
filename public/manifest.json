@@ -1,6 +1,6 @@
 {
-  "short_name": "vorspiel",
-  "name": "Vorspiel",
+  "short_name": "word light",
+  "name": "Word light",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
