@@ -17,7 +17,7 @@ import { DONT_SHOW_AGAIN_COOKIE_NAME } from "../../../globalVariables";
 /**
  * Popup content used for changing the document orientation.
  * 
- * @since 0.0.5
+ * @since 0.0.6
  */
 export default function PopupOrientationConfig(props: {
     id?: string,

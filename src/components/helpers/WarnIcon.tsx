@@ -7,7 +7,7 @@ import { isBooleanFalsy, log } from "../../utils/basicUtils";
 /**
  * Icon with "!" char to click on and display a text popup with some kind of warning text.
  * 
- * @since 0.0.5
+ * @since 0.0.6
  */
 export default function WarnIcon(props: {
     size: "small" | "medium" | "large",

@@ -12,7 +12,7 @@ import Checkbox from "../Checkbox";
 /**
  * Popup content used for displaying a warning.
  * 
- * @since 0.0.5
+ * @since 0.0.6
  */
 export default function PopupWarnConfirm(props: {
     id: string,

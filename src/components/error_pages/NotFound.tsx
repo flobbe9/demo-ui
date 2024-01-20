@@ -6,7 +6,7 @@ import "../../assets/styles/ErrorPages.css";
 /**
  * Default page for any route not handled by Router in <App /> component (http 404).
  * 
- * @since 0.0.5
+ * @since 0.0.6
  */
 export default function NotFound(props: {
     id?: string,

@@ -6,7 +6,7 @@ import { API_VERSION } from "../globalVariables";
 /**
  * Display some api versions.
  * 
- * @since 0.0.5
+ * @since 0.0.6
  */
 export default function Version(props: {
     id?: string,

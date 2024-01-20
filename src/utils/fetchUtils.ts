@@ -57,7 +57,7 @@ export default async function fetchJson(url: string, method = "get", body?: obje
  * @param body (optional) to add to the request
  * @param headers json object with strings as keys and values
  * @returns a promise with the response or an {@link ApiExceptionFormat} object in it
- * @since 0.0.5
+ * @since 0.0.6
  */
 export async function fetchAny(url: string, method = "get", body?: object, headers?): Promise<Response | ApiExceptionFormat> {
     

@@ -5,7 +5,7 @@ import "../../../assets/styles/PopupContainer.css";
 /**
  * Container component for ```<Popup />```. Only exists for several css configurations.
  * 
- * @since 0.0.5
+ * @since 0.0.6
  */
 export default forwardRef(function PopupContainer(props: {
     id: string,

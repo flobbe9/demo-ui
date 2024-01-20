@@ -6,7 +6,7 @@ import "../../assets/styles/ErrorPages.css";
 /**
  * Page handling http 403.
  * 
- * @since 0.0.5
+ * @since 0.0.6
  */
 export default function Forbidden(props: {
     id?: string,
