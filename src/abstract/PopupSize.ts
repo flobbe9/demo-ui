@@ -1,7 +1,7 @@
 const popupSizeNames = ["small", "medium", "large", "full"] as const;
 
 /** Defining height or width of a ```<Popup />``` component */
-export type PopupSize = typeof popupSizeNames;
+export type PopupSize = "small" | "medium" | "large" | "full";
 
 
 /**

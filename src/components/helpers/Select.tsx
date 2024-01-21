@@ -284,6 +284,8 @@ export default function Select(props: {
                                         value={value}
                                         title={label}
                                         onClick={(event) => handleSelect(event, value, label)}
+                                        // has only an effect in case of fontFamily select
+                                        style={{fontFamily: value}}
                                         >
                                     {label}
                                 </option>

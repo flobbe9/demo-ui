@@ -9,8 +9,8 @@
     position: relative;
     
     .TextInput {
-        border: 2px dashed white;
-        border-bottom: 1px solid rgb(197, 197, 197);
+        border: 2px solid white;
+        border-bottom: 1px solid rgb(219, 219, 219);
         cursor: auto;
         font-family: 'Calibri';
         font-size: var(--initialTextInputFontSize);

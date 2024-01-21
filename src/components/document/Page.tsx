@@ -44,7 +44,6 @@ export default function Page(props: {
     }
 
 
-    // TODO: hides immediatly
     useEffect(() => {
         checkWindowWidthAgainstPageWidth();
 

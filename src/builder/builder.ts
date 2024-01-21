@@ -13,7 +13,7 @@ import { ApiExceptionFormat } from '../abstract/ApiExceptionFormat';
 
 const documentBuilderMapping = "/api/documentBuilder";
 
-// TODO: remember to add empty line after table (in case of column break)
+// TODO: remember to add empty line after table (in case of column break, or second table following)
 
 
 /**

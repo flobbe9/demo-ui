@@ -121,11 +121,15 @@ export default function App() {
 
         // hide nav menu mobile
         if (!targetClassName.includes("dontHideNavSectionRightMobile") || !event) 
-            $(".navSectionRightMobile").slideUp(200);
+            $(".navSectionRightMobile").slideUp(100);
 
         // hide warn info popup
         if (!targetClassName.includes("dontHideWarnIcon"))
             $(".WarnIcon .miniPopup").hide();
+
+        // hide controlPanelMenu
+        if (!targetClassName.includes("dontHideControlPanelMenu"))
+            $(".ControlPanel .controlPanelMenu").slideUp(100);
     }
 
 

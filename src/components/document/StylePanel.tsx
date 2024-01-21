@@ -195,7 +195,6 @@ export default function StylePanel(props) {
             <div className={"sectionContainer " + flexClass + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
                 <StylePanelSection hideRightBorder={true} componentStyle={{maxWidth: "215px"}}>
                     <div className="flexLeft" style={{height: "50%"}}>
-                        {/* TODO: display every option in given font family */}
                         <Select id="FontFamily" 
                                 label={documentContext.selectedTextInputStyle.fontFamily}
                                 disabled={disabled}
@@ -408,7 +407,7 @@ export default function StylePanel(props) {
             {/* subtle popup */}
             {/* TODO: hover does not work */}
             <div className="subtlePopupContainer">
-                <Popup id={documentContext.subtlePopupId} className="Subtle dontHideSubtlePopup">
+                <Popup id={"Subtle" + documentContext.subtlePopupType} className="Subtle dontHideSubtlePopup">
                     {documentContext.subtlePopupContent}
                 </Popup>
             </div>

@@ -13,14 +13,16 @@ import PopupContainer from "../helpers/popups/PopupContainer";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
 import { buildDocument, downloadDocument } from "../../builder/builder";
+import { SubtlePopupType } from "../../abstract/SubtlePopupType";
 
 
 // TODO: add some kind of "back" button
+
 // TODO: update to bootstrap 5
 // TODO: fix console errors
-
 // TODO: improove design
 // TODO: still performance issues with key down
+// TODO: line space not accurate
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -31,7 +33,7 @@ export default function Document(props) {
     const [escapePopup, setEscapePopup] = useState(true);
     const [popupContent, setPopupContent] = useState<React.JSX.Element>();
     const [subtlePopupContent, setSubtlePopupContent] = useState("");
-    const [subtlePopupId, setSubtlePopupId] = useState("SubtleInfo");
+    const [subtlePopupType, setSubtlePopupType] = useState<SubtlePopupType>("Info");
 
     const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
@@ -80,7 +82,7 @@ export default function Document(props) {
         hidePopup,
         popupContent,
         setPopupContent,
-        subtlePopupId,
+        subtlePopupType,
         showSubtlePopup,
         subtlePopupContent,
         setSubtlePopupContent,
@@ -112,8 +114,6 @@ export default function Document(props) {
         if (API_ENV !== "dev")
             confirmPageUnload();
 
-        appContext.hideStuff();
-        
         window.addEventListener("scroll", handleScroll);
         window.addEventListener("keydown", handleKeyDown);
 
@@ -418,7 +418,7 @@ export default function Document(props) {
             // case: warn user
             if (flash) {
                 flashClass(selectedTextInputId, "textInputFlash", "textInputFocus");
-                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite und versuche es dann erneut.");
+                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite und versuche es dann erneut.", "Warn");
             }
 
             return false;
@@ -595,10 +595,11 @@ export default function Document(props) {
 
     /**
      * Stop subtle popup animations on mouseover and display it instead. Fade it out on mouseout. 
+     * Id of SubtlePopup is build like: ```"PopupSubtle" + subtlePopupType```.
      */
     function handleSubtlePopupMouseMove(event): void {
 
-        const subtlePopup = getJQueryElementById(subtlePopupId, false);
+        const subtlePopup = getJQueryElementById("PopupSubtle" + subtlePopupType, false);
         if (!subtlePopup)
             return;
 
@@ -652,7 +653,7 @@ export default function Document(props) {
 
         // case: build failed
         if (buildResponse.status !== 200)
-            showSubtlePopup("Kann Dokument nicht erstellen", "Da ist etwas beim Erstellen des Dokumentes schiefgelaufen. Versche es erneut oder lade die Seite neu.", false);
+            showSubtlePopup("Kann Dokument nicht erstellen", "Da ist etwas beim Erstellen des Dokumentes schiefgelaufen. Versche es erneut oder lade die Seite neu.", "Error");
 
         // case: build successful
         else {
@@ -661,7 +662,7 @@ export default function Document(props) {
 
             // case: download failed
             if (downloadResponse && downloadResponse.status !== 200)
-                showSubtlePopup("Kann Dokument nicht herunterladen", "Da ist etwas beim Herunterladen des Dokumentes schiefgelaufen. Versche es erneut oder lade die Seite neu.", false);
+                showSubtlePopup("Kann Dokument nicht herunterladen", "Da ist etwas beim Herunterladen des Dokumentes schiefgelaufen. Versche es erneut oder lade die Seite neu.", "Error");
         }
 
         // add back confirm unload event
@@ -709,12 +710,11 @@ export default function Document(props) {
      * 
      * @param summary heading to display inside popup, may be a plain string
      * @param content content to display inside popup, may be a plain string
-     * @param warn if true, the popup will be styles as warn popup, else as error popup, default is true (warn style)
      * @param duration time in ms that the popup should fade in, default is 100
      * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
      */
     // TODO: add info and success options
-    function showSubtlePopup(summary: string, content: string, warn = true, duration = 100, holdTime = 3000): void {
+    function showSubtlePopup(summary: string, content: string, type: SubtlePopupType, duration = 100, holdTime = 3000): void {
 
         const subtlePopup = getJQueryElementByClassName("Popup.Subtle");
         if (!subtlePopup)
@@ -724,7 +724,7 @@ export default function Document(props) {
         if (subtlePopup.css("opacity") !== "0")
             return;
 
-        setSubtlePopupId("Subtle" + (warn ? "Warn" : "Error"));
+        setSubtlePopupType(type);
 
         // show popup, dont set opacity to 1
         subtlePopup.animate({opacity: 0.999}, duration);

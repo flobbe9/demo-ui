@@ -15,10 +15,6 @@ label {
     margin: 0;
 }
 
-Link {
-    
-}
-
 .App {
     background-color: var(--appBackgroundColor);
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
@@ -125,13 +121,13 @@ Link {
     }
 
     .flexCenterStart {
-        align-items: start;
+        align-items: flex-start;
         display: flex;
         justify-content: center;
     }
 
     .flexCenterEnd {
-        align-items: end;
+        align-items: flex-end;
         display: flex;
         justify-content: center;
     }
@@ -143,13 +139,13 @@ Link {
     }
 
     .flexLeftStart {
-        align-items: start;
+        align-items: flex-start;
         display: flex;
         justify-content: left;
     }
 
     .flexLeftEnd {
-        align-items: end;
+        align-items: flex-end;
         display: flex;
         justify-content: left;
     }
@@ -161,13 +157,13 @@ Link {
     }
     
     .flexRightStart {
-        align-items: start;
+        align-items: flex-start;
         display: flex;
         justify-content: right;
     }
 
     .flexRightEnd {
-        align-items: end;
+        align-items: flex-end;
         display: flex;
         justify-content: right;
     }
@@ -205,6 +201,14 @@ Link {
 
     .hidden {
         display: none;
+    }
+
+    .hover {
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 0.8;
+        }
     }
 
     .dontMarkText {
