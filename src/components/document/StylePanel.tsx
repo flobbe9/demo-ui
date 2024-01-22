@@ -300,6 +300,7 @@ export default function StylePanel(props) {
 
                     <div className="flexLeft" style={{height: "50%"}}>
                         <RadioButton id={"Left"} 
+                                    className="mr-1"
                                     childrenClassName="flexCenter dontMarkText" 
                                     name={"TextAlign"} 
                                     value="START"
@@ -318,7 +319,7 @@ export default function StylePanel(props) {
                             L
                         </RadioButton>
                         <RadioButton id={"Center"} 
-                                    className="flexCenter"
+                                    className="mr-1 flexCenter"
                                     childrenClassName="flexCenter dontMarkText" 
                                     name={"TextAlign"} 
                                     value="CENTER"

@@ -27,7 +27,7 @@ export default function Paragraph(props: {
     const documentContext = useContext(DocumentContext);
     const columnContext = useContext(ColumnContext);
 
-    const [textInputs, setTextInputs] = useState([<></>]);
+    const [textInputs, setTextInputs] = useState([<div key={0}></div>]);
 
 
     useEffect(() => {

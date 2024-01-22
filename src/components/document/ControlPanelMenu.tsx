@@ -11,7 +11,7 @@ export default function ControlPanelMenu(props: {
 }) {
 
     const id = "ControlPanelMenu" + (props.id || "");
-    const className = "ControlPanelMenu" + (props.className || "");
+    const className = "ControlPanelMenu " + (props.className || "");
 
     const documentContext = useContext(DocumentContext);
     const menuRef = useRef(null);
@@ -49,6 +49,7 @@ export default function ControlPanelMenu(props: {
                             handlePromise={() => documentContext.buildAndDownloadDocument(true)}
                             title="Als PDF Dokument herunterladen"
                             disabled={true}
+                            rendered={false}
 
                             boxStyle={{backgroundColor: "red"}}
                             childrenStyle={{
@@ -71,6 +72,7 @@ export default function ControlPanelMenu(props: {
                             
                             title="Dokument speichern"
                             disabled={true}
+                            rendered={false}
 
                             boxStyle={{height: "fit-content"}}
                             childrenStyle={{

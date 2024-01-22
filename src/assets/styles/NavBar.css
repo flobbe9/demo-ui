@@ -45,17 +45,22 @@
 
         .navSectionRightMobile {
             border-radius: 5px;
-            background-color: black;
-            color: white;
+            background-color: white;
             padding: 10px 0;
             position: absolute;
-            right: calc(var(--marginNavBarInside) * 2);
+            /* right: calc(var(--marginNavBarInside) * 2); */
+            right: 5px;
             width: 150px;
             z-index: 3;
 
             .navSectionRightMobileItem {
                 border-radius: 3px;
                 padding: 5px 15px;
+                transition: background-color 0.2s;
+                
+                &:hover {
+                    background-color: bisque;
+                }
             }
         }
     }

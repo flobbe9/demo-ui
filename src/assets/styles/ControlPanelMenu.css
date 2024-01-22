@@ -1,11 +1,17 @@
+:root {
+    --controlPanelMenuTop: ;
+}
+
 .ControlPanelMenu {
     background-color: white;
-    border: 3px solid black;
+    /* border: 3px solid black; */
     border-radius: 3px;
+    left: 5px;
     overflow: auto;
     padding: 0 10px;
     position: absolute;
-    top: 40px;
+    top: var(--controlPanelMenuTop);
+    width: fit-content;
     z-index: 2;
     
     .controlPanelMenuItem {

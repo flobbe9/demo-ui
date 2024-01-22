@@ -5,6 +5,11 @@ import { log } from "../../utils/basicUtils";
 import { isRGB } from "../../utils/documentBuilderUtils";
 
 
+/**
+ * Custom color picker component. 
+ * 
+ * @since 0.0.5
+ */
 export default function ColorPicker(props: {
     id: string,
     color: string,

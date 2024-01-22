@@ -48,7 +48,6 @@ export default forwardRef(function Popup(props: {
     }
 
 
-    // TODO: does not work
     function initStyle() {
 
         let style = props.style || {};

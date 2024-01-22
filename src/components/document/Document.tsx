@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, createContext, useRef } from "react";
 import "../../assets/styles/Document.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { confirmPageUnload, flashClass, getJQueryElementByClassName, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, removeConfirmPageUnloadEvent, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { confirmPageUnload, flashClass, getCssVariable, getJQueryElementByClassName, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, removeConfirmPageUnloadEvent, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE } from "../../globalVariables";
@@ -23,8 +23,7 @@ import ControlPanelMenu from "./ControlPanelMenu";
 // TODO: update to bootstrap 5
 // TODO: fix console errors
 // TODO: improove design
-// TODO: still performance issues with key down
-// TODO: line space not accurate
+// TODO: landscape dimensions not accurate
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -38,13 +37,14 @@ export default function Document(props) {
     const [subtlePopupType, setSubtlePopupType] = useState<SubtlePopupType>("Info");
 
     const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
+    const [orientationPageContainerClassName, setOrientationPageContainerClassName] = useState("flexCenter")
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
     const [selectedTextInputStyle, setSelectedTextInputStyleState] = useState(getDefaultStyle());
 
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
     const [numSingleColumnLines, setNumSingleColumnLines] = useState(0);
-    const [documentFileName, setDocumentFileName] = useState("Dokument_1.docx");
+    const [documentFileName, setDocumentFileName] = useState("Dokument 1.docx");
 
     /** <Paragraph /> component listens to changes of these states and attempts to append or remove a <TextInput /> at the end */
     const [paragraphIdAppendTextInput, setParagraphIdAppendTextInput] = useState<[string[], number]>([[""], 0]); // [paragraphIds, numTextInputsToAppend]
@@ -95,6 +95,7 @@ export default function Document(props) {
 
         setSelectedTextInputStyle,
         setPages,
+        setOrientationPageContainerClassName,
         initPages,
         orientation,
         setOrientation,
@@ -123,6 +124,7 @@ export default function Document(props) {
         setCssVariable("appBackgroundColor", "white");
         setCssVariable("pageWidthPortrait", PAGE_WIDTH_PORTRAIT);
         setCssVariable("pageWidthLandscape", PAGE_WIDTH_LANDSCAPE);
+        setCssVariable("controlPanelMenuTop", getCSSValueAsNumber($(".ControlPanel").css("height"), 2) + 5 + "px");
 
         // clean up
         return () => {
@@ -620,13 +622,26 @@ export default function Document(props) {
 
     function handleScroll(event): void {
 
+        // hide controlpanel menu
+        $(".ControlPanelMenu").slideUp(0);
+
         const currentScrollY = window.scrollY;
 
         const controlPanelHeight = $(".ControlPanel").css("height");
+        const navBarHeight = $(".NavBar").css("height");
+        const controlPanelHeightNumber = getCSSValueAsNumber(controlPanelHeight, 2);
+        const navBarHeightNumber = getCSSValueAsNumber(navBarHeight, 2);
+
         const isScrollUp = windowScrollY.current > currentScrollY;
 
-        // move controlPanel in view
+        // move StylePanel a bit lower to pull ControlPanel in view
         $(".StylePanel").css("top", isScrollUp ? controlPanelHeight : 0);
+
+        // move ControlPanelMenu along with ControlPanel
+        let controlPanelMenuTop = currentScrollY < navBarHeightNumber ? controlPanelHeightNumber : currentScrollY - navBarHeightNumber + controlPanelHeightNumber;
+        // add some space for boxShadow
+        controlPanelMenuTop += 5;
+        setCssVariable("controlPanelMenuTop", controlPanelMenuTop + "px");
         
         // update ref
         windowScrollY.current = currentScrollY;
@@ -766,19 +781,21 @@ export default function Document(props) {
                 <div className="documentOverlay hideDocumentPopup" ref={documentOverlayRef}></div>
 
                 {/* document popup */}
-                <div className="flexCenter test">
+                <div className="flexCenter">
                     <PopupContainer id={"Document"} className="hideDocumentPopup" ref={documentPopupRef}>
                         {popupContent}
                     </PopupContainer>
                 </div>
                 
                 <ControlPanel />
-                <ControlPanelMenu />
+                <ControlPanelMenu className="boxShadowDark" />
                 
                 <StylePanel />
 
-                <div className="pageContainer">
-                    {pages}
+                <div className={"pageContainer " + orientationPageContainerClassName}>
+                    <div style={{width: orientation === Orientation.PORTRAIT ? PAGE_WIDTH_PORTRAIT : PAGE_WIDTH_LANDSCAPE}}>
+                        {pages}
+                    </div>
                 </div>
             </DocumentContext.Provider>
         </div>
@@ -822,6 +839,7 @@ export const DocumentContext = createContext({
     unFocusTextInput: (textInputId: string, debug?: boolean) => {},
 
     setPages: (pages: React.JSX.Element[]) => {},
+    setOrientationPageContainerClassName: (pageContainerClassName: string) => {},
     initPages: (): React.JSX.Element[] => {return []},
     orientation: Orientation.PORTRAIT,
     setOrientation: (orientation: Orientation) => {},

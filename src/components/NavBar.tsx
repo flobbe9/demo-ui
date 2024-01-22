@@ -70,7 +70,7 @@ export default function NavBar(props: {
 
     return (
         <div id={id} className={className + " dontMarkText"}>
-            <div className="boxShadowContainer flex">
+            <div className="boxShadowContainer flexCenter">
                 <div className="col-7 col-sm-4 navSectionLeft textLeft flexLeft">
                     <Link className="navLink" to="/">
                         <img className="navImage dontMarkText mr-2" src="/favicon.png" alt="" height="40" width="40"/>
@@ -86,7 +86,7 @@ export default function NavBar(props: {
                     </div>
                 </div>
 
-                <div className="col-4 col-sm-4 navSectionRight textRight">
+                <div className="col-4 col-sm-4 navSectionRight textRight" style={{position: "relative"}}>
                     
                     {/* TODO: add functionality */}
                     {/* desktop mode */}
@@ -124,8 +124,8 @@ export default function NavBar(props: {
 
                     {/* TODO: add functionality */}
                     {/* mobile mode*/}
-                    <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile " + (!isMobileView && "hidden")} onClick={handleClickMenuIcon}></i>
-                    <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile">
+                    <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile hover " + (!isMobileView && "hidden")} onClick={handleClickMenuIcon}></i>
+                    <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile boxShadowDark">
                         <div id="navSectionRightMobileItem-1" 
                             className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
                             onClick={handleClickMobileItem}
@@ -144,7 +144,7 @@ export default function NavBar(props: {
                             className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
                             onClick={handleClickMobileItem}
                             >
-                            <LeaveConfirmLink className="whiteLink dontHideNavSectionRightMobile" 
+                            <LeaveConfirmLink className="blackLink dontHideNavSectionRightMobile" 
                                             to="/home" 
                                             pathsToConfirm={["/"]}
                                             style={{width: "100%"}}

@@ -18,7 +18,6 @@ import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextI
 
 // TODO: add pictures
 // TODO: add table
-
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
@@ -48,8 +47,6 @@ export default function TextInput(props: {
     useEffect(() => {
         // set initial font size
         setCssVariable("initialTextInputFontSize", DEFAULT_FONT_SIZE + getFontSizeDiffInWord(DEFAULT_FONT_SIZE) + "px");
-
-        setIsSingleColumnLineCandidate(checkIsSingleColumnLineCandidate());
 
         // focus first text input of document or singleColumnLine
         if (id === getDocumentId("TextInput", 0, "", 0, 0, 0) || props.isSingleColumnLine)
@@ -552,12 +549,12 @@ export default function TextInput(props: {
 
             
             <input id={id} 
-                className={className + " " + dontHideConnectIconClassName} 
+                className={className + " " + dontHideConnectIconClassName + (isSingleColumnLineCandidate && " singleColumnLineCandidate")} 
                 ref={inputRef} 
                 type="text" 
                 onMouseDown={handleMouseDown}
                 onKeyDown={handleKeyDown}
-                onPaste={handlePaste}
+                // onPaste={handlePaste}
                 />
         </div>
     )

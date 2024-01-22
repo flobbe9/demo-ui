@@ -654,6 +654,12 @@ export function setCssVariable(variableName: string, value: string): void {
 }
 
 
+export function getCssVariable(variableName: string): string {
+
+    return document.documentElement.style.getPropertyValue("--" + variableName);
+}
+
+
 /**
  * @param str to check
  * @param regexp to use for matching

@@ -2,6 +2,7 @@
     --initialTextInputFontSize: 14px; /** is changed on render */
     --connectLinesBorder: 2px dashed rgba(128, 128, 128, 0.3);
     --selectedColor: "white";
+    --textInputBorderBottom: 1px solid rgb(219, 219, 219);
 }
 
 .textInputContainer {
@@ -9,12 +10,14 @@
     position: relative;
     
     .TextInput {
-        border: 2px solid white;
-        border-bottom: 1px solid rgb(219, 219, 219);
+        border: none;
+        border-bottom: var(--textInputBorderBottom);
         cursor: auto;
         font-family: 'Calibri';
         font-size: var(--initialTextInputFontSize);
-        margin: 0 3px 1px 3px;
+        line-height: 23px;
+        margin: 0 3px;
+        padding: 0;
         outline: none;
         width: 100%;
     }
@@ -37,6 +40,12 @@
     .textInputFlash {
         border-bottom-color: red;
         border-bottom-width: 2px;
+    }
+
+    .singleColumnLineCandidate, .SingleColumnLine {
+        border: 2px solid white;
+        border-bottom: var(--textInputBorderBottom);
+        margin-bottom: 1px;
     }
 
     .textInputLeftColumnConnect {

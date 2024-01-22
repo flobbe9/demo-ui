@@ -15,7 +15,6 @@ import { adjustDocumentFileName } from "../../utils/documentBuilderUtils";
  * 
  * @since 0.0.6
  */
-// TODO: z index making trouble, divide controlpanel and menu into two outer components, make controlpaenl z-index 1 and menu 2
 export default function ControlPanel(props: {
     id?: string,
     className?: string,
@@ -67,9 +66,9 @@ export default function ControlPanel(props: {
     return (
         <div id={id} className={className}>
             <div className="boxShadowContainer flex">
-                <div className="col-4 controlPanelItem flexLeft">
+                <div className="col-6 col-sm-4 controlPanelItem flexLeft">
                     <Button id={"ControlPanelMenu"} 
-                            className="hover dontHideControlPanelMenu"
+                            className="hover dontHideControlPanelMenu hover"
                             childrenClassName="dontHideControlPanelMenu"
                             disabled={disabled}
                             handleClick={handleBurgerButtonClick}
@@ -77,13 +76,18 @@ export default function ControlPanel(props: {
                                 backgroundColor: "transparent",
                                 boxShadow: "none"
                             }}
-                            childrenStyle={{padding: 0}}
+                            childrenStyle={{
+                                color: "white",
+                                fontSize: "1.2em",
+                                padding: 0
+                            }}
                             >
-                        <i className={"burgerButtonIcon hover fa fa-bars fa-lg dontHideControlPanelMenu"}></i>
+                        <i className={"burgerButtonIcon fa fa-bars dontHideControlPanelMenu"}></i>
+                        <span className="ml-2">Menü</span>
                     </Button>
                 </div>
 
-                <div className="col-4 controlPanelItem flexCenter">
+                <div className="col-6 col-sm-4 controlPanelItem flexCenter">
                     <input id="fileNameInput"
                         className="fileNameInput"
                         ref={fileNameInputRef}
@@ -93,7 +97,7 @@ export default function ControlPanel(props: {
                         />
                 </div>  
                 
-                <div className="col-12 col-md-7 col-lg-4 controlPanelItem flexRight">
+                <div className="col-4 controlPanelItem flexRight">
                 </div>  
             </div>
         </div>

@@ -74,40 +74,39 @@ export default function Page(props: {
         const pageWidth = documentContext.orientation === Orientation.PORTRAIT ? PAGE_WIDTH_PORTRAIT : PAGE_WIDTH_LANDSCAPE;
         const pageWidthNumber = stringToNumber(getCSSValueAsNumber(pageWidth, 2));
 
-        // case: window big enough for page width
-        if (props.pageIndex !== 0 || windowWidth! >= pageWidthNumber)
-            return;
+        // case: window not big enough for page width
+        if (props.pageIndex === 0 && windowWidth! < pageWidthNumber) 
+            documentContext.setOrientationPageContainerClassName("flexLeft");
 
-        // case: dont show window again
-        if (dontShowAgainWindowWidthWarningCookie === "true")
-            return;
+        else if (props.pageIndex === 0)
+            documentContext.setOrientationPageContainerClassName("flexCenter");
 
-        documentContext.togglePopup();
+        // // documentContext.togglePopup();
 
-        documentContext.setPopupContent((
-            <Popup id={dontShowAgainWindowWidthWarningCookieId.current} height="medium" width="medium">
-                <PopupWarnConfirm id={dontShowAgainWindowWidthWarningCookieId.current} 
-                                  hideThis={documentContext.hidePopup} 
-                                  dontConfirm={true}
-                                  >
-                    <div className="textCenter">
-                        Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
-                        nicht identisch dargestellt werden.
-                    </div>
+        // documentContext.setPopupContent((
+        //     <Popup id={dontShowAgainWindowWidthWarningCookieId.current} height="medium" width="medium">
+        //         <PopupWarnConfirm id={dontShowAgainWindowWidthWarningCookieId.current} 
+        //                           hideThis={documentContext.hidePopup} 
+        //                           dontConfirm={true}
+        //                           >
+        //             <div className="textCenter">
+        //                 Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
+        //                 nicht identisch dargestellt werden.
+        //             </div>
 
-                    <div className="flexCenter mt-5">
-                        <Button id={id + "Ok"}
-                                className="blackButton blackButtonContained"
-                                hoverBackgroundColor="rgb(100, 100, 100)"
-                                clickBackgroundColor="rgb(130, 130, 130)"
-                                handleClick={() => documentContext.hidePopup()}
-                                >
-                            Alles klar
-                        </Button>
-                    </div>
-                </PopupWarnConfirm>
-            </Popup>
-        )); 
+        //             <div className="flexCenter mt-5">
+        //                 <Button id={id + "Ok"}
+        //                         className="blackButton blackButtonContained"
+        //                         hoverBackgroundColor="rgb(100, 100, 100)"
+        //                         clickBackgroundColor="rgb(130, 130, 130)"
+        //                         handleClick={() => documentContext.hidePopup()}
+        //                         >
+        //                     Alles klar
+        //                 </Button>
+        //             </div>
+        //         </PopupWarnConfirm>
+        //     </Popup>
+        // )); 
     }
 
 
@@ -317,7 +316,7 @@ export default function Page(props: {
 
     return (
         <div id={id} 
-             className={className + " " + orientationClassName} 
+             className={className + " " + orientationClassName + " boxShadowGrey"} 
              ref={pageRef}
              style={props.style}
              onMouseMove={handleMouseMove}

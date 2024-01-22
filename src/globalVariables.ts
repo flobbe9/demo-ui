@@ -10,8 +10,9 @@ export const API_ENV = "" + process.env.REACT_APP_ENV;
 export const API_VERSION = "" + process.env.REACT_APP_VERSION;
 
 export const NUM_PAGES = 2;
-export const PAGE_WIDTH_PORTRAIT = "778px";
-export const PAGE_WIDTH_LANDSCAPE = "1133px";
+export const PAGE_WIDTH_PORTRAIT = "806px";
+// export const PAGE_WIDTH_LANDSCAPE = "1181px";
+export const PAGE_WIDTH_LANDSCAPE = "1581px";
 
 export const MAX_NUM_COLUMNS = 3;
 
