@@ -1,19 +1,28 @@
-const popupSizeNames = ["small", "medium", "large", "full"] as const;
+interface PopupSizeNames {
+    small: string,
+    medium: string,
+    large: string,
+    full: string
+}
+
+const example: PopupSizeNames = {
+    small: "",
+    medium: "",
+    large: "",
+    full: ""
+}
 
 /** Defining height or width of a ```<Popup />``` component */
-export type PopupSize = "small" | "medium" | "large" | "full";
+export type PopupSize = keyof PopupSizeNames;
 
 
 /**
  * @param str to check for it's type
  * @returns true if given str is of type {@link PopupSize}.
  */
-export function isPopupSize(str: string | PopupSize): boolean {
+export function isPopupSize(str: any): boolean {
 
-    for (let popupSizeName of popupSizeNames) {
-        if (popupSizeName === str)
-            return true;
-    }
+    const result = Object.keys(example).filter(key => key === str);
 
-    return false;
+    return Boolean(result.length);
 }

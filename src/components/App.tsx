@@ -21,13 +21,13 @@ import NotFound from "./error_pages/NotFound";
  *      <ControlPanel />
  *      <StylePanel />
  * 
- *      <Page>
- *          <Column>
- *              <Paragraph>
- *                  <TextInput />
- *              </ Paragraph>
- *          </ Column>
- *      </ Page>
+ *      [<Page>
+ *          [<Column>
+ *              [<Paragraph>
+ *                  [<TextInput />]
+ *              </ Paragraph>]
+ *          </ Column>]
+ *      </ Page>]
  *  </ Document>
  * ```
  * @returns any content of this website
@@ -129,7 +129,7 @@ export default function App() {
 
         // hide controlPanelMenu
         if (!targetClassName.includes("dontHideControlPanelMenu"))
-            $(".ControlPanel .controlPanelMenu").slideUp(100);
+            $(".ControlPanelMenu").slideUp(100);
     }
 
 

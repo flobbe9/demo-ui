@@ -15,6 +15,7 @@ import Page from "./Page";
 import { buildDocument, downloadDocument } from "../../builder/builder";
 import { SubtlePopupType } from "../../abstract/SubtlePopupType";
 import Button from "../helpers/Button";
+import ControlPanelMenu from "./ControlPanelMenu";
 
 
 // TODO: add some kind of "back" button
@@ -772,6 +773,7 @@ export default function Document(props) {
                 </div>
                 
                 <ControlPanel />
+                <ControlPanelMenu />
                 
                 <StylePanel />
 
