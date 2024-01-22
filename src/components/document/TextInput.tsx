@@ -163,7 +163,7 @@ export default function TextInput(props: {
 
         // hide borders
         if (props.isSingleColumnLine)
-            $(inputRef.current).removeClass("textInputSingleColumnDisconnect");
+            $(inputRef.current!).removeClass("textInputSingleColumnDisconnect");
         else
             getTextInputsInSameLine().forEach(textInput =>
                 toggleSingleColumnLineCandidateBorder(true, textInput.prop("id")));
@@ -190,7 +190,7 @@ export default function TextInput(props: {
                 
                 // case: is singleColumnLine
                 } else if (isLastSingleColumnLine()) {
-                    $(inputRef.current).addClass("textInputSingleColumnDisconnect");
+                    $(inputRef.current!).addClass("textInputSingleColumnDisconnect");
                     leftTextInputId = id;
                 }
             });
@@ -261,8 +261,10 @@ export default function TextInput(props: {
     async function handleTextLongerThanLine(event): Promise<void> {
         
         const lastTextInputInColumn = documentContext.getLastTextInputOfColumn(id);
+        if (!lastTextInputInColumn)
+            return;
 
-        const thisTextInput = $(inputRef.current);
+        const thisTextInput = $(inputRef.current!);
         const thisTextInputValue = thisTextInput.prop("value");
 
         const nextTextInput = getNextTextInput(id);
@@ -424,7 +426,7 @@ export default function TextInput(props: {
      */
     function moveLastWordToNextTextInput(): void {
 
-        const thisTextInput = $(inputRef.current);
+        const thisTextInput = $(inputRef.current!);
         const nextTextInput = getNextTextInput(id);
 
         // case: no next text input

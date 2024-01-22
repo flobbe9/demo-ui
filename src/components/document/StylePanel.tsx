@@ -279,7 +279,7 @@ export default function StylePanel(props) {
                 <StylePanelSection hideRightBorder={false} componentStyle={{maxWidth: "150px"}}>
                     <div className="flexCenter" style={{height: "50%"}}>
                         <Select id="FontSize"
-                                label={documentContext.selectedTextInputStyle.fontSize}
+                                label={documentContext.selectedTextInputStyle.fontSize.toString()}
                                 disabled={disabled}
                                 hoverBackgroundColor={hoverBackgroundColor}
                                 boxStyle={{
@@ -377,8 +377,8 @@ export default function StylePanel(props) {
                             handleClick={handleOrientationConfigClick}
                             >
                         <div className={id + "IconContainer"}>
-                            <img className={id + "Icon"} src="portraitSheet.png" alt="portrait mode"/>
-                            <img className={id + "Icon"} src="landscapeSheet.png" alt="landscape mode"/>
+                            <img src="portraitSheet.png" alt="portrait mode" height="50"/>
+                            <img src="landscapeSheet.png" alt="landscape mode" height="50"/>
                         </div>
                         Ausrichtung
                     </Button>
@@ -397,7 +397,7 @@ export default function StylePanel(props) {
                             handleClick={handleColumnConfigClick}
                             >
                         <div className={id + "IconContainer mb-2"}>
-                            <img className={id + "Icon"} src="columnIcon.png" alt="column icon" style={{opacity: 0.7, height: "40px"}}/>
+                            <img src="columnIcon.png" alt="column icon" style={{opacity: 0.7}} height="40" />
                         </div>
                         Spalten
                     </Button>
@@ -405,9 +405,8 @@ export default function StylePanel(props) {
             </div>
             
             {/* subtle popup */}
-            {/* TODO: hover does not work */}
             <div className="subtlePopupContainer">
-                <Popup id={"Subtle" + documentContext.subtlePopupType} className="Subtle dontHideSubtlePopup">
+                <Popup id={"Subtle" + documentContext.subtlePopupType} className="Subtle dontHideSubtlePopup" height={"fit-content"} width={"200px"}>
                     {documentContext.subtlePopupContent}
                 </Popup>
             </div>

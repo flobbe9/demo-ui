@@ -27,7 +27,7 @@ export default function Paragraph(props: {
     const documentContext = useContext(DocumentContext);
     const columnContext = useContext(ColumnContext);
 
-    const [textInputs, setTextInputs] = useState<React.JSX.Element[]>();
+    const [textInputs, setTextInputs] = useState([<></>]);
 
 
     useEffect(() => {

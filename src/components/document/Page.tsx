@@ -335,4 +335,6 @@ export default function Page(props: {
     )
 }
 
-export const PageContext = createContext();
+export const PageContext = createContext({
+    toggleConnectWarnPopup: (lineIndex: number, disconnect?: boolean) => {}
+});

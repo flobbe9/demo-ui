@@ -14,6 +14,7 @@ import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputSty
 import Page from "./Page";
 import { buildDocument, downloadDocument } from "../../builder/builder";
 import { SubtlePopupType } from "../../abstract/SubtlePopupType";
+import Button from "../helpers/Button";
 
 
 // TODO: add some kind of "back" button
@@ -31,8 +32,8 @@ export default function Document(props) {
     const appContext = useContext(AppContext);
 
     const [escapePopup, setEscapePopup] = useState(true);
-    const [popupContent, setPopupContent] = useState<React.JSX.Element>();
-    const [subtlePopupContent, setSubtlePopupContent] = useState("");
+    const [popupContent, setPopupContent] = useState(<></>);
+    const [subtlePopupContent, setSubtlePopupContent] = useState(<></>);
     const [subtlePopupType, setSubtlePopupType] = useState<SubtlePopupType>("Info");
 
     const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
@@ -45,8 +46,8 @@ export default function Document(props) {
     const [documentFileName, setDocumentFileName] = useState("Dokument_1.docx");
 
     /** <Paragraph /> component listens to changes of these states and attempts to append or remove a <TextInput /> at the end */
-    const [paragraphIdAppendTextInput, setParagraphIdAppendTextInput] = useState<[string[], number]>(); // [paragraphIds, numTextInputsToAppend]
-    const [paragraphIdRemoveTextInput, setParagraphIdRemoveTextInput] = useState<[string[], number]>(); // [paragraphIds, numTextInputsToRemove]
+    const [paragraphIdAppendTextInput, setParagraphIdAppendTextInput] = useState<[string[], number]>([[""], 0]); // [paragraphIds, numTextInputsToAppend]
+    const [paragraphIdRemoveTextInput, setParagraphIdRemoveTextInput] = useState<[string[], number]>([[""], 0]); // [paragraphIds, numTextInputsToRemove]
     
     /** serves as notification for the singleColumnLines state in ```<Page />``` component to refresh */
     const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
@@ -673,24 +674,24 @@ export default function Document(props) {
 
     function togglePopup(duration = 100): void {
 
-        const documentPopup = $(documentPopupRef.current);
+        const documentPopup = $(documentPopupRef.current!);
         documentPopup.fadeToggle(duration);
         documentPopup.css("display", "flex");
 
-        $(documentOverlayRef.current).fadeToggle(duration);
+        $(documentOverlayRef.current!).fadeToggle(duration);
 
         // case: is hidden now
         if (!documentPopup.is(":visible"))
-            resetDocumentPopup(setPopupContent);
+            resetDocumentPopup();
     }
 
 
     function hidePopup(duration = 100): void {
 
-        const documentPopup = $(documentPopupRef.current);
+        const documentPopup = $(documentPopupRef.current!);
         documentPopup.fadeOut(duration);
 
-        $(documentOverlayRef.current).fadeOut(duration);
+        $(documentOverlayRef.current!).fadeOut(duration);
 
         resetDocumentPopup(duration);
     }
@@ -713,8 +714,7 @@ export default function Document(props) {
      * @param duration time in ms that the popup should fade in, default is 100
      * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
      */
-    // TODO: add info and success options
-    function showSubtlePopup(summary: string, content: string, type: SubtlePopupType, duration = 100, holdTime = 3000): void {
+    function showSubtlePopup(summary: string, content: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 3000): void {
 
         const subtlePopup = getJQueryElementByClassName("Popup.Subtle");
         if (!subtlePopup)
@@ -772,7 +772,7 @@ export default function Document(props) {
                 </div>
                 
                 <ControlPanel />
-
+                
                 <StylePanel />
 
                 <div className="pageContainer">
@@ -783,5 +783,56 @@ export default function Document(props) {
     );
 }
 
+const paragraphIdAppendExample: [string[], number] = [[""], 0];
+export const DocumentContext = createContext({
+    isTextInputHeading: (textInputId?: string): boolean => {return false},
+    refreshSingleColumnLines: false, 
+    setRefreshSingleColumnLines: (bool: boolean) => {},
 
-export const DocumentContext = createContext();
+    isFontSizeTooLargeForColumn: (documentId?: string, diff?: number): [boolean, number] => {return [false, 0]},
+    handleFontSizeTooLarge: (flash?: boolean, deleteCount?: number, documentId?: string): boolean => {return false},
+    getNumLinesOverhead: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},
+    appendTextInput: (textInputs: React.JSX.Element[], setTextInputs: (textInputs: React.JSX.Element[]) => void, pageIndex: number, columnIndex: number, paragraphIndex: number, numTextInputs?: number): React.JSX.Element[] => {return []},
+    removeTextInput: (textInputs: React.JSX.Element[], setTextInputs: (textInputs: React.JSX.Element[]) => void, index?: number, deleteCount?: number): React.JSX.Element[] => {return []},
+    paragraphIdAppendTextInput: paragraphIdAppendExample,
+    setParagraphIdAppendTextInput: (paragraphIdAppendTextInput: [string[], number]) => {},
+    paragraphIdRemoveTextInput: paragraphIdAppendExample,
+    setParagraphIdRemoveTextInput: (paragraphIdAppendTextInput: [string[], number]) => {},
+    getParagraphIdByDocumentId: (documentId?: string, paragraphIndex?: number): string => {return ""},
+    getParagraphIdsForFontSizeChange: (documentId?: string, paragraphIndex?: number, isSingleColumnLine?: boolean): string[] => {return []},
+
+    getColumnTextInputs: (documentId?: string): JQuery | null => {return null},
+    getColumnFontSizesSum: (documentId?: string): number => {return 0},
+    getLastTextInputOfColumn: (documentId?: string): JQuery | null => {return null},
+    checkIsColumnEmptyById: (documentId?: string): boolean => {return false},
+
+    togglePopup: (duration?: number) => {},
+    hidePopup: (duration?: number) => {},
+    popupContent: <></>,
+    setPopupContent: (popupContent: React.JSX.Element) => {},
+    subtlePopupType: "Warn" as SubtlePopupType,
+    showSubtlePopup: (summary: string, content: string, type?: SubtlePopupType, duration?: number, holdTime?: number) => {},
+    subtlePopupContent: <></>,
+    setSubtlePopupContent: (popupContent: React.JSX.Element) => {},
+    hideSelectOptions: (selectComponentId?: string) => {},
+
+    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
+    unFocusTextInput: (textInputId: string, debug?: boolean) => {},
+
+    setPages: (pages: React.JSX.Element[]) => {},
+    initPages: (): React.JSX.Element[] => {return []},
+    orientation: Orientation.PORTRAIT,
+    setOrientation: (orientation: Orientation) => {},
+    numColumns: 1,
+    setNumColumns: (numColumns: number) => {},
+    numSingleColumnLines: 0, 
+    setNumSingleColumnLines: (numSingleColumnLines: number) => {},
+    selectedTextInputId: "",
+    setSelectedTextInputId: (id: string) => {},
+    selectedTextInputStyle: getDefaultStyle(),
+    setSelectedTextInputStyle: (style: Style, stylePropsToOverride?: [StyleProp, string | number][]) => {},
+    documentFileName: "",
+    setDocumentFileName: (fileName: string) => {},
+
+    buildAndDownloadDocument: async (pdf?: boolean) => {}, 
+});

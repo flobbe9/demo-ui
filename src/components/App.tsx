@@ -144,9 +144,9 @@ export default function App() {
 
     function togglePopup(duration = 100): void {
 
-        const appPopup = $(appPopupRef.current);
+        const appPopup = $(appPopupRef.current!);
         appPopup.fadeToggle(duration);
-        $(appOverlayRef.current).fadeToggle(duration);
+        $(appOverlayRef.current!).fadeToggle(duration);
 
         if (!appPopup.is(":visible"))
             resetPopup();
@@ -155,8 +155,8 @@ export default function App() {
 
     function hidePopup(duration = 100): void {
 
-        $(appPopupRef.current).fadeOut(duration);
-        $(appOverlayRef.current).fadeOut(duration);
+        $(appPopupRef.current!).fadeOut(duration);
+        $(appOverlayRef.current!).fadeOut(duration);
 
         resetPopup(duration);
     }
@@ -212,4 +212,12 @@ export default function App() {
 }
 
 
-export const AppContext = createContext();
+export const AppContext = createContext({
+    setEscapePopup: (escapePopup: boolean) => {},
+    setPopupContent: (popupContent: React.JSX.Element) => {},
+    togglePopup: (duration?: number) => {},
+    hidePopup: (duration?: number) => {},
+    pressedKey: "",
+    isWindowWidthTooSmall: (): boolean => {return false},
+    hideStuff: (event?) => {}
+});

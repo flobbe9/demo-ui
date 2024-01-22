@@ -12,10 +12,13 @@ import LeaveConfirmLink from "./helpers/LeaveConfirmLink";
 /**
  * @since 0.0.1
  */
-export default function NavBar(props) {
+export default function NavBar(props: {
+    id?: string,
+    className?: string
+}) {
     
-    const id = props.id ? "NavBar" + props.id : "NavBar";
-    const className = props.className ? "NavBar " + props.className : "NavBar";
+    const id = "NavBar" + (props.id || "");
+    const className = "NavBar " + (props.className || "");
 
     const appContext = useContext(AppContext);
     
@@ -70,13 +73,13 @@ export default function NavBar(props) {
             <div className="boxShadowContainer flex">
                 <div className="col-7 col-sm-4 navSectionLeft textLeft flexLeft">
                     <Link className="navLink" to="/">
-                        <img className="navImage dontMarkText mr-2" src="/favicon.png" alt="" height="40px" width="40px"/>
+                        <img className="navImage dontMarkText mr-2" src="/favicon.png" alt="" height="40" width="40"/>
                         <span className="navHeading dontBreakText">{WEBSITE_NAME}</span>
                     </Link>
                 </div>
 
                 <div className={"col-1 col-sm-4 navSectionCenter flexLeft"}>
-                    <div className={(isMobileView ? "hidden" : "")}>
+                    <div className={"" + (isMobileView && "hidden")}>
                         {/* <LeaveConfirmLink className="navLink" to="/home" pathsToConfirm={[BUILDER_PATH]}>
                             Home
                         </LeaveConfirmLink> */}
@@ -87,7 +90,7 @@ export default function NavBar(props) {
                     
                     {/* TODO: add functionality */}
                     {/* desktop mode */}
-                    <div className={"navSectionRightDesktop " + (isMobileView ? "hidden" : "")}>
+                    <div className={"navSectionRightDesktop " + (isMobileView && "hidden")}>
                         <LoadingButton 
                                     id={"Register"}
                                     boxStyle={{
@@ -121,7 +124,7 @@ export default function NavBar(props) {
 
                     {/* TODO: add functionality */}
                     {/* mobile mode*/}
-                    <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile " + (isMobileView ? "" : "hidden")} onClick={handleClickMenuIcon}></i>
+                    <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile " + (!isMobileView && "hidden")} onClick={handleClickMenuIcon}></i>
                     <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile">
                         <div id="navSectionRightMobileItem-1" 
                             className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 

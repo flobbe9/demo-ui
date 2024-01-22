@@ -65,15 +65,15 @@ export default function Column(props: {
         if (documentContext.numColumns > 1) {
             // case: is first column
             if (props.columnIndex === 0)
-                $(componentRef.current).addClass("halfSpaceRightBetweenColumns")
+                $(componentRef.current!).addClass("halfSpaceRightBetweenColumns")
 
             // case: is last column
             else if (props.columnIndex === documentContext.numColumns - 1)
-                $(componentRef.current).addClass("halfSpaceLeftBetweenColumns")
+                $(componentRef.current!).addClass("halfSpaceLeftBetweenColumns")
             
             // case: is middle column
             else 
-                $(componentRef.current).addClass("spaceBetweenColumns")
+                $(componentRef.current!).addClass("spaceBetweenColumns")
         }
     }
 
@@ -103,4 +103,7 @@ export default function Column(props: {
 }
 
 
-export const ColumnContext = createContext();
+export const ColumnContext = createContext({
+    numLinesPerParagraph: 1,
+    setNumLinesPerParagraph: (numLinesPerParagraph: number) => {}
+});

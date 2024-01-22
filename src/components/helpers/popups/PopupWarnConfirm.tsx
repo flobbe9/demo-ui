@@ -59,7 +59,7 @@ export default function PopupWarnConfirm(props: {
 
         // case: no confirm button
         if (props.dontConfirm && !isBooleanFalsy(isChecked)) {
-            setIsDontShowAgain(isChecked);
+            setIsDontShowAgain(isChecked || false);
             dontShowAgain = isChecked!;
         }
 

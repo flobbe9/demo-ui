@@ -62,7 +62,7 @@ export default function Select(props: {
         $(optionsBoxRef.current!).css("top", $(boxRef.current!).css("height"));
         $(optionsBoxRef.current!).css("width", $(boxRef.current!).css("width"));
 
-        setCssVariable("selectBackgroundColor", props.boxStyle.backgroundColor || "white");
+        setCssVariable("selectBackgroundColor", props.boxStyle?.backgroundColor || "white");
 
     }, []);
 
@@ -123,14 +123,14 @@ export default function Select(props: {
             return;
 
         $(boxRef.current!).css("backgroundColor", props.hoverBackgroundColor || "");
-        $(labelRef.current).css("backgroundColor", "white");
+        $(labelRef.current!).css("backgroundColor", "white");
     }
 
 
     function handleBoxMouseOut(): void {
 
         $(boxRef.current!).css("backgroundColor", props.boxStyle?.backgroundColor || "");
-        $(labelRef.current).css("backgroundColor", props.boxStyle?.backgroundColor || "");
+        $(labelRef.current!).css("backgroundColor", props.boxStyle?.backgroundColor || "");
     }
 
 
@@ -265,7 +265,7 @@ export default function Select(props: {
                  >
                 <input className="selectLabel dontMarkText dontHideSelect" 
                        ref={labelRef}
-                       title={isFontSize ? getOriginalFontSize(props.label) : props.label}
+                       title={isFontSize ? getOriginalFontSize(props.label).toString() : props.label}
                        defaultValue={props.label}
                        onKeyUp={handleLabelKeyUp}
                        />

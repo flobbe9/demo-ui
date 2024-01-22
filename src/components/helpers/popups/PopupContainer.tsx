@@ -1,4 +1,4 @@
-import React, { forwardRef} from "react";
+import React, { LegacyRef, forwardRef} from "react";
 import "../../../assets/styles/PopupContainer.css";
 
 
@@ -14,7 +14,7 @@ export default forwardRef(function PopupContainer(props: {
     onClick?,
     style?: React.CSSProperties,
     matchPopupDimensions?: boolean
-}, ref) {
+}, ref: LegacyRef<HTMLDivElement> | undefined) {
 
     const id = "PopupContainer" + props.id;
     const className = "PopupContainer " + (props.className || "");

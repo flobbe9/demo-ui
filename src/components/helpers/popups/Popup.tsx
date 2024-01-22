@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef, LegacyRef } from "react";
 import "../../../assets/styles/Popup.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log } from "../../../utils/basicUtils";
@@ -20,7 +20,7 @@ export default forwardRef(function Popup(props: {
     height: PopupSize | string,
     width: PopupSize | string,
     handleOverlayClick?: () => void
-}, ref) {
+}, ref: LegacyRef<HTMLDivElement> | undefined) {
 
     const id = "Popup" + props.id;
 
@@ -48,6 +48,7 @@ export default forwardRef(function Popup(props: {
     }
 
 
+    // TODO: does not work
     function initStyle() {
 
         let style = props.style || {};
