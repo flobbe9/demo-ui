@@ -80,33 +80,6 @@ export default function Page(props: {
 
         else if (props.pageIndex === 0)
             documentContext.setOrientationPageContainerClassName("flexCenter");
-
-        // // documentContext.togglePopup();
-
-        // documentContext.setPopupContent((
-        //     <Popup id={dontShowAgainWindowWidthWarningCookieId.current} height="medium" width="medium">
-        //         <PopupWarnConfirm id={dontShowAgainWindowWidthWarningCookieId.current} 
-        //                           hideThis={documentContext.hidePopup} 
-        //                           dontConfirm={true}
-        //                           >
-        //             <div className="textCenter">
-        //                 Die Breite Ihres Gerätes ist kleiner als eine Zeile im Dokument lang ist. Zeilen werden deshalb in Word
-        //                 nicht identisch dargestellt werden.
-        //             </div>
-
-        //             <div className="flexCenter mt-5">
-        //                 <Button id={id + "Ok"}
-        //                         className="blackButton blackButtonContained"
-        //                         hoverBackgroundColor="rgb(100, 100, 100)"
-        //                         clickBackgroundColor="rgb(130, 130, 130)"
-        //                         handleClick={() => documentContext.hidePopup()}
-        //                         >
-        //                     Alles klar
-        //                 </Button>
-        //             </div>
-        //         </PopupWarnConfirm>
-        //     </Popup>
-        // )); 
     }
 
 
@@ -316,18 +289,20 @@ export default function Page(props: {
 
     return (
         <div id={id} 
-             className={className + " " + orientationClassName + " boxShadowGrey"} 
+             className={className + " " + orientationClassName} 
              ref={pageRef}
              style={props.style}
              onMouseMove={handleMouseMove}
              >
             <PageContext.Provider value={context}>
-                <div className="headingContainer">
-                    {linesAsSingleColumn}
-                </div>
+                <div style={{width: "100%"}}>
+                    <div className="headingContainer">
+                        {linesAsSingleColumn}
+                    </div>
 
-                <div className="columnContainer">
-                    {columns}
+                    <div className="columnContainer">
+                        {columns}
+                    </div>
                 </div>
             </PageContext.Provider>
         </div>

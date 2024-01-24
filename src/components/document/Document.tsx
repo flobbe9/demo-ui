@@ -4,17 +4,16 @@ import "../../assets/styles/Document.css";
 import { confirmPageUnload, flashClass, getCssVariable, getJQueryElementByClassName, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, removeConfirmPageUnloadEvent, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
-import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, TAB_UNICODE, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE } from "../../globalVariables";
+import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE } from "../../globalVariables";
 import ControlPanel from "./ControlPanel";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
-import { getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getFontSizeDiffInWord, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
+import { getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import PopupContainer from "../helpers/popups/PopupContainer";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
 import { buildDocument, downloadDocument } from "../../builder/builder";
 import { SubtlePopupType } from "../../abstract/SubtlePopupType";
-import Button from "../helpers/Button";
 import ControlPanelMenu from "./ControlPanelMenu";
 
 
@@ -22,8 +21,6 @@ import ControlPanelMenu from "./ControlPanelMenu";
 
 // TODO: update to bootstrap 5
 // TODO: fix console errors
-// TODO: improove design
-// TODO: landscape dimensions not accurate
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -44,7 +41,7 @@ export default function Document(props) {
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
     const [numSingleColumnLines, setNumSingleColumnLines] = useState(0);
-    const [documentFileName, setDocumentFileName] = useState("Dokument 1.docx");
+    const [documentFileName, setDocumentFileName] = useState("Dokument1.docx");
 
     /** <Paragraph /> component listens to changes of these states and attempts to append or remove a <TextInput /> at the end */
     const [paragraphIdAppendTextInput, setParagraphIdAppendTextInput] = useState<[string[], number]>([[""], 0]); // [paragraphIds, numTextInputsToAppend]
@@ -63,9 +60,10 @@ export default function Document(props) {
         refreshSingleColumnLines, 
         setRefreshSingleColumnLines,
 
-        isFontSizeTooLargeForColumn,
         handleFontSizeTooLarge,
-        getNumLinesOverhead,
+        handleFontSizeTooSmall,
+        getNumLinesDeviation,
+        subtractMSWordFontSizes,
         appendTextInput,
         removeTextInput,
         paragraphIdAppendTextInput,
@@ -217,7 +215,7 @@ export default function Document(props) {
         for (let i = 0; i < NUM_PAGES; i++)
             pages.push((
                 <div className="flexCenter" key={i}>
-                    <Page pageIndex={i} />
+                    <Page pageIndex={i} className="boxShadowGrey flexCenter"/>
                 </div>
             ));
 
@@ -293,34 +291,6 @@ export default function Document(props) {
 
 
     /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-     * @returns sum of font sizes of all text inputs in column (in px) or -1 if column was not found
-     * 
-     * @see getFontSizeDiffInWord
-     */
-    function getColumnFontSizesSum(documentId = selectedTextInputId): number {
-
-        const columnTextInputs = getColumnTextInputs(documentId);
-
-        if (!columnTextInputs || !columnTextInputs.length)
-            return -1;
-
-        let sum = 0;
-        columnTextInputs.each((i, textInputElement) => {
-            const textInput = $("#" + textInputElement.id);
-            const fontSize = textInput.css("fontSize");
-
-            if (fontSize) {
-                const fontSizeNumber = getCSSValueAsNumber(fontSize, 2);
-                sum += fontSizeNumber - getFontSizeDiffInWord(fontSizeNumber)
-            }
-        });
-
-        return sum;
-    }
-
-
-    /**
      * Append new ```<TextInput />``` to ```textInputs``` state (passed as param).
      *
      * @param textInputs array of ```<TextInput />``` (state) to add new text input to
@@ -385,9 +355,13 @@ export default function Document(props) {
      * @param flash if true, the given text input will flash if no text input can be removed, default is true
      * @param deleteCount number of lines to remove if blank, default is 1
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @param checkNextTextInputFocused if true, one more text input will be checked for "is focused" than it normally would to prevent
+     *                                  focusing a text input that will be deleted
      * @returns false if the fontSize should not be changed, else true
      */
-    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId): boolean {
+    // TODO: singleColumnLines not working properly, diff?
+    // TODO: handlefontsize too small gets too big, diff?
+    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId, checkNextTextInputFocused = false): boolean {
 
         const columnTextInputs = getColumnTextInputs(documentId);
         if (!columnTextInputs) {
@@ -398,7 +372,7 @@ export default function Document(props) {
         // get last textinputs
         let areTextInputsBlank = true;
         let areTextInputsToDeleteFocused = false;
-        const columnTextInputsToDelete = Array.from(columnTextInputs).slice(columnTextInputs.length - deleteCount);
+        const columnTextInputsToDelete = Array.from(columnTextInputs).slice(columnTextInputs.length - deleteCount - (checkNextTextInputFocused ? 1 : 0));
 
         // check for non blank textInputs
         columnTextInputsToDelete.forEach(textInput => {
@@ -429,6 +403,120 @@ export default function Document(props) {
         }
 
         return true;
+    }
+
+    
+    /**
+     * Set weird "paragraph append" state for some paragraphs to be added.
+     * 
+     * @param numLinesToAdd number of lines of {@link DEFAULT_FONT_SIZE} that could fit at the bottom of selected column
+     */
+    function handleFontSizeTooSmall(numLinesToAdd: number): void {
+
+        // case: some lines to add
+        if (Math.abs(numLinesToAdd) !== 0) {
+            // case: is last text input
+            const lastTextInputInColumn = getLastTextInputOfColumn();
+            if (lastTextInputInColumn && lastTextInputInColumn.prop("id") === selectedTextInputId)
+                return;
+            
+            // get all paragraphs to 
+            const paragraphIds = getParagraphIdsForFontSizeChange();
+            setParagraphIdAppendTextInput([paragraphIds, Math.abs(numLinesToAdd)]);
+        }
+    }
+
+
+    /**
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @returns sum of font sizes of all text inputs in column (in px) or -1 if column was not found. Uses msWord font size.
+     */
+    function getColumnFontSizesSum(documentId = selectedTextInputId): number {
+
+        const columnTextInputs = getColumnTextInputs(documentId);
+
+        if (!columnTextInputs || !columnTextInputs.length)
+            return -1;
+
+        let sum = 0;
+        columnTextInputs.each((i, textInputElement) => {
+            const fontSize = $("#" + textInputElement.id).css("fontSize");
+            if (fontSize) 
+                sum += getMSWordFontSizeByBrowserFontSize(getCSSValueAsNumber(fontSize, 2));
+        });
+
+        return sum;
+    }
+
+
+    // /**
+    //  * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+    //  * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
+    //  *             stated as msWord font size. 
+    //  * @returns a touple formatted like: ```[isFontSizeTooLargeForColumn, numLinesDiff]``` where numLinesDiff is the number
+    //  *          of lines that should be removed to match the MAX_NUM_LINES.
+    //  */
+    // function isFontSizeTooLargeForColumn(documentId = selectedTextInputId, diff = 0): number {
+
+    //     const columnFontSizesSum = getColumnFontSizesSum(documentId);
+        
+    //     // case: font size sum in column not too large
+    //     if (columnFontSizesSum === -1)
+    //         return [false, -1];
+
+    //     const numLinesDiff = getNumLinesDeviation(documentId, diff, columnFontSizesSum);
+    //     // case: font size too large
+    //     if (numLinesDiff > 0)
+    //         return [true, numLinesDiff];
+
+    //     return [false, numLinesDiff];
+    // }
+
+
+    /**
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
+     *             stated as msWord font size. 
+     * @param columnFontSizesSum sum of fontSizes of all text inputs in this column. If present it wont be calculated again to increase performance 
+     * @returns number of lines with fontSize {@link DEFAULT_FONT_SIZE} by which the number of lines in the given ```<Column />``` differes from max num lines.
+     *          Return -1 if no column is selected yet.
+     */
+    function getNumLinesDeviation(documentId = selectedTextInputId, diff = 0, columnFontSizesSum?: number): number {
+
+        // case: no sum in param
+        if (!columnFontSizesSum)
+            columnFontSizesSum = getColumnFontSizesSum(documentId);
+
+        // case: invalid document id
+        if (columnFontSizesSum === -1)
+            return -1;
+
+        columnFontSizesSum += diff;
+        
+        const maxSum = orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
+        
+        const totalDiff = columnFontSizesSum - maxSum;
+
+        return Math.floor(totalDiff / DEFAULT_FONT_SIZE);
+    }
+
+
+    /**
+     * Calculate ```fontSize - fontSize2``` but convert to msWord font size first.
+     * 
+     * @param fontSize browser font size
+     * @param fontSize2 browser font size
+     * @returns deviation of two given font sizes, but converted to msWord font size first
+     */
+    function subtractMSWordFontSizes(fontSize: number | string, fontSize2: number | string): number {
+
+        fontSize = getCSSValueAsNumber(fontSize, 2);
+        fontSize = getMSWordFontSizeByBrowserFontSize(fontSize);
+        
+        fontSize2 = getCSSValueAsNumber(fontSize2, 2);
+        fontSize2 = getMSWordFontSizeByBrowserFontSize(fontSize2);
+
+        return fontSize - fontSize2;
     }
 
 
@@ -481,59 +569,6 @@ export default function Document(props) {
 
     /**
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-     * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxSum```. Will be added to ```columnFontSizesSum```. 
-     * @returns a touple formatted like: ```[isFontSizeTooLargeForColumn, numLinesOverhead]``` where numLinesOverhead is the number
-     *          of lines that should be removed to match the MAX_NUM_LINES.
-     */
-    function isFontSizeTooLargeForColumn(documentId = selectedTextInputId, diff = 0): [boolean, number] {
-
-        const columnFontSizesSum = getColumnFontSizesSum(documentId);
-        
-        // case: font size sum in column not too large
-        if (columnFontSizesSum === -1)
-            return [false, -1];
-
-        const numLinesOverhead = Math.abs(getNumLinesOverhead(documentId, diff, columnFontSizesSum));
-
-        const maxSum = orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
-
-        // case: adding the numLinesOverhead would exceed max value
-        if (columnFontSizesSum + numLinesOverhead > maxSum)
-            return [true, numLinesOverhead];
-
-        return [false, numLinesOverhead];
-    }
-
-
-    /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-     * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxSum```. Will be added to ```columnFontSizesSum```.
-     * @param columnFontSizesSum sum of fontSizes of all text inputs in this column. If present it wont be calculated again to increase performance 
-     * @returns number of lines with fontSize {@link DEFAULT_FONT_SIZE} by which the number of lines in the given ```<Column />``` differes from max num lines.
-     *          Return -1 if no column is selected yet.
-     */
-    function getNumLinesOverhead(documentId = selectedTextInputId, diff = 0, columnFontSizesSum?: number): number {
-
-        // case: no sum in param
-        if (!columnFontSizesSum)
-            columnFontSizesSum = getColumnFontSizesSum(documentId);
-
-        // case: invalid document id
-        if (columnFontSizesSum === -1)
-            return -1;
-
-        columnFontSizesSum += diff;
-        
-        const maxSum = orientation === Orientation.PORTRAIT ? MAX_FONT_SIZE_SUM_PORTRAIT : MAX_FONT_SIZE_SUM_LANDSCAPE;
-        
-        const totalDiff = maxSum - columnFontSizesSum;
-
-        return Math.floor(totalDiff / DEFAULT_FONT_SIZE);
-    }
-
-
-    /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @param paragraphIndex index of the paragraph inside the column, will be set to last paragraph in column if not present
      * @returns id of the paragraph found with given params. Contains -1 as paragraphIndex if paragraph wasn't found
      */
@@ -581,7 +616,7 @@ export default function Document(props) {
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @returns a JQuery of the last ```<TextInput />``` in given column or null if not found
      */
-    function getLastTextInputOfColumn(documentId: string): JQuery | null {
+    function getLastTextInputOfColumn(documentId = selectedTextInputId): JQuery | null {
 
         const columnTextInputs = getColumnTextInputs(documentId);
         if (!columnTextInputs || !columnTextInputs.length)
@@ -808,9 +843,10 @@ export const DocumentContext = createContext({
     refreshSingleColumnLines: false, 
     setRefreshSingleColumnLines: (bool: boolean) => {},
 
-    isFontSizeTooLargeForColumn: (documentId?: string, diff?: number): [boolean, number] => {return [false, 0]},
-    handleFontSizeTooLarge: (flash?: boolean, deleteCount?: number, documentId?: string): boolean => {return false},
-    getNumLinesOverhead: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},
+    handleFontSizeTooLarge: (flash?: boolean, deleteCount?: number, documentId?: string, checkNextTextInputFocused?: boolean): boolean => {return false},
+    handleFontSizeTooSmall: (numLinesToAdd: number) => {},
+    getNumLinesDeviation: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},
+    subtractMSWordFontSizes: (fontSize: number | string, fontSize2: number | string): number => {return 0},
     appendTextInput: (textInputs: React.JSX.Element[], setTextInputs: (textInputs: React.JSX.Element[]) => void, pageIndex: number, columnIndex: number, paragraphIndex: number, numTextInputs?: number): React.JSX.Element[] => {return []},
     removeTextInput: (textInputs: React.JSX.Element[], setTextInputs: (textInputs: React.JSX.Element[]) => void, index?: number, deleteCount?: number): React.JSX.Element[] => {return []},
     paragraphIdAppendTextInput: paragraphIdAppendExample,
@@ -833,6 +869,7 @@ export const DocumentContext = createContext({
     showSubtlePopup: (summary: string, content: string, type?: SubtlePopupType, duration?: number, holdTime?: number) => {},
     subtlePopupContent: <></>,
     setSubtlePopupContent: (popupContent: React.JSX.Element) => {},
+
     hideSelectOptions: (selectComponentId?: string) => {},
 
     focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},

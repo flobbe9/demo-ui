@@ -1,4 +1,4 @@
-import { DOCUMENT_SUFFIX, Side } from "../globalVariables";
+import { DOCUMENT_SUFFIX, FONT_SIZES_WHOLE_SCALE, MAX_FONT_SIZE, MIN_FONT_SIZE, Side } from "../globalVariables";
 import { getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isNumberFalsy, isStringNumeric, log, logError, logWarn, stringToNumber } from "./basicUtils";
 
 
@@ -180,6 +180,28 @@ export function getFontSizeDiffInWord(fontSize: number): number {
     }
 
     return fontSize >= 19 ? Math.ceil(fontSize / 4) : Math.ceil(fontSize / 3);
+}
+
+
+/**
+ * @param msWordFontSize font size in ms word
+ * @returns the matching font size for browser. Adds a cretain amount to msWord font size
+ */
+export function getBrowserFontSizeByMSWordFontSize(msWordFontSize: number): number {
+
+    return msWordFontSize + getFontSizeDiffInWord(msWordFontSize);
+}
+
+
+/**
+ * @param browserFontSize font size in browser
+ * @returns the matching font size for ms word. Adds a cretain amount to browser font size
+ */
+export function getMSWordFontSizeByBrowserFontSize(browserFontSize: number): number {
+
+    const msWordFontSize = FONT_SIZES_WHOLE_SCALE.find(([msWordFontSize, fontSize]) => fontSize === browserFontSize);
+
+    return msWordFontSize ? msWordFontSize[0] : -1;
 }
 
 

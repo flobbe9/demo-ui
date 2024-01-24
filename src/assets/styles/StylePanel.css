@@ -45,7 +45,6 @@
         z-index: 2;
 
         .Popup.Subtle {
-            box-shadow: 1px 1px 5px 1px rgb(151, 151, 151);
             border-radius: 3px;
             font-size: 0.9em;
             line-height: normal;

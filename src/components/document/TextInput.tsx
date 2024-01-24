@@ -1,23 +1,29 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashClass, getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { equalsIgnoreCase, flashClass, getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import { StyleProp, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
 import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
-import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextInput, getPartFromDocumentId, getPrevTextInput, getTextInputOverhead, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
+import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 
 
 // IDEA: 
-    // mark multiple lines, style all, tab all, break all (mousemove event)
-    // strg a
-    // strg c / strg v(?)
+// mark multiple lines, style all, tab all, break all (mousemove event)
+// strg a
+// strg c / strg v(?)
 
 // TODO: add pictures
 // TODO: add table
+// TODO: add more pages
+/**
+ * Component defining a text input in the <Document /> and it's logic and styling information.
+ * 
+ * @since 0.0.1
+ */
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
@@ -85,28 +91,6 @@ export default function TextInput(props: {
     }, [documentContext.selectedTextInputStyle]);
 
 
-    useEffect(() => {
-        if (id === documentContext.selectedTextInputId)
-            handleFontSizeChange();
-
-    }, [documentContext.selectedTextInputStyle.fontSize]);
-
-
-    function handleFontSizeChange(): void {
-
-        documentContext.focusTextInput(id, false);
-            
-        const numLinesToAdd = documentContext.getNumLinesOverhead();
-
-        // case: some lines to add
-        if (numLinesToAdd > 0) {
-            // get all paragraphs to 
-            const paragraphIds = documentContext.getParagraphIdsForFontSizeChange();
-            documentContext.setParagraphIdAppendTextInput([paragraphIds, numLinesToAdd]);
-        }
-    }
-
-
     function handleKeyDown(event): void {
 
         const eventKey = event.key;
@@ -138,7 +122,7 @@ export default function TextInput(props: {
         const pastedText = event.clipboardData.getData("text") || "";
 
         if (isTextLongerThanInput(documentContext.selectedTextInputId, pastedText))
-            handleTextLongerThanLine(event);
+            handleTextLongerThanLinePreventKeyDown(event);
     }
 
 
@@ -152,7 +136,7 @@ export default function TextInput(props: {
 
     function handleMouseOver(event): void {
 
-        handleSingleLineColumnMouseOver(event)
+        handleSingleColumnLineMouseOver(event);
     }
 
 
@@ -170,7 +154,7 @@ export default function TextInput(props: {
     /**
      * Toggle borders for singleColumnLines and candidates
      */
-    function handleSingleLineColumnMouseOver(event): void {
+    function handleSingleColumnLineMouseOver(event): void {
 
         let leftTextInputId = ""
         if (isSingleColumnLineCandidate || props.isSingleColumnLine) {
@@ -237,7 +221,7 @@ export default function TextInput(props: {
             selectedTextInput.prop("value", newInputValue);
 
             // move cursor to end of tab
-            moveCursor(documentContext.selectedTextInputId, cursorIndex + 1);
+            moveCursor(documentContext.selectedTextInputId, cursorIndex + (equalsIgnoreCase(documentContext.selectedTextInputStyle.textAlign, "right") ? 0 : + 1));
         }
     }
 
@@ -258,43 +242,46 @@ export default function TextInput(props: {
     async function handleTextLongerThanLine(event): Promise<void> {
         
         const lastTextInputInColumn = documentContext.getLastTextInputOfColumn(id);
-        if (!lastTextInputInColumn)
-            return;
 
         const thisTextInput = $(inputRef.current!);
         const thisTextInputValue = thisTextInput.prop("value");
 
         const nextTextInput = getNextTextInput(id);
         
-        const isNotLastTextInputInColumn = lastTextInputInColumn.prop("id") !== id;
+        const isNotLastTextInputInColumn = lastTextInputInColumn && lastTextInputInColumn.prop("id") !== id;
         const isNextTextInputBlank = !nextTextInput || isBlank(nextTextInput.prop("value"));
-        const hasTextWhiteSpace = thisTextInputValue.includes(" ");
         const cursorIndex = getCursorIndex(id);
-
+        
         // case: can shift text to next line
         if (isNotLastTextInputInColumn && isNextTextInputBlank && cursorIndex === thisTextInputValue.length) {
             // case: dont shift text but continue in next input
+            const hasTextWhiteSpace = thisTextInputValue.includes(" ");
             if (!hasTextWhiteSpace)
                 focusNextTextInput(true);
             else 
                 moveLastWordToNextTextInput();
 
         // case: can't shift text to next line
-        } else {
-            event.preventDefault();
-
-            // case: border still flashing
-            if (textInputBorderFlashing)
-                return;
-
-            setTextInputBorderFlashing(true);
-            await flashClass(id, "textInputFlash", "textInputFocus", 200);
-            setTextInputBorderFlashing(false);
-        }
+        } else
+            handleTextLongerThanLinePreventKeyDown(event);
     }
 
 
-    function handle_Dis_ConnectLines(event): void {
+    async function handleTextLongerThanLinePreventKeyDown(event): Promise<void> {
+
+        event.preventDefault();
+
+        // case: border still flashing
+        if (textInputBorderFlashing)
+            return;
+
+        setTextInputBorderFlashing(true);
+        await flashClass(id, "textInputFlash", "textInputFocus", 200);
+        setTextInputBorderFlashing(false);
+    }
+
+
+    function toggleSingleColumnLine(event): void {
 
         $(".connectIcon").hide();
 
@@ -466,17 +453,22 @@ export default function TextInput(props: {
 
         // case: next text input blank
         if (copyStyles && isBlank(nextTextInput.prop("value"))) {
-            const checkFontSize = documentContext.isFontSizeTooLargeForColumn(nextTextInputId); 
+            const fontSizeDiff = documentContext.subtractMSWordFontSizes($(inputRef.current!).css("fontSize"), nextTextInput.css("fontSize"));
+            const numLinesDiff = documentContext.getNumLinesDeviation(nextTextInputId, fontSizeDiff); 
             
             // case: font size too large
-            if (checkFontSize[0]) 
+            if (numLinesDiff > 0) {
                 // case: cant handle font size too large
-                if (!documentContext.handleFontSizeTooLarge(false, checkFontSize[1], nextTextInputId))
-                    // override fontSize with nextTextInputFontSize (keep nextTextInputFontSize)
+                if (!documentContext.handleFontSizeTooLarge(false, numLinesDiff, nextTextInputId, true))
+                    // keep nextTextInput's fontSize
                     stylePropsToOverride?.push(["fontSize", getCSSValueAsNumber(nextTextInputFontSize, 2)]);
+
+            // case: font size too small
+            } else if (numLinesDiff < 0)
+                documentContext.handleFontSizeTooSmall(numLinesDiff);
             
-            documentContext.focusTextInput(nextTextInput.prop("id"), false);
-            documentContext.setSelectedTextInputStyle(getTextInputStyle($("#" + id)), stylePropsToOverride);
+            documentContext.focusTextInput(nextTextInputId, false);
+            documentContext.setSelectedTextInputStyle(getTextInputStyle($(inputRef.current!)), stylePropsToOverride);
 
         // case: next text input not blank
         } else 
@@ -540,7 +532,7 @@ export default function TextInput(props: {
                         hoverBackgroundColor={props.isSingleColumnLine ? "rgb(255, 180, 160)" : "rgb(160, 180, 255)"}
                         clickBackgroundColor="rgb(220, 220, 220)"
 
-                        handleClick={handle_Dis_ConnectLines} 
+                        handleClick={toggleSingleColumnLine} 
                         >
                     <i className={"fa-solid fa-link " + dontHideConnectIconClassName + (props.isSingleColumnLine ?  "hidden" : "")}></i>
                     <i className={"fa-solid fa-link-slash " + dontHideConnectIconClassName + (props.isSingleColumnLine ? "" : " hidden")}></i>
@@ -554,7 +546,7 @@ export default function TextInput(props: {
                 type="text" 
                 onMouseDown={handleMouseDown}
                 onKeyDown={handleKeyDown}
-                // onPaste={handlePaste}
+                onPaste={handlePaste}
                 />
         </div>
     )

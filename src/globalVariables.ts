@@ -11,8 +11,7 @@ export const API_VERSION = "" + process.env.REACT_APP_VERSION;
 
 export const NUM_PAGES = 2;
 export const PAGE_WIDTH_PORTRAIT = "806px";
-// export const PAGE_WIDTH_LANDSCAPE = "1181px";
-export const PAGE_WIDTH_LANDSCAPE = "1581px";
+export const PAGE_WIDTH_LANDSCAPE = "1170px";
 
 export const MAX_NUM_COLUMNS = 3;
 
@@ -45,12 +44,13 @@ export const RAW_FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28,
 export const MAX_FONT_SIZE = RAW_FONT_SIZES[RAW_FONT_SIZES.length - 1];
 export const MIN_FONT_SIZE = RAW_FONT_SIZES[0];
 
-/** Formatted like: ```[originalFontSize, fakeFontSize]```. To get fakeFontSize add a certain diff to even out font style difference in MS Word */
+/** Formatted like: ```[msWordFontSize, browserFontSize]```. To get browserFontSize add a certain diff to even out font style difference in MS Word */
 export const FONT_SIZES = RAW_FONT_SIZES.map(fontSize => [fontSize, fontSize + getFontSizeDiffInWord(fontSize)]);
 
-/** Formatted liek {@link FONT_SIZES} but mapping all numbers from {@link MIN_FONT_SIZE} to {@link MAX_FONT_SIZE} */
-export const ALL_FONT_SIZES = getAllFontSizes();
+/** Formatted like: ```[msWordFontSize, browserFontSize]```. Cover all fontSizes from {@link MIN_FONT_SIZE} to {@link MAX_FONT_SIZE} */
+export const FONT_SIZES_WHOLE_SCALE = getAllFontSizes();
 function getAllFontSizes(): number[][] {
+
     const allFontSizes: number[][] = [];
 
     for (let i = MIN_FONT_SIZE; i <= MAX_FONT_SIZE; i++) 
@@ -59,40 +59,13 @@ function getAllFontSizes(): number[][] {
     return allFontSizes;
 }
 
-export function getFakeFontSizeByOriginalFontSize(originalFontSize: number): number {
-
-    return originalFontSize + getFontSizeDiffInWord(originalFontSize);
-}
-
-export function getOriginalFontSizeByFakeFontSize(fakeFontSize: number): number {
-
-    const originalFontSize = ALL_FONT_SIZES.find(([originalFontSize, fontSize]) => fontSize === fakeFontSize);
-
-    return originalFontSize ? originalFontSize[0] : -1;
-}
-
+/** Formatted like {@link FONT_SIZES} but mapping all numbers from {@link MIN_FONT_SIZE} to {@link MAX_FONT_SIZE} */
 
 export type Side = "top" | "right" | "left" | "bottom" | "none";
 
 export const DEFAULT_BASIC_PARAGRAPH_TEXT = " ";
 
 export const NO_TEXT_INPUT_SELECTED = "Wähle zuerst ein Texteingabefeld aus.";
-
-/** 
- * Width of one text input relative to the wirndwo width (at the moment). 
- * Not constant because it changes with the orientation 
- */
-let TEXT_INPUT_WIDTH = 100 / 13;
-export function getTextInputWidth(): number {
-
-    return TEXT_INPUT_WIDTH;
-}
-
-export function setTextInputWidth(textInputWidth: number): void {
-
-    TEXT_INPUT_WIDTH = textInputWidth;
-}
-
 
 /** fontSize of a line that is added to the document (i.e. because there's not enough lines at the moment) */
 export const DEFAULT_FONT_SIZE = 14;

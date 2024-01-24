@@ -3,8 +3,8 @@ import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { equalsIgnoreCase, flashClass, flashCss, getJQueryElementById, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
-import { MAX_FONT_SIZE, MIN_FONT_SIZE, getFakeFontSizeByOriginalFontSize, getOriginalFontSizeByFakeFontSize, isMobileWidth } from "../../globalVariables";
-import { getCSSValueAsNumber } from "../../utils/documentBuilderUtils";
+import { MAX_FONT_SIZE, MIN_FONT_SIZE, isMobileWidth } from "../../globalVariables";
+import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getMSWordFontSizeByBrowserFontSize } from "../../utils/documentBuilderUtils";
 import { DocumentContext } from "../document/Document";
 
 
@@ -103,7 +103,7 @@ export default function Select(props: {
 
     function handleSelect(event, value: string, label: string | number): void {
 
-        value = isFontSize ? getFakeFontSizeByOriginalFontSize(getCSSValueAsNumber(value, 2)).toString() : getOptionsBoxValueByLabel(value, true);
+        value = isFontSize ? getBrowserFontSizeByMSWordFontSize(getCSSValueAsNumber(value, 2)).toString() : getOptionsBoxValueByLabel(value, true);
         props.handleSelect(value);
     }
 
@@ -137,7 +137,7 @@ export default function Select(props: {
     function setSelectLabel(label: string | number): void {
 
         if (isFontSize) {
-            $(labelRef.current!).prop("value", getOriginalFontSize(label));
+            $(labelRef.current!).prop("value", getMSWordFontSize(label));
             return;
         }
         
@@ -224,25 +224,25 @@ export default function Select(props: {
     /**
      * Adds a certain value to given fontSize in order to display the fontSize almost like in MS Word.
      * 
-     * @param fakeFontSize to get the original fontSize of (is not altered)
-     * @returns the given font size plus {@link getFontSizeDiffInWord()} or the fake fontSize, if state 
-     *          ```isFontSize``` is false or ```fakeFontSize``` is NaN
+     * @param browserFontSize to get the msWord fontSize of (is not altered)
+     * @returns the given font size plus {@link getFontSizeDiffInWord()} or the browser fontSize, if state 
+     *          ```isFontSize``` is false or ```browserFontSize``` is NaN
      * @see getFontSizeDiffInWord
      */
-    function getOriginalFontSize(fakeFontSize: string | number): number | string {
+    function getMSWordFontSize(browserFontSize: string | number): number | string {
 
         if (!isFontSize)
-            return fakeFontSize;
+            return browserFontSize;
 
-        const fontSizeNumber = getCSSValueAsNumber(fakeFontSize, 2);
-        if (isNaN(fontSizeNumber)) {
-            logWarn("'getOriginalFontSize()' failed. 'fontSizeNumber' is NaN. 'fontSize': " + fakeFontSize);
-            return fakeFontSize;
+        const browserFontSizeNumber = getCSSValueAsNumber(browserFontSize, 2);
+        if (isNaN(browserFontSizeNumber)) {
+            logWarn("'getMSWordFontSize()' failed. 'browserFontSizeNumber' is NaN. 'fontSize': " + browserFontSize);
+            return browserFontSize;
         }
 
-        const originalFontSize = getOriginalFontSizeByFakeFontSize(fontSizeNumber);
+        const msWordFontSize = getMSWordFontSizeByBrowserFontSize(browserFontSizeNumber);
 
-        return originalFontSize;
+        return msWordFontSize;
     }
 
     
@@ -265,7 +265,7 @@ export default function Select(props: {
                  >
                 <input className="selectLabel dontMarkText dontHideSelect" 
                        ref={labelRef}
-                       title={isFontSize ? getOriginalFontSize(props.label).toString() : props.label}
+                       title={isFontSize ? getMSWordFontSize(props.label).toString() : props.label}
                        defaultValue={props.label}
                        onKeyUp={handleLabelKeyUp}
                        />

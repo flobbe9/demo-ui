@@ -3,17 +3,17 @@ import DocumentWrapper from "../abstract/DocumentWrapper";
 import { getTextInputStyle } from "../abstract/Style";
 import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
-import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLASS_NAME, getOriginalFontSizeByFakeFontSize } from "../globalVariables";
+import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLASS_NAME } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { downloadFileByUrl, isBlank, log, logApiResponse, logError, logWarn, stringToNumber } from "../utils/basicUtils";
-import { appendDocxSuffix, getDocumentId, getPartFromDocumentId } from "../utils/documentBuilderUtils";
+import { appendDocxSuffix, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPartFromDocumentId } from "../utils/documentBuilderUtils";
 import fetchJson from "../utils/fetchUtils";
 import { ApiExceptionFormat } from '../abstract/ApiExceptionFormat';
 
 
 const documentBuilderMapping = "/api/documentBuilder";
 
-// TODO: remember to add empty line after table (in case of column break, or second table following)
+// NOTE: remember to add empty line after table (in case of column break, or second table following)
 
 
 /**
@@ -127,7 +127,7 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
 
         const style = getTextInputStyle(textInput);
         // fix font size for MS Word
-        style.fontSize = getOriginalFontSizeByFakeFontSize(style.fontSize);
+        style.fontSize = getMSWordFontSizeByBrowserFontSize(style.fontSize);
 
         allBasicParagrahps.push({text: text, style})
     });

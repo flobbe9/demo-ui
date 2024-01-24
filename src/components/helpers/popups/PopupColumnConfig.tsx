@@ -116,7 +116,7 @@ export default function PopupColumnConfig(props: {
                                     >
                             <div>Lorem ipsum</div>
                         </RadioButton>
-                        <div className="mt-2 mb-3 mr-2">1 Spalte / Seite</div>
+                        <div className="mt-2 mb-3 mr-2 textCenter">1 Spalte / Seite</div>
                     </div>
 
                     <div className="radioContainer mr-0 mr-sm-4">
@@ -143,7 +143,7 @@ export default function PopupColumnConfig(props: {
                             </div>
                             <div style={{width: "50%"}}></div>
                         </RadioButton>
-                        <div className="mt-2 mb-3">2 Spalten / Seite</div>
+                        <div className="mt-2 mb-3 textCenter">2 Spalten / Seite</div>
                     </div>
 
                     <div className="radioContainer">
@@ -171,7 +171,7 @@ export default function PopupColumnConfig(props: {
                             <div className="verticalBorderRightDotted" style={{width: "33%"}}></div>
                             <div style={{width: "33%"}}></div>
                         </RadioButton>
-                        <div className="mt-2 mb-3">3 Spalten / Seite</div>
+                        <div className="mt-2 mb-3 textCenter">3 Spalten / Seite</div>
                     </div>
                 </div>
 

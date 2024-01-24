@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import useCookie from "react-use-cookie";
 import "../../assets/styles/StylePanel.css";
 import StylePanelSection from "./StylePanelSection";
 import Checkbox from "../helpers/Checkbox";
@@ -10,7 +9,7 @@ import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { flashClass, isBlank, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
-import { DONT_SHOW_AGAIN_COOKIE_NAME, FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
+import { FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
 import Popup from "../helpers/popups/Popup";
 import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
@@ -66,27 +65,28 @@ export default function StylePanel(props) {
     }
 
 
+    // gets slow (over time or on page 2)
     function handleFontSizeSelect(fontSize: string): void {
         
         // case: text too long for text input length      
         const isFontSizeTooLargeForTextInput = isTextLongerThanInput(documentContext.selectedTextInputId, "", fontSize + "px");
         if (isFontSizeTooLargeForTextInput) {
-            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.");
+            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.", "Warn");
             return;
         }
 
-        // TODO: calculation is inaccurate (off by two?)
-        const diff = getCSSValueAsNumber(fontSize, 2) - documentContext.selectedTextInputStyle.fontSize;
-        const checkFontSize = documentContext.isFontSizeTooLargeForColumn(documentContext.selectedTextInputId, diff);
-        const isFontSizeTooLargeForColumn = checkFontSize[0];
-        const deleteCount = checkFontSize[1];
-        
-        // case: line height too large for column height
-        if (isFontSizeTooLargeForColumn) {
+        const diff = documentContext.subtractMSWordFontSizes(getCSSValueAsNumber(fontSize, 2), documentContext.selectedTextInputStyle.fontSize);
+        const numLinesDiff = documentContext.getNumLinesDeviation(documentContext.selectedTextInputId, diff);
+
+        // case: font size too large
+        if (numLinesDiff > 0) {
             // case: dont increase font size
-            if (!documentContext.handleFontSizeTooLarge(true, deleteCount))
+            if (!documentContext.handleFontSizeTooLarge(true, numLinesDiff))
                 return;
-        }
+        
+        // case: font size too small
+        } else if (numLinesDiff < 0)
+            documentContext.handleFontSizeTooSmall(numLinesDiff);
 
         documentContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
         documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
@@ -407,7 +407,10 @@ export default function StylePanel(props) {
             
             {/* subtle popup */}
             <div className="subtlePopupContainer">
-                <Popup id={"Subtle" + documentContext.subtlePopupType} className="Subtle dontHideSubtlePopup" height={"fit-content"} width={"200px"}>
+                <Popup id={"Subtle" + documentContext.subtlePopupType} 
+                       className="Subtle dontHideSubtlePopup boxShadowGrey" 
+                       height={"fit-content"} 
+                       width={"200px"}>
                     {documentContext.subtlePopupContent}
                 </Popup>
             </div>

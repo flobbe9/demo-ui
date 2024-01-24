@@ -1,7 +1,7 @@
 :root {
     --initialTextInputFontSize: 14px; /** is changed on render */
     --connectLinesBorder: 2px dashed rgba(128, 128, 128, 0.3);
-    --selectedColor: "white";
+    --selectedColor: "black";
     --textInputBorderBottom: 1px solid rgb(219, 219, 219);
 }
 
@@ -11,11 +11,13 @@
     
     .TextInput {
         border: none;
+        border-left: 2px solid white;
+        border-right: 2px solid white;
         border-bottom: var(--textInputBorderBottom);
         cursor: auto;
         font-family: 'Calibri';
         font-size: var(--initialTextInputFontSize);
-        line-height: 23px;
+        line-height: 11px;
         margin: 0 3px;
         padding: 0;
         outline: none;
@@ -34,12 +36,12 @@
     }
     
     .textInputFocus {
-        border-bottom-color: var(--selectedColor);
+        border-bottom-color: var(--selectedColor) !important;
     }
 
     .textInputFlash {
-        border-bottom-color: red;
-        border-bottom-width: 2px;
+        border-bottom-color: red !important;
+        border-bottom-width: 1px;
     }
 
     .singleColumnLineCandidate, .SingleColumnLine {
@@ -54,15 +56,6 @@
         border-bottom: var(--connectLinesBorder);
         
         margin-bottom: 0;
-
-        &.textInputFocus {
-            border-bottom-color: var(--selectedColor);
-        }
-
-        &.textInputFlash {
-            border-bottom-color: red;
-            border-bottom-width: 2px;
-        }
     }
 
     .textInputMiddleColumnConnect {
@@ -70,15 +63,6 @@
         border-bottom: var(--connectLinesBorder);
 
         margin-bottom: 0;
-
-        &.textInputFocus {
-            border-bottom-color: var(--selectedColor);
-        }
-
-        &.textInputFlash {
-            border-bottom-color: red;
-            border-bottom-width: 2px;
-        }
     }
 
     .textInputRightColumnConnect {
@@ -87,29 +71,11 @@
         border-bottom: var(--connectLinesBorder);  
 
         margin-bottom: 0;
-
-        &.textInputFocus {
-            border-bottom-color: var(--selectedColor);
-        }
-
-        &.textInputFlash {
-            border-bottom-color: red;
-            border-bottom-width: 2px;
-        }
     }
 
     .textInputSingleColumnDisconnect {
         border: var(--connectLinesBorder);
         
         margin-bottom: 0;
-
-        &.textInputFocus {
-            border-bottom-color: var(--selectedColor);
-        }
-
-        &.textInputFlash {
-            border-bottom-color: red;
-            border-bottom-width: 2px;
-        }
     }
 }

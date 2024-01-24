@@ -9,7 +9,7 @@ import { API_VERSION, WEBSITE_NAME } from "../globalVariables";
 export default function Footer(props) {
 
     return (
-        <div className="Footer flex">
+        <div className="Footer flex dontMarkText">
             <div className="col-4">
             </div>
             <div className="col-4 flexCenter">

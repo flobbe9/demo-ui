@@ -14,15 +14,15 @@
     }
 }
 
-/* page dimensions, don't change!!! */
+/* page dimensions */
 .pagePortrait {
-    height: 1100px !important;
+    height: 1180px !important;
     padding: 33px 90px !important;
     width: var(--pageWidthPortrait) !important;
 }
 
 .pageLandscape {
-    height: 800px !important;
+    height: 855px !important;
     padding: 33px 100px !important;
     width: var(--pageWidthLandscape) !important;
 }

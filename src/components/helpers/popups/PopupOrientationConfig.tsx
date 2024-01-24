@@ -103,7 +103,7 @@ export default function PopupOrientationConfig(props: {
                                     >
                             <span style={{fontSize: "10px"}}>Lorem ipsum</span>
                         </RadioButton>
-                        <div className="textCenter">Hoch-Format</div>
+                        <div className="mt-2 textCenter">Hoch-Format</div>
                     </div>
                     
                     <div className="col-12 col-sm-7  mt-3 mt-sm-0">
@@ -125,7 +125,7 @@ export default function PopupOrientationConfig(props: {
                                     >
                             <span style={{fontSize: "10px"}}>Lorem ipsum</span>
                         </RadioButton>
-                        <div className="textCenter">Quer-Format</div>
+                        <div className="mt-2 textCenter">Quer-Format</div>
                     </div>
                 </div>
 

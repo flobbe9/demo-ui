@@ -2,6 +2,7 @@ import React, { useContext, useRef } from 'react';
 import "../../assets/styles/ControlPanelMenu.css";
 import Button from '../helpers/Button';
 import { DocumentContext } from './Document';
+import DownloadIcon from '../helpers/DownloadIcon';
 
 
 export default function ControlPanelMenu(props: {
@@ -17,27 +18,32 @@ export default function ControlPanelMenu(props: {
     const menuRef = useRef(null);
 
 
+    // TODO: 
+        // new document
+        // pdf
+        // save
+
     return (
         <div id={id} className={className + " dontHideControlPanelMenu hidden"} ref={menuRef}>
                 <div className="controlPanelMenuItem dontHideControlPanelMenu">
                     <Button id={"DownloadDocument"}
-                            className="dontHideControlPanelMenu"
-                            childrenClassName="dontHideControlPanelMenu"
+                            className="dontHideControlPanelMenu hover"
+                            childrenClassName="dontHideControlPanelMenu flexCenter"
                             
                             handlePromise={documentContext.buildAndDownloadDocument}
                             title="Als Word Dokument herunterladen"
 
-                            boxStyle={{backgroundColor: "blue"}}
+                            boxStyle={{
+                                backgroundColor: "blue",
+                                boxShadow: "none"
+                            }}
                             childrenStyle={{
                                 color: "white",
                                 padding: "3px 9px",
                                 width: "80px"
                             }}
-                            hoverBackgroundColor="rgb(80, 80, 255)"
-                            clickBackgroundColor="rgb(80, 80, 255)"
                             >
-                        <i className="fa-solid fa-file-arrow-down fa-lg mr-2"></i>
-                        <span>Word</span>
+                        <DownloadIcon className="mr-2" /> <span>Word</span>
                     </Button>    
                 </div>
                         
@@ -51,17 +57,18 @@ export default function ControlPanelMenu(props: {
                             disabled={true}
                             rendered={false}
 
-                            boxStyle={{backgroundColor: "red"}}
+                            boxStyle={{
+                                backgroundColor: "red",
+                                boxShadow: "none"
+                            }}
                             childrenStyle={{
                                 color: "white",
                                 padding: "3px 9px",
-                                width: "80px"
                             }}
                             hoverBackgroundColor="rgb(255, 135, 135)"
                             clickBackgroundColor="rgb(255, 80, 80)"
                             >
-                        <i className="fa-solid fa-file-arrow-down fa-lg mr-2"></i>
-                        <span>Pdf</span>
+                        <DownloadIcon className="mr-2" /> <span>Pdf</span>
                     </Button>  
                 </div>
 

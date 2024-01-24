@@ -17,6 +17,10 @@
 
     &:disabled {
         cursor: default;
+
+        &:hover {
+            opacity: 0.5;
+        }
     }
 
     .buttonOverlay {
