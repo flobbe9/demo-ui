@@ -94,7 +94,7 @@ export default function PopupColumnConfig(props: {
             
             <div className="popupBody flexCenter">
                 <div id="numColumnsContainer" className="numColumnsContainer flexCenter dontMarkText">
-                    <div className="radioContainer ml-1 mr-0 mr-sm-4">
+                    <div className="radioContainer ms-1 m-2">
                         <RadioButton id="OneColumn" 
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName="flexLeftStart"
@@ -116,10 +116,10 @@ export default function PopupColumnConfig(props: {
                                     >
                             <div>Lorem ipsum</div>
                         </RadioButton>
-                        <div className="mt-2 mb-3 mr-2 textCenter">1 Spalte / Seite</div>
+                        <div className="mt-2 mb-3 me-2 textCenter">1 Spalte / Seite</div>
                     </div>
 
-                    <div className="radioContainer mr-0 mr-sm-4">
+                    <div className="radioContainer m-2">
                         <RadioButton id="TwoColumns" 
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName="flexLeftStart"
@@ -146,7 +146,7 @@ export default function PopupColumnConfig(props: {
                         <div className="mt-2 mb-3 textCenter">2 Spalten / Seite</div>
                     </div>
 
-                    <div className="radioContainer">
+                    <div className="radioContainer m-2">
                         <RadioButton id="ThreeColumns" 
                                     labelClassName={"whiteButton " + orientationClassName}
                                     childrenClassName="flexLeftStart"
@@ -175,8 +175,8 @@ export default function PopupColumnConfig(props: {
                     </div>
                 </div>
 
-                <PopupContainer id={props.warnPopupContainerIdPart} className="warnPopupContainer" matchPopupDimensions={true}>
-                    <Popup id={props.warnPopupContainerIdPart} height="medium" width="medium">
+                <PopupContainer id={props.warnPopupContainerIdPart} className="warnPopupContainer" matchPopupDimensions={documentContext.matchPopupDimensions}>
+                    <Popup id={props.warnPopupContainerIdPart} height={appContext.isMobileView ? "350px" : "medium"} width="medium">
                         <PopupWarnConfirm id="ColumnConfig" handleConfirm={handleSubmit} 
                                         handleDecline={(event) => toggleWarnPopup(event)}
                                         hideThis={(event) => toggleWarnPopup(event)}

@@ -4,7 +4,7 @@ import "../../assets/styles/Document.css";
 import { confirmPageUnload, flashClass, getCssVariable, getJQueryElementByClassName, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, removeConfirmPageUnloadEvent, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
-import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE } from "../../globalVariables";
+import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE, isMobileWidth } from "../../globalVariables";
 import ControlPanel from "./ControlPanel";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
@@ -19,7 +19,6 @@ import ControlPanelMenu from "./ControlPanelMenu";
 
 // TODO: add some kind of "back" button
 
-// TODO: update to bootstrap 5
 // TODO: fix console errors
 export default function Document(props) {
 
@@ -28,13 +27,16 @@ export default function Document(props) {
 
     const appContext = useContext(AppContext);
 
-    const [escapePopup, setEscapePopup] = useState(true);
+    // document popup
     const [popupContent, setPopupContent] = useState(<></>);
     const [subtlePopupContent, setSubtlePopupContent] = useState(<></>);
+    const [matchPopupDimensions, setMatchPopupDimensions] = useState(!appContext.isMobileView);
+    const [escapePopup, setEscapePopup] = useState(true);
+
+    // subtle popup (inside StylePanel)
     const [subtlePopupType, setSubtlePopupType] = useState<SubtlePopupType>("Info");
 
     const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
-    const [orientationPageContainerClassName, setOrientationPageContainerClassName] = useState("flexCenter")
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
     const [selectedTextInputStyle, setSelectedTextInputStyleState] = useState(getDefaultStyle());
 
@@ -87,13 +89,14 @@ export default function Document(props) {
         subtlePopupContent,
         setSubtlePopupContent,
         hideSelectOptions,
+        matchPopupDimensions,
+        setMatchPopupDimensions,
 
         focusTextInput,
         unFocusTextInput,
 
         setSelectedTextInputStyle,
         setPages,
-        setOrientationPageContainerClassName,
         initPages,
         orientation,
         setOrientation,
@@ -215,7 +218,7 @@ export default function Document(props) {
         for (let i = 0; i < NUM_PAGES; i++)
             pages.push((
                 <div className="flexCenter" key={i}>
-                    <Page pageIndex={i} className="boxShadowGrey flexCenter"/>
+                    <Page pageIndex={i} className="boxShadowGrey"/>
                 </div>
             ));
 
@@ -359,8 +362,6 @@ export default function Document(props) {
      *                                  focusing a text input that will be deleted
      * @returns false if the fontSize should not be changed, else true
      */
-    // TODO: singleColumnLines not working properly, diff?
-    // TODO: handlefontsize too small gets too big, diff?
     function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId, checkNextTextInputFocused = false): boolean {
 
         const columnTextInputs = getColumnTextInputs(documentId);
@@ -817,7 +818,7 @@ export default function Document(props) {
 
                 {/* document popup */}
                 <div className="flexCenter">
-                    <PopupContainer id={"Document"} className="hideDocumentPopup" ref={documentPopupRef}>
+                    <PopupContainer id={"Document"} className="hideDocumentPopup" ref={documentPopupRef} matchPopupDimensions={matchPopupDimensions}>
                         {popupContent}
                     </PopupContainer>
                 </div>
@@ -827,7 +828,7 @@ export default function Document(props) {
                 
                 <StylePanel />
 
-                <div className={"pageContainer " + orientationPageContainerClassName}>
+                <div className={"pageContainer " + (appContext.isMobileView ? "flexLeft" : "flexCenter")}>
                     <div style={{width: orientation === Orientation.PORTRAIT ? PAGE_WIDTH_PORTRAIT : PAGE_WIDTH_LANDSCAPE}}>
                         {pages}
                     </div>
@@ -869,6 +870,8 @@ export const DocumentContext = createContext({
     showSubtlePopup: (summary: string, content: string, type?: SubtlePopupType, duration?: number, holdTime?: number) => {},
     subtlePopupContent: <></>,
     setSubtlePopupContent: (popupContent: React.JSX.Element) => {},
+    matchPopupDimensions: false,
+    setMatchPopupDimensions: (matchPopupDimenstions: boolean) => {},
 
     hideSelectOptions: (selectComponentId?: string) => {},
 
@@ -876,7 +879,6 @@ export const DocumentContext = createContext({
     unFocusTextInput: (textInputId: string, debug?: boolean) => {},
 
     setPages: (pages: React.JSX.Element[]) => {},
-    setOrientationPageContainerClassName: (pageContainerClassName: string) => {},
     initPages: (): React.JSX.Element[] => {return []},
     orientation: Orientation.PORTRAIT,
     setOrientation: (orientation: Orientation) => {},

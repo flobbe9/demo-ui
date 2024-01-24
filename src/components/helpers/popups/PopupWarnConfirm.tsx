@@ -84,7 +84,7 @@ export default function PopupWarnConfirm(props: {
                             hover={false}
                             />
                 </div>
-                <div className="col-4 flexRightStart pr-0">
+                <div className="col-4 flexRightStart">
                     <i className="fa-solid fa-xmark fa-xl closeIcon" onClick={props.hideThis}></i>
                 </div>
             </div>
@@ -96,7 +96,7 @@ export default function PopupWarnConfirm(props: {
                 {props.displayDontShowAgainCheckbox ? 
                     <div className={props.checkboxContainerClassname || ""} style={{fontSize: "0.8em"}}>
                         <Checkbox id={"DontShowAgainCheckbox"} 
-                                  className="flexCenter mr-1"
+                                  className="flexCenter me-1"
                                   checked={isDontShowAgain} 
                                   handleSelect={props.dontConfirm ? handleCheckboxChecked : setIsDontShowAgain}
                                   boxStyle={{
@@ -121,7 +121,7 @@ export default function PopupWarnConfirm(props: {
             <div className={"popupFooter flexCenter " + (dontConfirm ? "hidden " : "")}>
 
                 <Button id={id + "Decline"} 
-                        className="mr-4 blackButton blackButtonContained" 
+                        className="me-4 blackButton blackButtonContained" 
                         childrenStyle={{
                             padding: "5px 10px",                            
                         }}

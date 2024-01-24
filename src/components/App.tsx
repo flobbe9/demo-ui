@@ -6,11 +6,9 @@ import NavBar from "./NavBar";
 import Footer from "./Footer";
 import Home from "./Home";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../utils/basicUtils";
+import { log, setCssVariable } from "../utils/basicUtils";
 import PopupContainer from "./helpers/popups/PopupContainer";
-import { WEBSITE_NAME, BUILDER_PATH} from "../globalVariables";
-import Version from "./Version";
-import { getJQueryElementByClassName, getJQueryElementById } from "../utils/basicUtils";
+import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth} from "../globalVariables";
 import NotFound from "./error_pages/NotFound";
 
 
@@ -43,6 +41,8 @@ export default function App() {
     
     const [pressedKey, setPressedKey] = useState("");
 
+    const [isMobileView, setIsMobileView] = useState(isMobileWidth());
+
     const appRef = useRef(null);
     const appPopupRef = useRef(null);
     const appOverlayRef = useRef(null);
@@ -52,15 +52,18 @@ export default function App() {
         setPopupContent,
         togglePopup,
         hidePopup,
+        hideStuff,
+
         pressedKey,
-        isWindowWidthTooSmall,
-        hideStuff
+
+        isMobileView,
     }
 
 
     useEffect(() => {
         document.addEventListener("keydown", handleGlobalKeyDown);
         document.addEventListener("keyup", handleGlobalKeyUp);
+        $(window).on("resize", handleWindowResize);
 
         document.title = WEBSITE_NAME;
 
@@ -68,13 +71,26 @@ export default function App() {
         return () => {
             document.removeEventListener("keydown", handleGlobalKeyDown);
             document.removeEventListener("keyup", handleGlobalKeyUp);
+            document.removeEventListener("resize", handleWindowResize);
         }
     }, []);
+
+
+    useEffect(() => {
+        setCssVariable("stylePanelOverflow", "auto");
+
+    }, [isMobileView])
 
 
     function handleClick(event): void {
 
         hideStuff(event);
+    }
+
+
+    function handleWindowResize(event): void {
+
+        setIsMobileView(isMobileWidth());
     }
 
 
@@ -130,15 +146,6 @@ export default function App() {
         // hide controlPanelMenu
         if (!targetClassName.includes("dontHideControlPanelMenu"))
             $(".ControlPanelMenu").slideUp(100);
-    }
-
-
-    /**
-     * @returns true if window width is smaller thatn landscape page width
-     */
-    function isWindowWidthTooSmall(): boolean {
-
-        return document.documentElement.clientWidth < 1014;
     }
     
 
@@ -217,7 +224,9 @@ export const AppContext = createContext({
     setPopupContent: (popupContent: React.JSX.Element) => {},
     togglePopup: (duration?: number) => {},
     hidePopup: (duration?: number) => {},
+    hideStuff: (event?) => {},
+
+    isMobileView: false,
+
     pressedKey: "",
-    isWindowWidthTooSmall: (): boolean => {return false},
-    hideStuff: (event?) => {}
 });

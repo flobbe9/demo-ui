@@ -43,7 +43,7 @@ export default function ControlPanelMenu(props: {
                                 width: "80px"
                             }}
                             >
-                        <DownloadIcon className="mr-2" /> <span>Word</span>
+                        <DownloadIcon className="me-2" /> <span>Word</span>
                     </Button>    
                 </div>
                         
@@ -68,7 +68,7 @@ export default function ControlPanelMenu(props: {
                             hoverBackgroundColor="rgb(255, 135, 135)"
                             clickBackgroundColor="rgb(255, 80, 80)"
                             >
-                        <DownloadIcon className="mr-2" /> <span>Pdf</span>
+                        <DownloadIcon className="me-2" /> <span>Pdf</span>
                     </Button>  
                 </div>
 
@@ -88,7 +88,7 @@ export default function ControlPanelMenu(props: {
                             hoverBackgroundColor="rgb(50, 50, 50)"
                             clickBackgroundColor="rgb(150, 150, 150)"
                             >
-                        <i className="fa-regular fa-floppy-disk mr-1"></i> 
+                        <i className="fa-regular fa-floppy-disk me-2"></i> 
                         <span>Speichern</span>
                     </Button>
                 </div>

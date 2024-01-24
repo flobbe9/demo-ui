@@ -283,7 +283,7 @@ export default function TextInput(props: {
 
     function toggleSingleColumnLine(event): void {
 
-        $(".connectIcon").hide();
+        $(".connectOrDisconnectButton").hide();
 
         // only works because there's one text input per paragraph
         pageContext.toggleConnectWarnPopup(props.paragraphIndex, props.isSingleColumnLine);
@@ -514,7 +514,7 @@ export default function TextInput(props: {
              >
             <label className={"textInputLabel " + dontHideConnectIconClassName} htmlFor={id}>
                 <Button id={"ConnectLines" + id}
-                        className={"connectIcon flexCenter " + dontHideConnectIconClassName}
+                        className={"connectOrDisconnectButton flexCenter " + dontHideConnectIconClassName}
                         title={props.isSingleColumnLine ? "Zeile aufspalten" : "Zeilen verbinden"}
 
                         childrenClassName={"flexCenter " + dontHideConnectIconClassName}
@@ -525,17 +525,17 @@ export default function TextInput(props: {
                         }}
                         childrenStyle={{
                             borderRadius: "50%",
-                            height: "30px",
+                            height: "25px",
                             padding: "0px",
-                            width: "30px"
+                            width: "25px"
                         }}      
                         hoverBackgroundColor={props.isSingleColumnLine ? "rgb(255, 180, 160)" : "rgb(160, 180, 255)"}
                         clickBackgroundColor="rgb(220, 220, 220)"
 
                         handleClick={toggleSingleColumnLine} 
                         >
-                    <i className={"fa-solid fa-link " + dontHideConnectIconClassName + (props.isSingleColumnLine ?  "hidden" : "")}></i>
-                    <i className={"fa-solid fa-link-slash " + dontHideConnectIconClassName + (props.isSingleColumnLine ? "" : " hidden")}></i>
+                    <i className={"fa-solid fa-link connectIcon " + dontHideConnectIconClassName + (props.isSingleColumnLine && " hidden")}></i>
+                    <i className={"fa-solid fa-link-slash disconnectIcon " + dontHideConnectIconClassName + (!props.isSingleColumnLine && " hidden")}></i>
                 </Button>
             </label>
 

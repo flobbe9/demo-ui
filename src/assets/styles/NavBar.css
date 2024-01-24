@@ -1,28 +1,15 @@
-:root {
-    --marginNavBarInside: 10px;
-}
-
 .NavBar {
     background-color: white;
     font-size: 20px;
-    /* height: 80px; */
     z-index: 2;
     
     .boxShadowContainer {
         background-color: bisque;
-        /* box-shadow: 0px 5px 10px 0px rgb(184, 184, 184); */
-        padding: var(--marginNavBarInside) 0;
     }
     
     .navLink {
         color: black;
-        text-decoration: none;
-        transition: opacity 0.2s;
         width: fit-content;
-        
-        &:hover {
-            opacity: 0.5;
-        }
     }
 
     .navSectionRight {
@@ -46,12 +33,11 @@
         .navSectionRightMobile {
             border-radius: 5px;
             background-color: white;
-            padding: 10px 0;
+            padding: 10px;
             position: absolute;
-            /* right: calc(var(--marginNavBarInside) * 2); */
-            right: 5px;
+            right: 0;
             width: 150px;
-            z-index: 3;
+            z-index: 2;
 
             .navSectionRightMobileItem {
                 border-radius: 3px;

@@ -1,11 +1,9 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import "../../assets/styles/ControlPanel.css";
-import { buildDocument, downloadDocument } from "../../builder/builder";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { confirmPageUnload, isBlank, log, removeConfirmPageUnloadEvent } from "../../utils/basicUtils";
 import Button from "../helpers/Button";
-import { API_ENV } from "../../globalVariables";
 import { DocumentContext } from "./Document";
 import { adjustDocumentFileName } from "../../utils/documentBuilderUtils";
 
@@ -15,6 +13,7 @@ import { adjustDocumentFileName } from "../../utils/documentBuilderUtils";
  * 
  * @since 0.0.6
  */
+// 15px margins
 export default function ControlPanel(props: {
     id?: string,
     className?: string,
@@ -29,8 +28,6 @@ export default function ControlPanel(props: {
     
     const [disabled, setDisabled] = useState(true);    
 
-    const menuRef = useRef(null);
-    
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
 
@@ -65,10 +62,10 @@ export default function ControlPanel(props: {
 
     return (
         <div id={id} className={className}>
-            <div className="boxShadowContainer flex">
-                <div className="col-6 col-sm-4 controlPanelItem flexLeft">
+            <div className="boxShadowContainer flex pt-1 pe-2 pb-1 ps-3">
+                <div className="col-4 controlPanelItem flexLeft">
                     <Button id={"ControlPanelMenu"} 
-                            className="hover dontHideControlPanelMenu hover"
+                            className="hover dontHideControlPanelMenu"
                             childrenClassName="dontHideControlPanelMenu"
                             disabled={disabled}
                             handleClick={handleBurgerButtonClick}
@@ -83,11 +80,11 @@ export default function ControlPanel(props: {
                             }}
                             >
                         <i className={"burgerButtonIcon fa fa-bars dontHideControlPanelMenu"}></i>
-                        <span className="ml-2">Menü</span>
+                        <span className="ms-2">Menü</span>
                     </Button>
                 </div>
 
-                <div className="col-6 col-sm-4 controlPanelItem flexCenter">
+                <div className="col-4 controlPanelItem flexCenter">
                     <input id="fileNameInput"
                         className="fileNameInput"
                         ref={fileNameInputRef}

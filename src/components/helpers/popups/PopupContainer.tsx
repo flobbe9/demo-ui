@@ -22,7 +22,7 @@ export default forwardRef(function PopupContainer(props: {
 
     return (
         <div id={id} 
-            className={className + " hidden flexCenter " + (props.matchPopupDimensions ? "matchPopupDimensions" : "")} 
+            className={className + " hidden flexCenter " + (props.matchPopupDimensions && "matchPopupDimensions")} 
             ref={ref} 
             style={props.style} 
             onClick={props.onClick}

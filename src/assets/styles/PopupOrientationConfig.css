@@ -5,6 +5,7 @@
     .popupBody {
         .orientationContainer {
             flex-wrap: wrap;
+            width: 100%;
         }
     }
 

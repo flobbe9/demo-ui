@@ -1,10 +1,10 @@
-import React, { useEffect, useContext, useState } from "react";
+import React, { useContext } from "react";
 import "../assets/styles/NavBar.css"
 import { Link } from "react-router-dom";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log, moveCursor } from "../utils/basicUtils";
 import LoadingButton from "./helpers/Button";
-import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth } from "../globalVariables";
+import { BUILDER_PATH, WEBSITE_NAME } from "../globalVariables";
 import { AppContext } from "./App";
 import LeaveConfirmLink from "./helpers/LeaveConfirmLink";
 
@@ -21,25 +21,8 @@ export default function NavBar(props: {
     const className = "NavBar " + (props.className || "");
 
     const appContext = useContext(AppContext);
-    
-    const [isMobileView, setIsMobileView] = useState(appContext.isWindowWidthTooSmall());
 
 
-    useEffect(() => {
-        if (isMobileWidth()) {
-            // hide buttons inside mobile menu
-            $(".navSectionRightDesktop").hide();
-            $(".navMenuIcon").removeClass("hidden");
-
-            // change width relations
-            $(".navSectionLeft").css("width", "45%");
-            $(".navSectionCenter").css("width", "45%");
-            $(".navSectionRight").css("width", "10%");
-        }
-
-    }, []);
-
-    
     function handleClickMenuIcon(event): void {
 
         $(".navSectionRightMobile").slideToggle(200);
@@ -70,27 +53,27 @@ export default function NavBar(props: {
 
     return (
         <div id={id} className={className + " dontMarkText"}>
-            <div className="boxShadowContainer flexCenter">
-                <div className="col-7 col-sm-4 navSectionLeft textLeft flexLeft">
-                    <Link className="navLink" to="/">
-                        <img className="navImage dontMarkText mr-2" src="/favicon.png" alt="" height="40" width="40"/>
-                        <span className="navHeading dontBreakText">{WEBSITE_NAME}</span>
+            <div className="boxShadowContainer flexCenter p-2">
+                <div className="col-4 navSectionLeft textLeft flexLeft">
+                    <Link className="navLink link hover" to="/">
+                        <img className="navImage me-2" src="/favicon.png" alt="" height="40" width="40"/>
+                        <span className="dontBreakText">{WEBSITE_NAME}</span>
                     </Link>
                 </div>
 
-                <div className={"col-1 col-sm-4 navSectionCenter flexLeft"}>
-                    <div className={"" + (isMobileView && "hidden")}>
+                <div className={"col-4 navSectionCenter flexLeft"}>
+                    <div className={"" + (appContext.isMobileView && "hidden")}>
                         {/* <LeaveConfirmLink className="navLink" to="/home" pathsToConfirm={[BUILDER_PATH]}>
                             Home
                         </LeaveConfirmLink> */}
                     </div>
                 </div>
 
-                <div className="col-4 col-sm-4 navSectionRight textRight" style={{position: "relative"}}>
+                <div className="col-4 navSectionRight textRight" style={{position: "relative"}}>
                     
                     {/* TODO: add functionality */}
                     {/* desktop mode */}
-                    <div className={"navSectionRightDesktop " + (isMobileView && "hidden")}>
+                    <div className={"navSectionRightDesktop " + (appContext.isMobileView && "hidden")}>
                         <LoadingButton 
                                     id={"Register"}
                                     boxStyle={{
@@ -124,24 +107,24 @@ export default function NavBar(props: {
 
                     {/* TODO: add functionality */}
                     {/* mobile mode*/}
-                    <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile hover " + (!isMobileView && "hidden")} onClick={handleClickMenuIcon}></i>
+                    <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile hover " + (!appContext.isMobileView && "hidden")} onClick={handleClickMenuIcon}></i>
                     <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile boxShadowDark">
-                        <div id="navSectionRightMobileItem-1" 
-                            className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
+                        {/* <div id="navSectionRightMobileItem-1" 
+                            className="navSectionRightMobileItem dontHideNavSectionRightMobile" 
                             onClick={handleClickMobileItem}
                             >
                             Register
                         </div>
 
                         <div id="navSectionRightMobileItem-2" 
-                            className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
+                            className="navSectionRightMobileItem dontHideNavSectionRightMobile" 
                             onClick={handleClickMobileItem}
                             >
                             Login
-                        </div>
+                        </div> */}
 
                         <div id="navSectionRightMobileItem-3" 
-                            className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
+                            className="navSectionRightMobileItem dontHideNavSectionRightMobile" 
                             onClick={handleClickMobileItem}
                             >
                             <LeaveConfirmLink className="blackLink dontHideNavSectionRightMobile" 

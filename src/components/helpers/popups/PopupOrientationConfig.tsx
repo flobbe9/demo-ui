@@ -84,7 +84,7 @@ export default function PopupOrientationConfig(props: {
             
             <div className="popupBody flexCenter">
                 <div id="orientationContainer" className="orientationContainer flexCenter dontMarkText">
-                    <div className="col-12 col-sm-5">
+                    <div className="col-12 col-sm-4">
                         <RadioButton id="Portrait"
                                     className="flexCenter" 
                                     labelClassName="whiteButton whiteButtonPortrait"
@@ -106,7 +106,7 @@ export default function PopupOrientationConfig(props: {
                         <div className="mt-2 textCenter">Hoch-Format</div>
                     </div>
                     
-                    <div className="col-12 col-sm-7  mt-3 mt-sm-0">
+                    <div className="col-12 col-sm-6 mt-3 mt-sm-0">
                         <RadioButton id="Landscape"
                                     className="flexCenter"
                                     labelClassName="whiteButton whiteButtonLandscape"
@@ -129,8 +129,8 @@ export default function PopupOrientationConfig(props: {
                     </div>
                 </div>
 
-                <PopupContainer id={props.warnPopupContainerIdPart} className="warnPopupContainer" matchPopupDimensions={true}>
-                    <Popup id={props.warnPopupContainerIdPart} height="medium" width="medium">
+                <PopupContainer id={props.warnPopupContainerIdPart} className="warnPopupContainer" matchPopupDimensions={documentContext.matchPopupDimensions}>
+                    <Popup id={props.warnPopupContainerIdPart} height={appContext.isMobileView ? "350px" : "medium"} width="medium">
                         <PopupWarnConfirm id="OrientationConfig"
                                             handleConfirm={handleSubmit} 
                                             handleDecline={(event) => toggleWarnPopup(event)}

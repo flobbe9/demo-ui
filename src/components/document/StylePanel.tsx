@@ -7,7 +7,7 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashClass, isBlank, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { flashClass, isBlank, log, logWarn, stringToNumber } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
 import { FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
@@ -33,7 +33,6 @@ export default function StylePanel(props) {
     const documentContext = useContext(DocumentContext);
 
     const [disabled, setDisabled] = useState(true);
-    const [flexClass, setFlexClass] = useState("flexCenter");
 
     const stylePanelRef = useRef(null);
     const sectionContainerRef = useRef(null);
@@ -42,13 +41,6 @@ export default function StylePanel(props) {
     const boxBorder = "1px solid rgb(200, 200, 200)";
     const hoverBackgroundColor = "rgb(245, 245, 245)";
     const checkedBackgroundColor = "rgb(233, 233, 233)";
-
-
-    useEffect(() => {
-        if (appContext.isWindowWidthTooSmall()) 
-            handleWindowWidthTooSmall();
-
-    }, []);
 
 
     useEffect(() => {
@@ -183,16 +175,9 @@ export default function StylePanel(props) {
     }
 
 
-    function handleWindowWidthTooSmall(): void {
-
-        setFlexClass("flexLeft");
-        setCssVariable("stylePanelOverflow", "auto");
-    }
-
-
     return (
         <div id={id} className={className} ref={stylePanelRef}>
-            <div className={"sectionContainer " + flexClass + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
+            <div className={"sectionContainer " + (appContext.isMobileView ? "flexLeft" : "flexCenter") + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
                 <StylePanelSection hideRightBorder={true} componentStyle={{maxWidth: "215px"}}>
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
@@ -300,7 +285,7 @@ export default function StylePanel(props) {
 
                     <div className="flexLeft" style={{height: "50%"}}>
                         <RadioButton id={"Left"} 
-                                    className="mr-1"
+                                    className="me-1"
                                     childrenClassName="flexCenter dontMarkText" 
                                     name={"TextAlign"} 
                                     value="START"
@@ -319,7 +304,7 @@ export default function StylePanel(props) {
                             L
                         </RadioButton>
                         <RadioButton id={"Center"} 
-                                    className="mr-1 flexCenter"
+                                    className="me-1 flexCenter"
                                     childrenClassName="flexCenter dontMarkText" 
                                     name={"TextAlign"} 
                                     value="CENTER"
@@ -365,7 +350,7 @@ export default function StylePanel(props) {
                                    hideRightBorder={true}
                                    >
                     <Button id={"OrientationConfig"}
-                            className="mr-3"
+                            className="me-3"
                             boxStyle={{
                                 backgroundColor: boxBackgroundColor,
                                 border: boxBorder,

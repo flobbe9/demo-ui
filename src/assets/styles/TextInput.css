@@ -25,13 +25,17 @@
     }
 
     .textInputLabel {
-        left: -32px;
+        left: -27px;
         padding-left: 2px;
         position: absolute;
 
-        .connectIcon {
+        .connectOrDisconnectButton {
             display: none;
             transition: background-color 0.2s;
+        }
+
+        .connectIcon, .disconnectIcon {
+            font-size: 14px;
         }
     }
     

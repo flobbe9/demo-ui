@@ -10,7 +10,6 @@ import { DocumentContext } from "./Document";
 import Paragraph from "./Paragraph";
 import { getCSSValueAsNumber, getDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import { Orientation } from "../../enums/Orientation";
-import Button from "../helpers/Button";
 import Popup from "../helpers/popups/Popup";
 import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
 
@@ -25,6 +24,7 @@ export default function Page(props: {
     const id = getDocumentId("Page", props.pageIndex, props.id);
     let className = props.className ? "Page " + props.className : "Page";
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
 
@@ -34,20 +34,12 @@ export default function Page(props: {
 
     const dontShowAgainConnectWarningCookieId = useRef("ConnectLinesWarning");
     const [dontShowAgainConnectWarningCookie, setDontShowAgainConnectWarningCookie] = useCookie(DONT_SHOW_AGAIN_COOKIE_NAME + dontShowAgainConnectWarningCookieId.current, "false");
-    const dontShowAgainWindowWidthWarningCookieId = useRef("WindowWidthWarning");
-    const [dontShowAgainWindowWidthWarningCookie, setDontShowAgainWindowWidthWarningCookie] = useCookie(DONT_SHOW_AGAIN_COOKIE_NAME + dontShowAgainWindowWidthWarningCookieId.current, "false");
 
     const pageRef = useRef(null);
 
     const context = {
         toggleConnectWarnPopup,
     }
-
-
-    useEffect(() => {
-        checkWindowWidthAgainstPageWidth();
-
-    }, []);
 
 
     function initColumns(): React.JSX.Element[] {
@@ -62,24 +54,6 @@ export default function Page(props: {
             columns.push(<Column key={i} pageIndex={props.pageIndex} columnIndex={i}/>);
 
         return columns;
-    }
-
-
-    /**
-     * Display warn popup if page width is greater than window width. 
-     */
-    function checkWindowWidthAgainstPageWidth(): void {
-
-        const windowWidth = $(window).width();
-        const pageWidth = documentContext.orientation === Orientation.PORTRAIT ? PAGE_WIDTH_PORTRAIT : PAGE_WIDTH_LANDSCAPE;
-        const pageWidthNumber = stringToNumber(getCSSValueAsNumber(pageWidth, 2));
-
-        // case: window not big enough for page width
-        if (props.pageIndex === 0 && windowWidth! < pageWidthNumber) 
-            documentContext.setOrientationPageContainerClassName("flexLeft");
-
-        else if (props.pageIndex === 0)
-            documentContext.setOrientationPageContainerClassName("flexCenter");
     }
 
 
@@ -167,7 +141,7 @@ export default function Page(props: {
         documentContext.togglePopup();
 
         documentContext.setPopupContent(
-            <Popup id={dontShowAgainConnectWarningCookieId.current} height="medium" width="medium">
+            <Popup id={dontShowAgainConnectWarningCookieId.current} height={appContext.isMobileView ? "350px" : "medium"} width="medium">
                 <PopupWarnConfirm id={dontShowAgainConnectWarningCookieId.current}
                                     handleConfirm={handleConfirm} 
                                     handleDecline={documentContext.hidePopup}
@@ -280,10 +254,10 @@ export default function Page(props: {
 
         // hide connect / disconnect icon of text inputs
         if (!includesIgnoreCase(targetClassName, "dontHideConnectIcon"))
-            $(".connectIcon.dontHideConnectIcon").hide();
+            $(".connectOrDisconnectButton.dontHideConnectIcon").hide();
 
         if (!includesIgnoreCase(targetClassName, "dontHideDisConnectIcon"))
-            $(".connectIcon.dontHideDisConnectIcon").hide();
+            $(".connectOrDisconnectButton.dontHideDisConnectIcon").hide();
     }
 
 

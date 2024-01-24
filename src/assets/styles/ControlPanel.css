@@ -6,9 +6,6 @@
     z-index: 1;
     
     .boxShadowContainer {
-        /* box-shadow: 0px 10px 10px 0px rgb(189, 189, 189); */
-        padding: 5px 0;
-
         .burgerButtonIcon {
             color: rgb(233, 233, 233);
         }
