@@ -9,10 +9,10 @@
     top: 15%;
     width: var(--fullWidth);
     z-index: 2;
+}
 
-    .matchPopupDimensions {
-        position: absolute;
-        height: fit-content;
-        width: fit-content;
-    }
+.PopupContainer.matchPopupDimensions {
+    position: absolute;
+    height: max-content;
+    width: max-content;
 }

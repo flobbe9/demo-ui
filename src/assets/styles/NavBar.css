@@ -9,7 +9,7 @@
     
     .navLink {
         color: black;
-        width: fit-content;
+        width: max-content;
     }
 
     .navSectionRight {

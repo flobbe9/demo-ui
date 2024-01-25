@@ -41,6 +41,7 @@ export default function App() {
     
     const [pressedKey, setPressedKey] = useState("");
 
+    const [windowSize, setWindowSize] = useState([0, 0]);
     const [isMobileView, setIsMobileView] = useState(isMobileWidth());
 
     const appRef = useRef(null);
@@ -56,6 +57,7 @@ export default function App() {
 
         pressedKey,
 
+        windowSize,
         isMobileView,
     }
 
@@ -76,12 +78,6 @@ export default function App() {
     }, []);
 
 
-    useEffect(() => {
-        setCssVariable("stylePanelOverflow", "auto");
-
-    }, [isMobileView])
-
-
     function handleClick(event): void {
 
         hideStuff(event);
@@ -90,6 +86,7 @@ export default function App() {
 
     function handleWindowResize(event): void {
 
+        setWindowSize([window.innerWidth, window.innerHeight]);
         setIsMobileView(isMobileWidth());
     }
 
@@ -131,7 +128,7 @@ export default function App() {
         if (!event)
             hideAllPopups();
 
-        // hide popup
+        // hide app popup
         if ((targetClassName.includes("hideAppPopup") && escapePopup))
             hidePopup();
 
@@ -198,7 +195,9 @@ export default function App() {
 
                     <div className="content">
                         <div className="flexCenter">
-                            <PopupContainer id={"App"} className="hideAppPopup" ref={appPopupRef}>{popupContent}</PopupContainer>
+                            <PopupContainer id={"App"} className="hideAppPopup" ref={appPopupRef}>
+                                {popupContent}
+                            </PopupContainer>
                         </div>
 
                         <Routes>
@@ -228,5 +227,6 @@ export const AppContext = createContext({
 
     isMobileView: false,
 
+    windowSize: [0, 0],
     pressedKey: "",
 });

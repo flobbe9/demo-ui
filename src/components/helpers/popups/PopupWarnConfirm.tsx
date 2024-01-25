@@ -111,7 +111,7 @@ export default function PopupWarnConfirm(props: {
                                 {isDontShowAgain ? <i className="fa-solid fa-check"></i> : <></>}
                             </div>
                         </Checkbox>
-                        <label htmlFor="dontShowAgainCheckbox">Nachricht nicht mehr anzeigen.</label>
+                        <label htmlFor="checkboxInputDontShowAgainCheckbox">Nachricht nicht mehr anzeigen.</label>
                     </div>
                     :
                     <></>
@@ -127,7 +127,7 @@ export default function PopupWarnConfirm(props: {
                         }}
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
-                        handleClick={props.handleDecline}
+                        handleMouseDown={props.handleDecline}
                         >
                     Nein
                 </Button>
@@ -140,7 +140,7 @@ export default function PopupWarnConfirm(props: {
                         }}
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
-                        handleClick={handleConfirm}
+                        handleMouseDown={handleConfirm}
                         >
                     Ja
                 </Button>

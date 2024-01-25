@@ -8,7 +8,7 @@ import "../../assets/styles/DownloadIcon.css";
  * @since 0.0.6
  */
 export default function DownloadIcon(props: {
-    id?: string,
+    id: string,
     className?: string,
     iconClassName?: string
     onClick?,

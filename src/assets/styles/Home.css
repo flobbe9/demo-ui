@@ -19,7 +19,7 @@
     }
     
     .rightSideBar {
-        height: fit-content;
+        height: max-content;
         width: 100%;
         
         .savedDocument {

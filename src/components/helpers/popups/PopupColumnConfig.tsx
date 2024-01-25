@@ -193,7 +193,7 @@ export default function PopupColumnConfig(props: {
 
             <div className="popupFooter flexRight">
                 <Button id={id + "Submit"} 
-                        handleClick={(event) => toggleWarnPopup(event)}
+                        handleMouseDown={(event) => toggleWarnPopup(event)}
                         className="blackButton blackButtonContained"
                         childrenStyle={{padding: "5px 10px"}}
                         hoverBackgroundColor="rgb(70, 70, 70)"

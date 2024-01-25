@@ -53,18 +53,20 @@ export default function Select(props: {
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
 
+    useEffect(() => {
+        setCssVariable("selectBackgroundColor", props.boxStyle?.backgroundColor || "white");
+
+    }, [])
 
     useEffect(() => {
-        if (isMobileWidth())
+        if (appContext.isMobileView)
             $(boxRef.current!).css("width", "100%");
     
         // place optionsBox exactly below selectBox and use same dimensions
         $(optionsBoxRef.current!).css("top", $(boxRef.current!).css("height"));
         $(optionsBoxRef.current!).css("width", $(boxRef.current!).css("width"));
 
-        setCssVariable("selectBackgroundColor", props.boxStyle?.backgroundColor || "white");
-
-    }, []);
+    }, [appContext.windowSize]);
 
 
     useEffect(() => {
@@ -263,7 +265,8 @@ export default function Select(props: {
                  onMouseOver={handleBoxMouseOver}
                  onMouseOut={handleBoxMouseOut}
                  >
-                <input className="selectLabel dontMarkText dontHideSelect" 
+                <input id={"selectTextInput" + props.id}
+                       className="selectLabel dontMarkText dontHideSelect" 
                        ref={labelRef}
                        title={isFontSize ? getMSWordFontSize(props.label).toString() : props.label}
                        defaultValue={props.label}

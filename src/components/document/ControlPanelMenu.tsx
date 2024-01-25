@@ -26,7 +26,7 @@ export default function ControlPanelMenu(props: {
     return (
         <div id={id} className={className + " dontHideControlPanelMenu hidden"} ref={menuRef}>
                 <div className="controlPanelMenuItem dontHideControlPanelMenu">
-                    <Button id={"DownloadDocument"}
+                    <Button id={"DownloadWord"}
                             className="dontHideControlPanelMenu hover"
                             childrenClassName="dontHideControlPanelMenu flexCenter"
                             
@@ -43,12 +43,12 @@ export default function ControlPanelMenu(props: {
                                 width: "80px"
                             }}
                             >
-                        <DownloadIcon className="me-2" /> <span>Word</span>
+                        <DownloadIcon id="Word" className="me-2" /> <span>Word</span>
                     </Button>    
                 </div>
                         
                 <div className="controlPanelMenuItem dontHideControlPanelMenu">
-                    <Button id={"DownloadDocument"}
+                    <Button id={"DownloadPdf"}
                             className="dontHideControlPanelMenu"
                             childrenClassName="flexLeft dontHideControlPanelMenu"
 
@@ -68,7 +68,7 @@ export default function ControlPanelMenu(props: {
                             hoverBackgroundColor="rgb(255, 135, 135)"
                             clickBackgroundColor="rgb(255, 80, 80)"
                             >
-                        <DownloadIcon className="me-2" /> <span>Pdf</span>
+                        <DownloadIcon id="Pdf" className="me-2" /> <span>Pdf</span>
                     </Button>  
                 </div>
 
@@ -81,7 +81,6 @@ export default function ControlPanelMenu(props: {
                             disabled={true}
                             rendered={false}
 
-                            boxStyle={{height: "fit-content"}}
                             childrenStyle={{
                                 padding: "3px 9px",
                             }}

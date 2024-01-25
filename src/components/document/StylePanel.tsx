@@ -7,7 +7,7 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashClass, isBlank, log, logWarn, stringToNumber } from "../../utils/basicUtils";
+import { flashClass, isBlank, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
 import { FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
@@ -15,6 +15,7 @@ import Popup from "../helpers/popups/Popup";
 import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
 import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
 import { getCSSValueAsNumber, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
+import PopupContainer from "../helpers/popups/PopupContainer";
 
 
 /**
@@ -48,6 +49,12 @@ export default function StylePanel(props) {
             setDisabled(false);
         
     }, [documentContext.selectedTextInputId]);
+
+    
+    useEffect(() => {
+        setCssVariable("stylePanelOverflow", (appContext.isMobileView ? "auto" : "none"));
+
+    }, [appContext.isMobileView]);
 
     
     function handleFontFamilySelect(fontFamily: string): void {
@@ -178,7 +185,7 @@ export default function StylePanel(props) {
     return (
         <div id={id} className={className} ref={stylePanelRef}>
             <div className={"sectionContainer " + (appContext.isMobileView ? "flexLeft" : "flexCenter") + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
-                <StylePanelSection hideRightBorder={true} componentStyle={{maxWidth: "215px"}}>
+                <StylePanelSection id="FontStyles1" hideRightBorder={true} componentStyle={{maxWidth: "215px"}}>
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
                                 label={documentContext.selectedTextInputStyle.fontFamily}
@@ -261,7 +268,7 @@ export default function StylePanel(props) {
                     </div>
                 </StylePanelSection>
 
-                <StylePanelSection hideRightBorder={false} componentStyle={{maxWidth: "150px"}}>
+                <StylePanelSection id="FontStyles2" hideRightBorder={false} componentStyle={{maxWidth: "150px"}}>
                     <div className="flexCenter" style={{height: "50%"}}>
                         <Select id="FontSize"
                                 label={documentContext.selectedTextInputStyle.fontSize.toString()}
@@ -344,7 +351,7 @@ export default function StylePanel(props) {
                     </div>
                 </StylePanelSection>
 
-                <StylePanelSection id={"NumColumns"} 
+                <StylePanelSection id={"Layout"} 
                                    buttonContainerClassName="flexCenter"
                                    componentStyle={{maxWidth: "260px"}}
                                    hideRightBorder={true}
@@ -360,7 +367,7 @@ export default function StylePanel(props) {
                             clickBackgroundColor={checkedBackgroundColor}
                             disabled={disabled}
                             title={"Ausrichtung der Seiten"}
-                            handleClick={handleOrientationConfigClick}
+                            handleMouseDown={handleOrientationConfigClick}
                             >
                         <div className={id + "IconContainer"}>
                             <img src="portraitSheet.png" alt="portrait mode" height="50"/>
@@ -380,10 +387,10 @@ export default function StylePanel(props) {
                             clickBackgroundColor={checkedBackgroundColor}
                             disabled={disabled}
                             title={"Anzahl der Spalten"}
-                            handleClick={handleColumnConfigClick}
+                            handleMouseDown={handleColumnConfigClick}
                             >
                         <div className={id + "IconContainer mb-2"}>
-                            <img src="columnIcon.png" alt="column icon" style={{opacity: 0.7}} height="40" />
+                            <img src="columnIcon.png" alt="column icon" height="40" />
                         </div>
                         Spalten
                     </Button>
@@ -391,14 +398,14 @@ export default function StylePanel(props) {
             </div>
             
             {/* subtle popup */}
-            <div className="subtlePopupContainer">
+            <PopupContainer id={"SubtlePopup"} className="subtlePopupContainer" matchPopupDimensions={true}>
                 <Popup id={"Subtle" + documentContext.subtlePopupType} 
                        className="Subtle dontHideSubtlePopup boxShadowGrey" 
-                       height={"fit-content"} 
+                       height={"max-content"} 
                        width={"200px"}>
                     {documentContext.subtlePopupContent}
                 </Popup>
-            </div>
+            </PopupContainer>
         </div>
     )
 }

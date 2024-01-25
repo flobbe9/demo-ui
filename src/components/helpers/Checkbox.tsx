@@ -115,7 +115,7 @@ export default function Checkbox(props: {
                    className={labelClassName} 
                    ref={labelRef}
                    style={checked ? {...props.boxStyle, ...props.checkedStyle} : props.boxStyle}
-                   htmlFor={id} 
+                   htmlFor={"checkboxInput" + props.id} 
                    onMouseOver={handleMouseOver}
                    onMouseOut={handleMouseOut}
                    onMouseDown={handleMouseDown}

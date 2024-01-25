@@ -1,15 +1,14 @@
-import React, { useContext, useEffect, useState, createContext, useRef } from "react";
+import React, { useContext, useState, createContext, useRef } from "react";
 import useCookie from "react-use-cookie";
 import "../../assets/styles/Page.css";
 import Column from "./Column";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getJQueryElementById, getRandomString, includesIgnoreCase, log, logWarn, stringToNumber } from "../../utils/basicUtils";
-import { DONT_SHOW_AGAIN_COOKIE_NAME, MAX_NUM_COLUMNS, PAGE_WIDTH_LANDSCAPE, PAGE_WIDTH_PORTRAIT, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
+import { DONT_SHOW_AGAIN_COOKIE_NAME, MAX_NUM_COLUMNS, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
 import { DocumentContext } from "./Document";
 import Paragraph from "./Paragraph";
-import { getCSSValueAsNumber, getDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
-import { Orientation } from "../../enums/Orientation";
+import { getDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import Popup from "../helpers/popups/Popup";
 import PopupWarnConfirm from "../helpers/popups/PopupWarnConfirm";
 

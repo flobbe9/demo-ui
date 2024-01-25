@@ -8,7 +8,7 @@ import { DocumentContext } from "./Document";
 import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
-import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
+import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 
 
 // IDEA: 
@@ -516,7 +516,6 @@ export default function TextInput(props: {
                 <Button id={"ConnectLines" + id}
                         className={"connectOrDisconnectButton flexCenter " + dontHideConnectIconClassName}
                         title={props.isSingleColumnLine ? "Zeile aufspalten" : "Zeilen verbinden"}
-
                         childrenClassName={"flexCenter " + dontHideConnectIconClassName}
                         boxStyle={{
                             backgroundColor: props.isSingleColumnLine ? "rgb(255, 200, 180)" : "rgb(180, 200, 255)",
@@ -531,8 +530,7 @@ export default function TextInput(props: {
                         }}      
                         hoverBackgroundColor={props.isSingleColumnLine ? "rgb(255, 180, 160)" : "rgb(160, 180, 255)"}
                         clickBackgroundColor="rgb(220, 220, 220)"
-
-                        handleClick={toggleSingleColumnLine} 
+                        handleMouseDown={toggleSingleColumnLine} 
                         >
                     <i className={"fa-solid fa-link connectIcon " + dontHideConnectIconClassName + (props.isSingleColumnLine && " hidden")}></i>
                     <i className={"fa-solid fa-link-slash disconnectIcon " + dontHideConnectIconClassName + (!props.isSingleColumnLine && " hidden")}></i>

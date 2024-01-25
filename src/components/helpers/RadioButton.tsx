@@ -118,7 +118,7 @@ export default function RadioButton(props: {
             <label id={labelId} 
                    className={labelClassName}
                    ref={boxRef}
-                   htmlFor={props.name}
+                   htmlFor={"radioInput" + props.id}
                    style={checked ? {...props.boxStyle, ...props.checkedStyle} : props.boxStyle}
                    onClick={handleSelect}
                    onMouseOver={handleMouseOver}

@@ -55,7 +55,7 @@ export function logApiResponse(response: ApiExceptionFormat): void {
 
 
 /**
- * @param id to find in html document
+ * @param id to find in html document, excluding the jquery prefix "#"
  * @param debug if true a warn log will be displayed in case of falsy id, default is true
  * @returns a JQuery with all matching elements or null if no results
  */
@@ -84,7 +84,7 @@ export function getJQueryElementById(id: string, debug = true): JQuery | null {
 
 
 /**
- * @param className to find in html document
+ * @param className to find in html document, excluding the jquery prefix "."
  * @param debug if true a warn log will be displayed in case of falsy id, default is true
  * @returns a JQuery with all matching elements or null if no results
  */

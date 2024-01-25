@@ -37,12 +37,9 @@
     }
 
     .subtlePopupContainer {
-        height: fit-content;
         position: absolute;
         right: 215px;
         top: 10px;
-        width: fit-content;
-        z-index: 2;
 
         .Popup.Subtle {
             border-radius: 3px;
@@ -54,22 +51,22 @@
         }
 
         #PopupSubtleInfo {
-            opacity: 0;
+            /* opacity: 0; */
             background-color: rgb(228, 228, 228);
         }
 
         #PopupSubtleSuccess {
-            opacity: 0;
+            /* opacity: 0; */
             background-color: rgb(130, 255, 130);
         }
 
         #PopupSubtleWarn {
-            opacity: 0;
+            /* opacity: 0; */
             background-color: rgb(255, 221, 127);
         }
 
         #PopupSubtleError {
-            opacity: 0;
+            /* opacity: 0; */
             background-color: rgb(255, 130, 130);
         }
     }

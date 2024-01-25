@@ -21,7 +21,7 @@ export default function Button(props: {
     className?: string,
     childrenClassName?: string,
     handlePromise?: () => Promise<any>,
-    handleClick?,
+    handleMouseDown?,
     disabled?: boolean,
     rendered?: boolean,
     children?,
@@ -65,7 +65,7 @@ export default function Button(props: {
      * Wont do anything if button is disabled. Animates click and promise callback if present or if not present normal 
      * click callback (promise callback is prioritised). Will never call both.
      */
-    function handleClick(event): void {
+    function handleMouseDown(event): void {
 
         if (disabled)
             return;
@@ -78,8 +78,8 @@ export default function Button(props: {
         else 
             animateOverlay();
         
-        if (props.handleClick)
-            props.handleClick(event);
+        if (props.handleMouseDown)
+            props.handleMouseDown(event);
     }
 
 
@@ -180,7 +180,7 @@ export default function Button(props: {
                 style={props.boxStyle}
                 ref={buttonRef}
                 disabled={disabled} 
-                onClick={handleClick}
+                onMouseDown={handleMouseDown}
                 onMouseOver={handleMouseOver}
                 onMouseOut={handleMouseOut}
                 title={props.title}

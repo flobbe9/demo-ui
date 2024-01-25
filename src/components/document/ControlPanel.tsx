@@ -63,12 +63,12 @@ export default function ControlPanel(props: {
     return (
         <div id={id} className={className}>
             <div className="boxShadowContainer flex pt-1 pe-2 pb-1 ps-3">
-                <div className="col-4 controlPanelItem flexLeft">
+                <div className="col-7 col-sm-4 controlPanelItem flexLeft">
                     <Button id={"ControlPanelMenu"} 
                             className="hover dontHideControlPanelMenu"
                             childrenClassName="dontHideControlPanelMenu"
                             disabled={disabled}
-                            handleClick={handleBurgerButtonClick}
+                            handleMouseDown={handleBurgerButtonClick}
                             boxStyle={{
                                 backgroundColor: "transparent",
                                 boxShadow: "none"

@@ -4,7 +4,7 @@ import "../../assets/styles/Document.css";
 import { confirmPageUnload, flashClass, getCssVariable, getJQueryElementByClassName, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, removeConfirmPageUnloadEvent, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
-import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE, isMobileWidth } from "../../globalVariables";
+import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE } from "../../globalVariables";
 import ControlPanel from "./ControlPanel";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
@@ -137,6 +137,12 @@ export default function Document(props) {
         }
 
     }, []);
+
+
+    useEffect(() => {
+        setMatchPopupDimensions(!appContext.isMobileView);
+
+    }, [appContext.isMobileView])
 
 
     function handleDocumentClick(event): void {
@@ -450,30 +456,6 @@ export default function Document(props) {
     }
 
 
-    // /**
-    //  * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-    //  * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
-    //  *             stated as msWord font size. 
-    //  * @returns a touple formatted like: ```[isFontSizeTooLargeForColumn, numLinesDiff]``` where numLinesDiff is the number
-    //  *          of lines that should be removed to match the MAX_NUM_LINES.
-    //  */
-    // function isFontSizeTooLargeForColumn(documentId = selectedTextInputId, diff = 0): number {
-
-    //     const columnFontSizesSum = getColumnFontSizesSum(documentId);
-        
-    //     // case: font size sum in column not too large
-    //     if (columnFontSizesSum === -1)
-    //         return [false, -1];
-
-    //     const numLinesDiff = getNumLinesDeviation(documentId, diff, columnFontSizesSum);
-    //     // case: font size too large
-    //     if (numLinesDiff > 0)
-    //         return [true, numLinesDiff];
-
-    //     return [false, numLinesDiff];
-    // }
-
-
     /**
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
@@ -634,25 +616,56 @@ export default function Document(props) {
 
 
     /**
-     * Stop subtle popup animations on mouseover and display it instead. Fade it out on mouseout. 
-     * Id of SubtlePopup is build like: ```"PopupSubtle" + subtlePopupType```.
+     * Display subtle popup, set content and set timeout to fade out.
+     * 
+     * @param summary heading to display inside popup, may be a plain string
+     * @param content content to display inside popup, may be a plain string
+     * @param duration time in ms that the popup should fade in, default is 100
+     * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
      */
-    function handleSubtlePopupMouseMove(event): void {
+    function showSubtlePopup(summary: string, content: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 3000): void {
 
-        const subtlePopup = getJQueryElementById("PopupSubtle" + subtlePopupType, false);
+        const subtlePopup = getJQueryElementById("PopupContainerSubtlePopup");
         if (!subtlePopup)
             return;
 
-        const subtlePopupOpacity = subtlePopup.css("opacity");
+        setSubtlePopupType(type);
 
-        // keep popup visible if not hidden completely
-        if (event.target.className.includes("dontHideSubtlePopup") && subtlePopupOpacity !== "0") {
+        // set content
+        setSubtlePopupContent(
+            <div className="dontHideSubtlePopup">
+                <h5 className="dontHideSubtlePopup">{summary}</h5>
+                <div className="dontHideSubtlePopup">{content}</div>
+            </div>
+        );
+
+        subtlePopup.fadeIn(duration);
+
+        setTimeout(() => { subtlePopup.fadeOut(holdTime) }, holdTime);
+    }
+
+
+    /**
+     * Stop subtle popup animations on mouseover and display it instead. Fade it out on mouseout. 
+     */
+    function handleSubtlePopupMouseMove(event): void {
+
+        const subtlePopup = getJQueryElementById("PopupContainerSubtlePopup");
+        if (!subtlePopup)
+            return;
+
+        // case: popup hidden already
+        if (!subtlePopup.is(":visible"))
+            return;
+    
+        // mouseover
+        if (event.target.className.includes("dontHideSubtlePopup")) {
             subtlePopup.stop(true);
             subtlePopup.css("opacity", 1);
 
-        // hide if completely visible
-        } else if (subtlePopupOpacity === "1")
-            subtlePopup.animate({opacity: 0}, 3000);
+        // mouseout
+        } else
+            subtlePopup.fadeOut(3000)
     }
 
 
@@ -757,42 +770,6 @@ export default function Document(props) {
         }, duration + 100);
     }
 
-
-    /**
-     * Display subtle popup, set content and set timeout to fade out.
-     * 
-     * @param summary heading to display inside popup, may be a plain string
-     * @param content content to display inside popup, may be a plain string
-     * @param duration time in ms that the popup should fade in, default is 100
-     * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
-     */
-    function showSubtlePopup(summary: string, content: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 3000): void {
-
-        const subtlePopup = getJQueryElementByClassName("Popup.Subtle");
-        if (!subtlePopup)
-            return;
-
-        // case: visible already
-        if (subtlePopup.css("opacity") !== "0")
-            return;
-
-        setSubtlePopupType(type);
-
-        // show popup, dont set opacity to 1
-        subtlePopup.animate({opacity: 0.999}, duration);
-
-        // fadeout
-        setTimeout(() => subtlePopup.animate({opacity: 0}, holdTime), holdTime);
-
-        // set content
-        setSubtlePopupContent(
-            <div className="dontHideSubtlePopup">
-                <h6 className="dontHideSubtlePopup">{summary}</h6>
-                <div className="dontHideSubtlePopup">{content}</div>
-            </div>
-        );
-    }
-
     
     function hideSelectOptions(selectComponentId?: string): void {
 
@@ -818,7 +795,7 @@ export default function Document(props) {
 
                 {/* document popup */}
                 <div className="flexCenter">
-                    <PopupContainer id={"Document"} className="hideDocumentPopup" ref={documentPopupRef} matchPopupDimensions={matchPopupDimensions}>
+                    <PopupContainer id={"Document"} className="hideDocumentPopup" ref={documentPopupRef}>
                         {popupContent}
                     </PopupContainer>
                 </div>

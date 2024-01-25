@@ -25,7 +25,7 @@ export default function NavBar(props: {
 
     function handleClickMenuIcon(event): void {
 
-        $(".navSectionRightMobile").slideToggle(200);
+        $(".navSectionRightMobile").slideToggle(100);
     }
 
     async function handleClickMobileItem(event): Promise<void> {

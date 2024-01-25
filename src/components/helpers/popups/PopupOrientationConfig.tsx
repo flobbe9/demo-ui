@@ -106,7 +106,7 @@ export default function PopupOrientationConfig(props: {
                         <div className="mt-2 textCenter">Hoch-Format</div>
                     </div>
                     
-                    <div className="col-12 col-sm-6 mt-3 mt-sm-0">
+                    <div className="col-12 col-sm-6 col-md-5 mt-3 mt-sm-0">
                         <RadioButton id="Landscape"
                                     className="flexCenter"
                                     labelClassName="whiteButton whiteButtonLandscape"
@@ -152,7 +152,7 @@ export default function PopupOrientationConfig(props: {
                         childrenStyle={{padding: "5px 10px"}}
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
-                        handleClick={(event) => toggleWarnPopup(event)}
+                        handleMouseDown={(event) => toggleWarnPopup(event)}
                         >
                     Anwenden
                 </Button>
