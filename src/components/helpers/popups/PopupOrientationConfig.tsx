@@ -152,7 +152,7 @@ export default function PopupOrientationConfig(props: {
                         childrenStyle={{padding: "5px 10px"}}
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
-                        handleMouseDown={(event) => toggleWarnPopup(event)}
+                        onClick={(event) => toggleWarnPopup(event)}
                         >
                     Anwenden
                 </Button>

@@ -13,7 +13,8 @@ import { adjustDocumentFileName } from "../../utils/documentBuilderUtils";
  * 
  * @since 0.0.6
  */
-// 15px margins
+// TODO: scroll like user does
+
 export default function ControlPanel(props: {
     id?: string,
     className?: string,
@@ -68,7 +69,7 @@ export default function ControlPanel(props: {
                             className="hover dontHideControlPanelMenu"
                             childrenClassName="dontHideControlPanelMenu"
                             disabled={disabled}
-                            handleMouseDown={handleBurgerButtonClick}
+                            onClick={handleBurgerButtonClick}
                             boxStyle={{
                                 backgroundColor: "transparent",
                                 boxShadow: "none"

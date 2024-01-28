@@ -15,11 +15,13 @@ import Page from "./Page";
 import { buildDocument, downloadDocument } from "../../builder/builder";
 import { SubtlePopupType } from "../../abstract/SubtlePopupType";
 import ControlPanelMenu from "./ControlPanelMenu";
+import WarnIcon from "../helpers/WarnIcon";
 
 
 // TODO: add some kind of "back" button
 
-// TODO: fix console errors
+// TODO: configure ssl?
+// TODO: adjust .env in prod
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -52,9 +54,12 @@ export default function Document(props) {
     /** serves as notification for the singleColumnLines state in ```<Page />``` component to refresh */
     const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
 
+    const [subtlePopupTimeout, setSubtlePopupTimeout] = useState<NodeJS.Timeout | null>();
+
     const windowScrollY = useRef(0);
     const documentPopupRef = useRef(null);
     const documentOverlayRef = useRef(null);
+    const subtlePopupRef = useRef(null);
 
 
     const context = {
@@ -623,25 +628,45 @@ export default function Document(props) {
      * @param duration time in ms that the popup should fade in, default is 100
      * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
      */
+    // TODO: propably make this a component
+    // TODO: adjust styles
     function showSubtlePopup(summary: string, content: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 3000): void {
 
-        const subtlePopup = getJQueryElementById("PopupContainerSubtlePopup");
-        if (!subtlePopup)
-            return;
+        const subtlePopup = $(subtlePopupRef.current!);
 
+        clearSubtlePopupTimeout();
+
+        // set type
         setSubtlePopupType(type);
 
         // set content
         setSubtlePopupContent(
             <div className="dontHideSubtlePopup">
-                <h5 className="dontHideSubtlePopup">{summary}</h5>
+                <div className="dontHideSubtlePopup subtlePopupHeader flex">
+                    <div className="dontHideSubtlePopup col-4"></div>
+                    <WarnIcon className="dontHideSubtlePopup flexCenter col-4" 
+                              size={"small"} 
+                              iconContainerStyle={{borderColor: "red", color: "red"}}
+                            />
+
+                    <i className="fa-solid fa-xmark fa-lg closeIcon dontHideSubtlePopup col-4 flexRight" 
+                       onClick={() => subtlePopup.fadeOut(100)}
+                       style={{height: "max-content"}}
+                       >
+                    </i>
+                </div>
+                <h5 className="dontHideSubtlePopup textCenter">
+                    {summary}
+                </h5>
                 <div className="dontHideSubtlePopup">{content}</div>
             </div>
         );
 
+        // fadeIn
         subtlePopup.fadeIn(duration);
 
-        setTimeout(() => { subtlePopup.fadeOut(holdTime) }, holdTime);
+        // fade out after time out
+        setSubtlePopupTimeout(setTimeout(() => subtlePopup.fadeOut(holdTime), holdTime));
     }
 
 
@@ -650,9 +675,7 @@ export default function Document(props) {
      */
     function handleSubtlePopupMouseMove(event): void {
 
-        const subtlePopup = getJQueryElementById("PopupContainerSubtlePopup");
-        if (!subtlePopup)
-            return;
+        const subtlePopup = $(subtlePopupRef.current!);
 
         // case: popup hidden already
         if (!subtlePopup.is(":visible"))
@@ -660,12 +683,47 @@ export default function Document(props) {
     
         // mouseover
         if (event.target.className.includes("dontHideSubtlePopup")) {
-            subtlePopup.stop(true);
+            clearSubtlePopupTimeout();
             subtlePopup.css("opacity", 1);
 
         // mouseout
         } else
-            subtlePopup.fadeOut(3000)
+            startSubtlePopupTimeout();
+    }
+
+
+    /**
+     * Set timeout to fade out SubtlePopup.
+     * 
+     * @param holdeTime time in ms that the popup waits until starting to fade out AND also the time that the popup takes to fade out
+     */
+    function startSubtlePopupTimeout(holdeTime = 3000): void {
+
+        const subtlePopup = $(subtlePopupRef.current!);
+
+        // case: already started
+        if (subtlePopupTimeout !== null)
+            return;
+
+        setSubtlePopupTimeout(setTimeout(() => subtlePopup.fadeOut(holdeTime), holdeTime));
+    }
+
+
+    /**
+     * Clear timeout that started fade out of SubtlePopup, stop any animation on SubtlePopup and set timout state of
+     * SubtlePopup to null.
+     */
+    function clearSubtlePopupTimeout(): void {
+        
+        // case: already cleared
+        if (subtlePopupTimeout === null) 
+            return;
+
+        const subtlePopup = $(subtlePopupRef.current!);
+
+        clearTimeout(subtlePopupTimeout);
+        subtlePopup.stop(true);
+        setSubtlePopupTimeout(null);
     }
 
 
@@ -712,7 +770,10 @@ export default function Document(props) {
     async function buildAndDownloadDocument(pdf = false): Promise<void> {
 
         // remove confirm unload event
-        removeConfirmPageUnloadEvent();
+        if (API_ENV !== "dev") {
+            log(API_ENV)
+            removeConfirmPageUnloadEvent();
+        }
 
         // build
         const buildResponse = await buildDocument(orientation, numColumns, documentFileName, numSingleColumnLines);
@@ -803,7 +864,7 @@ export default function Document(props) {
                 <ControlPanel />
                 <ControlPanelMenu className="boxShadowDark" />
                 
-                <StylePanel />
+                <StylePanel ref={subtlePopupRef}/>
 
                 <div className={"pageContainer " + (appContext.isMobileView ? "flexLeft" : "flexCenter")}>
                     <div style={{width: orientation === Orientation.PORTRAIT ? PAGE_WIDTH_PORTRAIT : PAGE_WIDTH_LANDSCAPE}}>

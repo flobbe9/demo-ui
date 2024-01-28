@@ -530,7 +530,7 @@ export default function TextInput(props: {
                         }}      
                         hoverBackgroundColor={props.isSingleColumnLine ? "rgb(255, 180, 160)" : "rgb(160, 180, 255)"}
                         clickBackgroundColor="rgb(220, 220, 220)"
-                        handleMouseDown={toggleSingleColumnLine} 
+                        onClick={toggleSingleColumnLine} 
                         >
                     <i className={"fa-solid fa-link connectIcon " + dontHideConnectIconClassName + (props.isSingleColumnLine && " hidden")}></i>
                     <i className={"fa-solid fa-link-slash disconnectIcon " + dontHideConnectIconClassName + (!props.isSingleColumnLine && " hidden")}></i>

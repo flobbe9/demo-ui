@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { Ref, forwardRef, useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/StylePanel.css";
 import StylePanelSection from "./StylePanelSection";
 import Checkbox from "../helpers/Checkbox";
@@ -25,7 +25,11 @@ import PopupContainer from "../helpers/popups/PopupContainer";
  */
 // TODO: add hide option, or dont fix
 
-export default function StylePanel(props) {
+// TODO: find better orientation icon
+export default forwardRef(function StylePanel(props: {
+    id?: string,
+    className?: string
+}, subtlePopupContainerRef: Ref<HTMLDivElement>) {
 
     const id = "StylePanel" + (props.id || "");
     const className = "StylePanel " + (props.className || "");
@@ -367,7 +371,7 @@ export default function StylePanel(props) {
                             clickBackgroundColor={checkedBackgroundColor}
                             disabled={disabled}
                             title={"Ausrichtung der Seiten"}
-                            handleMouseDown={handleOrientationConfigClick}
+                            onClick={handleOrientationConfigClick}
                             >
                         <div className={id + "IconContainer"}>
                             <img src="portraitSheet.png" alt="portrait mode" height="50"/>
@@ -387,7 +391,7 @@ export default function StylePanel(props) {
                             clickBackgroundColor={checkedBackgroundColor}
                             disabled={disabled}
                             title={"Anzahl der Spalten"}
-                            handleMouseDown={handleColumnConfigClick}
+                            onClick={handleColumnConfigClick}
                             >
                         <div className={id + "IconContainer mb-2"}>
                             <img src="columnIcon.png" alt="column icon" height="40" />
@@ -398,7 +402,7 @@ export default function StylePanel(props) {
             </div>
             
             {/* subtle popup */}
-            <PopupContainer id={"SubtlePopup"} className="subtlePopupContainer" matchPopupDimensions={true}>
+            <PopupContainer id={"SubtlePopup"} className="subtlePopupContainer" matchPopupDimensions={true} ref={subtlePopupContainerRef}>
                 <Popup id={"Subtle" + documentContext.subtlePopupType} 
                        className="Subtle dontHideSubtlePopup boxShadowGrey" 
                        height={"max-content"} 
@@ -408,4 +412,4 @@ export default function StylePanel(props) {
             </PopupContainer>
         </div>
     )
-}
+})

@@ -9,6 +9,7 @@ import { isBooleanFalsy, log } from "../../utils/basicUtils";
  * 
  * @since 0.0.6
  */
+// TODO: add error, info and success?
 export default function WarnIcon(props: {
     size: "small" | "medium" | "large",
     id?: string,

@@ -42,6 +42,7 @@
         top: 10px;
 
         .Popup.Subtle {
+            border: 1px solid rgb(199, 199, 199);
             border-radius: 3px;
             font-size: 0.9em;
             line-height: normal;
@@ -52,22 +53,22 @@
 
         #PopupSubtleInfo {
             /* opacity: 0; */
-            background-color: rgb(228, 228, 228);
+            /* background-color: rgb(228, 228, 228); */
         }
 
         #PopupSubtleSuccess {
             /* opacity: 0; */
-            background-color: rgb(130, 255, 130);
+            /* background-color: rgb(130, 255, 130); */
         }
 
         #PopupSubtleWarn {
             /* opacity: 0; */
-            background-color: rgb(255, 221, 127);
+            /* background-color: rgb(255, 221, 127); */
         }
 
         #PopupSubtleError {
             /* opacity: 0; */
-            background-color: rgb(255, 130, 130);
+            /* background-color: rgb(255, 130, 130); */
         }
     }
 

@@ -20,8 +20,8 @@ export default function Button(props: {
 
     className?: string,
     childrenClassName?: string,
-    handlePromise?: () => Promise<any>,
-    handleMouseDown?,
+    handlePromise?: (event) => Promise<any>,
+    onClick?: (event) => void,
     disabled?: boolean,
     rendered?: boolean,
     children?,
@@ -65,21 +65,21 @@ export default function Button(props: {
      * Wont do anything if button is disabled. Animates click and promise callback if present or if not present normal 
      * click callback (promise callback is prioritised). Will never call both.
      */
-    function handleMouseDown(event): void {
+    function handleClick(event): void {
 
         if (disabled)
             return;
         
         // case: loading button
         if (props.handlePromise) 
-            handlePromiseAnimation();
+            handlePromiseAnimation(event);
 
         // case: normal button
         else 
             animateOverlay();
         
-        if (props.handleMouseDown)
-            props.handleMouseDown(event);
+        if (props.onClick)
+            props.onClick(event);
     }
 
 
@@ -87,8 +87,10 @@ export default function Button(props: {
      * Add spinner icon and remove button content, await promise ```props.handlePromise```, then reset button styles. <p>
      * 
      * Button will be disabled during promise call.
+     * 
+     * @param event that triggered the promise handler
      */
-    async function handlePromiseAnimation(): Promise<void> {
+    async function handlePromiseAnimation(event): Promise<void> {
 
         setDisabled(true);
 
@@ -106,7 +108,7 @@ export default function Button(props: {
         const spinner = createSpinner()
         buttonChildren.append(spinner);
 
-        await props.handlePromise!();
+        await props.handlePromise!(event);
 
         // remove spinner
         spinner.remove();
@@ -180,7 +182,7 @@ export default function Button(props: {
                 style={props.boxStyle}
                 ref={buttonRef}
                 disabled={disabled} 
-                onMouseDown={handleMouseDown}
+                onClick={handleClick}
                 onMouseOver={handleMouseOver}
                 onMouseOut={handleMouseOut}
                 title={props.title}

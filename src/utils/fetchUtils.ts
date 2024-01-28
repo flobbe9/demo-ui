@@ -1,4 +1,4 @@
-import { BACKEND_BASE_URL } from "../globalVariables";
+import { DOCUMENT_BUILDER_BASE_URL } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log, logApiResponse, logError } from "./basicUtils";
 import { ApiExceptionFormat } from './../abstract/ApiExceptionFormat';
@@ -66,6 +66,7 @@ export async function fetchAny(url: string, method = "get", body?: object, heade
         method: method,
         headers: getFetchHeaders(headers),
         credentials: "include"
+        // TODO: vary credentials
     }
 
     // case: request has body
@@ -113,7 +114,7 @@ export async function fetchAnyReturnBlobUrl(url: string, method = "get", body?: 
             status: 406, // not acceptable
             error: null,
             message: "Failed to get blob from resopnse.",
-            path: url.replace(BACKEND_BASE_URL, "")
+            path: url.replace(DOCUMENT_BUILDER_BASE_URL, "")
         }
 
         logApiResponse(error);
@@ -167,13 +168,15 @@ function getFetchHeaders(headers?) {
  * @param url that fetch() used
  * @returns {@link ApiExceptionFormat} using most values from given error
  */
+// TODO: somehow replaces whole path
 function handleFetchError(e: Error, url: string): ApiExceptionFormat {
 
     const error: ApiExceptionFormat = {
         status: FAILED_TO_FETCH_STATUS_CODE,
         error: e.toString(),
         message: e.message,
-        path: url.replace(BACKEND_BASE_URL, "")
+        // path: url.replace(DOCUMENT_BUILDER_BASE_URL, "")
+        path: url
     }
 
     logApiResponse(error);

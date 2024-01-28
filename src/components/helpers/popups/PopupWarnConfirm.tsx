@@ -127,7 +127,7 @@ export default function PopupWarnConfirm(props: {
                         }}
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
-                        handleMouseDown={props.handleDecline}
+                        onClick={props.handleDecline}
                         >
                     Nein
                 </Button>
@@ -140,7 +140,7 @@ export default function PopupWarnConfirm(props: {
                         }}
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
-                        handleMouseDown={handleConfirm}
+                        onClick={handleConfirm}
                         >
                     Ja
                 </Button>

@@ -3,7 +3,7 @@ import DocumentWrapper from "../abstract/DocumentWrapper";
 import { getTextInputStyle } from "../abstract/Style";
 import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
-import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLASS_NAME } from "../globalVariables";
+import { DOCUMENT_BUILDER_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLASS_NAME } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { downloadFileByUrl, isBlank, log, logApiResponse, logError, logWarn, stringToNumber } from "../utils/basicUtils";
 import { appendDocxSuffix, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPartFromDocumentId } from "../utils/documentBuilderUtils";
@@ -11,10 +11,7 @@ import fetchJson from "../utils/fetchUtils";
 import { ApiExceptionFormat } from '../abstract/ApiExceptionFormat';
 
 
-const documentBuilderMapping = "/api/documentBuilder";
-
 // NOTE: remember to add empty line after table (in case of column break, or second table following)
-
 
 /**
  * Send request to backend to download document either as pdf or docx file.
@@ -25,7 +22,7 @@ const documentBuilderMapping = "/api/documentBuilder";
  */
 export async function downloadDocument(pdf: boolean, fileName?: string): Promise<ApiExceptionFormat | void> {
     
-    const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf;
+    const url = DOCUMENT_BUILDER_BASE_URL + "/download?pdf=" + pdf;
 
     return await downloadFileByUrl(url, fileName);
 }
@@ -52,7 +49,7 @@ export async function buildDocument(orientation: Orientation, numColumns: number
         numSingleColumnLines: numSingleColumnLines
     }
 
-    return fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/buildAndWrite", "post", body);
+    return fetchJson(DOCUMENT_BUILDER_BASE_URL + "/buildAndWrite", "post", body);
 }
 
 
