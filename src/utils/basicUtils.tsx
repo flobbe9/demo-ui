@@ -377,7 +377,7 @@ export function getTotalTabWidthInText(text: string, fontSize: string | number, 
  * @param fileName name of file to use for download. If empty, the response header will be searched for a filename
  * @param fetchBlob if true, the given url will be handled by {@link fetchAnyReturnBlobUrl} method first, before beeing passed to ```<a></a>``` tag. 
  *                  In that case, the fileName param should be passed as well or no fileName will be specified at all.
- *                  If false, the given url will be passed directly to ```<a></a>``` tag.
+ *                  If false, the given url will be passed directly to ```<a></a>``` tag. Http method should be "get" in that case.
  *                  Default is true
  * @param method http method to use for fetch. Default is "get"
  * @param body to send with the request

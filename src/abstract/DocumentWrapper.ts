@@ -1,4 +1,4 @@
-import BasicParagraph from "./BasicParagraphs";
+import BasicParagraph from "./BasicParagraph";
 import TableConfig from "./TableConfig";
 
 

@@ -11,6 +11,8 @@ export const API_PORT = "" + process.env.REACT_APP_API_PORT;
 export const DOCUMENT_BUILDER_BASE_URL = "" + process.env.REACT_APP_DOCUMENT_BUILDER_BASE_URL;
 export const USER_SERVICE_BASE_URL = "" + process.env.REACT_APP_USER_SERVICE_BASE_URL;
 
+export const CSRF_TOKEN_HEADER_NAME="X-XSRF-TOKEN";
+
 export const NUM_PAGES = 2;
 export const PAGE_WIDTH_PORTRAIT = "806px";
 export const PAGE_WIDTH_LANDSCAPE = "1170px";

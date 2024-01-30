@@ -1,4 +1,4 @@
-import { DOCUMENT_BUILDER_BASE_URL } from "../globalVariables";
+import { CSRF_TOKEN_HEADER_NAME, DOCUMENT_BUILDER_BASE_URL } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log, logApiResponse, logError } from "./basicUtils";
 import { ApiExceptionFormat } from './../abstract/ApiExceptionFormat';
@@ -66,7 +66,6 @@ export async function fetchAny(url: string, method = "get", body?: object, heade
         method: method,
         headers: getFetchHeaders(headers),
         credentials: "include"
-        // TODO: vary credentials
     }
 
     // case: request has body
@@ -143,19 +142,22 @@ export const FAILED_TO_FETCH_STATUS_CODE = 503;
 
 
 /**
- * 
  * @param headers json object with strings as keys and values
  * @returns ```headers``` param with ```"Content-Type": "application/json"``` as default content type if none set 
  */
 function getFetchHeaders(headers?) {
 
     const contentType = {"Content-Type": "application/json"};
+    const csrfToken = {[CSRF_TOKEN_HEADER_NAME]: sessionStorage.getItem(CSRF_TOKEN_HEADER_NAME) || ""};
 
     if (!headers)
-        return contentType;
+        headers = {};
 
     if (!headers["Content-Type"])
         Object.assign(headers, contentType)
+
+    if (!headers[CSRF_TOKEN_HEADER_NAME])
+        Object.assign(headers, csrfToken)
 
     return headers;
 }
@@ -175,8 +177,7 @@ function handleFetchError(e: Error, url: string): ApiExceptionFormat {
         status: FAILED_TO_FETCH_STATUS_CODE,
         error: e.toString(),
         message: e.message,
-        // path: url.replace(DOCUMENT_BUILDER_BASE_URL, "")
-        path: url
+        path: url.replace(DOCUMENT_BUILDER_BASE_URL, "")
     }
 
     logApiResponse(error);

@@ -30,7 +30,7 @@ export default function ControlPanelMenu(props: {
                             className="dontHideControlPanelMenu hover"
                             childrenClassName="dontHideControlPanelMenu flexCenter"
                             
-                            handlePromise={documentContext.buildAndDownloadDocument}
+                            handlePromise={(event) => documentContext.buildAndDownloadDocument(false)}
                             title="Als Word Dokument herunterladen"
 
                             boxStyle={{
@@ -52,7 +52,7 @@ export default function ControlPanelMenu(props: {
                             className="dontHideControlPanelMenu"
                             childrenClassName="flexLeft dontHideControlPanelMenu"
 
-                            handlePromise={() => documentContext.buildAndDownloadDocument(true)}
+                            handlePromise={(event) => documentContext.buildAndDownloadDocument(true)}
                             title="Als PDF Dokument herunterladen"
                             disabled={true}
                             rendered={false}
