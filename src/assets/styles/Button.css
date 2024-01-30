@@ -4,6 +4,7 @@
     border-radius: 5px;
     box-shadow: 0 1px 3px 0px rgb(151, 151, 151);
     padding: 0;
+    position: relative;
     transition: background-color 0.2s, opacity 0.2s;
 
     &:focus {
@@ -16,6 +17,10 @@
 
     &:disabled {
         cursor: default;
+
+        &:hover {
+            opacity: 0.5;
+        }
     }
 
     .buttonOverlay {

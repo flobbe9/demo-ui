@@ -1,3 +1,7 @@
+:root {
+    --appBackgroundColor: rgb(228, 228, 228);
+}
+
 /* disable reacts error overlay */
 iframe {
     display: none;
@@ -12,6 +16,8 @@ label {
 }
 
 .App {
+    background-color: var(--appBackgroundColor);
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     min-height: 100vh;
     position: relative;
     
@@ -26,7 +32,7 @@ label {
     
     .content {
         background-color: rgb(228, 228, 228);
-        margin-top: 7px;
+        /* margin-top: 7px; */
     }
 
     /* Buttons */
@@ -103,9 +109,25 @@ label {
         opacity: 0.5;
     }
 
-    /* Other */
+    /* Flex */
+    .flex {
+        display: flex;
+    }
+    
     .flexCenter {
         align-items: center;
+        display: flex;
+        justify-content: center;
+    }
+
+    .flexCenterStart {
+        align-items: flex-start;
+        display: flex;
+        justify-content: center;
+    }
+
+    .flexCenterEnd {
+        align-items: flex-end;
         display: flex;
         justify-content: center;
     }
@@ -116,12 +138,37 @@ label {
         justify-content: left;
     }
 
+    .flexLeftStart {
+        align-items: flex-start;
+        display: flex;
+        justify-content: left;
+    }
+
+    .flexLeftEnd {
+        align-items: flex-end;
+        display: flex;
+        justify-content: left;
+    }
+
     .flexRight {
         align-items: center;
         display: flex;
         justify-content: right;
     }
+    
+    .flexRightStart {
+        align-items: flex-start;
+        display: flex;
+        justify-content: right;
+    }
 
+    .flexRightEnd {
+        align-items: flex-end;
+        display: flex;
+        justify-content: right;
+    }
+
+    /* Other */
     .textCenter {
         text-align: center;
     }
@@ -134,13 +181,58 @@ label {
         text-align: right;
     }
 
+    .link {
+        text-decoration: none;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
     .whiteLink {
         color: white;
         text-decoration: none;
+        
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    .blackLink {
+        color: black;
+        text-decoration: none;
+        
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    .dontBreakText {
+        white-space: nowrap;
     }
 
     .hidden {
         display: none;
+    }
+
+    .hover {
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
+
+    .boxShadowLight {
+        box-shadow: 1px 1px 5px 1px rgb(180, 180, 180);
+    }
+
+    .boxShadowGrey {
+        box-shadow: 0 1px 3px 0px rgb(151, 151, 151);
+    }
+
+    .boxShadowDark {
+        box-shadow: 1px 1px 5px 1px rgb(90, 90, 90);
     }
 
     .dontMarkText {
@@ -167,7 +259,29 @@ label {
 }
 
 
+/* Animations, dont delete! */
 @keyframes rotating {
     from {transform: rotate(0deg)}
     to {transform: rotate(360deg)} 
 }
+
+/* 
+@keyframes heightPulse {
+    0% {height: 50px}
+
+    30% {height: 50px}
+
+    35% {height: 60px}
+
+    40% {height: 50px}
+}
+
+@keyframes backgroundPulse {
+    0% {background-color: transparent}
+
+    30% {background-color: transparent}
+
+    35% {background-color: rgb(167, 167, 167)}
+
+    40% {background-color: transparent}
+} */

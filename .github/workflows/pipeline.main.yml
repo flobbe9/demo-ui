@@ -1,4 +1,4 @@
-name: vorspiel_frontend main
+name: word-light_frontend main
 
 run-name: ${{ github.event.head_commit.message }}
 on: 
@@ -41,4 +41,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/vorspiel_frontend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/word_light_frontend:latest

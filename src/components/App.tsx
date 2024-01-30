@@ -4,27 +4,29 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Document from "./document/Document";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
-import Menu from "./Menu";
+import Home from "./Home";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getDocumentId, getPartFromDocumentId, hidePopup, isBlank, log, stringToNumber } from "../utils/Utils";
-import { Orientation } from "../enums/Orientation";
-import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../abstract/Style";
+import { log, setCssVariable } from "../utils/basicUtils";
 import PopupContainer from "./helpers/popups/PopupContainer";
+import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth, DOCUMENT_BUILDER_BASE_URL, CSRF_TOKEN_HEADER_NAME, API_ENV} from "../globalVariables";
+import NotFound from "./error_pages/NotFound";
+import { fetchAny, isHttpStatusCodeAlright } from "../utils/fetchUtils";
 
 
 /**
  * Document is structured like
  * ```
  *  <Document>
+ *      <ControlPanel />
  *      <StylePanel />
  * 
- *      <Page>
- *          <Column>
- *              <Paragraph>
- *                  <TextInput />
- *              </ Paragraph>
- *          </ Column>
- *      </ Page>
+ *      [<Page>
+ *          [<Column>
+ *              [<Paragraph>
+ *                  [<TextInput />]
+ *              </ Paragraph>]
+ *          </ Column>]
+ *      </ Page>]
  *  </ Document>
  * ```
  * @returns any content of this website
@@ -32,127 +34,69 @@ import PopupContainer from "./helpers/popups/PopupContainer";
  */
 export default function App() {
 
-    // use this when backend login is implemented (https://www.baeldung.com/spring-security-csrf)
-    // const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
-
     const [escapePopup, setEscapePopup] = useState(true);
     const [popupContent, setPopupContent] = useState(<></>);
     
-    const [selectedTextInputId, setSelectedTextInputId] = useState("");
-    const [selectedTextInputStyle, setSelectedTextInputStyleState] = useState(getDefaultStyle());
-
-    const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
-    const [numColumns, setNumColumns] = useState(1);
-    const [columnFontSize, setColumnFontSize] = useState(selectedTextInputStyle.fontSize + "px");
-    const [columnHeading1FontSize, setColumnHeading1FontSize] = useState<string>(null);
-    const [columnHeading2FontSize, setColumnHeading2FontSize] = useState<string>(null);
-    const [columnHeading3FontSize, setColumnHeading3FontSize] = useState<string>(null);
-    
     const [pressedKey, setPressedKey] = useState("");
-
-    const [documentFileName, setDocumentFileName] = useState("Dokument_1.docx");
-
+    
+    const [windowSize, setWindowSize] = useState([0, 0]);
+    const [isMobileView, setIsMobileView] = useState(isMobileWidth());
+    
     const appRef = useRef(null);
+    const appPopupRef = useRef(null);
+    const appOverlayRef = useRef(null);
 
     const context = {
-        setEscapePopup: setEscapePopup,
-        setPopupContent: setPopupContent,
+        setEscapePopup,
+        setPopupContent,
+        togglePopup,
+        hidePopup,
+        hideStuff,
 
-        orientation: orientation,
-        setOrientation: setOrientation,
-        numColumns: numColumns,
-        setNumColumns: setNumColumns,
-        getSelectedColumnId,
-        getColumnIdByTextInputId,
-        columnFontSize,
-        setColumnFontSize,
-        columnHeading1FontSize,
-        setColumnHeading1FontSize,
-        columnHeading2FontSize,
-        setColumnHeading2FontSize, 
-        columnHeading3FontSize,
-        setColumnHeading3FontSize,
+        pressedKey,
 
-        selectedTextInputId: selectedTextInputId,
-        setSelectedTextInputId: setSelectedTextInputId,
-        selectedTextInputStyle: selectedTextInputStyle,
-        setSelectedTextInputStyle: setSelectedTextInputStyle,
-        focusSelectedTextInput: focusSelectedTextInput,
-        focusTextInput: focusTextInput,
-        unFocusTextInput: unFocusTextInput,
-
-        pressedKey: pressedKey,
-
-        documentFileName,
-        setDocumentFileName
+        windowSize,
+        isMobileView,
     }
 
 
     useEffect(() => {
-        document.addEventListener("keydown", (event) => handleGlobalKeyDown(event));
-        document.addEventListener("keyup", (event) => handleGlobalKeyUp(event));
+        if (API_ENV === "prod")
+            initCookies();
 
+        document.addEventListener("keydown", handleGlobalKeyDown);
+        document.addEventListener("keyup", handleGlobalKeyUp);
+        $(window).on("resize", handleWindowResize);
+
+        document.title = WEBSITE_NAME;
+
+        // clean up
+        return () => {
+            document.removeEventListener("keydown", handleGlobalKeyDown);
+            document.removeEventListener("keyup", handleGlobalKeyUp);
+            document.removeEventListener("resize", handleWindowResize);
+        }
     }, []);
-
-
-    /**
-     * @param style to update selectedTextInputStyle with
-     * @param stylePropsToOverride style props to override in ```style``` param
-     */
-    function setSelectedTextInputStyle(style: Style, stylePropsToOverride?: [StyleProp, string | number][]): void {
-
-        // set specific props
-        if (stylePropsToOverride) 
-            stylePropsToOverride.forEach(([styleProp, value]) => style[styleProp.toString()] = value);
-        
-        setSelectedTextInputStyleState(style);
-    }
-    
-
-    function getSelectedColumnId(): string {
-
-        return getColumnIdByTextInputId(selectedTextInputId);
-    }
-
-
-    function getColumnIdByTextInputId(textInputId: string): string {
-
-        // case: no text input selected yet
-        if (isBlank(textInputId))
-            return "";
-
-        const pageIndex = getPartFromDocumentId(textInputId, 1);
-        const columnIndex = getPartFromDocumentId(textInputId, 2);
-
-        return getDocumentId("Column", stringToNumber(pageIndex), "", stringToNumber(columnIndex));
-    }
-
 
 
     function handleClick(event): void {
 
-        // hide popup
-        if (event.target.className.includes("hidePopup") && escapePopup)
-            hidePopup(setPopupContent);
+        hideStuff(event);
+    }
 
-        // hide select options
-        if (!event.target.className.includes("dontHideSelect")) 
-            hideSelectOptions();
 
-        // hide nav menu mobile
-        if (!event.target.className.includes("dontHideNavSectionRightMobile")) 
-            $(".navSectionRightMobile").slideUp(200);
+    function handleWindowResize(event): void {
 
-        // hide warn info popup
-        if (!event.target.className.includes("dontHideWarnIcon"))
-            $(".WarnIcon .miniPopup").hide();
+        setWindowSize([window.innerWidth, window.innerHeight]);
+        setIsMobileView(isMobileWidth());
     }
 
 
     function handleGlobalKeyDown(event): void {
 
-        if (event.key === "Escape") 
-            hidePopup(setPopupContent);
+        if (event.key === "Escape")
+            if (escapePopup)
+                hideAllPopups();
 
         if (event.key === "Control")
             setPressedKey("Control");
@@ -172,94 +116,91 @@ export default function App() {
     }
 
 
-    function focusSelectedTextInput(): void {
-        
-        // case: no textinput id selected yet
-        if (isBlank(selectedTextInputId))
-            return;
+    /**
+     * Hide popups, menus and such on event or, if not present, unconditionally.
+     * 
+     * @param event to use the className of
+     */
+    function hideStuff(event?): void {
 
-        focusTextInput(selectedTextInputId);
+        const targetClassName = event ? event.target.className : "";
+
+        // hide all popups
+        if (!event)
+            hideAllPopups();
+
+        // hide app popup
+        if ((targetClassName.includes("hideAppPopup") && escapePopup))
+            hidePopup();
+
+        // hide nav menu mobile
+        if (!targetClassName.includes("dontHideNavSectionRightMobile") || !event) 
+            $(".navSectionRightMobile").slideUp(100);
+
+        // hide warn info popup
+        if (!targetClassName.includes("dontHideWarnIcon"))
+            $(".WarnIcon .miniPopup").hide();
+
+        // hide controlPanelMenu
+        if (!targetClassName.includes("dontHideControlPanelMenu"))
+            $(".ControlPanelMenu").slideUp(100);
     }
 
 
     /**
-     * @param textInputId id of valid ```<TextInput />``` to focus
-     * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` state will be updated with focused text input style
-     * @param stylePropsToOverride list of style properties to override when copying styles 
+     * Send an empty GET request to document_builder that has no purpose but for the backend to pass
+     * some cookies to the browser.
+     * Will store csrf token to session storage using {@link CSRF_TOKEN_HEADER_NAME} as key.
      */
-    function focusTextInput(textInputId: string, updateSelectedTextInputStyle = true, stylePropsToOverride?: [StyleProp, string | number][]): void {
+    async function initCookies(): Promise<void> {
 
-        if (!isTextInputIdValid(textInputId))
-            return;
-
-        const textInput = $("#" + textInputId);
-    
-        textInput.addClass("textInputFocus");
-
-        // id state
-        setSelectedTextInputId(textInputId);
+        // send request that does nothing
+        await fetchAny(DOCUMENT_BUILDER_BASE_URL + "/getCsrfToken");    
         
-        // style state
-        if (updateSelectedTextInputStyle) 
-            setSelectedTextInputStyle(getTextInputStyle(textInput), stylePropsToOverride);
+        
+        // save token to session storage
+        const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
 
-        // style text input
-        applyTextInputStyle(textInputId, selectedTextInputStyle);
+        if (csrfToken)
+            sessionStorage.setItem(CSRF_TOKEN_HEADER_NAME, csrfToken);
+    }
+    
 
-        textInput.trigger("focus");
+    function togglePopup(duration = 100): void {
+
+        const appPopup = $(appPopupRef.current!);
+        appPopup.fadeToggle(duration);
+        $(appOverlayRef.current!).fadeToggle(duration);
+
+        if (!appPopup.is(":visible"))
+            resetPopup();
     }
 
 
-    function unFocusSelectedTextInput(): void {
+    function hidePopup(duration = 100): void {
 
-        if (!isBlank(selectedTextInputId))
-            unFocusTextInput(selectedTextInputId);
+        $(appPopupRef.current!).fadeOut(duration);
+        $(appOverlayRef.current!).fadeOut(duration);
+
+        resetPopup(duration);
     }
 
 
-    function unFocusTextInput(textInputId: string): void {
+    function hideAllPopups(duration = 100): void {
 
-        if (!isTextInputIdValid(textInputId))
-            return;
+        // popups
+        $(".PopupContainer").fadeOut(duration);
 
-        const textInput = $("#" + textInputId);
-
-        textInput.removeClass("textInputFocus");
+        // overlays
+        $(".appOverlay").fadeOut(duration);
+        $(".documentOverlay").fadeOut(duration);
+        $(".popupOverlay").fadeOut(duration);
     }
 
 
-    function hideSelectOptions(): void {
+    function resetPopup(duration = 100): void {
 
-        const selectOptionsBoxes = $(".selectOptionsBox");
-
-        // iterate all select option boxes
-        Array.from(selectOptionsBoxes).forEach(selectOptionsBoxElement => {
-            if (!selectOptionsBoxElement)
-                return;
-
-            // hide if not hidden already
-            const selectOptionsBox = $("#" + selectOptionsBoxElement.id);
-            if (selectOptionsBox.css("display") !== "none")
-                selectOptionsBox.slideUp(100, "linear");
-        })
-    }
-
-
-    function isTextInputIdValid(textInputId: string): boolean {
-
-        if (isBlank(textInputId))
-            return false;
-
-        const textInput = $("#" + textInputId);
-        // case: invalid id
-        if (!textInput.length)
-            return false;
-
-        // case: is no TextInput
-        if (!textInput.prop("className").includes("TextInput"))
-            return false;
-
-        return true;
+        setTimeout(() => setPopupContent(<></>), duration + 100);
     }
 
     
@@ -270,19 +211,21 @@ export default function App() {
 
                     <NavBar />
 
-                    <div className="appOverlay hidePopup"></div>
+                    <div className="appOverlay hideAppPopup" ref={appOverlayRef}></div>
 
                     <div className="content">
                         <div className="flexCenter">
-                            <PopupContainer>{popupContent}</PopupContainer>
+                            <PopupContainer id={"App"} className="hideAppPopup" ref={appPopupRef}>
+                                {popupContent}
+                            </PopupContainer>
                         </div>
 
                         <Routes>
-                            <Route path="/" element={<Menu />} />
-                            <Route path="/build" element={<Document />} />
+                            <Route path="/home" element={<Home />} />
+                            <Route path={BUILDER_PATH} element={<Document />} />
                             {/* <Route path="/login" element={<Login />} /> */}
                             {/* <Route path="/confirmAccount" element={<AccountConfirmed />} /> */}
-                            {/* <Route path="*" element={<NotFound />} /> */}
+                            <Route path="*" element={<NotFound />} />
                         </Routes>
                     </div>
                     
@@ -297,32 +240,13 @@ export default function App() {
 
 export const AppContext = createContext({
     setEscapePopup: (escapePopup: boolean) => {},
-    setPopupContent: (content: React.JSX.Element) => {},
+    setPopupContent: (popupContent: React.JSX.Element) => {},
+    togglePopup: (duration?: number) => {},
+    hidePopup: (duration?: number) => {},
+    hideStuff: (event?) => {},
 
-    orientation: Orientation.PORTRAIT,
-    setOrientation: (orientation: Orientation) => {},
-    numColumns: 1,
-    setNumColumns: (numColumns: number) => {},
-    getSelectedColumnId: (): string => {return ""},
-    getColumnIdByTextInputId: (textInputId: string): string => {return ""},
+    isMobileView: false,
 
-    columnHeading1FontSize: "",
-    setColumnHeading1FontSize: (headingFontSize: string) => {},
-    columnHeading2FontSize: "",
-    setColumnHeading2FontSize: (headingFontSize: string) => {},
-    columnHeading3FontSize: "",
-    setColumnHeading3FontSize: (headingFontSize: string) => {},
-
-    selectedTextInputId: "",
-    setSelectedTextInputId: (id: string) => {},
-    selectedTextInputStyle: getDefaultStyle(),
-    setSelectedTextInputStyle: (style: Style, stylePropsToOverride?: [StyleProp, string | number][]) => {},
-
-    focusSelectedTextInput: () => {},
-    focusTextInput: (id: string, updateSelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
-    unFocusTextInput: (id: string) => {},
-
+    windowSize: [0, 0],
     pressedKey: "",
-    documentFileName: "",
-    setDocumentFileName: (fileName: string) => {}
-})
+});

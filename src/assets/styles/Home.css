@@ -1,4 +1,4 @@
-.Menu {
+.Home {
     display: flex;
     height: 100vb;
     padding: 2vi;
@@ -7,6 +7,7 @@
 
     .leftSideBar {
         margin-right: 5vi;
+        width: 200px;
 
         #newDocumentButton {
             transition: color 0.2s;
@@ -18,9 +19,8 @@
     }
     
     .rightSideBar {
-        height: fit-content;
+        height: max-content;
         width: 100%;
-        color: rgb(128, 128, 128);
         
         .savedDocument {
             background-color: white;

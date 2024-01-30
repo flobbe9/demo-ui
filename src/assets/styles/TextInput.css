@@ -1,16 +1,85 @@
+:root {
+    --initialTextInputFontSize: 14px; /** is changed on render */
+    --connectLinesBorder: 2px dashed rgba(128, 128, 128, 0.3);
+    --selectedColor: "black";
+    --textInputBorderBottom: 1px solid rgb(219, 219, 219);
+}
+
 .textInputContainer {
+    margin-bottom: 2px;
+    position: relative;
+    
     .TextInput {
         border: none;
-        border-bottom: 1px dashed grey;
+        border-left: 2px solid white;
+        border-right: 2px solid white;
+        border-bottom: var(--textInputBorderBottom);
+        cursor: auto;
         font-family: 'Calibri';
-        font-size: 14px;
-        margin: 0 3px 1px 3px;
+        font-size: var(--initialTextInputFontSize);
+        line-height: 11px;
+        margin: 0 3px;
+        padding: 0;
         outline: none;
         width: 100%;
-        
+    }
+
+    .textInputLabel {
+        left: -27px;
+        padding-left: 2px;
+        position: absolute;
+
+        .connectOrDisconnectButton {
+            display: none;
+            transition: background-color 0.2s;
+        }
+
+        .connectIcon, .disconnectIcon {
+            font-size: 14px;
+        }
     }
     
     .textInputFocus {
-        border-bottom-color: aqua;
+        border-bottom-color: var(--selectedColor) !important;
+    }
+
+    .textInputFlash {
+        border-bottom-color: red !important;
+        border-bottom-width: 1px;
+    }
+
+    .singleColumnLineCandidate, .SingleColumnLine {
+        border: 2px solid white;
+        border-bottom: var(--textInputBorderBottom);
+        margin-bottom: 1px;
+    }
+
+    .textInputLeftColumnConnect {
+        border-left: var(--connectLinesBorder);
+        border-top: var(--connectLinesBorder);
+        border-bottom: var(--connectLinesBorder);
+        
+        margin-bottom: 0;
+    }
+
+    .textInputMiddleColumnConnect {
+        border-top: var(--connectLinesBorder);
+        border-bottom: var(--connectLinesBorder);
+
+        margin-bottom: 0;
+    }
+
+    .textInputRightColumnConnect {
+        border-right: var(--connectLinesBorder);
+        border-top: var(--connectLinesBorder);
+        border-bottom: var(--connectLinesBorder);  
+
+        margin-bottom: 0;
+    }
+
+    .textInputSingleColumnDisconnect {
+        border: var(--connectLinesBorder);
+        
+        margin-bottom: 0;
     }
 }

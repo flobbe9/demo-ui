@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/RadioButton.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../../utils/Utils";
-import { SELECTED_STYLE } from "../../utils/GlobalVariables";
+import { equalsIgnoreCase, log } from "../../utils/basicUtils";
 
 
 /**
@@ -20,7 +19,7 @@ export default function RadioButton(props: {
     handleSelect: Function,
     
     hoverBackgroundColor?: string,
-    checkedBackgroundColor?: string,
+    checkedStyle?: React.CSSProperties,
 
     componentStyle?: React.CSSProperties,
     boxStyle?: React.CSSProperties,
@@ -41,20 +40,12 @@ export default function RadioButton(props: {
     const labelId = labelClassName + props.id;
     const childrenClassName = props.childrenClassName ? "radioChildren " + props.childrenClassName : "radioChildren";
 
-    const [checked, setChecked] = useState(props.value === props.radioGroupValue);
+    const [checked, setChecked] = useState(equalsIgnoreCase(props.value, props.radioGroupValue));
     const [disabled, setDisabled] = useState(props.disabled);
-    const [boxStyle, setBoxStyle] = useState<React.CSSProperties>();
 
     const boxRef = useRef(null);
     const inputRef = useRef(null);
     const childrenRef = useRef(null);
-
-
-    // set prop styles
-    useEffect(() => {
-        setBoxStyle(props.boxStyle || {});
-
-    }, []);
 
 
     // handle select
@@ -102,13 +93,6 @@ export default function RadioButton(props: {
 
         const checked = props.value === props.radioGroupValue;
         setChecked(checked);
-
-        const label = $(boxRef.current!);
-        if (checked)
-            label.css("backgroundColor", props.checkedBackgroundColor || "");
-        
-        else 
-            label.css("backgroundColor", props.boxStyle?.backgroundColor || "");
     }
 
 
@@ -134,8 +118,8 @@ export default function RadioButton(props: {
             <label id={labelId} 
                    className={labelClassName}
                    ref={boxRef}
-                   htmlFor={props.name}
-                   style={checked ? {...boxStyle, ...SELECTED_STYLE} : boxStyle}
+                   htmlFor={"radioInput" + props.id}
+                   style={checked ? {...props.boxStyle, ...props.checkedStyle} : props.boxStyle}
                    onClick={handleSelect}
                    onMouseOver={handleMouseOver}
                    onMouseOut={handleMouseOut}

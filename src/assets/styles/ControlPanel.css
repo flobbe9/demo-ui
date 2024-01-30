@@ -1,3 +1,36 @@
 .ControlPanel {
+    background-color: black;
+    overflow: auto;
+    position: sticky;
+    top: 0;
+    z-index: 1;
     
+    .boxShadowContainer {
+        .burgerButtonIcon {
+            color: rgb(233, 233, 233);
+        }
+        
+        .fileNameInput {
+            border: none;
+            border-radius: 3px;
+            min-width: 191px;
+            opacity: 0.6;
+            overflow: auto;
+            padding: 3px;
+            transition: background-color 0.2s, opacity 0.2s;
+
+            &:focus {
+                opacity: 1;
+                outline: none;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+            
+            &:hover {
+                opacity: 0.8;
+            }
+        }
+    }
 }

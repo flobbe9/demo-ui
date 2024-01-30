@@ -1,14 +1,81 @@
 .Popup {
     background-color: white;
-    border-radius: 5px;
-    padding: 2%;
+    border-radius: 3px;
+    box-shadow: 1px 1px 5px 1px rgb(90, 90, 90);
+    padding: 15px;
+    position: relative;
     width: 100%;
 
+    .popupOverlay {
+        background-color: rgb(0, 0, 0, 0.5);
+        border-radius: 3px;
+        display: none;
+        height: 100%;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        z-index: 3;
+    }
+    
     .closeIcon {
+        line-height: 1em;
         transition: opacity 0.2s;
         
         &:hover {
             opacity: 0.5;
         }
     }
+
+    .popupChildren {
+        height: 100%;
+
+        .popupHeader {
+            height: 5%;
+        }
+
+        .popupBody {
+            height: 90%;
+        }
+        
+        .popupFooter {
+            height: 5%;
+        }
+    }
+
+    .warnPopupContainer {
+        z-index: 3;
+    }
+}
+
+.fullWidth {
+    width: var(--fullWidth);
+}
+
+.largeWidth {
+    width: 450px;
+}
+
+.mediumWidth {
+    width: 300px;
+}
+
+.smallWidth {
+    max-width: 200px;
+}
+
+.fullHeight {
+    height: var(--fullHeight);
+}
+
+.largeHeight {
+    height: 450px;
+}
+
+.mediumHeight {
+    height: 300px;
+}
+
+.smallHeight {
+    height: 200px;
 }

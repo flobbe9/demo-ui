@@ -1,26 +1,33 @@
-import React from "react";
+import React, { LegacyRef, forwardRef} from "react";
 import "../../../assets/styles/PopupContainer.css";
 
 
 /**
  * Container component for ```<Popup />```. Only exists for several css configurations.
  * 
- * @since 0.0.5
+ * @since 0.0.6
  */
-export default function PopupContainer(props: {
-    id?: string,
+export default forwardRef(function PopupContainer(props: {
+    id: string,
     className?: string,
     children?,
+    onClick?,
+    style?: React.CSSProperties,
+    matchPopupDimensions?: boolean
+}, ref: LegacyRef<HTMLDivElement> | undefined) {
 
-}) {
-
-    const id = props.id ? "PopupContainer" + props.id : "PopupContainer";
-    const className = props.className ? "PopupContainer " + props.className : "PopupContainer";
+    const id = "PopupContainer" + props.id;
+    const className = "PopupContainer " + (props.className || "");
 
 
     return (
-        <div id={id} className={className + " flexCenter hidePopup"}>
+        <div id={id} 
+            className={className + " hidden flexCenter " + (props.matchPopupDimensions && "matchPopupDimensions")} 
+            ref={ref} 
+            style={props.style} 
+            onClick={props.onClick}
+            >
             {props.children}
         </div>
     )
-}
+});

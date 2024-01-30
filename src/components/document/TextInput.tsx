@@ -1,195 +1,438 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCSSValueAsNumber, getCursorIndex, getDocumentId, getTabSpaces, isBlank, isKeyAlphaNumeric, isTextLongerThanInput, log, moveCursor, replaceAtIndex } from "../../utils/Utils";
+import { equalsIgnoreCase, flashClass, getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
-import { StyleProp, applyTextInputStyle, getTextInputStyle } from "../../abstract/Style";
+import { StyleProp, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
-import { SINGLE_TAB_UNICODE_ESCAPED, TAB_UNICODE_ESCAPED } from "../../utils/GlobalVariables";
-import { ColumnContext } from "./Column";
+import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
+import { PageContext } from "./Page";
+import Button from "../helpers/Button";
+import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 
 
-// TODO: 
-    // mark multiple lines, style all, tab all, break all (mousemove event)
-    // strg a
-    // strg c / strg v(?)
+// IDEA: 
+// mark multiple lines, style all, tab all, break all (mousemove event)
+// strg a
+// strg c / strg v(?)
 
-// TODO: increase font size but only on display
-// TODO: underline tabs
-// TODO: fix tab size
+// TODO: add pictures
+// TODO: add table
+// TODO: add more pages
+/**
+ * Component defining a text input in the <Document /> and it's logic and styling information.
+ * 
+ * @since 0.0.1
+ */
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
     paragraphIndex: number,
     textInputIndex: number,
-    isHeading: boolean,
+    isSingleColumnLine: boolean,
     key?: string | number
     id?: string | number,
     className?: string,
 }) {
 
-    const id = getDocumentId("TextInput", props.pageIndex, props.id, props.columnIndex, props.paragraphIndex, props.textInputIndex);
-    const [className, setClassName] = useState("TextInput");
+    const id = getDocumentId("TextInput", props.pageIndex, props.id ? props.id : "", props.columnIndex, props.paragraphIndex, props.textInputIndex);
+    const className = "TextInput " + (props.className || "");
 
     const inputRef = useRef(null);
-
+    
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
-    const columnContext = useContext(ColumnContext);
+    const pageContext = useContext(PageContext);
+
+    const [dontHideConnectIconClassName, setDontHideConnectIconClassName] = useState("");
+    const [isSingleColumnLineCandidate, setIsSingleColumnLineCandidate] = useState(false);
+
+    const [textInputBorderFlashing, setTextInputBorderFlashing] = useState(false);
 
 
     useEffect(() => {
-        if (props.className)
-            setClassName(className + " " + props.className);
+        // set initial font size
+        setCssVariable("initialTextInputFontSize", DEFAULT_FONT_SIZE + getFontSizeDiffInWord(DEFAULT_FONT_SIZE) + "px");
 
-        initTextInputStyle();
+        // focus first text input of document or singleColumnLine
+        if (id === getDocumentId("TextInput", 0, "", 0, 0, 0) || props.isSingleColumnLine)
+            documentContext.focusTextInput(id);
 
     }, []);
 
 
     useEffect(() => {
-        if (appContext.selectedTextInputId !== id) 
-            appContext.unFocusTextInput(id);
-        
-    }, [appContext.selectedTextInputId]);
+        const isSingleColumnLineCandidate = checkIsSingleColumnLineCandidate();
+
+        // update state
+        setIsSingleColumnLineCandidate(isSingleColumnLineCandidate);
+
+        // update classes, those are checked on hover in Page component
+        if (isSingleColumnLineCandidate)
+            setDontHideConnectIconClassName("dontHideConnectIcon");
+
+        else if (props.isSingleColumnLine)
+            setDontHideConnectIconClassName("dontHideDisConnectIcon");
+
+    }, [documentContext.refreshSingleColumnLines])
 
 
     useEffect(() => {
-        if (id === appContext.selectedTextInputId)
-            appContext.focusTextInput(id, false);
-
-    }, [appContext.selectedTextInputStyle]);
-
-
-    function initTextInputStyle(): void {
-
-        const style = appContext.selectedTextInputStyle;
-        const headingState = documentContext.getHeadingStateByTextInputId(id);
-        const headingFontsize = headingState ? headingState[0] : "";
-
-        // font size
-        // case: heading
-        if (props.isHeading && headingFontsize) 
-            style.fontSize = getCSSValueAsNumber(headingFontsize, 2);
+        if (id !== documentContext.selectedTextInputId) 
+            documentContext.unFocusTextInput(id, false);
         
-        // case: normal line
-        else 
-            style.fontSize = getCSSValueAsNumber(appContext.columnFontSize, 2);
+    }, [documentContext.selectedTextInputId]);
 
-        applyTextInputStyle(id, style);
-    }
+
+    useEffect(() => {
+        if (id === documentContext.selectedTextInputId) 
+            documentContext.focusTextInput(id, false);
+
+    }, [documentContext.selectedTextInputStyle]);
 
 
     function handleKeyDown(event): void {
 
-        // char that was just typed
-        let typedChar = event.key === "Tab" ? getTabSpaces() : event.key;
+        const eventKey = event.key;
 
         // case: text too long when including typed char
-        if (isTextLongerThanInput(appContext.selectedTextInputId, documentContext.getTextInputOverhead(), typedChar) && 
-            isKeyAlphaNumeric(event.keyCode) &&
-            appContext.pressedKey === "") {
+        if (isKeyAlphaNumeric(event.keyCode) && (appContext.pressedKey !== "Control")) 
+            if (isTextLongerThanInput(documentContext.selectedTextInputId, eventKey === "Tab" ? TAB_UNICODE : eventKey))
+                handleTextLongerThanLine(event);
 
-            event.preventDefault();
-            documentContext.handleTextLongerThanLine(id, "aqua");
-            return;
-        }
-
-        if (event.key === "Tab") 
+        if (eventKey === "Tab")
             handleTab(event);
         
-        // TODO: move all values down by one line, or flash if no line below is empty
-        if (event.key === "Enter")
-            focusNextTextInput(true, ["fontSize"]);
+        else if (eventKey === "Enter")
+            focusNextTextInput(true);
 
-        if (event.key === "ArrowDown")
+        else if (eventKey === "ArrowDown")
             focusNextTextInput(false);
 
-        if (event.key === "ArrowUp")
+        else if (eventKey === "ArrowUp")
             focusPrevTextInput(event);
 
-        if (event.key === "ArrowLeft")
-            handleArrowLeft(event);
-
-        if (event.key === "ArrowRight")
-            handleArrowRight(event);
-
-        if (event.key === "Backspace")
+        else if (eventKey === "Backspace")
             handleBackspace(event);
     }
 
 
-    function handleMouseDown(event): void {
-        
-        columnContext.updateColumnStates(id);
+    function handlePaste(event): void {
 
-        // case: selected new text input
-        if (appContext.selectedTextInputId !== id) 
-            appContext.focusTextInput(id);
+        const pastedText = event.clipboardData.getData("text") || "";
+
+        if (isTextLongerThanInput(documentContext.selectedTextInputId, pastedText))
+            handleTextLongerThanLinePreventKeyDown(event);
     }
 
 
-    function handleClick(event): void {
-        
-        handleCursorInBetweenSingleTabUnicodes(event.target.id);
+    function handleMouseDown(event): void {
+
+        // case: selected new text input
+        if (documentContext.selectedTextInputId !== id) 
+            documentContext.focusTextInput(id);
+    }
+
+
+    function handleMouseOver(event): void {
+
+        handleSingleColumnLineMouseOver(event);
+    }
+
+
+    function handleMousOut(event): void {
+
+        // hide borders
+        if (props.isSingleColumnLine)
+            $(inputRef.current!).removeClass("textInputSingleColumnDisconnect");
+        else
+            getTextInputsInSameLine().forEach(textInput =>
+                toggleSingleColumnLineCandidateBorder(true, textInput.prop("id")));
     }
 
 
     /**
-     * Move cursor left by one char if cursor is in between two connected tab unicodes. I.e. a click on cursor '|' in ```\t\t\t|\t```
-     * would move the cursor like ```\t\t|\t\t```
-     * @param textInputId id of text input to potentially move cursor of
+     * Toggle borders for singleColumnLines and candidates
      */
-    function handleCursorInBetweenSingleTabUnicodes(textInputId: string): void {
+    function handleSingleColumnLineMouseOver(event): void {
 
-        const cursorIndex = getCursorIndex(textInputId);
-        const inputValue = $(inputRef.current!).prop("value");
-
-        // count single tab unicodes in front of cursor
-        let tabUnicodeCount = 0;
-        for (let i = cursorIndex - 1; i >= 0; i--) {
-            if (inputValue.charAt(i) !== SINGLE_TAB_UNICODE_ESCAPED)
-                break;
-
-            tabUnicodeCount++;
+        let leftTextInputId = ""
+        if (isSingleColumnLineCandidate || props.isSingleColumnLine) {
+            // show borders
+            getTextInputsInSameLine().forEach(textInput => {
+                const textInputId = textInput.prop("id");
+    
+                // case: is candidate
+                if (isSingleColumnLineCandidate) {
+                    toggleSingleColumnLineCandidateBorder(false, textInputId);
+                    
+                    if (isLeftColumn(textInputId))
+                        leftTextInputId = textInputId;            
+                
+                // case: is singleColumnLine
+                } else if (isLastSingleColumnLine()) {
+                    $(inputRef.current!).addClass("textInputSingleColumnDisconnect");
+                    leftTextInputId = id;
+                }
+            });
         }
 
-        // is cursor between tab unicodes
-        const isCursorInBetweenTabUnicodes = inputValue.charAt(cursorIndex - 1) === SINGLE_TAB_UNICODE_ESCAPED && 
-                                             inputValue.charAt(cursorIndex) === SINGLE_TAB_UNICODE_ESCAPED;
-                          
-        // case: cursor between connected tab unicodes
-        if (isCursorInBetweenTabUnicodes && tabUnicodeCount % 2 === 1)
-            moveCursor(textInputId, cursorIndex - 1, cursorIndex - 1);
+        // show very left connect button
+        $("#ButtonConnectLines" + leftTextInputId).fadeIn(0);
+    }
+
+
+    function isLastSingleColumnLine(): boolean { 
+
+        // case: not a singleColumnLine
+        if (!props.isSingleColumnLine) 
+            return false;
+
+        const singleColumnLines = $("." + SINGLE_COLUMN_LINE_CLASS_NAME);
+
+        // case: no singleColumnLines at all
+        if (!singleColumnLines.length)
+            return false;
+
+        const lastSingleColumnLine = singleColumnLines.get(singleColumnLines.length - 1);
+
+        return id === lastSingleColumnLine!.id;
     }
 
 
     function handleTab(event): void {
 
+        event.preventDefault();
+
         if (appContext.pressedKey === "Shift") {
-            event.preventDefault();
             handleBackspace(event);
 
-        } else 
-            documentContext.handleTab(event);
-    }
+        } else {
+            // case: text too long
+            if (isTextLongerThanInput(documentContext.selectedTextInputId, TAB_UNICODE)) {
+                handleTextLongerThanLine(event);
+                return;
+            }
 
+            // add tab after cursor
+            const selectedTextInput = $("#" + documentContext.selectedTextInputId);
+            const cursorIndex = selectedTextInput.prop("selectionStart");
+            const newInputValue = insertString(selectedTextInput.prop("value"), TAB_UNICODE, cursorIndex);
+            selectedTextInput.prop("value", newInputValue);
 
-    function handleArrowLeft(event): void {
-
-        if (areCharsInFrontOfCursorTab()) {
-            const cursorIndex = getCursorIndex(event.target.id);
-            moveCursor(event.target.id, cursorIndex - 1, cursorIndex - 1);
+            // move cursor to end of tab
+            moveCursor(documentContext.selectedTextInputId, cursorIndex + (equalsIgnoreCase(documentContext.selectedTextInputStyle.textAlign, "right") ? 0 : + 1));
         }
     }
 
 
-    function handleArrowRight(event): void {
+    /**
+     * Move cursor to prev text input if at first char.
+     */
+    function handleBackspace(event): void {
 
-        if (areCharsAfterCursorTab()) {
-            const cursorIndex = getCursorIndex(event.target.id);
-            moveCursor(event.target.id, cursorIndex + 1, cursorIndex + 1);
+        const cursorIndex = getCursorIndex(id);
+
+        // case: cursor at first char
+        if (cursorIndex === 0 && !isTextInputValueMarked(id)) 
+            focusPrevTextInput(event);
+    }
+
+
+    async function handleTextLongerThanLine(event): Promise<void> {
+        
+        const lastTextInputInColumn = documentContext.getLastTextInputOfColumn(id);
+
+        const thisTextInput = $(inputRef.current!);
+        const thisTextInputValue = thisTextInput.prop("value");
+
+        const nextTextInput = getNextTextInput(id);
+        
+        const isNotLastTextInputInColumn = lastTextInputInColumn && lastTextInputInColumn.prop("id") !== id;
+        const isNextTextInputBlank = !nextTextInput || isBlank(nextTextInput.prop("value"));
+        const cursorIndex = getCursorIndex(id);
+        
+        // case: can shift text to next line
+        if (isNotLastTextInputInColumn && isNextTextInputBlank && cursorIndex === thisTextInputValue.length) {
+            // case: dont shift text but continue in next input
+            const hasTextWhiteSpace = thisTextInputValue.includes(" ");
+            if (!hasTextWhiteSpace)
+                focusNextTextInput(true);
+            else 
+                moveLastWordToNextTextInput();
+
+        // case: can't shift text to next line
+        } else
+            handleTextLongerThanLinePreventKeyDown(event);
+    }
+
+
+    async function handleTextLongerThanLinePreventKeyDown(event): Promise<void> {
+
+        event.preventDefault();
+
+        // case: border still flashing
+        if (textInputBorderFlashing)
+            return;
+
+        setTextInputBorderFlashing(true);
+        await flashClass(id, "textInputFlash", "textInputFocus", 200);
+        setTextInputBorderFlashing(false);
+    }
+
+
+    function toggleSingleColumnLine(event): void {
+
+        $(".connectOrDisconnectButton").hide();
+
+        // only works because there's one text input per paragraph
+        pageContext.toggleConnectWarnPopup(props.paragraphIndex, props.isSingleColumnLine);
+    }
+
+
+    function getTextInputsInSameLine(): JQuery[] {
+
+        const textInputs: JQuery[] = [];
+        
+        for (let i = 0; i < documentContext.numColumns; i++) {
+            // only works because there's one text input per paragraph
+            const textInputId = getDocumentId("TextInput", props.pageIndex, "", i, props.paragraphIndex, props.textInputIndex);
+            
+            const textInput = $("#" + textInputId);
+            if (textInput)
+                textInputs.push(textInput);
         }
+
+        return textInputs;
+    }
+
+
+    function toggleSingleColumnLineCandidateBorder(hide: boolean, textInputId = id): void {
+        
+        const thisTextInput = $("#" + textInputId);
+
+        if (isLeftColumn(textInputId, false))
+            if (hide)
+                thisTextInput.removeClass("textInputLeftColumnConnect");
+            else
+                thisTextInput.addClass("textInputLeftColumnConnect");
+
+        if (isMiddleColumn(textInputId, false))
+            if (hide)
+                thisTextInput.removeClass("textInputMiddleColumnConnect");
+            else
+                thisTextInput.addClass("textInputMiddleColumnConnect");
+
+        if (isRightColumn(textInputId, false))
+            if (hide)
+                thisTextInput.removeClass("textInputRightColumnConnect");
+            else
+                thisTextInput.addClass("textInputRightColumnConnect");
+    }
+
+
+    /**
+     * @returns true if this text input is not a singleColumnLine already but the previous text input in column is one, or if this text input is
+     *          first in column and not a singleColumnLine. 
+     *          False if only one column in document or is not first page.
+     */
+    function checkIsSingleColumnLineCandidate(): boolean {
+
+        // case: no singleColumnLines possible
+        if (documentContext.numColumns <= 1)
+            return false;
+
+        // case: not on first page
+        if (props.pageIndex !== 0)
+            return false;
+    
+        const isNoSingleColumnLine = !props.isSingleColumnLine;
+        let prevTextInputIsSingleColumnLine = false;
+
+        const prevTextInput = getPrevTextInput(id, false);
+
+        // case: prev text input is singleColumnLine
+        if (prevTextInput && prevTextInput.length)
+            prevTextInputIsSingleColumnLine = prevTextInput.prop("className").includes(SINGLE_COLUMN_LINE_CLASS_NAME);
+    
+        // case: no prev text input at all
+        if (!prevTextInput || !prevTextInput.length)
+            return isNoSingleColumnLine;
+
+        const prevTextInputId = prevTextInput.prop("id");
+
+        const prevTextInputColumnIndex = stringToNumber(getPartFromDocumentId(prevTextInputId, 2));
+
+        // case: first text input in column on first page
+        if (props.columnIndex !== prevTextInputColumnIndex)
+            prevTextInputIsSingleColumnLine = true;
+
+        return isNoSingleColumnLine && prevTextInputIsSingleColumnLine;
+    }
+
+
+    function isLeftColumn(textInputId = id, debug = true): boolean {
+
+        if (!isTextInputIdValid(textInputId, debug))
+            return false;
+
+        const columnIndex = stringToNumber(getPartFromDocumentId(textInputId, 2));
+
+        return columnIndex === 0;
+    }
+
+
+    function isMiddleColumn(textInputId = id, debug = true): boolean {
+
+        if (!isTextInputIdValid(textInputId, debug))
+            return false;
+
+        const columnIndex = stringToNumber(getPartFromDocumentId(textInputId, 2));
+
+        return columnIndex >= 1 && documentContext.numColumns >= 3;
+    }
+
+
+    function isRightColumn(textInputId = id, debug = true): boolean {
+
+        if (!isTextInputIdValid(textInputId, debug))
+            return false;
+
+        const columnIndex = stringToNumber(getPartFromDocumentId(textInputId, 2));
+
+        return columnIndex === documentContext.numColumns - 1;
+    }
+
+
+    /**
+     * Remove last word (separator is the last white space char) of this text input and add it to next text input.
+     * Do nothing if there is no white space char in this text input's value.
+     */
+    function moveLastWordToNextTextInput(): void {
+
+        const thisTextInput = $(inputRef.current!);
+        const nextTextInput = getNextTextInput(id);
+
+        // case: no next text input
+        if (!nextTextInput)
+            return;
+
+        let thisInputValue = thisTextInput.prop("value");
+        const lastSpaceIndex = thisInputValue.lastIndexOf(" ");
+
+        // case: no space char
+        if (lastSpaceIndex === -1)
+            return;
+
+        const lastWord = thisInputValue.substring(lastSpaceIndex + 1);
+
+        // remove last word from this text input
+        thisInputValue = replaceAtIndex(thisInputValue, "", lastSpaceIndex + 1);
+        thisTextInput.prop("value", thisInputValue);
+
+        // add last word to next text input
+        focusNextTextInput(true);
+        nextTextInput.val(lastWord);
     }
 
 
@@ -197,124 +440,112 @@ export default function TextInput(props: {
      * @param copyStyles if true, all styles of selected text input will be copied to next text input
      * @param stylePropsToOverride style props to override the selected style props with if ```copyStyles```is true
      */
-    function focusNextTextInput(copyStyles: boolean, stylePropsToOverride?: StyleProp[]): void {
+    function focusNextTextInput(copyStyles: boolean, stylePropsToOverride: [StyleProp, string | number][] = []): void {
 
-        const nextTextInput = documentContext.getNextTextInput(id);
-        if (nextTextInput) {
-            // case: next text input blank
-            if (copyStyles && isBlank(nextTextInput.prop("value"))) {
-                // copy style
-                appContext.setSelectedTextInputStyle(getTextInputStyle($("#" + id)), mapTextInputStyleAsTouple(nextTextInput, stylePropsToOverride));
-                appContext.focusTextInput(nextTextInput.prop("id"), false);
-
-            // case: next text input not blank
-            } else 
-                appContext.focusTextInput(nextTextInput.prop("id"), true);
-        }
-    }
-
-
-    /**
-     * @param textInput which the style is taken from
-     * @param styleProperties to map, if not present all style props of text input are used
-     * @returns an array of touples i.e. ```[["fontSize", "16px"], "color", "black"]
-     */
-    function mapTextInputStyleAsTouple(textInput: JQuery, styleProperties?: StyleProp[]): [StyleProp, string][] {
-
-        const textInputStyle = getTextInputStyle(textInput);
-
-        if (styleProperties) 
-            return styleProperties.map(styleProp => [styleProp, textInputStyle[styleProp.toString()]])
+        const nextTextInput = getNextTextInput(id);
         
-        return Object.entries(textInputStyle)
-                     .map(([key, value]) => [key as StyleProp, value]);
+        // case: end of document
+        if (!nextTextInput)
+            return;
+
+        const nextTextInputId = nextTextInput.prop("id");
+        const nextTextInputFontSize = nextTextInput.css("fontSize");
+
+        // case: next text input blank
+        if (copyStyles && isBlank(nextTextInput.prop("value"))) {
+            const fontSizeDiff = documentContext.subtractMSWordFontSizes($(inputRef.current!).css("fontSize"), nextTextInput.css("fontSize"));
+            const numLinesDiff = documentContext.getNumLinesDeviation(nextTextInputId, fontSizeDiff); 
+            
+            // case: font size too large
+            if (numLinesDiff > 0) {
+                // case: cant handle font size too large
+                if (!documentContext.handleFontSizeTooLarge(false, numLinesDiff, nextTextInputId, true))
+                    // keep nextTextInput's fontSize
+                    stylePropsToOverride?.push(["fontSize", getCSSValueAsNumber(nextTextInputFontSize, 2)]);
+
+            // case: font size too small
+            } else if (numLinesDiff < 0)
+                documentContext.handleFontSizeTooSmall(numLinesDiff);
+            
+            documentContext.focusTextInput(nextTextInputId, false);
+            documentContext.setSelectedTextInputStyle(getTextInputStyle($(inputRef.current!)), stylePropsToOverride);
+
+        // case: next text input not blank
+        } else 
+            documentContext.focusTextInput(nextTextInput.prop("id"), true);
     }
 
 
     function focusPrevTextInput(event): void {
 
-        const prevTextInput = documentContext.getPrevTextInput(id);
+        const prevTextInput = getPrevTextInput(id);
 
         // case: has no prev text input
         if (!prevTextInput) 
             return;
 
         event.preventDefault();
-        appContext.focusTextInput(prevTextInput.prop("id"), true);
+        documentContext.focusTextInput(prevTextInput.prop("id"), true);
 
         // move cursor to end of text
         const lastCharIndex = prevTextInput.prop("value").length;
-        moveCursor(prevTextInput.prop("id"), lastCharIndex, lastCharIndex);
+        moveCursor(prevTextInput.prop("id"), lastCharIndex);
     }
 
 
     /**
-     * Remove tab unicodes
+     * @param textInputId id of text input to check the value of 
+     * @returns true if value of text input is marked
      */
-    // TODO: move up one line if value is blank
-    function handleBackspace(event): void {
-        
-        // case: is tab
-        if (areCharsInFrontOfCursorTab()) {
-            const input = $(inputRef.current!);
-            const value: string = input.prop("value");
-            const cursorIndex = input.prop("selectionStart");
+    function isTextInputValueMarked(textInputId: string): boolean {
 
-            event.preventDefault();
+        if (!textInputId)
+            return false;
 
-            // remove both unicodes
-            let newValue = replaceAtIndex(value, "", cursorIndex - 2, cursorIndex);
-            input.prop("value", newValue);
-        }
-    }
-
-
-    /**
-     * @returns true if ```2 chars in front of cursor === TAB_UNICODE_ESCAPED```.
-     */
-    function areCharsInFrontOfCursorTab(): boolean {
-
-        // get input value
-        const input = $(inputRef.current!);
-        const value: string = input.prop("value");
-        
-        // get 2 chars in front of cursor
-        const cursorIndex = input.prop("selectionStart");
-        const charsInFrontOfCursor = value.charAt(cursorIndex - 1) + value.charAt(cursorIndex - 2);
-
-        return charsInFrontOfCursor === TAB_UNICODE_ESCAPED;
-    }
-
-
-    /**
-     * @returns true if ```2 chars after cursor === TAB_UNICODE_ESCAPED```.
-     */
-    function areCharsAfterCursorTab(): boolean {
-
-        // get input value
-        const input = $(inputRef.current!);
-        const value: string = input.prop("value");
-        
-        // get 2 chars after cursor
-        const cursorIndex = input.prop("selectionStart");
-        const charsInFrontOfCursor = value.charAt(cursorIndex) + value.charAt(cursorIndex + 1);
-
-        return charsInFrontOfCursor === TAB_UNICODE_ESCAPED;
+        const textInput = $("#" + textInputId);
+        return textInput.prop("selectionStart") !== textInput.prop("selectionEnd")
     }
 
 
     return (
-        <div className={"textInputContainer"}>
-            <label htmlFor={id}></label>
+        <div className={"textInputContainer flexCenter " + dontHideConnectIconClassName} 
+            onMouseOver={handleMouseOver}
+            onMouseOut={handleMousOut}
+             >
+            <label className={"textInputLabel " + dontHideConnectIconClassName} htmlFor={id}>
+                <Button id={"ConnectLines" + id}
+                        className={"connectOrDisconnectButton flexCenter " + dontHideConnectIconClassName}
+                        title={props.isSingleColumnLine ? "Zeile aufspalten" : "Zeilen verbinden"}
+                        childrenClassName={"flexCenter " + dontHideConnectIconClassName}
+                        boxStyle={{
+                            backgroundColor: props.isSingleColumnLine ? "rgb(255, 200, 180)" : "rgb(180, 200, 255)",
+                            borderRadius: "50%",
+                            marginBottom: "2px",
+                        }}
+                        childrenStyle={{
+                            borderRadius: "50%",
+                            height: "25px",
+                            padding: "0px",
+                            width: "25px"
+                        }}      
+                        hoverBackgroundColor={props.isSingleColumnLine ? "rgb(255, 180, 160)" : "rgb(160, 180, 255)"}
+                        clickBackgroundColor="rgb(220, 220, 220)"
+                        onClick={toggleSingleColumnLine} 
+                        >
+                    <i className={"fa-solid fa-link connectIcon " + dontHideConnectIconClassName + (props.isSingleColumnLine && " hidden")}></i>
+                    <i className={"fa-solid fa-link-slash disconnectIcon " + dontHideConnectIconClassName + (!props.isSingleColumnLine && " hidden")}></i>
+                </Button>
+            </label>
+
+            
             <input id={id} 
-                   className={className} 
-                   ref={inputRef} 
-                   type="text" 
-                   onMouseDown={handleMouseDown}
-                   onClick={handleClick}
-                   onKeyDown={handleKeyDown}
-                   onKeyUp={() => documentContext.setIsSelectedColumnEmpty(documentContext.checkIsSelectedColumnEmpty())}
-                   />
+                className={className + " " + dontHideConnectIconClassName + (isSingleColumnLineCandidate && " singleColumnLineCandidate")} 
+                ref={inputRef} 
+                type="text" 
+                onMouseDown={handleMouseDown}
+                onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
+                />
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { Ref, forwardRef, useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/StylePanel.css";
 import StylePanelSection from "./StylePanelSection";
 import Checkbox from "../helpers/Checkbox";
@@ -7,22 +7,32 @@ import ColorPicker from "../helpers/ColorPicker";
 import { AppContext } from "../App";
 import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { flashBorder, getCSSValueAsNumber, getDocumentId, getPartFromDocumentId, isBlank, isTextLongerThanInput, log, logWarn, stringToNumber, togglePopup } from "../../utils/Utils";
+import { flashClass, isBlank, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
+import { FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
-import WarnIcon from "../helpers/WarnIcon";
-import PopupHeadingConfig from "../helpers/popups/PopupHeadingConfig";
 import Popup from "../helpers/popups/Popup";
-import { FONT_FAMILIES, FONT_SIZES } from "../../utils/GlobalVariables";
+import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
+import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
+import { getCSSValueAsNumber, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
+import PopupContainer from "../helpers/popups/PopupContainer";
 
 
-// TODO: add key combinations for most buttons
-    // set title to combination
+/**
+ * Panel on top of <Document /> with all document options (styling etc.).
+ * 
+ * @since 0.0.1
+ */
+// TODO: add hide option, or dont fix
 
-export default function StylePanel(props) {
+// TODO: find better orientation icon
+export default forwardRef(function StylePanel(props: {
+    id?: string,
+    className?: string
+}, subtlePopupContainerRef: Ref<HTMLDivElement>) {
 
-    const id = props.id ? "StylePanel" + props.id : "StylePanel";
-    const className = props.className ? "StylePanel " + props.className : "StylePanel";
+    const id = "StylePanel" + (props.id || "");
+    const className = "StylePanel " + (props.className || "");
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
@@ -32,59 +42,92 @@ export default function StylePanel(props) {
     const stylePanelRef = useRef(null);
     const sectionContainerRef = useRef(null);
 
+    const boxBackgroundColor = "rgb(255, 255, 255)";
+    const boxBorder = "1px solid rgb(200, 200, 200)";
+    const hoverBackgroundColor = "rgb(245, 245, 245)";
+    const checkedBackgroundColor = "rgb(233, 233, 233)";
+
 
     useEffect(() => {
-        if (disabled && !isBlank(appContext.selectedTextInputId))
+        if (disabled && !isBlank(documentContext.selectedTextInputId))
             setDisabled(false);
         
-    }, [appContext.selectedTextInputId]);
+    }, [documentContext.selectedTextInputId]);
+
+    
+    useEffect(() => {
+        setCssVariable("stylePanelOverflow", (appContext.isMobileView ? "auto" : "none"));
+
+    }, [appContext.isMobileView]);
 
     
     function handleFontFamilySelect(fontFamily: string): void {
 
-        appContext.selectedTextInputStyle.fontFamily = fontFamily;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.fontFamily = fontFamily;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
+    // gets slow (over time or on page 2)
     function handleFontSizeSelect(fontSize: string): void {
+        
+        // case: text too long for text input length      
+        const isFontSizeTooLargeForTextInput = isTextLongerThanInput(documentContext.selectedTextInputId, "", fontSize + "px");
+        if (isFontSizeTooLargeForTextInput) {
+            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.", "Warn");
+            return;
+        }
 
-        appContext.setColumnFontSize(fontSize);
+        const diff = documentContext.subtractMSWordFontSizes(getCSSValueAsNumber(fontSize, 2), documentContext.selectedTextInputStyle.fontSize);
+        const numLinesDiff = documentContext.getNumLinesDeviation(documentContext.selectedTextInputId, diff);
+
+        // case: font size too large
+        if (numLinesDiff > 0) {
+            // case: dont increase font size
+            if (!documentContext.handleFontSizeTooLarge(true, numLinesDiff))
+                return;
+        
+        // case: font size too small
+        } else if (numLinesDiff < 0)
+            documentContext.handleFontSizeTooSmall(numLinesDiff);
+
+        documentContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleBoldSelect(bold: boolean): void {
 
-        appContext.selectedTextInputStyle.bold = bold;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.bold = bold;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleUnderlineSelect(underline: boolean): void {
         
-        appContext.selectedTextInputStyle.underline = underline;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.underline = underline;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleItalicSelect(italic: boolean): void {
         
-        appContext.selectedTextInputStyle.italic = italic;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.italic = italic;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleColorSelect(color: string): void {
         
-        appContext.selectedTextInputStyle.color = color;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.color = color;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
     function handleTextAlignSelect(textAlign: string): void {
 
-        appContext.selectedTextInputStyle.textAlign = textAlign;
-        appContext.setSelectedTextInputStyle({...appContext.selectedTextInputStyle});
+        documentContext.selectedTextInputStyle.textAlign = textAlign;
+        documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
 
 
@@ -94,110 +137,73 @@ export default function StylePanel(props) {
     }
 
 
-    function handleTab(event): void {
+    function handleColumnConfigClick(event): void {
 
-        documentContext.handleTab(event);
+        const warnPopupContainerIdPart = "ColumnConfigWarning";
 
-        appContext.focusSelectedTextInput();
+        // toggle popup
+        documentContext.togglePopup();
+
+        documentContext.setPopupContent(
+            // pass the id of inner <PoupContainer /> for toggle effect
+            <Popup id="Column" width="large" height="large" handleOverlayClick={() => toggleWarnPopup("PopupContainer" + warnPopupContainerIdPart)}>
+                <PopupColumnConfig toggleWarnPopup={toggleWarnPopup} warnPopupContainerIdPart={warnPopupContainerIdPart} />
+            </Popup>
+        );
     }
 
 
-    function handleHeadingClick(event): void {
+    function handleOrientationConfigClick(event): void {
 
-        // configure popup
-        appContext.setPopupContent(
-            <Popup height="large" width="large">
-                <PopupHeadingConfig />
+        const warnPopupContainerIdPart = "OrientationConfigWarning";
+
+        // toggle popup
+        documentContext.togglePopup(100);
+
+        documentContext.setPopupContent(
+            // pass the id of inner <PoupContainer /> for toggle effect
+            <Popup id="Orientation" width="large" height="large" handleOverlayClick={() => toggleWarnPopup("PopupContainer" + warnPopupContainerIdPart)}>
+                <PopupOrientationConfig toggleWarnPopup={toggleWarnPopup} warnPopupContainerIdPart={warnPopupContainerIdPart} />
             </Popup>
         );
+    }
 
-        // toggle
-        togglePopup(appContext.setPopupContent);
+
+    /**
+     * Toggle element with given id and the popup overlays of all  ```<Popup />``` parents.
+     * 
+     * @param warnPopupId complete id of ```<Popup />``` component holding the ```<WarnPopup />```
+     * @param duration of the jquery fade animation (in ms)
+     */
+    function toggleWarnPopup(warnPopupId: string, duration = 100): void {
+
+        const warnPopup = $("#" + warnPopupId);
+        warnPopup.fadeToggle(duration);
+        warnPopup.css("display", "flex");
+
+        const popupOverlay = warnPopup.parents(".Popup").children(".popupOverlay");
+        popupOverlay.fadeToggle(duration);
     }
 
 
     return (
-        <div id={id} className={className + " flexCenter"} ref={stylePanelRef} >
-            <div className={"sectionContainer flexLeft row " + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
-                <StylePanelSection hideRightBorder={false} 
-                                    className="col-6 col-lg-4"
-                                    buttonContainerClassName="flexCenter"
-                                    >
-                    {/* <h6 className="textCenter">Spalte</h6> */}
-                    <div className="flexCenter align-items-start row">
-                        <div className="flexCenter col-sm-4 col-md-6">
-                            <WarnIcon 
-                                componentStyle={{
-                                    visibility: documentContext.isSelectedColumnEmpty ? "hidden" : "visible",
-                                }}
-                                iconContainerStyle={{
-                                    borderColor: "grey",
-                                    color: "grey",
-                                    height: "24px",
-                                    marginRight: "2px",
-                                    padding: "7px",
-                                    width: "24px"
-                                }}
-                                popupStyle={{
-                                    backgroundColor: "white",
-                                    borderRadius: "3px",
-                                    boxShadow: "0 0 3px 1px rgb(200, 200, 200)",
-                                    fontSize: "0.8em",
-                                    marginTop: "2px",
-                                    padding: "5px",
-                                    width: "130px",
-                                    zIndex: 1
-                                }}
-                                showPopupOnHover={true}
-                                title="Schriftgöße ändern"
-                            >
-                                Um Schriftgrößen zu verändern, lösche allen Text in der Spalte.
-                            </WarnIcon>
-
-                            <Select id="FontSize"
-                                    label={getCSSValueAsNumber(appContext.columnFontSize, 2).toString()}
-                                    disabled={disabled || !documentContext.isSelectedColumnEmpty}
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    className="mr-sm-5 mr-md-3"
-                                    boxStyle={{borderColor: "rgb(200, 200, 200)", width: "70px"}}
-                                    optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
-                                    handleSelect={handleFontSizeSelect}
-                                    title="Schriftgröße"
-                                    options={FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
-                                    />
-                        </div>
-
-                        <div className="col-sm-4 col-md-3 mt-2 mt-sm-0 flexCenter">
-                            <Button id={"HeadingConfig"}
-                                    handleClick={handleHeadingClick}
-                                    hoverBackgroundColor="rgb(245, 245, 245)"
-                                    clickBackgroundColor="rgb(200, 200, 200)"
-                                    boxStyle={{
-                                        border: "1px solid rgb(200, 200, 200)",
-                                        borderRadius: "3px",
-                                        boxShadow: "none",
-                                    }}
-                                    disabled={disabled || !documentContext.isSelectedColumnEmpty}
-                                    >
-                                <div style={{fontSize: "16px"}}>Überschrift</div>
-                                <div style={{fontSize: "12px"}}>Überschrift</div>
-                            </Button>
-                        </div>
-                    </div>
-                </StylePanelSection>
-                
-                <StylePanelSection className="col-6 col-lg-3" 
-                                    hideRightBorder={false} 
-                                    buttonContainerClassName="pl-4 pr-4"
-                                    >
+        <div id={id} className={className} ref={stylePanelRef}>
+            <div className={"sectionContainer " + (appContext.isMobileView ? "flexLeft" : "flexCenter") + (disabled ? " disabled" : "")} ref={sectionContainerRef}>
+                <StylePanelSection id="FontStyles1" hideRightBorder={true} componentStyle={{maxWidth: "215px"}}>
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Select id="FontFamily" 
-                                label={appContext.selectedTextInputStyle.fontFamily}
+                                label={documentContext.selectedTextInputStyle.fontFamily}
                                 disabled={disabled}
-                                hoverBackgroundColor="rgb(245, 245, 245)"
+                                hoverBackgroundColor={hoverBackgroundColor}
                                 componentStyle={{width: "100%"}}
-                                optionsBoxStyle={{borderColor: "rgb(200, 200, 200)", maxHeight: "50vb"}}
-                                boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                optionsBoxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: "rgb(235, 235, 235)",
+                                    maxHeight: "50vb"}}
+                                boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                }}
                                 handleSelect={handleFontFamilySelect}
                                 title="Schriftart"
                                 options={FONT_FAMILIES.sort().map(font => [font, font])}
@@ -207,42 +213,58 @@ export default function StylePanel(props) {
                     <div className="flexLeft" style={{height: "50%"}}>
                         <Checkbox id="Bold" 
                                   handleSelect={handleBoldSelect}
-                                  checked={appContext.selectedTextInputStyle.bold}
-                                  hoverBackgroundColor="rgb(245, 245, 245)"
-                                  checkedBackgroundColor="rgb(230, 230, 230)"
+                                  checked={documentContext.selectedTextInputStyle.bold}
+                                  hoverBackgroundColor={hoverBackgroundColor}
+                                  checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                   disabled={disabled}
-                                  boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                  boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                  }}
                                   title="Fett"
                                   >
                             <strong>F</strong>
                         </Checkbox>
                         <Checkbox id="Underline" 
                                   handleSelect={handleUnderlineSelect}
-                                  checked={appContext.selectedTextInputStyle.underline}
-                                  hoverBackgroundColor="rgb(245, 245, 245)"
-                                  checkedBackgroundColor="rgb(230, 230, 230)"
+                                  checked={documentContext.selectedTextInputStyle.underline}
+                                  hoverBackgroundColor={hoverBackgroundColor}
+                                  checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                   disabled={disabled}
-                                  boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                  boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                  }}
                                   title="Unterstrichen"
-                                  ><u>U</u></Checkbox>
+                                  >
+                            <u>U</u>
+                        </Checkbox>
                         <Checkbox id="Italic" 
                                   handleSelect={handleItalicSelect}
-                                  checked={appContext.selectedTextInputStyle.italic}
-                                  hoverBackgroundColor="rgb(245, 245, 245)"
-                                  checkedBackgroundColor="rgb(230, 230, 230)"
+                                  checked={documentContext.selectedTextInputStyle.italic}
+                                  hoverBackgroundColor={hoverBackgroundColor}
+                                  checkedStyle={{backgroundColor: checkedBackgroundColor}}
                                   disabled={disabled}
-                                  boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                  boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                  }}
                                   title="Kursiv"
-                                  ><i>K</i></Checkbox>
+                                  >
+                            <i>K</i>
+                        </Checkbox>
 
                         <div className="flexRight" style={{width: "100%"}}>
                             <ColorPicker id="StylePanelColor" 
                                         handleSelect={handleColorSelect} 
-                                        color={appContext.selectedTextInputStyle.color}
+                                        color={documentContext.selectedTextInputStyle.color}
                                         toggleStyle={toggleColorPickerStyle}
-                                        hoverBackgroundColor="rgb(245, 245, 245)"
+                                        hoverBackgroundColor={hoverBackgroundColor}
                                         disabled={disabled}
-                                        boxStyle={{borderColor: "rgb(200, 200, 200)"}}
+                                        boxStyle={{
+                                            border: boxBorder,
+                                            backgroundColor: boxBackgroundColor
+                                        }}
                                         >
                                 <span className="dontMarkText">A</span>
                             </ColorPicker>
@@ -250,76 +272,144 @@ export default function StylePanel(props) {
                     </div>
                 </StylePanelSection>
 
-                <StylePanelSection 
-                                className="col-6 col-lg-2"
-                                hideRightBorder={false} 
-                                buttonContainerClassName="flexCenter"
-                                >
-                    <RadioButton id={"Left"} 
-                                 childrenClassName="flexCenter dontMarkText" 
-                                 name={"TextAlign"} 
-                                 value="LEFT"
-                                 radioGroupValue={appContext.selectedTextInputStyle.textAlign}
-                                 handleSelect={handleTextAlignSelect}
-                                 title="Linksbündig" 
-                                 hoverBackgroundColor="rgb(245, 245, 245)"
-                                 checkedBackgroundColor="rgb(230, 230, 230)"
-                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                 disabled={disabled}
-                                 >
-                        L
-                    </RadioButton>
-                    <RadioButton id={"Center"} 
-                                 childrenClassName="flexCenter dontMarkText" 
-                                 name={"TextAlign"} 
-                                 value="CENTER"
-                                 radioGroupValue={appContext.selectedTextInputStyle.textAlign}
-                                 handleSelect={handleTextAlignSelect}
-                                 title="Zentriert" 
-                                 hoverBackgroundColor="rgb(245, 245, 245)"
-                                 checkedBackgroundColor="rgb(230, 230, 230)"
-                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                 disabled={disabled}
-                                 >
-                        M
-                    </RadioButton>
-                    <RadioButton id={"Right"} 
-                                 childrenClassName="flexCenter dontMarkText" 
-                                 name={"TextAlign"} 
-                                 value="RIGHT"
-                                 radioGroupValue={appContext.selectedTextInputStyle.textAlign}
-                                 handleSelect={handleTextAlignSelect}
-                                 title="Rechtsbündig" 
-                                 hoverBackgroundColor="rgb(245, 245, 245)"
-                                 checkedBackgroundColor="rgb(230, 230, 230)"
-                                 boxStyle={{borderColor: "rgb(200, 200, 200)"}}
-                                 disabled={disabled}
-                                 >
-                        R
-                    </RadioButton>
+                <StylePanelSection id="FontStyles2" hideRightBorder={false} componentStyle={{maxWidth: "150px"}}>
+                    <div className="flexCenter" style={{height: "50%"}}>
+                        <Select id="FontSize"
+                                label={documentContext.selectedTextInputStyle.fontSize.toString()}
+                                disabled={disabled}
+                                hoverBackgroundColor={hoverBackgroundColor}
+                                boxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: boxBackgroundColor
+                                }}
+                                optionsBoxStyle={{
+                                    border: boxBorder,
+                                    backgroundColor: "rgb(235, 235, 235)",                                    
+                                    maxHeight: "50vb"
+                                }}
+                                handleSelect={handleFontSizeSelect}
+                                title="Schriftgröße"
+                                options={RAW_FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
+                                pattern={/[0-9]/}
+                                />
+                    </div>
+
+                    <div className="flexLeft" style={{height: "50%"}}>
+                        <RadioButton id={"Left"} 
+                                    className="me-1"
+                                    childrenClassName="flexCenter dontMarkText" 
+                                    name={"TextAlign"} 
+                                    value="START"
+                                    radioGroupValue={documentContext.selectedTextInputStyle.textAlign}
+                                    handleSelect={handleTextAlignSelect}
+                                    title="Linksbündig" 
+                                    disabled={disabled}
+                                    componentStyle={{width: "33%"}}
+                                    boxStyle={{
+                                        border: boxBorder,
+                                        backgroundColor: boxBackgroundColor
+                                    }}
+                                    hoverBackgroundColor={hoverBackgroundColor}
+                                    checkedStyle={{backgroundColor: checkedBackgroundColor}}
+                                    >
+                            L
+                        </RadioButton>
+                        <RadioButton id={"Center"} 
+                                    className="me-1 flexCenter"
+                                    childrenClassName="flexCenter dontMarkText" 
+                                    name={"TextAlign"} 
+                                    value="CENTER"
+                                    radioGroupValue={documentContext.selectedTextInputStyle.textAlign}
+                                    handleSelect={handleTextAlignSelect}
+                                    title="Zentriert" 
+                                    disabled={disabled}
+                                    componentStyle={{width: "33%"}}
+                                    boxStyle={{
+                                        border: boxBorder,
+                                        backgroundColor: boxBackgroundColor
+                                    }}
+                                    hoverBackgroundColor={hoverBackgroundColor}
+                                    checkedStyle={{backgroundColor: checkedBackgroundColor}}
+                                    >
+                            M
+                        </RadioButton>
+                        <RadioButton id={"Right"} 
+                                    className="flexRight"
+                                    childrenClassName="flexCenter dontMarkText" 
+                                    name={"TextAlign"} 
+                                    value="RIGHT"
+                                    radioGroupValue={documentContext.selectedTextInputStyle.textAlign}
+                                    handleSelect={handleTextAlignSelect}
+                                    title="Rechtsbündig" 
+                                    disabled={disabled}
+                                    componentStyle={{width: "34%"}}
+                                    boxStyle={{
+                                        border: boxBorder,
+                                        backgroundColor: boxBackgroundColor
+                                    }}
+                                    hoverBackgroundColor={hoverBackgroundColor}
+                                    checkedStyle={{backgroundColor: checkedBackgroundColor}}
+                                    >
+                            R
+                        </RadioButton>
+                    </div>
                 </StylePanelSection>
 
-                <StylePanelSection hideRightBorder={true}
-                                    buttonContainerClassName="flexCenter"
-                                    className="col-6 col-lg-2"
+                <StylePanelSection id={"Layout"} 
+                                   buttonContainerClassName="flexCenter"
+                                   componentStyle={{maxWidth: "260px"}}
+                                   hideRightBorder={true}
                                    >
-                    <Button id={"Tab"} 
-                            hoverBackgroundColor="rgb(245, 245, 245)"
-                            clickBackgroundColor="rgb(200, 200, 200)"
-                            disabled={disabled} 
-                            handleClick={handleTab}
-                            title="Tab"
+                    <Button id={"OrientationConfig"}
+                            className="me-3"
                             boxStyle={{
-                                border: "1px solid rgb(200, 200, 200)",
-                                borderRadius: "3px",
+                                backgroundColor: boxBackgroundColor,
+                                border: boxBorder,
                                 boxShadow: "none"
                             }}
+                            hoverBackgroundColor={hoverBackgroundColor}
+                            clickBackgroundColor={checkedBackgroundColor}
+                            disabled={disabled}
+                            title={"Ausrichtung der Seiten"}
+                            onClick={handleOrientationConfigClick}
                             >
-                        <div>Einrückung</div>
-                        <img src="tab_copy_2.png" alt="Tab key icon" title="Einrückung (Tab)" height={30} width={40}/>
+                        <div className={id + "IconContainer"}>
+                            <img src="portraitSheet.png" alt="portrait mode" height="50"/>
+                            <img src="landscapeSheet.png" alt="landscape mode" height="50"/>
+                        </div>
+                        Ausrichtung
+                    </Button>
+
+                    <Button id={"ColumnConfig"}
+                            boxStyle={{
+                                backgroundColor: boxBackgroundColor,
+                                border: boxBorder,
+                                boxShadow: "none",
+                                height: "96px"
+                            }}
+                            hoverBackgroundColor={hoverBackgroundColor}
+                            clickBackgroundColor={checkedBackgroundColor}
+                            disabled={disabled}
+                            title={"Anzahl der Spalten"}
+                            onClick={handleColumnConfigClick}
+                            >
+                        <div className={id + "IconContainer mb-2"}>
+                            <img src="columnIcon.png" alt="column icon" height="40" />
+                        </div>
+                        Spalten
                     </Button>
                 </StylePanelSection>
             </div>
+            
+            {/* subtle popup */}
+            <PopupContainer id={"SubtlePopup"} className="subtlePopupContainer" matchPopupDimensions={true} ref={subtlePopupContainerRef}>
+                <Popup id={"Subtle" + documentContext.subtlePopupType} 
+                       className="Subtle dontHideSubtlePopup boxShadowGrey" 
+                       height={"max-content"} 
+                       width={"200px"}>
+                    {documentContext.subtlePopupContent}
+                </Popup>
+            </PopupContainer>
         </div>
     )
-}
+})

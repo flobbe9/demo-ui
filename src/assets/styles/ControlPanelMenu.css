@@ -1,0 +1,20 @@
+:root {
+    --controlPanelMenuTop: ;
+}
+
+.ControlPanelMenu {
+    background-color: white;
+    /* border: 3px solid black; */
+    border-radius: 3px;
+    left: 5px;
+    overflow: auto;
+    padding: 0 10px;
+    position: absolute;
+    top: var(--controlPanelMenuTop);
+    width: max-content;
+    z-index: 2;
+    
+    .controlPanelMenuItem {
+        margin: 15px 0;
+    }
+}

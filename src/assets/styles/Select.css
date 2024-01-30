@@ -1,3 +1,7 @@
+:root {
+    --selectBackgroundColor: white; /* will be set on render */
+}
+
 .Select {
     position: relative;
 
@@ -18,10 +22,19 @@
         }
 
         .selectLabel {
+            background-color: var(--selectBackgroundColor);
+            border: none;
+            border-radius: 3px;
             margin-right: 3px;
+            outline: none;
             overflow: hidden;
+            transition: background-color 0.2s, opacity 0.2s;
             white-space: nowrap;
             width: 100%;
+
+            &:hover, &:focus {
+                background-color: white;
+            }
         }
     }
 

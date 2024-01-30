@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, forwardRef } from "react";
 import "../../assets/styles/Checkbox.css"
-import { SELECTED_STYLE } from "../../utils/GlobalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../../utils/Utils";
+import { log } from "../../utils/basicUtils";
 
 
 /**
@@ -15,10 +14,10 @@ import { log } from "../../utils/Utils";
 export default function Checkbox(props: {
     id: string, 
     checked: boolean,
-    handleSelect,
+    handleSelect: (isChecked: boolean) => void,
     
     hoverBackgroundColor?: string,
-    checkedBackgroundColor?: string,
+    checkedStyle?: React.CSSProperties,
 
     componentStyle?: React.CSSProperties,
     boxStyle?: React.CSSProperties,
@@ -38,7 +37,6 @@ export default function Checkbox(props: {
 
     const [checked, setChecked] = useState(props.checked);
     const [disabled, setDisabled] = useState(props.disabled);
-    const [boxStyle, setBoxStyle] = useState<React.CSSProperties>();
 
     const labelRef = useRef(null);
     const inputRef = useRef(null);
@@ -46,20 +44,7 @@ export default function Checkbox(props: {
 
 
     useEffect(() => {
-        setBoxStyle(props.boxStyle || {});
-
-    }, []);
-    
-    
-    useEffect(() => {
         setChecked(props.checked);
-
-        const label = $(labelRef.current!);
-        if (props.checked) 
-            label.css("backgroundColor", props.checkedBackgroundColor || "");
-
-        else 
-            label.css("backgroundColor", props.boxStyle?.backgroundColor || "");
 
     }, [props.checked]);
 
@@ -129,8 +114,8 @@ export default function Checkbox(props: {
             <label id={labelId} 
                    className={labelClassName} 
                    ref={labelRef}
-                   style={checked ? {...boxStyle, ...SELECTED_STYLE} : boxStyle}
-                   htmlFor={id} 
+                   style={checked ? {...props.boxStyle, ...props.checkedStyle} : props.boxStyle}
+                   htmlFor={"checkboxInput" + props.id} 
                    onMouseOver={handleMouseOver}
                    onMouseOut={handleMouseOut}
                    onMouseDown={handleMouseDown}

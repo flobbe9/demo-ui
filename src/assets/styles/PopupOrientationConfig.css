@@ -1,0 +1,16 @@
+.PopupOrientationConfig {
+    height: 100%;
+    position: relative;
+
+    .popupBody {
+        .orientationContainer {
+            flex-wrap: wrap;
+            width: 100%;
+        }
+    }
+
+    .popupFooter {
+        align-items: last baseline;
+        width: 100%;
+    }
+}

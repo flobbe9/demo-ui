@@ -1,0 +1,24 @@
+.PopupWarnConfirm {
+    height: 100%;
+    position: relative;
+    width: 100%;
+    border-radius: 7px;
+    opacity: 1;
+
+    .popupHeader {
+        height: 15% !important;
+    }
+
+    .popupBody {
+        height: 65% !important;
+    }
+
+    .popupFooter {
+        height: 20% !important;
+    }
+
+    .warnTriangle {
+        color: orange;
+        font-size: 2em;
+    }
+}

@@ -1,24 +1,17 @@
 .Document {
-    height: 100%;
+    min-height: 100vh;
+    position: relative;
 
-    .subContainer {
-        .pageContainer {
-            margin: 0 1vi;
-            width: 100%;
-        }
-        
-        .stickyDownloadButton {
-            bottom: 130px;
-            right: 30px;
-            position: fixed;
-            width: fit-content;
-        }
-        
-        .controlPanelContainer {
-            margin-top: 20px;
-            position: sticky;
-            top: 150px;
-            width: 130px;
-        }
+    .documentOverlay {
+        background-color: rgb(0, 0, 0, 0.4);
+        display: none;
+        height: 100%;
+        position: absolute;
+        width: 100%;
+        z-index: 2;
+    }
+
+    .pageContainer {
+        overflow: auto;
     }
 }

@@ -1,19 +1,23 @@
+:root {
+    --stylePanelOverflow: none
+}
+
 .StylePanel {
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    box-shadow: 0 7px 8px -2px rgb(155, 155, 155);
+    box-shadow: 0 5px 8px -5px rgb(155, 155, 155);
     min-height: 120px;
-    padding-bottom: 10px;
     position: sticky;
-    top: 0;
+    transition: top 0.3s;
     z-index: 1;
 
     .sectionContainer {
         height: 100%;
-        transition: opacity 0.2s;
         max-width: 100vi;
         min-width: 80vi;
+        overflow: var(--stylePanelOverflow);
+        transition: opacity 0.2s;
 
         /* ColorPicker */
         .colorChildren {
@@ -24,12 +28,55 @@
         .radioLabel {
             border-radius: 3px;
             height: 30px;
-            margin-right: 5px;
             width: 30px;
         }
 
-        .warnIcon {
-
+        .StylePanelIconContainer {
+            white-space: nowrap;
         }
+    }
+
+    .subtlePopupContainer {
+        position: absolute;
+        right: 215px;
+        top: 10px;
+
+        .Popup.Subtle {
+            border: 1px solid rgb(199, 199, 199);
+            border-radius: 3px;
+            font-size: 0.9em;
+            line-height: normal;
+            overflow: auto;
+            padding: 10px;
+            position: absolute;
+        }
+
+        #PopupSubtleInfo {
+            /* opacity: 0; */
+            /* background-color: rgb(228, 228, 228); */
+        }
+
+        #PopupSubtleSuccess {
+            /* opacity: 0; */
+            /* background-color: rgb(130, 255, 130); */
+        }
+
+        #PopupSubtleWarn {
+            /* opacity: 0; */
+            /* background-color: rgb(255, 221, 127); */
+        }
+
+        #PopupSubtleError {
+            /* opacity: 0; */
+            /* background-color: rgb(255, 130, 130); */
+        }
+    }
+
+    ::-moz-selection {
+        background: rgb(172, 172, 172);
+    }
+      
+    ::selection {
+        background: rgb(172, 172, 172);
     }
 }

@@ -1,191 +1,140 @@
-import React, { useEffect, useContext, useRef } from "react";
+import React, { useContext } from "react";
 import "../assets/styles/NavBar.css"
 import { Link } from "react-router-dom";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log, moveCursor } from "../utils/Utils";
+import { log, moveCursor } from "../utils/basicUtils";
 import LoadingButton from "./helpers/Button";
-import { DOCUMENT_SUFFIX, isMobileWidth } from "../utils/GlobalVariables";
+import { BUILDER_PATH, WEBSITE_NAME } from "../globalVariables";
 import { AppContext } from "./App";
-import LeaveConfirmLink from "./LeaveConfirmLink";
+import LeaveConfirmLink from "./helpers/LeaveConfirmLink";
 
 
 /**
  * @since 0.0.1
  */
-export default function NavBar(props) {
+export default function NavBar(props: {
+    id?: string,
+    className?: string
+}) {
     
-    const id = props.id ? "NavBar" + props.id : "NavBar";
-    const className = props.className ? "NavBar " + props.className : "NavBar";
+    const id = "NavBar" + (props.id || "");
+    const className = "NavBar " + (props.className || "");
 
     const appContext = useContext(AppContext);
-    const fileNameInputRef = useRef(null);
 
 
-    useEffect(() => {
-        if (isMobileWidth()) {
-            // hide buttons inside mobile menu
-            $(".navSectionRightDesktop").hide();
-            $(".navMenuIcon").removeClass("hidden");
-
-            // change width relations
-            $(".navSectionLeft").css("width", "45%");
-            $(".navSectionCenter").css("width", "45%");
-            $(".navSectionRight").css("width", "10%");
-        }
-    }, []);
-
-    
     function handleClickMenuIcon(event): void {
 
-        $(".navSectionRightMobile").slideToggle(200);
+        $(".navSectionRightMobile").slideToggle(100);
     }
 
     async function handleClickMobileItem(event): Promise<void> {
 
-        const mobileItem = $(event.target)
+        let mobileItem = $(event.target)
+
+        // case: selected child
+        if (!event.target.className.includes("navSectionRightMobileItem"))
+            mobileItem = mobileItem.parent(".navSectionRightMobileItem");
+
         const initBackgroundColor = mobileItem.css("backgroundColor")
         const initColor = mobileItem.css("color");
+
         mobileItem.animate({
             backgroundColor: "#ffe4c4", // bisque
             color: "black"
-        }, 100, () => {
+        }, 150, () => {
             mobileItem.animate({
                 backgroundColor: initBackgroundColor,
                 color: initColor
-            });
+            }, 150);
         });
     }
 
 
-    /**
-     * Move cursor in front of ```.docx``` suffix if was not focused.
-     * 
-     * @param event 
-     */
-    function handleFileNameInputMouseDown(event): void {
-
-        const value = event.target.value;
-        let valueLength: number;
-
-        // case: invalid file name
-        if (!value || (valueLength = value.length) < 5)
-            return;
-
-        const input = $(fileNameInputRef.current!);
-
-        // case: not focused yet
-        // if (!input.is(":focus")) {
-        //     event.preventDefault();
-
-        //     input.trigger("focus");
-        //     moveCursor(event.target.id, valueLength - 5, valueLength - 5);
-        // }
-    }
-
-
-    function handleFileNameKeyUp(event): void {
-
-        const input = $(fileNameInputRef.current!);
-        let inputValue: string;
-
-        if (!input || !(inputValue = input.prop("value")))  
-            return;
-
-        inputValue = adjustDocumentFileName(inputValue);
-
-        appContext.setDocumentFileName(inputValue);
-    }
-
-
-    /**
-     * Append {@link DOCUMENT_SUFFIX} if last chars dont match it.
-     * 
-     * @param documentFileName to adjust
-     * @returns fixed document file name (not altering givn param)
-     */
-    function adjustDocumentFileName(documentFileName: string): string {
-
-        let fileName = documentFileName.trim();
-
-        fileName = fileName.replaceAll(" ", "_");
-
-        const suffix = fileName.substring(fileName.length - 5);
-
-        if (suffix !== DOCUMENT_SUFFIX)
-            fileName += DOCUMENT_SUFFIX;
-
-        return fileName;
-    }
-
-
     return (
-        <div id={id} className={className}>
-            <div className="navSectionLeft textLeft flexLeft">
-                <LeaveConfirmLink className="navLink" to="/" pathsToConfirm={["/build"]}>
-                    <img className="navImage dontMarkText" src="/favicon.png" alt="" height="60px" width="65px"/>
-                    <span className="navHeading ml-0 ml-sm-3">DocumentBuilder</span>
-                </LeaveConfirmLink>
-            </div>
-
-            <div className="navSectionCenter textCenter flexCenter">
-                {/* TODO: add '.docx' on focus out if is not suffix already */}
-                {/* TODO: validate file name before using it on download */}
-                    {/* replace spaces with '_' */}
-                    {/* avoid special chars (?) */}
-                <input id="fileNameInput"
-                       className="fileNameInput" 
-                       ref={fileNameInputRef}
-                       type="text" 
-                       defaultValue={appContext.documentFileName}
-                       onMouseDown={handleFileNameInputMouseDown}
-                       onKeyUp={handleFileNameKeyUp}
-                       />
-            </div>
-
-            <div className="navSectionRight textRight">
-                <i className="navMenuIcon fa fa-bars fa-lg hidden dontHideNavSectionRightMobile" onClick={handleClickMenuIcon}></i>
-                {/* TODO: add functionality */}
-                <div className="navSectionRightDesktop">
-                    <LoadingButton 
-                                id={"Register"}
-                                boxStyle={{
-                                    backgroundColor: "transparent", 
-                                    border: "1px solid grey", 
-                                    marginRight: "15px", 
-                                }}
-                                hoverBackgroundColor={"rgb(255, 238, 214)"} 
-                                clickBackgroundColor={"rgb(180, 180, 180)"}
-                                disabled={true}
-                                >
-                        Registrieren
-                    </LoadingButton>
-                                
-                    <LoadingButton 
-                                id={"Login"}
-                                boxStyle={{
-                                    backgroundColor: "black",
-                                    color: "bisque", 
-                                }}
-                                childrenStyle={{width: "100px"}}
-                                hoverBackgroundColor={"rgb(60, 60, 60)"} 
-                                clickBackgroundColor={"rgb(200, 200, 200)"}
-                                disabled={true}
-                                >
-                        Login
-                    </LoadingButton>
+        <div id={id} className={className + " dontMarkText"}>
+            <div className="boxShadowContainer flexCenter p-2">
+                <div className="col-4 navSectionLeft textLeft flexLeft">
+                    <Link className="navLink link hover" to="/">
+                        <img className="navImage me-2" src="/favicon.png" alt="" height="40" width="40"/>
+                        <span className="dontBreakText">{WEBSITE_NAME}</span>
+                    </Link>
                 </div>
 
-                {/* TODO: add functionality */}
-                {/* mobile menu */}
-                <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile">
-                    <div id="navSectionRightMobileItem-1" 
-                         className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" 
-                         onClick={handleClickMobileItem}>
-                        Register
+                <div className={"col-4 navSectionCenter flexLeft"}>
+                    <div className={"" + (appContext.isMobileView && "hidden")}>
+                        {/* <LeaveConfirmLink className="navLink" to="/home" pathsToConfirm={[BUILDER_PATH]}>
+                            Home
+                        </LeaveConfirmLink> */}
+                    </div>
+                </div>
+
+                <div className="col-4 navSectionRight textRight" style={{position: "relative"}}>
+                    
+                    {/* TODO: add functionality */}
+                    {/* desktop mode */}
+                    <div className={"navSectionRightDesktop " + (appContext.isMobileView && "hidden")}>
+                        <LoadingButton 
+                                    id={"Register"}
+                                    boxStyle={{
+                                        backgroundColor: "transparent", 
+                                        border: "1px solid grey", 
+                                        marginRight: "15px", 
+                                    }}
+                                    hoverBackgroundColor={"rgb(255, 238, 214)"} 
+                                    clickBackgroundColor={"rgb(180, 180, 180)"}
+                                    disabled={true}
+                                    rendered={false}
+                                    >
+                            Registrieren
+                        </LoadingButton>
+                                    
+                        <LoadingButton 
+                                    id={"Login"}
+                                    boxStyle={{
+                                        backgroundColor: "black",
+                                        color: "bisque", 
+                                    }}
+                                    childrenStyle={{width: "100px"}}
+                                    hoverBackgroundColor={"rgb(60, 60, 60)"} 
+                                    clickBackgroundColor={"rgb(200, 200, 200)"}
+                                    disabled={true}
+                                    rendered={false}
+                                    >
+                            Login
+                        </LoadingButton>
                     </div>
 
-                    <div id="navSectionRightMobileItem-2" className="navSectionRightMobileItem dontMarkText dontHideNavSectionRightMobile" onClick={handleClickMobileItem}>
-                        Login
+                    {/* TODO: add functionality */}
+                    {/* mobile mode*/}
+                    <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile hover " + (!appContext.isMobileView && "hidden")} onClick={handleClickMenuIcon}></i>
+                    <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile boxShadowDark">
+                        {/* <div id="navSectionRightMobileItem-1" 
+                            className="navSectionRightMobileItem dontHideNavSectionRightMobile" 
+                            onClick={handleClickMobileItem}
+                            >
+                            Register
+                        </div>
+
+                        <div id="navSectionRightMobileItem-2" 
+                            className="navSectionRightMobileItem dontHideNavSectionRightMobile" 
+                            onClick={handleClickMobileItem}
+                            >
+                            Login
+                        </div> */}
+
+                        <div id="navSectionRightMobileItem-3" 
+                            className="navSectionRightMobileItem dontHideNavSectionRightMobile" 
+                            onClick={handleClickMobileItem}
+                            >
+                            <LeaveConfirmLink className="blackLink dontHideNavSectionRightMobile" 
+                                            to="/home" 
+                                            pathsToConfirm={["/"]}
+                                            style={{width: "100%"}}
+                                            >
+                                Home
+                            </LeaveConfirmLink>
+                        </div>
                     </div>
                 </div>
             </div>

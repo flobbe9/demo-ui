@@ -3,8 +3,8 @@ import "../../assets/styles/StylePanelSection.css";
 
 
 export default function StylePanelSection(props: {
+    id: string,
     hideRightBorder: boolean,
-    id?: string,
     className?: string,
     buttonContainerClassName?: string,
     componentStyle?: React.CSSProperties

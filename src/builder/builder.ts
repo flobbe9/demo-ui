@@ -1,30 +1,30 @@
-import BasicParagraph, { getDefaultBasicParagraph } from "../abstract/BasicParagraphs";
+import BasicParagraph, { getDefaultBasicParagraph } from "../abstract/BasicParagraph";
 import DocumentWrapper from "../abstract/DocumentWrapper";
 import { getTextInputStyle } from "../abstract/Style";
-import TableConfig from "../abstract/TableConfig";
 import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
-import { BACKEND_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, TABLE_CONFIG } from "../utils/GlobalVariables";
-import { downloadFileByUrl, getDocumentId, getPartFromDocumentId, isBlank, log, logWarn, stringToNumber } from "../utils/Utils";
-import fetchJson from "../utils/fetch/fetch";
+import { DOCUMENT_BUILDER_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLASS_NAME } from "../globalVariables";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { downloadFileByUrl, isBlank, log, logApiResponse, logError, logWarn, stringToNumber } from "../utils/basicUtils";
+import { appendDocxSuffix, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPartFromDocumentId } from "../utils/documentBuilderUtils";
+import fetchJson from "../utils/fetchUtils";
+import { ApiExceptionFormat } from '../abstract/ApiExceptionFormat';
 
 
-const documentBuilderMapping = "/api/documentBuilder";
-
-// TODO: remember to add empty line after table (in case of column break)
-
+// NOTE: remember to add empty line after table (in case of column break, or second table following)
 
 /**
  * Send request to backend to download document either as pdf or docx file.
  *  
  * @param pdf if true, a pdf file is returned by backend
+ * @param fileName name of file to use for download. If empty, the response header will be searched for a filename
+ * @returns error response as {@link ApiExceptionFormat} or nothing if all went well 
  */
-export async function downloadDocument(pdf: boolean, documentFileName: string) {
+export async function downloadDocument(pdf: boolean, fileName?: string): Promise<ApiExceptionFormat | void> {
     
-    const fileName = documentFileName || "Dokument_1.docx";
-    const url = BACKEND_BASE_URL + documentBuilderMapping + "/download?pdf=" + pdf + "&fileName=" + fileName;
+    const url = DOCUMENT_BUILDER_BASE_URL + "/download?pdf=" + pdf;
 
-    downloadFileByUrl(url);
+    return await downloadFileByUrl(url, fileName, true, "post");
 }
 
 
@@ -33,22 +33,23 @@ export async function downloadDocument(pdf: boolean, documentFileName: string) {
  * 
  * @param orientation of the document
  * @param numColumns number of columns in the document
+ * @param docxFileName full name of the document (including suffix)
+ * @return promise of json response
  */
-export async function buildDocument(orientation: Orientation, numColumns: number): Promise<any> {
+export async function buildDocument(orientation: Orientation, numColumns: number, docxFileName: string, numSingleColumnLines = 0): Promise<any> {
+
+    const fileName = docxFileName ? appendDocxSuffix(docxFileName) : "Dokument_1.docx";
 
     const body: DocumentWrapper =  {
         content: buildContent(numColumns),
         tableConfigs: [],
         landscape: orientation === Orientation.LANDSCAPE,
-        numColumns: numColumns
+        fileName: fileName,
+        numColumns: numColumns,
+        numSingleColumnLines: numSingleColumnLines
     }
 
-    // TODO
-    // case: is table
-    // if (isTable(columnType)) 
-    //     body.tableConfig = getTableConfig(columnType);
-
-    return await fetchJson(BACKEND_BASE_URL + documentBuilderMapping + "/createDocument", "post", body);
+    return fetchJson(DOCUMENT_BUILDER_BASE_URL + "/buildAndWrite", "post", body);
 }
 
 
@@ -68,12 +69,6 @@ function buildContent(numColumns: number): BasicParagraph[] {
 
     // header (none)
     content.push(getDefaultBasicParagraph());
-
-    // heading
-    const heading = $(".heading");
-    const headingText = getTextInputContent(heading);
-    if (!isBlank(headingText))
-        content.push({text: headingText, style: getTextInputStyle(heading)});
 
     // body
     Array.from(columns).forEach(column => {
@@ -103,12 +98,19 @@ function buildContent(numColumns: number): BasicParagraph[] {
 function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps: BasicParagraph[], numColumns: number): void {
 
     const columnId = getDocumentId("Column", pageIndex, "", columnIndex);
-    const columnTextInputs = $("#" + columnId + " .TextInput");
-
+    let columnTextInputs = $("#" + columnId + " .TextInput");
+    
     // case: no text inputs yet
     if (!columnTextInputs.length) {
         logWarn("Failed to build column. No text inputs rendered yet. 'columnId': " + columnId);
         return;
+    }
+    
+    // case: first page first column
+    if (pageIndex === 0 && columnIndex === 0 ) {
+        // add single column lines
+        const linesAsSingleColumn = $("." + SINGLE_COLUMN_LINE_CLASS_NAME);
+        columnTextInputs = columnTextInputs.add(linesAsSingleColumn);
     }
 
     // iterate text inputs
@@ -120,7 +122,11 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
         if (isBlank(text))
             text = DEFAULT_BASIC_PARAGRAPH_TEXT;
 
-        allBasicParagrahps.push({text: text, style: getTextInputStyle(textInput)})
+        const style = getTextInputStyle(textInput);
+        // fix font size for MS Word
+        style.fontSize = getMSWordFontSizeByBrowserFontSize(style.fontSize);
+
+        allBasicParagrahps.push({text: text, style})
     });
 
     // case: is not very last column
@@ -136,11 +142,9 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
 function getTextInputContent(textInput: JQuery): string {
 
     // case: input falsy
-    if (!textInput.length) {
-        logWarn("Failed to get text input content. 'textInput' not present");
+    if (!textInput.length) 
         return ""
-    }
-
+    
     // case: not a text input
     if (textInput.prop("type") !== "text") {
         logWarn("Failed to get text input content. 'textInput' type does not equal 'text'");
@@ -189,28 +193,4 @@ function isLastColumn(documentId: string, numColumns: number): boolean {
     const columnIndex = getPartFromDocumentId(documentId, 2);
 
     return stringToNumber(columnIndex) === numColumns - 1;
-}
-
-
-/**
- * @param columnType type of column
- * @returns true if this column is a table
- */
-function isTable(columnType: number): boolean {
-
-    return columnType === 6 ||
-           columnType === 7 ||
-           columnType === 8;
-}
-
-
-function getTableConfig(columnType: number): TableConfig {
-
-    const numRows = 10;// TODO
-
-    return {
-        numColumns: TABLE_CONFIG[columnType].numColumns,
-        numRows: 0, // iterate and count
-        startIndex: TABLE_CONFIG[columnType].startIndex
-    };
 }

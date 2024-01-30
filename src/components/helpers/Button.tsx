@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/Button.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { isBooleanFalsy, log } from "../../utils/Utils";
+import { isBooleanFalsy, log } from "../../utils/basicUtils";
 
 
 /**
@@ -18,17 +18,18 @@ export default function Button(props: {
     boxStyle?: React.CSSProperties,
     childrenStyle?: React.CSSProperties,
 
-    handlePromise?: () => Promise<any>,
-    handleClick?,
+    className?: string,
+    childrenClassName?: string,
+    handlePromise?: (event) => Promise<any>,
+    onClick?: (event) => void,
     disabled?: boolean,
     rendered?: boolean,
-    className?: string
     children?,
     title?: string
 }) {
 
-    const id = props.id ? "Button" + props.id : "Button";
-    const className = "Button " + props.className || "";
+    const id = "Button" + (props.id || "Button");
+    const className = "Button " + (props.className || "");
 
     const [rendered, setRendered] = useState(isBooleanFalsy(props.rendered) ? true : props.rendered);
     const [disabled, setDisabled] = useState(isBooleanFalsy(props.disabled) ? false : props.disabled);
@@ -69,15 +70,16 @@ export default function Button(props: {
         if (disabled)
             return;
         
-        animateOverlay();
-
         // case: loading button
         if (props.handlePromise) 
-            handlePromiseAnimation();
-        
+            handlePromiseAnimation(event);
+
         // case: normal button
-        else if (props.handleClick)
-            props.handleClick(event);
+        else 
+            animateOverlay();
+        
+        if (props.onClick)
+            props.onClick(event);
     }
 
 
@@ -85,8 +87,10 @@ export default function Button(props: {
      * Add spinner icon and remove button content, await promise ```props.handlePromise```, then reset button styles. <p>
      * 
      * Button will be disabled during promise call.
+     * 
+     * @param event that triggered the promise handler
      */
-    async function handlePromiseAnimation(): Promise<void> {
+    async function handlePromiseAnimation(event): Promise<void> {
 
         setDisabled(true);
 
@@ -104,7 +108,7 @@ export default function Button(props: {
         const spinner = createSpinner()
         buttonChildren.append(spinner);
 
-        await props.handlePromise!();
+        await props.handlePromise!(event);
 
         // remove spinner
         spinner.remove();
@@ -168,13 +172,13 @@ export default function Button(props: {
         // animate in three steps
         overlay.animate({opacity: 0.3}, 100, "swing",
             () => overlay.animate({width: "toggle"}, 100, "swing", 
-                () => overlay.fadeOut(200, "swing")));
+                () => overlay.animate({opacity: 0}, 100, "swing")));
     }
 
     
     return (
         <button id={id} 
-                className={className + (disabled ? " disabledButton" : "") + (rendered ? "" : "hidden")}
+                className={className + (disabled ? " disabledButton" : "") + (rendered ? "" : " hidden")}
                 style={props.boxStyle}
                 ref={buttonRef}
                 disabled={disabled} 
@@ -184,12 +188,12 @@ export default function Button(props: {
                 title={props.title}
                 >
             {/* hidden */}
-            <div className="buttonOverlay buttonChildren" ref={buttonOverlayRef} style={props.childrenStyle}>
+            <div className={"buttonOverlay buttonChildren " + (props.childrenClassName || "")} ref={buttonOverlayRef} style={props.childrenStyle}>
                 <div className="hiddenChildren">{children}</div>
             </div>
 
             {/* visible */}
-            <div className="buttonChildren" ref={buttonChildrenRef} style={props.childrenStyle}>
+            <div className={"buttonChildren dontMarkText " + (props.childrenClassName || "")} ref={buttonChildrenRef} style={props.childrenStyle}>
                 {children}
             </div>
         </button>

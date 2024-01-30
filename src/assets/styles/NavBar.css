@@ -1,57 +1,18 @@
-:root {
-    --marginNavBarInside: 10px;
-}
-
 .NavBar {
-    align-items: center;
-    background-color: bisque;
-    box-shadow: 0 1px 5px -2px black;
-    display: flex;
+    background-color: white;
     font-size: 20px;
-    overflow: auto;
-    padding: var(--marginNavBarInside);
+    z-index: 2;
     
-    .navSectionLeft {
-        margin-left: var(--marginNavBarInside);
-        width: 33%;
+    .boxShadowContainer {
+        background-color: bisque;
+    }
     
-        .navLink {
-            color: black;
-            padding-right: 20px;
-            text-decoration: none;
-            transition: opacity 0.2s;
-            
-            &:hover {
-                opacity: 0.5;
-            }
-        }
+    .navLink {
+        color: black;
+        width: max-content;
     }
 
-    .navSectionCenter {
-        color: rgba(0, 0, 0, 0.486);
-        font-size: 15px;
-        overflow: auto;
-        width: 33%;
-
-        .fileNameInput {
-            background-color: bisque;
-            background-color: rgb(255, 242, 223);
-            border: none;
-            border-radius: 3px;
-            opacity: 0.6;
-            padding: 5px;
-
-            &:focus {
-                opacity: 1;
-                outline: none;
-            }
-        }
-    }
-        
     .navSectionRight {
-        margin-right: var(--marginNavBarInside);
-        width: 33%;
-
         .navButton {
             margin-left: 10px;
             
@@ -71,17 +32,21 @@
 
         .navSectionRightMobile {
             border-radius: 5px;
-            background-color: black;
-            color: white;
-            padding: 10px 0;
+            background-color: white;
+            padding: 10px;
             position: absolute;
-            right: calc(var(--marginNavBarInside) * 2);
+            right: 0;
             width: 150px;
             z-index: 2;
 
             .navSectionRightMobileItem {
                 border-radius: 3px;
                 padding: 5px 15px;
+                transition: background-color 0.2s;
+                
+                &:hover {
+                    background-color: bisque;
+                }
             }
         }
     }
