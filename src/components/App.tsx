@@ -8,8 +8,9 @@ import Home from "./Home";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log, setCssVariable } from "../utils/basicUtils";
 import PopupContainer from "./helpers/popups/PopupContainer";
-import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth} from "../globalVariables";
+import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth, DOCUMENT_BUILDER_BASE_URL, CSRF_TOKEN_HEADER_NAME, API_ENV} from "../globalVariables";
 import NotFound from "./error_pages/NotFound";
+import { fetchAny, isHttpStatusCodeAlright } from "../utils/fetchUtils";
 
 
 /**
@@ -33,17 +34,14 @@ import NotFound from "./error_pages/NotFound";
  */
 export default function App() {
 
-    // use this when backend login is implemented (https://www.baeldung.com/spring-security-csrf)
-    // const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
-    
     const [escapePopup, setEscapePopup] = useState(true);
     const [popupContent, setPopupContent] = useState(<></>);
     
     const [pressedKey, setPressedKey] = useState("");
-
+    
     const [windowSize, setWindowSize] = useState([0, 0]);
     const [isMobileView, setIsMobileView] = useState(isMobileWidth());
-
+    
     const appRef = useRef(null);
     const appPopupRef = useRef(null);
     const appOverlayRef = useRef(null);
@@ -63,6 +61,9 @@ export default function App() {
 
 
     useEffect(() => {
+        if (API_ENV === "prod")
+            initCookies();
+
         document.addEventListener("keydown", handleGlobalKeyDown);
         document.addEventListener("keyup", handleGlobalKeyUp);
         $(window).on("resize", handleWindowResize);
@@ -143,6 +144,25 @@ export default function App() {
         // hide controlPanelMenu
         if (!targetClassName.includes("dontHideControlPanelMenu"))
             $(".ControlPanelMenu").slideUp(100);
+    }
+
+
+    /**
+     * Send an empty GET request to document_builder that has no purpose but for the backend to pass
+     * some cookies to the browser.
+     * Will store csrf token to session storage using {@link CSRF_TOKEN_HEADER_NAME} as key.
+     */
+    async function initCookies(): Promise<void> {
+
+        // send request that does nothing
+        await fetchAny(DOCUMENT_BUILDER_BASE_URL + "/getCsrfToken");    
+        
+        
+        // save token to session storage
+        const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+
+        if (csrfToken)
+            sessionStorage.setItem(CSRF_TOKEN_HEADER_NAME, csrfToken);
     }
     
 

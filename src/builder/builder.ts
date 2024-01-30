@@ -1,4 +1,4 @@
-import BasicParagraph, { getDefaultBasicParagraph } from "../abstract/BasicParagraphs";
+import BasicParagraph, { getDefaultBasicParagraph } from "../abstract/BasicParagraph";
 import DocumentWrapper from "../abstract/DocumentWrapper";
 import { getTextInputStyle } from "../abstract/Style";
 import { BreakType } from "../enums/Breaktype";
@@ -24,7 +24,7 @@ export async function downloadDocument(pdf: boolean, fileName?: string): Promise
     
     const url = DOCUMENT_BUILDER_BASE_URL + "/download?pdf=" + pdf;
 
-    return await downloadFileByUrl(url, fileName);
+    return await downloadFileByUrl(url, fileName, true, "post");
 }
 
 
