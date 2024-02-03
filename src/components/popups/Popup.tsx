@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, forwardRef, LegacyRef } from "react";
-import "../../../assets/styles/Popup.css";
+import "../../assets/styles/Popup.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../../../utils/basicUtils";
-import { PopupSize, isPopupSize } from "../../../abstract/PopupSize";
+import { log } from "../../utils/basicUtils";
+import { PopupSize, isPopupSize } from "../../abstract/PopupSize";
 
 
 /**

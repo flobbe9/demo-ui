@@ -1,12 +1,11 @@
-import React, { useContext, useEffect, useState, useRef } from "react"; 
-import useCookie, { cookieOptions, getCookie } from "react-use-cookie";
-import "../../../assets/styles/PopupWarnConfirm.css";
+import React, { useState } from "react"; 
+import "../../assets/styles/PopupWarnConfirm.css";
+import { cookieOptions } from "react-use-cookie";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { isBooleanFalsy, log, } from "../../../utils/basicUtils";
-import Button from "../Button";
-import WarnIcon from "../WarnIcon";
-import { DONT_SHOW_AGAIN_COOKIE_NAME } from "../../../globalVariables";
-import Checkbox from "../Checkbox";
+import { isBooleanFalsy, log } from "../../utils/basicUtils";
+import Button from "../helpers/Button";
+import WarnIcon from "../helpers/WarnIcon";
+import Checkbox from "../helpers/Checkbox";
 
 
 /**

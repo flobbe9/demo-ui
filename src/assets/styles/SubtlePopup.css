@@ -1,0 +1,25 @@
+.SubtlePopup {
+    border-radius: 3px;
+    border: 1px solid green;
+    font-size: 0.9em;
+    line-height: normal;
+    padding: 10px;
+}
+
+.Popup.Subtle {
+    .Info {
+        border-color: rgb(0, 140, 255);
+    }
+    
+    .Success {
+        border-color: rgb(0, 206, 0);
+    }
+    
+    .Warn {
+        border-color: orange;
+    }
+    
+    .Error {
+        border-color: red;
+    }
+}

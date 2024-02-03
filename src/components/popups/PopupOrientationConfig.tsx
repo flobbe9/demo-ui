@@ -1,17 +1,17 @@
 import React, { useContext, useState } from "react"; 
+import "../../assets/styles/PopupOrientationConfig.css";
 import useCookie from "react-use-cookie";
-import "../../../assets/styles/PopupOrientationConfig.css";
-import { AppContext } from "../../App";
-import { Orientation } from "../../../enums/Orientation";
-import RadioButton from "../../helpers/RadioButton";
+import { AppContext } from "../App";
+import { Orientation } from "../../enums/Orientation";
+import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log } from "../../../utils/basicUtils";
-import Button from "../Button";
+import { log } from "../../utils/basicUtils";
+import Button from "../helpers/Button";
 import Popup from "./Popup";
 import PopupWarnConfirm from "./PopupWarnConfirm";
-import { DocumentContext } from "../../document/Document";
+import { DocumentContext } from "../document/Document";
 import PopupContainer from "./PopupContainer";
-import { DONT_SHOW_AGAIN_COOKIE_NAME } from "../../../globalVariables";
+import { DONT_SHOW_AGAIN_COOKIE_NAME } from "../../globalVariables";
 
 
 /**
@@ -82,50 +82,54 @@ export default function PopupOrientationConfig(props: {
                 <i className="fa-solid fa-xmark fa-xl closeIcon hideDocumentPopup"></i>
             </div>
             
-            <div className="popupBody flexCenter">
-                <div id="orientationContainer" className="orientationContainer flexCenter dontMarkText">
-                    <div className="col-12 col-sm-4">
-                        <RadioButton id="Portrait"
-                                    className="flexCenter" 
-                                    labelClassName="whiteButton whiteButtonPortrait"
-                                    childrenClassName="flexCenterStart"
-                                    name="Orientation" 
-                                    value={Orientation.PORTRAIT}
-                                    radioGroupValue={orientation}
-                                    handleSelect={handleSelectOrientation}
-                                    boxStyle={{
-                                        borderRadius: "3px",
-                                        boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
-                                        padding: "2px"
-                                    }}
-                                    checkedStyle={{backgroundColor: "rgb(238, 238, 238)"}}
-                                    hoverBackgroundColor="rgb(243, 243, 243)"
-                                    >
-                            <span style={{fontSize: "10px"}}>Lorem ipsum</span>
-                        </RadioButton>
-                        <div className="mt-2 textCenter">Hoch-Format</div>
-                    </div>
-                    
-                    <div className="col-12 col-sm-6 col-md-5 mt-3 mt-sm-0">
-                        <RadioButton id="Landscape"
-                                    className="flexCenter"
-                                    labelClassName="whiteButton whiteButtonLandscape"
-                                    childrenClassName="flexCenterStart"
-                                    name="Orientation"
-                                    value={Orientation.LANDSCAPE}
-                                    radioGroupValue={orientation}
-                                    handleSelect={handleSelectOrientation}
-                                    boxStyle={{
-                                        borderRadius: "3px",
-                                        boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
-                                        padding: "2px"
-                                    }}
-                                    checkedStyle={{backgroundColor: "rgb(238, 238, 238)"}}
-                                    hoverBackgroundColor="rgb(243, 243, 243)"
-                                    >
-                            <span style={{fontSize: "10px"}}>Lorem ipsum</span>
-                        </RadioButton>
-                        <div className="mt-2 textCenter">Quer-Format</div>
+            <div className="popupBody">
+                <h2 className="textCenter">Ausrichtung ändern</h2>
+                
+                <div className="bodyContent flexCenter">
+                    <div id="orientationContainer" className="orientationContainer flexCenter dontMarkText">
+                        <div className="col-12 col-sm-4">
+                            <RadioButton id="Portrait"
+                                        className="flexCenter" 
+                                        labelClassName="whiteButton whiteButtonPortrait"
+                                        childrenClassName="flexCenterStart"
+                                        name="Orientation" 
+                                        value={Orientation.PORTRAIT}
+                                        radioGroupValue={orientation}
+                                        handleSelect={handleSelectOrientation}
+                                        boxStyle={{
+                                            borderRadius: "3px",
+                                            boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
+                                            padding: "2px"
+                                        }}
+                                        checkedStyle={{backgroundColor: "rgb(238, 238, 238)"}}
+                                        hoverBackgroundColor="rgb(243, 243, 243)"
+                                        >
+                                <span style={{fontSize: "10px"}}>Lorem ipsum</span>
+                            </RadioButton>
+                            <div className="mt-2 textCenter">Hoch-Format</div>
+                        </div>
+                        
+                        <div className="col-12 col-sm-6 col-md-5 mt-3 mt-sm-0">
+                            <RadioButton id="Landscape"
+                                        className="flexCenter"
+                                        labelClassName="whiteButton whiteButtonLandscape"
+                                        childrenClassName="flexCenterStart"
+                                        name="Orientation"
+                                        value={Orientation.LANDSCAPE}
+                                        radioGroupValue={orientation}
+                                        handleSelect={handleSelectOrientation}
+                                        boxStyle={{
+                                            borderRadius: "3px",
+                                            boxShadow: "0 1px 3px 0px rgb(151, 151, 151)",
+                                            padding: "2px"
+                                        }}
+                                        checkedStyle={{backgroundColor: "rgb(238, 238, 238)"}}
+                                        hoverBackgroundColor="rgb(243, 243, 243)"
+                                        >
+                                <span style={{fontSize: "10px"}}>Lorem ipsum</span>
+                            </RadioButton>
+                            <div className="mt-2 textCenter">Quer-Format</div>
+                        </div>
                     </div>
                 </div>
 
