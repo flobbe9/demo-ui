@@ -131,23 +131,23 @@ export default function PopupOrientationConfig(props: {
                             <div className="mt-2 textCenter">Quer-Format</div>
                         </div>
                     </div>
-                </div>
 
-                <PopupContainer id={props.warnPopupContainerIdPart} className="warnPopupContainer" matchPopupDimensions={documentContext.matchPopupDimensions}>
-                    <Popup id={props.warnPopupContainerIdPart} height={appContext.isMobileView ? "350px" : "medium"} width="medium">
-                        <PopupWarnConfirm id="OrientationConfig"
-                                            handleConfirm={handleSubmit} 
-                                            handleDecline={(event) => toggleWarnPopup(event)}
-                                            hideThis={(event) => toggleWarnPopup(event)}
-                                            displayDontShowAgainCheckbox={true}
-                                            checkboxContainerClassname="flexCenter mt-5"
-                                            setDontShowAgainCookie={setDontShowAgainCookie}
-                                            >
-                            <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
-                            <p className="textCenter">Fortfahren?</p>
-                        </PopupWarnConfirm>
-                    </Popup>
-                </PopupContainer>
+                    <PopupContainer id={props.warnPopupContainerIdPart} className="warnPopupContainer" matchPopupDimensions={documentContext.matchPopupDimensions}>
+                        <Popup id={props.warnPopupContainerIdPart} height={appContext.isMobileView ? "350px" : "medium"} width="medium">
+                            <PopupWarnConfirm id="OrientationConfig"
+                                                handleConfirm={handleSubmit} 
+                                                handleDecline={(event) => toggleWarnPopup(event)}
+                                                hideThis={(event) => toggleWarnPopup(event)}
+                                                displayDontShowAgainCheckbox={true}
+                                                checkboxContainerClassname="flexCenter mt-5"
+                                                setDontShowAgainCookie={setDontShowAgainCookie}
+                                                >
+                                <p className="textCenter">Der Inhalt des <strong>gesamten</strong> Dokumentes wird <strong>gelöscht</strong> werden.</p>
+                                <p className="textCenter">Fortfahren?</p>
+                            </PopupWarnConfirm>
+                        </Popup>
+                    </PopupContainer>
+                </div>
             </div>
 
             <div className="popupFooter flexRight" >

@@ -7,7 +7,7 @@ import Footer from "./Footer";
 import Home from "./Home";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log, setCssVariable } from "../utils/basicUtils";
-import PopupContainer from "./helpers/popups/PopupContainer";
+import PopupContainer from "./popups/PopupContainer";
 import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth, DOCUMENT_BUILDER_BASE_URL, CSRF_TOKEN_HEADER_NAME, API_ENV} from "../globalVariables";
 import NotFound from "./error_pages/NotFound";
 import { fetchAny, isHttpStatusCodeAlright } from "../utils/fetchUtils";

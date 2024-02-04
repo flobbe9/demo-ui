@@ -26,8 +26,6 @@ import SubtlePopup from "../popups/SubtlePopup";
  */
 // TODO: add hide option, or dont fix
 
-// TODO: give popups a heading
-// TODO: connect lines does not work endlesly
 export default forwardRef(function StylePanel(props: {
     id?: string,
     className?: string

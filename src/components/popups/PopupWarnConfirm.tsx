@@ -80,7 +80,6 @@ export default function PopupWarnConfirm(props: {
                                 borderColor: "orange",
                                 color: "orange",
                             }}
-                            hover={false}
                             />
                 </div>
                 <div className="col-4 flexRightStart">

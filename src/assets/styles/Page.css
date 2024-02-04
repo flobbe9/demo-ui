@@ -16,13 +16,13 @@
 
 /* page dimensions */
 .pagePortrait {
-    height: 1180px !important;
+    height: 1280px !important;
     padding: 33px 90px !important;
     width: var(--pageWidthPortrait) !important;
 }
 
 .pageLandscape {
-    height: 855px !important;
+    height: 955px !important;
     padding: 33px 100px !important;
     width: var(--pageWidthLandscape) !important;
 }

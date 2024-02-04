@@ -19,6 +19,8 @@ import WarnIcon from "../helpers/WarnIcon";
 
 
 // TODO: add some kind of "back" button
+// TODO: num lines calculation is wrong, if not all lines are filled with text
+// TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
 
 // TODO: configure ssl?
 export default function Document(props) {
@@ -55,6 +57,8 @@ export default function Document(props) {
     
     /** serves as notification for the singleColumnLines state in ```<Page />``` component to refresh */
     const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
+
+    const [isWindowWidthFitLandscape, setIsWindowWidthFitLandscape] = useState(checkIsWindowWidthFitLandscape());
 
 
     const windowScrollY = useRef(0);
@@ -103,7 +107,6 @@ export default function Document(props) {
         hideSelectOptions,
 
         focusTextInput,
-        unFocusTextInput,
 
         setSelectedTextInputStyle,
         setPages,
@@ -152,7 +155,13 @@ export default function Document(props) {
     useEffect(() => {
         setMatchPopupDimensions(!appContext.isMobileView);
 
-    }, [appContext.isMobileView])
+    }, [appContext.isMobileView]);
+
+
+    useEffect(() => {
+        setIsWindowWidthFitLandscape(checkIsWindowWidthFitLandscape());
+
+    }, [appContext.windowSize]);
 
 
     function handleDocumentClick(event): void {
@@ -216,16 +225,6 @@ export default function Document(props) {
         textInput.trigger("focus");
     }
 
-
-    function unFocusTextInput(textInputId: string, debug = true): void {
-
-        const textInput = getJQueryElementById(textInputId, debug);
-        if (!textInput)
-            return;
-
-        textInput.removeClass("textInputFocus");
-    }
-        
 
     function initPages(): React.JSX.Element[] {
 
@@ -751,10 +750,8 @@ export default function Document(props) {
     async function buildAndDownloadDocument(pdf = false): Promise<void> {
 
         // remove confirm unload event
-        if (API_ENV !== "dev") {
-            log(API_ENV)
+        if (API_ENV !== "dev")
             removeConfirmPageUnloadEvent();
-        }
 
         // build
         const buildResponse = await buildDocument(orientation, numColumns, documentFileName, numSingleColumnLines);
@@ -830,6 +827,15 @@ export default function Document(props) {
     }
 
 
+    /**
+     * @returns true if width of window is smaller than the page width in landscape mode. See also: {@link PAGE_WIDTH_LANDSCAPE}.
+     */
+    function checkIsWindowWidthFitLandscape(): boolean {
+
+        return appContext.windowSize[0] < stringToNumber(getCSSValueAsNumber(PAGE_WIDTH_LANDSCAPE, 2));
+    }
+
+
     return (
         <div id={id} className={className} onClick={handleDocumentClick} onMouseMove={handleDocumentMouseMove}>
             <DocumentContext.Provider value={context}>
@@ -847,7 +853,7 @@ export default function Document(props) {
                 
                 <StylePanel ref={subtlePopupRef}/>
 
-                <div className={"pageContainer " + (appContext.isMobileView ? "flexLeft" : "flexCenter")}>
+                <div className={"pageContainer " + (isWindowWidthFitLandscape && orientation === Orientation.LANDSCAPE ? "flexLeft" : "flexCenter")}>
                     <div style={{width: orientation === Orientation.PORTRAIT ? PAGE_WIDTH_PORTRAIT : PAGE_WIDTH_LANDSCAPE}}>
                         {pages}
                     </div>
@@ -897,7 +903,6 @@ export const DocumentContext = createContext({
     hideSelectOptions: (selectComponentId?: string) => {},
 
     focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
-    unFocusTextInput: (textInputId: string, debug?: boolean) => {},
 
     setPages: (pages: React.JSX.Element[]) => {},
     initPages: (): React.JSX.Element[] => {return []},
