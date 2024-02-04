@@ -1,4 +1,4 @@
-import React, { Ref, forwardRef, useContext, useEffect, useRef, useState } from "react";
+import React, { Ref, forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from "react";
 import "../../assets/styles/StylePanel.css";
 import StylePanelSection from "./StylePanelSection";
 import Checkbox from "../helpers/Checkbox";
@@ -11,11 +11,12 @@ import { flashClass, isBlank, log, logWarn, setCssVariable, stringToNumber } fro
 import { DocumentContext } from "./Document";
 import { FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
-import Popup from "../helpers/popups/Popup";
-import PopupColumnConfig from "../helpers/popups/PopupColumnConfig";
-import PopupOrientationConfig from "../helpers/popups/PopupOrientationConfig";
+import Popup from "../popups/Popup";
+import PopupColumnConfig from "../popups/PopupColumnConfig";
+import PopupOrientationConfig from "../popups/PopupOrientationConfig";
 import { getCSSValueAsNumber, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
-import PopupContainer from "../helpers/popups/PopupContainer";
+import PopupContainer from "../popups/PopupContainer";
+import SubtlePopup from "../popups/SubtlePopup";
 
 
 /**
@@ -25,7 +26,6 @@ import PopupContainer from "../helpers/popups/PopupContainer";
  */
 // TODO: add hide option, or dont fix
 
-// TODO: find better orientation icon
 export default forwardRef(function StylePanel(props: {
     id?: string,
     className?: string
@@ -41,6 +41,10 @@ export default forwardRef(function StylePanel(props: {
 
     const stylePanelRef = useRef(null);
     const sectionContainerRef = useRef(null);
+    const subtlePopupRef = useRef(null);
+
+    // make ref passed by 'forwardRef' usable inside this component
+    useImperativeHandle(subtlePopupContainerRef, () => subtlePopupRef.current!, []);
 
     const boxBackgroundColor = "rgb(255, 255, 255)";
     const boxBorder = "1px solid rgb(200, 200, 200)";
@@ -68,7 +72,6 @@ export default forwardRef(function StylePanel(props: {
     }
 
 
-    // gets slow (over time or on page 2)
     function handleFontSizeSelect(fontSize: string): void {
         
         // case: text too long for text input length      
@@ -374,8 +377,7 @@ export default forwardRef(function StylePanel(props: {
                             onClick={handleOrientationConfigClick}
                             >
                         <div className={id + "IconContainer"}>
-                            <img src="portraitSheet.png" alt="portrait mode" height="50"/>
-                            <img src="landscapeSheet.png" alt="landscape mode" height="50"/>
+                            <img src="orientation.png" alt="orientation icon" height="50" />
                         </div>
                         Ausrichtung
                     </Button>
@@ -402,12 +404,12 @@ export default forwardRef(function StylePanel(props: {
             </div>
             
             {/* subtle popup */}
-            <PopupContainer id={"SubtlePopup"} className="subtlePopupContainer" matchPopupDimensions={true} ref={subtlePopupContainerRef}>
+            <PopupContainer id={"SubtlePopup"} className="subtlePopupContainer" matchPopupDimensions={true} ref={subtlePopupRef}>
                 <Popup id={"Subtle" + documentContext.subtlePopupType} 
                        className="Subtle dontHideSubtlePopup boxShadowGrey" 
                        height={"max-content"} 
                        width={"200px"}>
-                    {documentContext.subtlePopupContent}
+                    <SubtlePopup title={documentContext.subtlePopupTitle} message={documentContext.subtlePopupMessage} type={documentContext.subtlePopupType} hideThis={(duration) => $(subtlePopupRef.current!).fadeOut(duration)} />
                 </Popup>
             </PopupContainer>
         </div>

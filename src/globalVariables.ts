@@ -6,8 +6,6 @@ export const WEBSITE_NAME = "" + process.env.REACT_APP_WEBSITE_NAME;
 export const API_ENV = "" + process.env.REACT_APP_ENV;
 export const API_VERSION = "" + process.env.REACT_APP_VERSION;
 export const API_NAME = "" + process.env.REACT_APP_API_NAME;
-export const API_HOST = "" + process.env.REACT_APP_API_HOST;
-export const API_PORT = "" + process.env.REACT_APP_API_PORT;
 export const DOCUMENT_BUILDER_BASE_URL = "" + process.env.REACT_APP_DOCUMENT_BUILDER_BASE_URL;
 export const USER_SERVICE_BASE_URL = "" + process.env.REACT_APP_USER_SERVICE_BASE_URL;
 
