@@ -13,6 +13,7 @@ export default function Paragraph(props: {
     pageIndex: number,
     columnIndex: number,
     paragraphIndex: number,
+    focusFirstTextInputOnRender?: boolean
     key?: string | number,
     id?: string,
     className?: string,
@@ -69,6 +70,7 @@ export default function Paragraph(props: {
                                         textInputIndex={i} 
                                         isSingleColumnLine={props.isTextInputSingleLineColumn || false}
                                         className={props.textInputClassName}
+                                        focusOnRender={props.focusFirstTextInputOnRender}
                                 />)
 
         return initTextInputs;

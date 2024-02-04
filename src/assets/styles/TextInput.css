@@ -5,26 +5,28 @@
     --textInputBorderBottom: 1px solid rgb(219, 219, 219);
 }
 
+/* Note: dont change horizontal values (margin, padding etc.) since those are used for calculating text width.
+         Vertical values can be changed though. */
 .textInputContainer {
     margin-bottom: 2px;
     position: relative;
     
     .TextInput {
         border: none;
-        border-left: 2px solid white;
-        border-right: 2px solid white;
+        border: 2px solid white;
         border-bottom: var(--textInputBorderBottom);
         cursor: auto;
         font-family: 'Calibri';
         font-size: var(--initialTextInputFontSize);
         line-height: 11px;
-        margin: 0 3px;
+        margin: 0 3px 1px;
         padding: 0;
         outline: none;
         width: 100%;
     }
 
     .textInputLabel {
+        border: 1px solid white;
         left: -27px;
         padding-left: 2px;
         position: absolute;
@@ -48,10 +50,8 @@
         border-bottom-width: 1px;
     }
 
-    .singleColumnLineCandidate, .SingleColumnLine {
-        border: 2px solid white;
+    .singleColumnLineCandidate {
         border-bottom: var(--textInputBorderBottom);
-        margin-bottom: 1px;
     }
 
     .textInputLeftColumnConnect {
@@ -76,10 +76,16 @@
 
         margin-bottom: 0;
     }
+}
+    
+/* last singleColumnLine in heading container */
+.headingContainer .Paragraph:nth-last-child(-n + 1) {
+    .SingleColumnLine {
+        border-bottom: var(--textInputBorderBottom);
 
-    .textInputSingleColumnDisconnect {
-        border: var(--connectLinesBorder);
-        
-        margin-bottom: 0;
+        &:hover {
+            border: var(--connectLinesBorder);
+            margin-bottom: 0;
+        }
     }
 }

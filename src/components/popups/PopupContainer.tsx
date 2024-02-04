@@ -1,5 +1,5 @@
 import React, { LegacyRef, forwardRef} from "react";
-import "../../../assets/styles/PopupContainer.css";
+import "../../assets/styles/PopupContainer.css";
 
 
 /**

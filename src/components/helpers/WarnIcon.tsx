@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef } from "react";
 import "../../assets/styles/WarnIcon.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { isBooleanFalsy, log } from "../../utils/basicUtils";
+import { SubtlePopupType } from "../../abstract/SubtlePopupType";
 
 
 /**
@@ -9,20 +10,21 @@ import { isBooleanFalsy, log } from "../../utils/basicUtils";
  * 
  * @since 0.0.6
  */
-// TODO: add error, info and success?
 export default function WarnIcon(props: {
     size: "small" | "medium" | "large",
     id?: string,
     className?: string,
     title?: string,
-
+    
     componentStyle?: React.CSSProperties,
     iconContainerStyle?: React.CSSProperties,
+    iconContainerClassName?: string,
     popupStyle?: React.CSSProperties,
+    /** Determines the icon. */
+    type?: SubtlePopupType
 
     /** if true, the popup will be displayed on hover, else the popup wont be displayed at all */
     showPopupOnHover?: boolean,
-    hover?: boolean,
     children?
 }) {
 
@@ -31,12 +33,28 @@ export default function WarnIcon(props: {
     const popupRef = useRef(null);
 
 
-    useEffect(() => {
-        $(iconContainerRef.current!).addClass(props.size + "Circle");
+    function getIcon(): React.JSX.Element {
 
-        if (!isBooleanFalsy(props.hover) && !props.hover)
-            $(iconContainerRef.current!).addClass("dontHover");
-    }, []);
+        const defaultClassName = " warnIcon dontHideWarnIcon ";
+
+        switch (props.type) {
+            case "Info":
+                return <i className={"fa-solid fa-info" + defaultClassName} style={{marginBottom: "1px"}}></i>
+
+            case "Success": 
+                return <i className={"fa-solid fa-check" + defaultClassName}></i>;
+            
+            case "Warn":
+                return <i className={"fa-solid fa-exclamation" + defaultClassName}></i>
+
+            case "Error":
+                return <i className={"fa-solid fa-xmark" + defaultClassName} style={{marginTop: "1px"}}></i>;
+
+            default:
+                // warn exlamation mark
+                return <i className={"fa-solid fa-exclamation" + defaultClassName}></i>;
+        }
+    }
 
 
     function handleClick(event): void {
@@ -59,13 +77,16 @@ export default function WarnIcon(props: {
              ref={componentRef}
              style={props.componentStyle}
              >
-            <div className="iconContainer flexCenter dontHideWarnIcon"
+            <div className={"iconContainer flexCenter dontHideWarnIcon " + 
+                            (props.iconContainerClassName || "") + " " + 
+                            props.size + "Circle " + 
+                            (props.showPopupOnHover && "hover")}
                  ref={iconContainerRef}
                  style={props.iconContainerStyle}
                  onClick={handleClick}
-                 title={props.title || "Hinweis"}
+                 title={props.title || ""}
                  >
-                <i className="fa-solid fa-exclamation warnIcon dontHideWarnIcon"></i>
+                {getIcon()}
             </div>
 
             <div className="miniPopup hidden dontHideWarnIcon"

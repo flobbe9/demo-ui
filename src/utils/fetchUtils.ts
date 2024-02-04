@@ -154,7 +154,10 @@ function getFetchHeaders(headers?) {
         headers = {};
 
     if (!headers["Content-Type"])
-        Object.assign(headers, contentType)
+        Object.assign(headers, contentType);
+
+    if (!headers[CSRF_TOKEN_HEADER_NAME])
+        Object.assign(headers, csrfToken);
 
     if (!headers[CSRF_TOKEN_HEADER_NAME])
         Object.assign(headers, csrfToken)
@@ -170,7 +173,6 @@ function getFetchHeaders(headers?) {
  * @param url that fetch() used
  * @returns {@link ApiExceptionFormat} using most values from given error
  */
-// TODO: somehow replaces whole path
 function handleFetchError(e: Error, url: string): ApiExceptionFormat {
 
     const error: ApiExceptionFormat = {

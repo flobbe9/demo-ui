@@ -1,4 +1,4 @@
-import { DOCUMENT_SUFFIX, FONT_SIZES_WHOLE_SCALE, MAX_FONT_SIZE, MIN_FONT_SIZE, Side } from "../globalVariables";
+import { DOCUMENT_SUFFIX, FONT_SIZES_WHOLE_SCALE, Side } from "../globalVariables";
 import { getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isNumberFalsy, isStringNumeric, log, logError, logWarn, stringToNumber } from "./basicUtils";
 
 
@@ -19,6 +19,9 @@ export function getDocumentId(prefix: string,
                             paragraphIndex?: number,
                             textInputIndex?: number): string {
 
+    if (!prefix || isNumberFalsy(pageIndex))
+        logError("Failed to create text input id. Falsy prefix: " + prefix + " or falsy pageIndex: " + pageIndex);
+
     let id = prefix + "_" + pageIndex;
 
     if (!isNumberFalsy(columnIndex))
@@ -32,10 +35,6 @@ export function getDocumentId(prefix: string,
 
     if (customId)
         id += "_" + customId;
-
-    // this check does not work
-    if (!prefix || isNumberFalsy(pageIndex))
-        logError("Failed to create text input id: " + id);
 
     return id;
 }
@@ -59,7 +58,7 @@ export function getDocumentId(prefix: string,
  */
 export function getPartFromDocumentId(id: string, idPart: number): string {
 
-    if (idPart < 0 || idPart > 3 || !id) {
+    if (idPart < 0 || !id) {
         logError("Failed to get index part from text input id. 'id': " + id + " 'idPart': " + idPart);
         return "";
     }

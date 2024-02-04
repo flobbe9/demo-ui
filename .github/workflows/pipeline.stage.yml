@@ -1,4 +1,4 @@
-name: vorspiel_frontend stage
+name: word-light_frontend stage
 
 run-name: ${{ github.event.head_commit.message }}
 on: 

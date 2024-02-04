@@ -9,7 +9,7 @@ import ControlPanel from "./ControlPanel";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
 import { getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
-import PopupContainer from "../helpers/popups/PopupContainer";
+import PopupContainer from "../popups/PopupContainer";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
 import { buildDocument, downloadDocument } from "../../builder/builder";
@@ -19,9 +19,10 @@ import WarnIcon from "../helpers/WarnIcon";
 
 
 // TODO: add some kind of "back" button
+// TODO: num lines calculation is wrong, if not all lines are filled with text
+// TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
 
 // TODO: configure ssl?
-// TODO: adjust .env in prod
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -31,12 +32,15 @@ export default function Document(props) {
 
     // document popup
     const [popupContent, setPopupContent] = useState(<></>);
-    const [subtlePopupContent, setSubtlePopupContent] = useState(<></>);
     const [matchPopupDimensions, setMatchPopupDimensions] = useState(!appContext.isMobileView);
     const [escapePopup, setEscapePopup] = useState(true);
-
-    // subtle popup (inside StylePanel)
+    
+    // subtle popup (in StylePanel)
+    const [subtlePopupContent, setSubtlePopupContent] = useState(<></>);
+    const [subtlePopupTitle, setSubtlePopupTitle] = useState("");
+    const [subtlePopupMessage, setSubtlePopupMessage] = useState("");
     const [subtlePopupType, setSubtlePopupType] = useState<SubtlePopupType>("Info");
+    const [subtlePopupTimeout, setSubtlePopupTimeout] = useState<NodeJS.Timeout | null>();
 
     const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
@@ -54,12 +58,13 @@ export default function Document(props) {
     /** serves as notification for the singleColumnLines state in ```<Page />``` component to refresh */
     const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
 
-    const [subtlePopupTimeout, setSubtlePopupTimeout] = useState<NodeJS.Timeout | null>();
+    const [isWindowWidthFitLandscape, setIsWindowWidthFitLandscape] = useState(checkIsWindowWidthFitLandscape());
+
 
     const windowScrollY = useRef(0);
     const documentPopupRef = useRef(null);
     const documentOverlayRef = useRef(null);
-    const subtlePopupRef = useRef(null);
+    const subtlePopupRef = useRef<HTMLDivElement>(null);
 
 
     const context = {
@@ -89,16 +94,19 @@ export default function Document(props) {
         hidePopup,
         popupContent,
         setPopupContent,
+        matchPopupDimensions,
+        setMatchPopupDimensions,
+
+        subtlePopupTitle,
+        subtlePopupMessage,
         subtlePopupType,
         showSubtlePopup,
         subtlePopupContent,
         setSubtlePopupContent,
+
         hideSelectOptions,
-        matchPopupDimensions,
-        setMatchPopupDimensions,
 
         focusTextInput,
-        unFocusTextInput,
 
         setSelectedTextInputStyle,
         setPages,
@@ -147,7 +155,13 @@ export default function Document(props) {
     useEffect(() => {
         setMatchPopupDimensions(!appContext.isMobileView);
 
-    }, [appContext.isMobileView])
+    }, [appContext.isMobileView]);
+
+
+    useEffect(() => {
+        setIsWindowWidthFitLandscape(checkIsWindowWidthFitLandscape());
+
+    }, [appContext.windowSize]);
 
 
     function handleDocumentClick(event): void {
@@ -211,16 +225,6 @@ export default function Document(props) {
         textInput.trigger("focus");
     }
 
-
-    function unFocusTextInput(textInputId: string, debug = true): void {
-
-        const textInput = getJQueryElementById(textInputId, debug);
-        if (!textInput)
-            return;
-
-        textInput.removeClass("textInputFocus");
-    }
-        
 
     function initPages(): React.JSX.Element[] {
 
@@ -623,44 +627,20 @@ export default function Document(props) {
     /**
      * Display subtle popup, set content and set timeout to fade out.
      * 
-     * @param summary heading to display inside popup, may be a plain string
-     * @param content content to display inside popup, may be a plain string
+     * @param title heading to display inside popup, may be a plain string
+     * @param message message to display inside popup, may be a plain string
      * @param duration time in ms that the popup should fade in, default is 100
      * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
      */
-    // TODO: propably make this a component
-    // TODO: adjust styles
-    function showSubtlePopup(summary: string, content: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 3000): void {
+    function showSubtlePopup(title: string, message: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 3000): void {
 
         const subtlePopup = $(subtlePopupRef.current!);
 
         clearSubtlePopupTimeout();
 
-        // set type
         setSubtlePopupType(type);
-
-        // set content
-        setSubtlePopupContent(
-            <div className="dontHideSubtlePopup">
-                <div className="dontHideSubtlePopup subtlePopupHeader flex">
-                    <div className="dontHideSubtlePopup col-4"></div>
-                    <WarnIcon className="dontHideSubtlePopup flexCenter col-4" 
-                              size={"small"} 
-                              iconContainerStyle={{borderColor: "red", color: "red"}}
-                            />
-
-                    <i className="fa-solid fa-xmark fa-lg closeIcon dontHideSubtlePopup col-4 flexRight" 
-                       onClick={() => subtlePopup.fadeOut(100)}
-                       style={{height: "max-content"}}
-                       >
-                    </i>
-                </div>
-                <h5 className="dontHideSubtlePopup textCenter">
-                    {summary}
-                </h5>
-                <div className="dontHideSubtlePopup">{content}</div>
-            </div>
-        );
+        setSubtlePopupTitle(title);
+        setSubtlePopupMessage(message);
 
         // fadeIn
         subtlePopup.fadeIn(duration);
@@ -770,10 +750,8 @@ export default function Document(props) {
     async function buildAndDownloadDocument(pdf = false): Promise<void> {
 
         // remove confirm unload event
-        if (API_ENV !== "dev") {
-            log(API_ENV)
+        if (API_ENV !== "dev")
             removeConfirmPageUnloadEvent();
-        }
 
         // build
         const buildResponse = await buildDocument(orientation, numColumns, documentFileName, numSingleColumnLines);
@@ -849,6 +827,15 @@ export default function Document(props) {
     }
 
 
+    /**
+     * @returns true if width of window is smaller than the page width in landscape mode. See also: {@link PAGE_WIDTH_LANDSCAPE}.
+     */
+    function checkIsWindowWidthFitLandscape(): boolean {
+
+        return appContext.windowSize[0] < stringToNumber(getCSSValueAsNumber(PAGE_WIDTH_LANDSCAPE, 2));
+    }
+
+
     return (
         <div id={id} className={className} onClick={handleDocumentClick} onMouseMove={handleDocumentMouseMove}>
             <DocumentContext.Provider value={context}>
@@ -866,7 +853,7 @@ export default function Document(props) {
                 
                 <StylePanel ref={subtlePopupRef}/>
 
-                <div className={"pageContainer " + (appContext.isMobileView ? "flexLeft" : "flexCenter")}>
+                <div className={"pageContainer " + (isWindowWidthFitLandscape && orientation === Orientation.LANDSCAPE ? "flexLeft" : "flexCenter")}>
                     <div style={{width: orientation === Orientation.PORTRAIT ? PAGE_WIDTH_PORTRAIT : PAGE_WIDTH_LANDSCAPE}}>
                         {pages}
                     </div>
@@ -904,6 +891,8 @@ export const DocumentContext = createContext({
     hidePopup: (duration?: number) => {},
     popupContent: <></>,
     setPopupContent: (popupContent: React.JSX.Element) => {},
+    subtlePopupTitle: "",
+    subtlePopupMessage: "",
     subtlePopupType: "Warn" as SubtlePopupType,
     showSubtlePopup: (summary: string, content: string, type?: SubtlePopupType, duration?: number, holdTime?: number) => {},
     subtlePopupContent: <></>,
@@ -914,7 +903,6 @@ export const DocumentContext = createContext({
     hideSelectOptions: (selectComponentId?: string) => {},
 
     focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
-    unFocusTextInput: (textInputId: string, debug?: boolean) => {},
 
     setPages: (pages: React.JSX.Element[]) => {},
     initPages: (): React.JSX.Element[] => {return []},

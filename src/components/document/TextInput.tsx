@@ -1,16 +1,21 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCase, flashClass, getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { equalsIgnoreCase, flashClass, getCursorIndex, insertString, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import { StyleProp, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
 import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
-import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
+import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getDocumentId, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 
 
+/**
+ * Component defining a text input in the <Document /> and it's logic and styling information.
+ * 
+ * @since 0.0.1
+ */
 // IDEA: 
 // mark multiple lines, style all, tab all, break all (mousemove event)
 // strg a
@@ -19,17 +24,14 @@ import { getCSSValueAsNumber, getDocumentId, getFontSizeDiffInWord, getNextTextI
 // TODO: add pictures
 // TODO: add table
 // TODO: add more pages
-/**
- * Component defining a text input in the <Document /> and it's logic and styling information.
- * 
- * @since 0.0.1
- */
+
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
     paragraphIndex: number,
     textInputIndex: number,
     isSingleColumnLine: boolean,
+    focusOnRender?: boolean,
     key?: string | number
     id?: string | number,
     className?: string,
@@ -45,6 +47,7 @@ export default function TextInput(props: {
     const pageContext = useContext(PageContext);
 
     const [dontHideConnectIconClassName, setDontHideConnectIconClassName] = useState("");
+    const [singleColumnLineCandidateClassName, setSingleColumnLineCandidateClassName] = useState("");
     const [isSingleColumnLineCandidate, setIsSingleColumnLineCandidate] = useState(false);
 
     const [textInputBorderFlashing, setTextInputBorderFlashing] = useState(false);
@@ -52,36 +55,39 @@ export default function TextInput(props: {
 
     useEffect(() => {
         // set initial font size
-        setCssVariable("initialTextInputFontSize", DEFAULT_FONT_SIZE + getFontSizeDiffInWord(DEFAULT_FONT_SIZE) + "px");
+        setCssVariable("initialTextInputFontSize", getBrowserFontSizeByMSWordFontSize(DEFAULT_FONT_SIZE) + "px");
 
-        // focus first text input of document or singleColumnLine
-        if (id === getDocumentId("TextInput", 0, "", 0, 0, 0) || props.isSingleColumnLine)
+        if ((id === getDocumentId("TextInput", 0, "", 0, 0, 0) && !props.isSingleColumnLine) || props.focusOnRender)
             documentContext.focusTextInput(id);
 
     }, []);
+    
 
-
+    // TODO: make this some helper
     useEffect(() => {
         const isSingleColumnLineCandidate = checkIsSingleColumnLineCandidate();
 
         // update state
         setIsSingleColumnLineCandidate(isSingleColumnLineCandidate);
-
-        // update classes, those are checked on hover in Page component
-        if (isSingleColumnLineCandidate)
-            setDontHideConnectIconClassName("dontHideConnectIcon");
-
-        else if (props.isSingleColumnLine)
-            setDontHideConnectIconClassName("dontHideDisConnectIcon");
-
-    }, [documentContext.refreshSingleColumnLines])
-
-
-    useEffect(() => {
-        if (id !== documentContext.selectedTextInputId) 
-            documentContext.unFocusTextInput(id, false);
         
-    }, [documentContext.selectedTextInputId]);
+        // update input classes
+        if (isSingleColumnLineCandidate) {
+            setSingleColumnLineCandidateClassName("singleColumnLineCandidate");
+            setDontHideConnectIconClassName("dontHideConnectIcon");
+            $(inputRef.current!).addClass("dontHideConnectIcon");
+            $(inputRef.current!).removeClass("dontHideDisConnectIcon");
+
+        } else if (props.isSingleColumnLine) {
+            setSingleColumnLineCandidateClassName("");
+            setDontHideConnectIconClassName("dontHideDisConnectIcon");
+            $(inputRef.current!).addClass("dontHideDisConnectIcon");
+            $(inputRef.current!).removeClass("dontHideConnectIcon");
+        }
+
+        if (id === documentContext.selectedTextInputId) 
+            documentContext.focusTextInput(id, false);
+
+    }, [documentContext.refreshSingleColumnLines]);
 
 
     useEffect(() => {
@@ -89,6 +95,13 @@ export default function TextInput(props: {
             documentContext.focusTextInput(id, false);
 
     }, [documentContext.selectedTextInputStyle]);
+
+
+    useEffect(() => {
+        if (id !== documentContext.selectedTextInputId) 
+            $(inputRef.current!).removeClass("textInputFocus");
+
+    }, [documentContext.selectedTextInputId]);
 
 
     function handleKeyDown(event): void {
@@ -143,9 +156,7 @@ export default function TextInput(props: {
     function handleMousOut(event): void {
 
         // hide borders
-        if (props.isSingleColumnLine)
-            $(inputRef.current!).removeClass("textInputSingleColumnDisconnect");
-        else
+        if (!props.isSingleColumnLine)
             getTextInputsInSameLine().forEach(textInput =>
                 toggleSingleColumnLineCandidateBorder(true, textInput.prop("id")));
     }
@@ -158,7 +169,7 @@ export default function TextInput(props: {
 
         let leftTextInputId = ""
         if (isSingleColumnLineCandidate || props.isSingleColumnLine) {
-            // show borders
+            // toggle borders
             getTextInputsInSameLine().forEach(textInput => {
                 const textInputId = textInput.prop("id");
     
@@ -170,31 +181,38 @@ export default function TextInput(props: {
                         leftTextInputId = textInputId;            
                 
                 // case: is singleColumnLine
-                } else if (isLastSingleColumnLine()) {
-                    $(inputRef.current!).addClass("textInputSingleColumnDisconnect");
+                } else if (isLastSingleColumnLine())
                     leftTextInputId = id;
-                }
             });
         }
 
-        // show very left connect button
-        $("#ButtonConnectLines" + leftTextInputId).fadeIn(0);
+        // toggle very left connect button
+        $("#ButtonConnectLines" + leftTextInputId).fadeIn(100);
     }
 
 
-    function isLastSingleColumnLine(): boolean { 
-
-        // case: not a singleColumnLine
-        if (!props.isSingleColumnLine) 
-            return false;
+    function getLastSingleColumnLine(): HTMLElement | null {
 
         const singleColumnLines = $("." + SINGLE_COLUMN_LINE_CLASS_NAME);
 
         // case: no singleColumnLines at all
         if (!singleColumnLines.length)
+            return null;
+
+        return singleColumnLines.get(singleColumnLines.length - 1) || null;
+    }
+
+
+    function isLastSingleColumnLine(): boolean {
+
+        // case: not a singleColumnLine
+        if (!props.isSingleColumnLine) 
             return false;
 
-        const lastSingleColumnLine = singleColumnLines.get(singleColumnLines.length - 1);
+        const lastSingleColumnLine = getLastSingleColumnLine();
+
+        if (!lastSingleColumnLine)
+            return false;
 
         return id === lastSingleColumnLine!.id;
     }
@@ -532,14 +550,12 @@ export default function TextInput(props: {
                         clickBackgroundColor="rgb(220, 220, 220)"
                         onClick={toggleSingleColumnLine} 
                         >
-                    <i className={"fa-solid fa-link connectIcon " + dontHideConnectIconClassName + (props.isSingleColumnLine && " hidden")}></i>
-                    <i className={"fa-solid fa-link-slash disconnectIcon " + dontHideConnectIconClassName + (!props.isSingleColumnLine && " hidden")}></i>
+                    <i className={"fa-solid fa-link connectIcon " + dontHideConnectIconClassName + " " + (props.isSingleColumnLine && " hidden")}></i>
+                    <i className={"fa-solid fa-link-slash disconnectIcon " + dontHideConnectIconClassName + " " + (!props.isSingleColumnLine && " hidden")}></i>
                 </Button>
             </label>
-
             
-            <input id={id} 
-                className={className + " " + dontHideConnectIconClassName + (isSingleColumnLineCandidate && " singleColumnLineCandidate")} 
+            <input id={id} className={className + " " + singleColumnLineCandidateClassName} 
                 ref={inputRef} 
                 type="text" 
                 onMouseDown={handleMouseDown}
