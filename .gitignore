@@ -26,3 +26,5 @@ yarn-error.log*
 /trash
 /.vscode
 .env.local
+word_light.crt.pem
+word_light.key.pem
