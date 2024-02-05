@@ -32,6 +32,8 @@ import { fetchAny, isHttpStatusCodeAlright } from "../utils/fetchUtils";
  * @returns any content of this website
  * @since 0.0.1
  */
+// TODO: change page flex for small window and portrait as well
+// TODO: navbar logo should stay aligned with text
 export default function App() {
 
     const [escapePopup, setEscapePopup] = useState(true);
