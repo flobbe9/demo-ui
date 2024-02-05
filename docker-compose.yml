@@ -7,5 +7,6 @@ services:
     ports:
       - ${PORT}:${PORT}
     environment:
-      # replace prod ip for local testing
     - API_HOST=localhost
+    - SSL_CRT_FILE=ssl/localhost.crt.pem
+    - SSL_KEY_FILE=ssl/localhost.key.pem
