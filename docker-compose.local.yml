@@ -1,8 +1,6 @@
 version: "3.9"
 
 # inside dev or stage branch
-# TODO: add this comment everywhere else for local files
-# TODO: test the main pipeline
 # TODO: decrease image size
 services: 
   api:
