@@ -8,7 +8,8 @@
     transition: background-color 0.2s, opacity 0.2s;
 
     &:focus {
-        outline: none;
+        transition: outline 0s;
+        outline-offset: 4px;
     }
 
     &:hover {

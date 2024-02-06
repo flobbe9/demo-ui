@@ -21,8 +21,8 @@ import WarnIcon from "../helpers/WarnIcon";
 // TODO: add some kind of "back" button
 // TODO: num lines calculation is wrong, if not all lines are filled with text
 // TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
+// TODO: font size of bottom lines of pages should be changable if empty
 
-// TODO: configure ssl?
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -59,6 +59,7 @@ export default function Document(props) {
     const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
 
     const [isWindowWidthFitLandscape, setIsWindowWidthFitLandscape] = useState(checkIsWindowWidthFitLandscape());
+    const [isWindowWidthFitPortrait, setIsWindowWidthFitPortrait] = useState(checkIsWindowWidthFitPortrait());
 
 
     const windowScrollY = useRef(0);
@@ -160,6 +161,7 @@ export default function Document(props) {
 
     useEffect(() => {
         setIsWindowWidthFitLandscape(checkIsWindowWidthFitLandscape());
+        setIsWindowWidthFitPortrait(checkIsWindowWidthFitPortrait());
 
     }, [appContext.windowSize]);
 
@@ -196,16 +198,18 @@ export default function Document(props) {
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` state will be updated with focused text input style
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` will be applied to text input with ```selectedTextInputId```
      * @param stylePropsToOverride list of style properties to override when copying styles 
+     * @param debug if false, no logs will be printed in case of falsy textInputId, default is ```true```
      */
     function focusTextInput(textInputId: string, 
                             updateSelectedTextInputStyle = true, 
                             applySelectedTextInputStyle = true,
-                            stylePropsToOverride?: [StyleProp, string | number][]): void {
+                            stylePropsToOverride?: [StyleProp, string | number][], 
+                            debug = true): void {
 
-        if (!isTextInputIdValid(textInputId))
+        if (!isTextInputIdValid(textInputId, debug))
             return;
 
-        const textInput = getJQueryElementById(textInputId);
+        const textInput = getJQueryElementById(textInputId, debug);
         if (!textInput)
             return;
 
@@ -412,7 +416,7 @@ export default function Document(props) {
             // case: warn user
             if (flash) {
                 flashClass(selectedTextInputId, "textInputFlash", "textInputFocus");
-                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite und versuche es dann erneut.", "Warn");
+                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite und wähle diese Zeilen nicht aus, dann versuche es erneut.", "Warn");
             }
 
             return false;
@@ -828,11 +832,34 @@ export default function Document(props) {
 
 
     /**
-     * @returns true if width of window is smaller than the page width in landscape mode. See also: {@link PAGE_WIDTH_LANDSCAPE}.
+     * @returns false if width of window is smaller than the page width in landscape mode. See also: {@link PAGE_WIDTH_LANDSCAPE}.
      */
     function checkIsWindowWidthFitLandscape(): boolean {
 
-        return appContext.windowSize[0] < stringToNumber(getCSSValueAsNumber(PAGE_WIDTH_LANDSCAPE, 2));
+        return appContext.windowSize[0] >= stringToNumber(getCSSValueAsNumber(PAGE_WIDTH_LANDSCAPE, 2));
+    }
+
+
+    /**
+     * @returns false if width of window is smaller than the page width in landscape mode. See also: {@link PAGE_WIDTH_LANDSCAPE}.
+     */
+    function checkIsWindowWidthFitPortrait(): boolean {
+
+        return appContext.windowSize[0] >= stringToNumber(getCSSValueAsNumber(PAGE_WIDTH_PORTRAIT, 2));
+    }
+
+
+    /**
+     * @returns true if window is wide enough for page width of current orientation
+     * @see {@link checkIsWindowWidthFitLandscape}
+     * @see {@link checkIsWindowWidthFitPortrait}
+     */
+    function isWindowWidthFit(): boolean {
+
+        if (orientation === Orientation.PORTRAIT)
+            return isWindowWidthFitPortrait;
+
+        return isWindowWidthFitLandscape;
     }
 
 
@@ -853,7 +880,7 @@ export default function Document(props) {
                 
                 <StylePanel ref={subtlePopupRef}/>
 
-                <div className={"pageContainer " + (isWindowWidthFitLandscape && orientation === Orientation.LANDSCAPE ? "flexLeft" : "flexCenter")}>
+                <div className={"pageContainer " + (isWindowWidthFit() ? "flexCenter" : "flexLeft") + " "}>
                     <div style={{width: orientation === Orientation.PORTRAIT ? PAGE_WIDTH_PORTRAIT : PAGE_WIDTH_LANDSCAPE}}>
                         {pages}
                     </div>
@@ -902,7 +929,7 @@ export const DocumentContext = createContext({
 
     hideSelectOptions: (selectComponentId?: string) => {},
 
-    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
+    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][], debug?: boolean) => {},
 
     setPages: (pages: React.JSX.Element[]) => {},
     initPages: (): React.JSX.Element[] => {return []},

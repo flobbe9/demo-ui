@@ -16,11 +16,9 @@ import PopupWarnConfirm from "../popups/PopupWarnConfirm";
 /**
  * @since 0.0.1
  */
-// TODO: optimize font size change warning messages
 // TODO: font size change in multiple columns with single line columns is buggy
-// TODO: cannot make line breaks for single column lines
 // TODO: handle font size change on connect lines
-// TODO: console warnings, disable debug?
+// TODO: landscape 4th line from bottom disappears when font size change 55
 export default function Page(props: {
     pageIndex: number,
     id?: string,
@@ -31,13 +29,11 @@ export default function Page(props: {
     const id = getDocumentId("Page", props.pageIndex, props.id);
     let className = props.className ? "Page " + props.className : "Page";
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
 
     const [columns, setColumns] = useState(initColumns());
     const [singleColumnLines, setSingleColumnLines] = useState<React.JSX.Element[]>([]);
-    const [orientationClassName, setOrientationClassName] = useState(documentContext.orientation === "portrait" ? "pagePortrait" : "pageLandscape");
 
     const dontShowAgainConnectWarningCookieId = useRef("ConnectLinesWarning");
     const [dontShowAgainConnectWarningCookie, setDontShowAgainConnectWarningCookie] = useCookie(DONT_SHOW_AGAIN_COOKIE_NAME + dontShowAgainConnectWarningCookieId.current, "false");
@@ -314,7 +310,7 @@ export default function Page(props: {
 
     return (
         <div id={id} 
-             className={className + " " + orientationClassName} 
+             className={className + " " + (documentContext.orientation === "portrait" ? "pagePortrait" : "pageLandscape")} 
              ref={pageRef}
              style={props.style}
              onMouseMove={handleMouseMove}

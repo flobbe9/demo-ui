@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useEffect, useRef, useState } from "react"; 
 import "../../assets/styles/PopupWarnConfirm.css";
 import { cookieOptions } from "react-use-cookie";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -6,6 +6,7 @@ import { isBooleanFalsy, log } from "../../utils/basicUtils";
 import Button from "../helpers/Button";
 import WarnIcon from "../helpers/WarnIcon";
 import Checkbox from "../helpers/Checkbox";
+import useIsVisible from "../../hooks/useIsVisible";
 
 
 /**
@@ -36,6 +37,9 @@ export default function PopupWarnConfirm(props: {
 
     const [dontConfirm, setDontConfirm] = useState(isBooleanFalsy(props.dontConfirm) ? false : props.dontConfirm);
     const [isDontShowAgain, setIsDontShowAgain] = useState(false);
+
+    const componentRef = useRef(null);
+    const isVisible = useIsVisible(componentRef);
 
 
     function handleConfirm(event): void {
@@ -69,11 +73,10 @@ export default function PopupWarnConfirm(props: {
 
 
     return (
-        <div id={id} className={className}> 
+        <div id={id} className={className} ref={componentRef}> 
             <div className="popupHeader flex">
-                <div className="col-4">
-                    {/* placeholder */}
-                </div>
+                <div className="col-4">{/* placeholder */}</div>
+                
                 <div className="col-4 flexCenterStart">
                     <WarnIcon size="small"
                             iconContainerStyle={{
@@ -82,6 +85,7 @@ export default function PopupWarnConfirm(props: {
                             }}
                             />
                 </div>
+                
                 <div className="col-4 flexRightStart">
                     <i className="fa-solid fa-xmark fa-xl closeIcon" onClick={props.hideThis}></i>
                 </div>
@@ -126,6 +130,7 @@ export default function PopupWarnConfirm(props: {
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
                         onClick={props.handleDecline}
+                        focus={isVisible}
                         >
                     Nein
                 </Button>
