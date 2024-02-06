@@ -32,7 +32,6 @@ label {
     
     .content {
         background-color: rgb(228, 228, 228);
-        /* margin-top: 7px; */
     }
 
     /* Buttons */
@@ -55,7 +54,6 @@ label {
         border: none;
         background-color: black;
         color: white;
-        outline: none;
     }
 
     .blackButtonContained:hover {
@@ -83,7 +81,6 @@ label {
         border: none;
         border-radius: 5px;
         color: black;
-        outline: none;
     }
     
     .whiteButtonPortrait {

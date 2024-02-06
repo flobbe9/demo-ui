@@ -17,6 +17,7 @@ export default function Button(props: {
     clickBackgroundColor?: string,
     boxStyle?: React.CSSProperties,
     childrenStyle?: React.CSSProperties,
+    focusStyle?: React.CSSProperties,
 
     className?: string,
     childrenClassName?: string,
@@ -26,6 +27,10 @@ export default function Button(props: {
     rendered?: boolean,
     children?,
     title?: string
+    /** button type, default is "button" */
+    type?: "submit" | "button" | "reset",
+    /** focus button when this prop changes and is true */
+    focus?: boolean
 }) {
 
     const id = "Button" + (props.id || "Button");
@@ -60,7 +65,14 @@ export default function Button(props: {
 
     }, [props.disabled]);
 
-    
+
+    useEffect(() => {
+        if (props.focus) 
+            $(buttonRef.current!).trigger("focus");
+        
+    }, [props.focus])
+
+
     /**
      * Wont do anything if button is disabled. Animates click and promise callback if present or if not present normal 
      * click callback (promise callback is prioritised). Will never call both.
@@ -162,7 +174,6 @@ export default function Button(props: {
         $(buttonRef.current!).css("backgroundColor", props.boxStyle?.backgroundColor || initialBackgroundColor)
     }
 
-
     function animateOverlay(): void {
 
         const overlay = $(buttonOverlayRef.current!);
@@ -179,13 +190,14 @@ export default function Button(props: {
     return (
         <button id={id} 
                 className={className + (disabled ? " disabledButton" : "") + (rendered ? "" : " hidden")}
-                style={props.boxStyle}
+                style={{...props.boxStyle}}
                 ref={buttonRef}
                 disabled={disabled} 
                 onClick={handleClick}
                 onMouseOver={handleMouseOver}
                 onMouseOut={handleMouseOut}
                 title={props.title}
+                type={(props.type || "button")}
                 >
             {/* hidden */}
             <div className={"buttonOverlay buttonChildren " + (props.childrenClassName || "")} ref={buttonOverlayRef} style={props.childrenStyle}>

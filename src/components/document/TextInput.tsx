@@ -47,7 +47,6 @@ export default function TextInput(props: {
     const pageContext = useContext(PageContext);
 
     const [dontHideConnectIconClassName, setDontHideConnectIconClassName] = useState("");
-    const [singleColumnLineCandidateClassName, setSingleColumnLineCandidateClassName] = useState("");
     const [isSingleColumnLineCandidate, setIsSingleColumnLineCandidate] = useState(false);
 
     const [textInputBorderFlashing, setTextInputBorderFlashing] = useState(false);
@@ -72,20 +71,20 @@ export default function TextInput(props: {
         
         // update input classes
         if (isSingleColumnLineCandidate) {
-            setSingleColumnLineCandidateClassName("singleColumnLineCandidate");
             setDontHideConnectIconClassName("dontHideConnectIcon");
+            $(inputRef.current!).addClass("singleColumnLineCandidate");
             $(inputRef.current!).addClass("dontHideConnectIcon");
             $(inputRef.current!).removeClass("dontHideDisConnectIcon");
 
         } else if (props.isSingleColumnLine) {
-            setSingleColumnLineCandidateClassName("");
             setDontHideConnectIconClassName("dontHideDisConnectIcon");
+            $(inputRef.current!).removeClass("singleColumnLineCandidate");
             $(inputRef.current!).addClass("dontHideDisConnectIcon");
             $(inputRef.current!).removeClass("dontHideConnectIcon");
         }
 
         if (id === documentContext.selectedTextInputId) 
-            documentContext.focusTextInput(id, false);
+            documentContext.focusTextInput(id, false, true, [], false);
 
     }, [documentContext.refreshSingleColumnLines]);
 
@@ -555,7 +554,8 @@ export default function TextInput(props: {
                 </Button>
             </label>
             
-            <input id={id} className={className + " " + singleColumnLineCandidateClassName} 
+            {/* Note: don't pass states into className, since jquery's .addClass would mess with that */}
+            <input id={id} className={className} 
                 ref={inputRef} 
                 type="text" 
                 onMouseDown={handleMouseDown}

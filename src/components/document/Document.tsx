@@ -21,6 +21,7 @@ import WarnIcon from "../helpers/WarnIcon";
 // TODO: add some kind of "back" button
 // TODO: num lines calculation is wrong, if not all lines are filled with text
 // TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
+// TODO: font size of bottom lines of pages should be changable if empty
 
 export default function Document(props) {
 
@@ -197,16 +198,18 @@ export default function Document(props) {
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` state will be updated with focused text input style
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` will be applied to text input with ```selectedTextInputId```
      * @param stylePropsToOverride list of style properties to override when copying styles 
+     * @param debug if false, no logs will be printed in case of falsy textInputId, default is ```true```
      */
     function focusTextInput(textInputId: string, 
                             updateSelectedTextInputStyle = true, 
                             applySelectedTextInputStyle = true,
-                            stylePropsToOverride?: [StyleProp, string | number][]): void {
+                            stylePropsToOverride?: [StyleProp, string | number][], 
+                            debug = true): void {
 
-        if (!isTextInputIdValid(textInputId))
+        if (!isTextInputIdValid(textInputId, debug))
             return;
 
-        const textInput = getJQueryElementById(textInputId);
+        const textInput = getJQueryElementById(textInputId, debug);
         if (!textInput)
             return;
 
@@ -413,7 +416,7 @@ export default function Document(props) {
             // case: warn user
             if (flash) {
                 flashClass(selectedTextInputId, "textInputFlash", "textInputFocus");
-                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite und versuche es dann erneut.", "Warn");
+                showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite und wähle diese Zeilen nicht aus, dann versuche es erneut.", "Warn");
             }
 
             return false;
@@ -926,7 +929,7 @@ export const DocumentContext = createContext({
 
     hideSelectOptions: (selectComponentId?: string) => {},
 
-    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][]) => {},
+    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][], debug?: boolean) => {},
 
     setPages: (pages: React.JSX.Element[]) => {},
     initPages: (): React.JSX.Element[] => {return []},

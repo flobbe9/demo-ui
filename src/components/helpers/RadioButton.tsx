@@ -31,7 +31,7 @@ export default function RadioButton(props: {
     childrenClassName?: string,
     disabled?: boolean,
     children?,
-    style?
+    style?: React.CSSProperties,
 }) {
 
     const id = "RadioButton" + props.id;
@@ -134,6 +134,7 @@ export default function RadioButton(props: {
                        checked={checked}
                        disabled={disabled}
                        readOnly
+                       autoFocus={checked}
                        />
 
                 <div className={childrenClassName} 
