@@ -19,7 +19,6 @@ import PopupWarnConfirm from "../popups/PopupWarnConfirm";
 // TODO: font size change in multiple columns with single line columns is buggy
 // TODO: handle font size change on connect lines
 // TODO: landscape 4th line from bottom disappears when font size change 55
-// TODO: make warn popup "ja" fields submit on enter (pass button type "submit"?)
 export default function Page(props: {
     pageIndex: number,
     id?: string,
@@ -30,7 +29,6 @@ export default function Page(props: {
     const id = getDocumentId("Page", props.pageIndex, props.id);
     let className = props.className ? "Page " + props.className : "Page";
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
 

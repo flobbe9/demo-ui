@@ -62,26 +62,10 @@ export default function TextInput(props: {
     }, []);
     
 
-    // TODO: make this some helper
     useEffect(() => {
         const isSingleColumnLineCandidate = checkIsSingleColumnLineCandidate();
 
-        // update state
-        setIsSingleColumnLineCandidate(isSingleColumnLineCandidate);
-        
-        // update input classes
-        if (isSingleColumnLineCandidate) {
-            setDontHideConnectIconClassName("dontHideConnectIcon");
-            $(inputRef.current!).addClass("singleColumnLineCandidate");
-            $(inputRef.current!).addClass("dontHideConnectIcon");
-            $(inputRef.current!).removeClass("dontHideDisConnectIcon");
-
-        } else if (props.isSingleColumnLine) {
-            setDontHideConnectIconClassName("dontHideDisConnectIcon");
-            $(inputRef.current!).removeClass("singleColumnLineCandidate");
-            $(inputRef.current!).addClass("dontHideDisConnectIcon");
-            $(inputRef.current!).removeClass("dontHideConnectIcon");
-        }
+        handleRefreshSingleColumnLine(isSingleColumnLineCandidate);
 
         if (id === documentContext.selectedTextInputId) 
             documentContext.focusTextInput(id, false, true, [], false);
@@ -295,6 +279,27 @@ export default function TextInput(props: {
         setTextInputBorderFlashing(true);
         await flashClass(id, "textInputFlash", "textInputFocus", 200);
         setTextInputBorderFlashing(false);
+    }
+
+
+    function handleRefreshSingleColumnLine(isSingleColumnLineCandidate: boolean): void {
+
+        // update state
+        setIsSingleColumnLineCandidate(isSingleColumnLineCandidate);
+
+        // update input classes
+        if (isSingleColumnLineCandidate) {
+            setDontHideConnectIconClassName("dontHideConnectIcon");
+            $(inputRef.current!).addClass("singleColumnLineCandidate");
+            $(inputRef.current!).addClass("dontHideConnectIcon");
+            $(inputRef.current!).removeClass("dontHideDisConnectIcon");
+
+        } else if (props.isSingleColumnLine) {
+            setDontHideConnectIconClassName("dontHideDisConnectIcon");
+            $(inputRef.current!).removeClass("singleColumnLineCandidate");
+            $(inputRef.current!).addClass("dontHideDisConnectIcon");
+            $(inputRef.current!).removeClass("dontHideConnectIcon");
+        }
     }
 
 
