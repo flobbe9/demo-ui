@@ -27,8 +27,8 @@ export default function PopupOrientationConfig(props: {
     toggleWarnPopup: (warnPopupId: string, duration?: number) => void
 }) {
 
-    const className = "PopupOrientationConfig " + (props.className || "PopupOrientationConfig");
-    const id = "PopupOrientationConfig " + (props.id || "PopupOrientationConfig");
+    const className = "PopupOrientationConfig " + (props.className || "");
+    const id = "PopupOrientationConfig" + (props.id || "");
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
@@ -157,6 +157,7 @@ export default function PopupOrientationConfig(props: {
                         hoverBackgroundColor="rgb(70, 70, 70)"
                         clickBackgroundColor="rgb(130, 130, 130)"
                         onClick={(event) => toggleWarnPopup(event)}
+                        type="submit"
                         >
                     Anwenden
                 </Button>

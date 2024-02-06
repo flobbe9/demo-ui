@@ -28,7 +28,7 @@ export default function PopupColumnConfig(props: {
 }) {
 
     const className = "PopupColumnConfig " + (props.className || "");
-    const id = "PopupColumnConfig " + (props.id || "");
+    const id = "PopupColumnConfig" + (props.id || "");
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
@@ -45,7 +45,7 @@ export default function PopupColumnConfig(props: {
         else    
             setOrientationClassName("whiteButtonLandscape");
 
-    }, [documentContext.orientation])
+    }, [documentContext.orientation]);
 
 
     function handleSelectNumColumns(numColumns: number): void {

@@ -10,7 +10,7 @@ import { log, setCssVariable } from "../utils/basicUtils";
 import PopupContainer from "./popups/PopupContainer";
 import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth, DOCUMENT_BUILDER_BASE_URL, CSRF_TOKEN_HEADER_NAME, API_ENV} from "../globalVariables";
 import NotFound from "./error_pages/NotFound";
-import { fetchAny, isHttpStatusCodeAlright } from "../utils/fetchUtils";
+import { fetchAny } from "../utils/fetchUtils";
 
 
 /**
@@ -32,8 +32,6 @@ import { fetchAny, isHttpStatusCodeAlright } from "../utils/fetchUtils";
  * @returns any content of this website
  * @since 0.0.1
  */
-// TODO: change page flex for small window and portrait as well
-// TODO: navbar logo should stay aligned with text
 export default function App() {
 
     const [escapePopup, setEscapePopup] = useState(true);
@@ -41,7 +39,7 @@ export default function App() {
     
     const [pressedKey, setPressedKey] = useState("");
     
-    const [windowSize, setWindowSize] = useState([0, 0]);
+    const [windowSize, setWindowSize] = useState([window.innerWidth, window.innerHeight]);
     const [isMobileView, setIsMobileView] = useState(isMobileWidth());
     
     const appRef = useRef(null);
