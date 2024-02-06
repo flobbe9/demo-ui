@@ -22,7 +22,6 @@ import WarnIcon from "../helpers/WarnIcon";
 // TODO: num lines calculation is wrong, if not all lines are filled with text
 // TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
 
-// TODO: configure ssl?
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -59,6 +58,7 @@ export default function Document(props) {
     const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
 
     const [isWindowWidthFitLandscape, setIsWindowWidthFitLandscape] = useState(checkIsWindowWidthFitLandscape());
+    const [isWindowWidthFitPortrait, setIsWindowWidthFitPortrait] = useState(checkIsWindowWidthFitPortrait());
 
 
     const windowScrollY = useRef(0);
@@ -160,6 +160,7 @@ export default function Document(props) {
 
     useEffect(() => {
         setIsWindowWidthFitLandscape(checkIsWindowWidthFitLandscape());
+        setIsWindowWidthFitPortrait(checkIsWindowWidthFitPortrait());
 
     }, [appContext.windowSize]);
 
@@ -828,11 +829,34 @@ export default function Document(props) {
 
 
     /**
-     * @returns true if width of window is smaller than the page width in landscape mode. See also: {@link PAGE_WIDTH_LANDSCAPE}.
+     * @returns false if width of window is smaller than the page width in landscape mode. See also: {@link PAGE_WIDTH_LANDSCAPE}.
      */
     function checkIsWindowWidthFitLandscape(): boolean {
 
-        return appContext.windowSize[0] < stringToNumber(getCSSValueAsNumber(PAGE_WIDTH_LANDSCAPE, 2));
+        return appContext.windowSize[0] >= stringToNumber(getCSSValueAsNumber(PAGE_WIDTH_LANDSCAPE, 2));
+    }
+
+
+    /**
+     * @returns false if width of window is smaller than the page width in landscape mode. See also: {@link PAGE_WIDTH_LANDSCAPE}.
+     */
+    function checkIsWindowWidthFitPortrait(): boolean {
+
+        return appContext.windowSize[0] >= stringToNumber(getCSSValueAsNumber(PAGE_WIDTH_PORTRAIT, 2));
+    }
+
+
+    /**
+     * @returns true if window is wide enough for page width of current orientation
+     * @see {@link checkIsWindowWidthFitLandscape}
+     * @see {@link checkIsWindowWidthFitPortrait}
+     */
+    function isWindowWidthFit(): boolean {
+
+        if (orientation === Orientation.PORTRAIT)
+            return isWindowWidthFitPortrait;
+
+        return isWindowWidthFitLandscape;
     }
 
 
@@ -853,7 +877,7 @@ export default function Document(props) {
                 
                 <StylePanel ref={subtlePopupRef}/>
 
-                <div className={"pageContainer " + (isWindowWidthFitLandscape && orientation === Orientation.LANDSCAPE ? "flexLeft" : "flexCenter")}>
+                <div className={"pageContainer " + (isWindowWidthFit() ? "flexCenter" : "flexLeft") + " "}>
                     <div style={{width: orientation === Orientation.PORTRAIT ? PAGE_WIDTH_PORTRAIT : PAGE_WIDTH_LANDSCAPE}}>
                         {pages}
                     </div>
