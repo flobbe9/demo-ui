@@ -1,5 +1,6 @@
 import React from "react";
 import { getFontSizeDiffInWord } from "./utils/documentBuilderUtils";
+import CsrfToken from "./classes/CsrfToken";
 
 
 export const WEBSITE_NAME = "" + process.env.REACT_APP_WEBSITE_NAME;
@@ -9,7 +10,12 @@ export const API_NAME = "" + process.env.REACT_APP_API_NAME;
 export const DOCUMENT_BUILDER_BASE_URL = "" + process.env.REACT_APP_DOCUMENT_BUILDER_BASE_URL;
 export const USER_SERVICE_BASE_URL = "" + process.env.REACT_APP_USER_SERVICE_BASE_URL;
 
-export const CSRF_TOKEN_HEADER_NAME="X-XSRF-TOKEN";
+/** 
+ * Token that is sent with every request to backend for additional security. 
+ * 
+ * @see {@link CsrfToken}
+ */
+export const CSRF_TOKEN: CsrfToken = new CsrfToken("X-CSRF-TOKEN");
 
 export const NUM_PAGES = 2;
 export const PAGE_WIDTH_PORTRAIT = "806px";
