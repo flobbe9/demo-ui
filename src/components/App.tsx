@@ -61,7 +61,7 @@ export default function App() {
 
 
     useEffect(() => {
-        // if (API_ENV === "prod")
+        if (API_ENV === "prod")
             initCookies();
 
         document.addEventListener("keydown", handleGlobalKeyDown);
