@@ -148,10 +148,7 @@ export default function App() {
 
 
     /**
-     * TODO
-     * Send an empty GET request to document_builder that has no purpose but for the backend to pass
-     * some cookies to the browser.
-     * Will store csrf token to session storage using {@link CSRF_TOKEN_HEADER_NAME} as key.
+     * Fetch csrf token from document_builder api and store in {@link CSRF_TOKEN}.
      */
     async function initCookies(): Promise<void> {
 
