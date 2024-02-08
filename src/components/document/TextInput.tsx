@@ -560,7 +560,7 @@ export default function TextInput(props: {
             </label>
             
             {/* Note: don't pass states into className, since jquery's .addClass would mess with that */}
-            <input id={id} className={className} g
+            <input id={id} className={className}
                 ref={inputRef} 
                 type="text" 
                 onMouseDown={handleMouseDown}
