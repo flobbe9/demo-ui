@@ -159,9 +159,6 @@ function getFetchHeaders(headers?) {
     if (!headers[CSRF_TOKEN.getHeaderName()])
         Object.assign(headers, csrfToken);
 
-    if (!headers[CSRF_TOKEN_HEADER_NAME])
-        Object.assign(headers, csrfToken)
-
     return headers;
 }
 
