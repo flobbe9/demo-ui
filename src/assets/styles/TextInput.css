@@ -42,7 +42,9 @@
     }
     
     .textInputFocus {
-        border-bottom-color: var(--selectedColor) !important;
+        &:focus {
+            border-bottom-color: var(--selectedColor) !important;
+        }
     }
 
     .textInputFlash {

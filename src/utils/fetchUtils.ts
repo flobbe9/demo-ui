@@ -1,4 +1,4 @@
-import { CSRF_TOKEN_HEADER_NAME, DOCUMENT_BUILDER_BASE_URL } from "../globalVariables";
+import { CSRF_TOKEN, DOCUMENT_BUILDER_BASE_URL } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { log, logApiResponse, logError } from "./basicUtils";
 import { ApiExceptionFormat } from './../abstract/ApiExceptionFormat';
@@ -148,7 +148,7 @@ export const FAILED_TO_FETCH_STATUS_CODE = 503;
 function getFetchHeaders(headers?) {
 
     const contentType = {"Content-Type": "application/json"};
-    const csrfToken = {[CSRF_TOKEN_HEADER_NAME]: sessionStorage.getItem(CSRF_TOKEN_HEADER_NAME) || ""};
+    const csrfToken = {[CSRF_TOKEN.getHeaderName()]: CSRF_TOKEN.getToken()};
 
     if (!headers)
         headers = {};
@@ -156,11 +156,8 @@ function getFetchHeaders(headers?) {
     if (!headers["Content-Type"])
         Object.assign(headers, contentType);
 
-    if (!headers[CSRF_TOKEN_HEADER_NAME])
+    if (!headers[CSRF_TOKEN.getHeaderName()])
         Object.assign(headers, csrfToken);
-
-    if (!headers[CSRF_TOKEN_HEADER_NAME])
-        Object.assign(headers, csrfToken)
 
     return headers;
 }

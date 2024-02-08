@@ -555,12 +555,12 @@ export default function TextInput(props: {
                         onClick={toggleSingleColumnLine} 
                         >
                     <i className={"fa-solid fa-link connectIcon " + dontHideConnectIconClassName + " " + (props.isSingleColumnLine && " hidden")}></i>
-                    <i className={"fa-solid fa-link-slash disconnectIcon " + dontHideConnectIconClassName + " " + (!props.isSingleColumnLine && " hidden")}></i>
+                    <i className={"fa-solid fa-link-slash disconnectIcon minorMarginTopOne " + dontHideConnectIconClassName + " " + (!props.isSingleColumnLine && " hidden")}></i>
                 </Button>
             </label>
             
             {/* Note: don't pass states into className, since jquery's .addClass would mess with that */}
-            <input id={id} className={className} 
+            <input id={id} className={className}
                 ref={inputRef} 
                 type="text" 
                 onMouseDown={handleMouseDown}

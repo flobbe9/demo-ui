@@ -6,11 +6,11 @@ import NavBar from "./NavBar";
 import Footer from "./Footer";
 import Home from "./Home";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { log, setCssVariable } from "../utils/basicUtils";
+import { log, logWarn, setCssVariable } from "../utils/basicUtils";
 import PopupContainer from "./popups/PopupContainer";
-import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth, DOCUMENT_BUILDER_BASE_URL, CSRF_TOKEN_HEADER_NAME, API_ENV} from "../globalVariables";
+import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth, DOCUMENT_BUILDER_BASE_URL, API_ENV, CSRF_TOKEN} from "../globalVariables";
 import NotFound from "./error_pages/NotFound";
-import { fetchAny } from "../utils/fetchUtils";
+import { fetchAny, isHttpStatusCodeAlright } from "../utils/fetchUtils";
 
 
 /**
@@ -148,21 +148,21 @@ export default function App() {
 
 
     /**
-     * Send an empty GET request to document_builder that has no purpose but for the backend to pass
-     * some cookies to the browser.
-     * Will store csrf token to session storage using {@link CSRF_TOKEN_HEADER_NAME} as key.
+     * Fetch csrf token from document_builder api and store in {@link CSRF_TOKEN}.
      */
     async function initCookies(): Promise<void> {
 
+        let csrfToken = "";
+
         // send request that does nothing
-        await fetchAny(DOCUMENT_BUILDER_BASE_URL + "/getCsrfToken");    
-        
-        
-        // save token to session storage
-        const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+        const response = await fetchAny(DOCUMENT_BUILDER_BASE_URL + "/getCsrfToken");    
+        if (isHttpStatusCodeAlright(response.status))
+            csrfToken = await (response as Response).text();
 
         if (csrfToken)
-            sessionStorage.setItem(CSRF_TOKEN_HEADER_NAME, csrfToken);
+            CSRF_TOKEN.setToken(csrfToken);
+        else
+            logWarn("Failed to init csrf token: " + csrfToken);
     }
     
 
