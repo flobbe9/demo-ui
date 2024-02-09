@@ -60,7 +60,6 @@ jobs:
           username: ${{ secrets.SSH_USER_NAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           debug: true
-          script_stop: true
           # pull new images, remove left overs from old images, kill processes on ports that I want to use, start microservice
           script: |
             docker-compose pull
