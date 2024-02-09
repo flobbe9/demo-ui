@@ -25,6 +25,8 @@ import WarnIcon from "../helpers/WarnIcon";
 
 // TODO: test barrier usability
 // TODO: check some seo criteria
+// TODO: shift tab does not work
+// TODO: what happens to db when docker restart?
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
