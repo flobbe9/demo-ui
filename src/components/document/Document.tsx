@@ -23,6 +23,8 @@ import WarnIcon from "../helpers/WarnIcon";
 // TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
 // TODO: font size of bottom lines of pages should be changable if empty
 
+// TODO: test barrier usability
+// TODO: check some seo criteria
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
