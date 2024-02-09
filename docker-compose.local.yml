@@ -7,6 +7,7 @@ services:
       context: .
       args:
         - PORT=${PORT}
+        - HTTPS=${HTTPS}
     container_name: word_light_frontend-single
     ports:
       - ${PORT}:${PORT}

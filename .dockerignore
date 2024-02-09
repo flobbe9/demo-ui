@@ -17,7 +17,6 @@ yarn-error.log*
 
 ### Gradle ###
 .gradle/
-build/
 gradle/
 build
 gradlew
