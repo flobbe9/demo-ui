@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout repository 
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - run: npm ci
       
@@ -55,7 +55,7 @@ jobs:
     # TODO: is data deleted when updating db image?
     steps:
       - name: install sshpass
-        run: apt-get install sshpass
+        run: sudo apt-get update && sudo apt-get install sshpass
       - name: establish ssh tunnel
         run: sshpass -p ${{ secrets.SSH_PASSWORD }} ssh ${{ secrets.SSH_USER_NAME }}@word-light.de
       - name: pull new images
