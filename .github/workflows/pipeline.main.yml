@@ -60,8 +60,9 @@ jobs:
           username: ${{ secrets.SSH_USER_NAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           debug: true
+          script_stop: true
           script: |
-            docker-compose pull &&
-            docker rm $(docker container ls --all --filter=ancestor=$(docker images -f "dangling=true" -q) --format "{{.ID}}") --force &&
-            docker image rm $(docker images -f "dangling=true" -q) &&
-            docker-compose up &&
+            docker-compose pull
+            yes | docker rm $(docker container ls --all --filter=ancestor=$(docker images -f "dangling=true" -q) --format "{{.ID}}") --force
+            yes | docker image rm $(docker images -f "dangling=true" -q)
+            docker-compose up
