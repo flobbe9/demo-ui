@@ -2,6 +2,7 @@
 /node_modules
 /.pnp
 .pnp.js
+/build
 
 # misc
 .DS_Store
@@ -16,7 +17,6 @@ yarn-error.log*
 
 ### Gradle ###
 .gradle/
-build/
 gradle/
 build
 gradlew

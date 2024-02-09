@@ -1,10 +1,13 @@
 version: "3.9"
 
 # inside dev or stage branch
-# TODO: decrease image size
 services: 
   api:
-    build: .
+    build:  
+      context: .
+      args:
+        - PORT=${PORT}
+        - HTTPS=${HTTPS}
     container_name: word_light_frontend-single
     ports:
       - ${PORT}:${PORT}
