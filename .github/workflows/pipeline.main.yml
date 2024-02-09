@@ -4,7 +4,7 @@ run-name: ${{ github.event.head_commit.message }}
 on: 
   push: 
     branches: 
-      - main
+      - dev
 
 jobs:
   build:
@@ -47,3 +47,22 @@ jobs:
             SSL_CRT_FILE=word_light.crt.pem
             SSL_KEY_FILE=word_light.key.pem
             SSL_KEYSTORE_FILE=word_light.p12
+
+  deploy_to_server:
+    runs-on: ubuntu-latest
+    needs: push_to_DockerHub
+
+    # TODO: is data deleted when updating db image?
+    steps:
+      - name: install sshpass
+        run: apt-get install sshpass
+      - name: establish ssh tunnel
+        run: sshpass -p ${{ secrets.SSH_PASSWORD }} ssh ${{ secrets.SSH_USER_NAME }}@word-light.de
+      - name: pull new images
+        run: docker-compose pull
+      - name: remove containers with dangling images
+        run: docker rm $(docker container ls --all --filter=ancestor=$(docker images -f "dangling=true" -q) --format "{{.ID}}") --force
+      - name: remove danling imges
+        run: docker image rm $(docker images -f "dangling=true" -q)
+      - name: start new docker images
+        run: docker-compose up
