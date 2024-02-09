@@ -15,11 +15,10 @@ ARG SSL_KEYSTORE_FILE
 ARG SSL_PASSWORD
 ARG SSL_CRT_FILE
 ARG SSL_KEY_FILE
-ARG PORT
 
 COPY . .
 
-# generate ssl files, default is self signed localhost.p12 certificate
+# generate ssl files
 RUN apt-get install libssl-dev
 RUN openssl pkcs12 -in ./ssl/${SSL_KEYSTORE_FILE} -out ./ssl/${SSL_CRT_FILE} -clcerts -nokeys -passin pass:${SSL_PASSWORD}
 RUN openssl pkcs12 -in ./ssl/${SSL_KEYSTORE_FILE} -out ./ssl/${SSL_KEY_FILE} -nocerts -nodes  -passin pass:${SSL_PASSWORD}
@@ -43,12 +42,13 @@ ENV SSL_KEY_FILE_ENV=${SSL_KEY_FILE}
 ARG PORT
 ENV PORT_ENV=${PORT}
 
+# copy necessary files only
 COPY --from=0 /build ./build
 COPY --from=0 /package.json .
 COPY --from=0 /ssl .
 
 RUN npm i -g serve
-
+# run with https if HTTPS arg is set
 ENTRYPOINT if [ "$HTTPS_ENV" ] ; \
            then serve -s -L ./build -l ${PORT_ENV} -n --no-port-switching --ssl-cert ./${SSL_CRT_FILE_ENV} --ssl-key ./${SSL_KEY_FILE_ENV} ; \
            else serve -s -L ./build -l ${PORT_ENV} -n --no-port-switching ; \
