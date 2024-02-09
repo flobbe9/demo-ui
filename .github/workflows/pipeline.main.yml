@@ -47,6 +47,7 @@ jobs:
             SSL_CRT_FILE=word_light.crt.pem
             SSL_KEY_FILE=word_light.key.pem
             SSL_KEYSTORE_FILE=word_light.p12
+            HTTPS=true
 
   deploy_to_server:
     runs-on: ubuntu-latest
@@ -59,11 +60,9 @@ jobs:
           username: ${{ secrets.SSH_USER_NAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           debug: true
-          # pull new images, remove left overs from old images, kill processes on ports that I want to use, start microservice
+          # pull new images, remove left overs from old images, start microservice
           script: |
             docker-compose pull
             yes | docker rm $(docker container ls --all --filter=ancestor=$(docker images -f "dangling=true" -q) --format "{{.ID}}") --force
             yes | docker image rm $(docker images -f "dangling=true" -q)
-            pkill mysql
-            pkill httpd
             docker-compose up -d
