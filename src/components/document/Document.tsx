@@ -25,7 +25,6 @@ import WarnIcon from "../helpers/WarnIcon";
 
 // TODO: test barrier usability
 // TODO: check some seo criteria
-// TODO: update pipeline when dockerfile works
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";

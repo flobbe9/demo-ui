@@ -1,5 +1,5 @@
 # word_light_frontend
-Frontend for Word light api. Uses react.js 18 with typescript.
+Frontend for Word light api. Uses react 18 with typescript and node 20.11.0.
 
 # Run
 ### Locally
