@@ -130,8 +130,13 @@ export const SELECTED_STYLE: React.CSSProperties = {
 }
 
 
-/** format of a word file */
-export const DOCUMENT_SUFFIX = ".docx";
+export const DOCX_SUFFIX = ".docx";
+export const PDF_SUFFIX = ".pdf";
+export const DEFAULT_DOCUMENT_FILE_NAME = "Document_1";
+/** Matches any num of any start chars plus '.' plus suffix, i.e. 'asdf.docx' or §$%.pdf */
+export const DOCUMENT_FILE_SUFFIX_PATTERN = /.(docx|pdf)$/;
+/** Matches any num of alphanumeric chars or '-' or '.' or ' '*/
+export const DOCUMENT_FILE_PREFIX_PATTERN = /[\w\-. ]/;
 
 
 export const BUILDER_PATH = "/";
@@ -139,6 +144,48 @@ export const BUILDER_PATH = "/";
 export const SINGLE_COLUMN_LINE_CLASS_NAME = "SingleColumnLine";
 
 export const DONT_SHOW_AGAIN_COOKIE_NAME = "dontShowAgain";
+
+/** list of key codes that don't display a character when typed inside a text input */
+export const KEY_CODES_NO_TYPED_CHAR = [
+        17, // command
+        91, // meta / windows / mac
+        18, // alt
+        16, // shift
+        20, // capsLock
+        27, // escape
+        33, // page up
+        34, // page down
+        37, // arrowLeft
+        38, // arrowTop
+        39, // arrowRight
+        40, // arrowDown
+        13, // enter
+        8, // backspace
+        46, // delete
+        45, // insert
+        35, // end
+        36, // home
+        112, // F1
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123 // F12
+]
+
+/** alphabetic key codes of german only letters like 'ä' */
+export const KEY_CODES_GERMAN_LETTERS = [
+    222, // ä / Ä
+    192, // ö / Ö
+    186, // ü / Ü
+    219, // ß / ?
+]
 
 
 // ------------------- Archive

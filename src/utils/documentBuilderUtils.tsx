@@ -1,5 +1,6 @@
-import { DOCUMENT_SUFFIX, FONT_SIZES_WHOLE_SCALE, Side } from "../globalVariables";
-import { getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isNumberFalsy, isStringNumeric, log, logError, logWarn, stringToNumber } from "./basicUtils";
+import { DEFAULT_DOCUMENT_FILE_NAME, DOCX_SUFFIX, FONT_SIZES_WHOLE_SCALE, PDF_SUFFIX, Side, DOCUMENT_FILE_PREFIX_PATTERN, DOCUMENT_FILE_SUFFIX_PATTERN } from "../globalVariables";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isNumberFalsy, isStringNumeric, log, logError, logWarn, matchesAll, stringToNumber } from "./basicUtils";
 
 
 /**
@@ -250,37 +251,87 @@ export function getTextInputOverhead(textInputId: string): number {
     return paddingRight + paddingLeft + borderRightWidth + borderLefttWidth;
 }
 
+
 /**
- * Append {@link DOCUMENT_SUFFIX} if last chars dont match it.
+ * Trim file name and replace white space chars with '_'. 
+ * If valid suffix is missing, append one depending on ```pdf``` param
  * 
  * @param documentFileName to adjust
- * @returns fixed document file name (not altering givn param)
+ * @param pdf if true {@link PDF_SUFFIX} will be appended, else {@link DOCX_SUFFIX}
+ * @returns valid document file name (not altering given param) or null if file name param is invalid
  */
-export function adjustDocumentFileName(documentFileName: string): string {
+export function adjustDocumentFileName(documentFileName: string | undefined, pdf = false): string | null {
 
-    let fileName = documentFileName.trim();
+    const [isPrefixValid, isSuffixValid] = isFileNameValid(documentFileName);
+
+    // case: prefix invalid
+    if (!isPrefixValid) {
+        log(documentFileName + " is invalid")
+        return null;
+    }
+
+    let fileName = documentFileName!.trim();
 
     fileName = fileName.replaceAll(" ", "_");
+
+    // case: suffix invalid
+    if (!isSuffixValid)
+        // case: prefix + suffix invalid too
+        if (!matchesAll(fileName, DOCUMENT_FILE_PREFIX_PATTERN))
+            return null;
+
+        // case: prefix + suffix valid
+        else
+            fileName = fileName += pdf ? PDF_SUFFIX : DOCX_SUFFIX;
 
     return fileName;
 }
 
 
 /**
- * @param fileName to append suffix to
- * @returns given fileName with {@link DOCUMENT_SUFFIX} appended or unaltered fileName, if fileName is falsy
- *          or has suffix already
+ * @param fileName to check
+ * @return true if file name without suffix matches {@link DOCUMENT_FILE_PREFIX_PATTERN} and suffix matches
+ *         {@link DOCUMENT_FILE_SUFFIX_PATTERN}
+ * 
+ * @see {@link DOCX_SUFFIX}
+ * @see {@link PDF_SUFFIX}
  */
-export function appendDocxSuffix(fileName: string): string {
+export function isFileNameValid(fileName: string | undefined): [boolean, boolean] {
 
-    if (!fileName) {
-        logWarn("'appendDocxSuffix()' failed. 'fileName' is falsy: " + fileName);
-        return fileName;
-    }
+    const prefixAndSuffix = separateFileNameSuffix(fileName || "");
 
-    const suffix = fileName.substring(fileName.length - 5);
+    // case: falsy fileName
+    if (!prefixAndSuffix)
+        return [false, false];
 
-    return suffix !== DOCUMENT_SUFFIX ? fileName += DOCUMENT_SUFFIX : fileName;
+    const prefix = prefixAndSuffix[0];
+    const suffix = prefixAndSuffix[1];
+
+    return [matchesAll(prefix, DOCUMENT_FILE_PREFIX_PATTERN), suffix.match(DOCUMENT_FILE_SUFFIX_PATTERN) !== null];
+}
+
+
+/**
+ * @param fileName to get prefix and suffix from
+ * @returns a touple with```[prefix, suffix]``` where suffix is a substring starting at the last '.' of given file name. 
+ *          I.e. ```Hello.world.pdf``` would return ```["Hello.world", ".pdf"]```.
+ *          Return ```null``` if fileName is blank.
+ */
+function separateFileNameSuffix(fileName: string): [string, string] | null {
+
+    if (isBlank(fileName))
+        return null;
+
+    const lastDotIndex = fileName.lastIndexOf(".");
+
+    // case: no '.' at all
+    if (lastDotIndex === -1)
+        return [fileName, ""];
+
+    const prefix = fileName.substring(0, lastDotIndex);
+    const suffix = fileName.substring(lastDotIndex);
+
+    return [prefix, suffix];
 }
 
 

@@ -6,9 +6,9 @@ import { Orientation } from "../enums/Orientation";
 import { DOCUMENT_BUILDER_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLASS_NAME } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { downloadFileByUrl, isBlank, log, logApiResponse, logError, logWarn, stringToNumber } from "../utils/basicUtils";
-import { appendDocxSuffix, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPartFromDocumentId } from "../utils/documentBuilderUtils";
+import { adjustDocumentFileName, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPartFromDocumentId } from "../utils/documentBuilderUtils";
 import fetchJson from "../utils/fetchUtils";
-import { ApiExceptionFormat } from '../abstract/ApiExceptionFormat';
+import { ApiExceptionFormat, getApiExceptionInstance } from '../abstract/ApiExceptionFormat';
 
 
 // NOTE: remember to add empty line after table (in case of column break, or second table following)
@@ -20,11 +20,27 @@ import { ApiExceptionFormat } from '../abstract/ApiExceptionFormat';
  * @param fileName name of file to use for download. If empty, the response header will be searched for a filename
  * @returns error response as {@link ApiExceptionFormat} or nothing if all went well 
  */
-export async function downloadDocument(pdf: boolean, fileName?: string): Promise<ApiExceptionFormat | void> {
+export async function downloadDocument(pdf: boolean, fileName?: string, fetchBlob = true): Promise<ApiExceptionFormat | void> {
     
+    // case: file name should be defined beforehand
+    if (fileName || fetchBlob) {
+        let cleanFileName = adjustDocumentFileName(fileName, pdf);
+
+        // case: fileName invalid
+        if (!cleanFileName) {
+            logWarn("Failed to download document. 'fileName' invalid: " + fileName);
+            return getApiExceptionInstance(400, 
+                                           "Bad request", 
+                                           "Failed to download document. 'fileName' invalid: " + fileName,
+                                           "/api/buildAndWrite");
+        }   
+
+        fileName = cleanFileName;
+    }
+
     const url = DOCUMENT_BUILDER_BASE_URL + "/download?pdf=" + pdf;
 
-    return await downloadFileByUrl(url, fileName, true, "post");
+    return await downloadFileByUrl(url, fileName, fetchBlob, "post");
 }
 
 
@@ -34,11 +50,20 @@ export async function downloadDocument(pdf: boolean, fileName?: string): Promise
  * @param orientation of the document
  * @param numColumns number of columns in the document
  * @param docxFileName full name of the document (including suffix)
+ * @param pdf if true, a pdf file is returned by backend
  * @return promise of json response
  */
-export async function buildDocument(orientation: Orientation, numColumns: number, docxFileName: string, numSingleColumnLines = 0): Promise<any> {
+export async function buildDocument(orientation: Orientation, numColumns: number, docxFileName: string, numSingleColumnLines = 0, pdf = false): Promise<ApiExceptionFormat | Response> {
 
-    const fileName = docxFileName ? appendDocxSuffix(docxFileName) : "Dokument_1.docx";
+    const fileName = adjustDocumentFileName(docxFileName, pdf);
+
+    if (!fileName) {
+        logWarn("Failed to build document. 'fileName' invalid: " + fileName);
+        return getApiExceptionInstance(400, 
+                                        "Bad request", 
+                                        "Failed to build document. 'fileName' invalid: " + fileName,
+                                        "/api/buildAndWrite");
+    }
 
     const body: DocumentWrapper =  {
         content: buildContent(numColumns),

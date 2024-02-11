@@ -4,7 +4,7 @@ import "../../assets/styles/Document.css";
 import { confirmPageUnload, flashClass, getCssVariable, getJQueryElementByClassName, getJQueryElementById, getRandomString, insertString, isBlank, log, logError, logWarn, moveCursor, removeConfirmPageUnloadEvent, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
-import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE } from "../../globalVariables";
+import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE, DEFAULT_DOCUMENT_FILE_NAME } from "../../globalVariables";
 import ControlPanel from "./ControlPanel";
 import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
@@ -22,10 +22,10 @@ import WarnIcon from "../helpers/WarnIcon";
 // TODO: num lines calculation is wrong, if not all lines are filled with text
 // TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
 // TODO: font size of bottom lines of pages should be changable if empty
+// TODO: about page, link github and stuff
 
 // TODO: test barrier usability
 // TODO: check some seo criteria
-// TODO: shift tab does not work
 // TODO: what happens to db when docker restart?
 export default function Document(props) {
 
@@ -53,7 +53,7 @@ export default function Document(props) {
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
     const [numSingleColumnLines, setNumSingleColumnLines] = useState(0);
-    const [documentFileName, setDocumentFileName] = useState("Dokument1.docx");
+    const [documentFileName, setDocumentFileName] = useState(DEFAULT_DOCUMENT_FILE_NAME);
 
     /** <Paragraph /> component listens to changes of these states and attempts to append or remove a <TextInput /> at the end */
     const [paragraphIdAppendTextInput, setParagraphIdAppendTextInput] = useState<[string[], number]>([[""], 0]); // [paragraphIds, numTextInputsToAppend]
@@ -637,6 +637,7 @@ export default function Document(props) {
      * 
      * @param title heading to display inside popup, may be a plain string
      * @param message message to display inside popup, may be a plain string
+     * @param type reflects sevirity of popup and will define the style. Defualt is "Info". See {@link SubtlePopupType}.
      * @param duration time in ms that the popup should fade in, default is 100
      * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
      */

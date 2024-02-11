@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { ApiExceptionFormat } from "../abstract/ApiExceptionFormat";
-import { NUM_SPACES_PER_TAB, TAB_UNICODE } from "../globalVariables";
+import { KEY_CODES_GERMAN_LETTERS, NUM_SPACES_PER_TAB, TAB_UNICODE } from "../globalVariables";
 import { getCSSValueAsNumber } from "./documentBuilderUtils";
 import { fetchAnyReturnBlobUrl } from "./fetchUtils";
 
@@ -143,7 +143,7 @@ export function isBooleanFalsy(bool: boolean | null | undefined) {
  * @param str string to check
  * @returns true if given string is empty or only contains white space chars
  */
-export function isBlank(str: string): boolean {
+export function isBlank(str: string | undefined): boolean {
 
     if (!str && str !== "") {
         logError("Falsy input str: " + str);
@@ -204,7 +204,7 @@ export function insertString(targetString: string, insertionString: string, inse
 
 /**
  * @param keyCode code of the key e.g ```65``` for letter 'A'
- * @returns true if key would use space inside a text input. Includes 'Tab' and 'Space'
+ * @returns true if key is either a letter or a number
  */
 export function isKeyAlphaNumeric(keyCode: number): boolean {
 
@@ -215,8 +215,9 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 
     return (keyCode >= 48 && keyCode <= 57) || // numbers
            (keyCode >= 65 && keyCode <= 90) || // letters
-           keyCode === 32 || // "Space"
-           keyCode === 9; // "Tab"
+           KEY_CODES_GERMAN_LETTERS.includes(keyCode); // some german letters
+        //    keyCode === 32 || // "Space"
+        //    keyCode === 9; // "Tab"
 }
 
 
@@ -239,6 +240,10 @@ export function moveCursor(textInputId: string, start = 0, end = start): void {
 }
 
 
+/**
+ * @param textInputId of text input element to check
+ * @returns the current index of the cursor of given text input element or -1. If text is marked, the index of selection start is returned
+ */
 export function getCursorIndex(textInputId: string): number {
 
     const textInput = getJQueryElementById(textInputId);
@@ -474,7 +479,7 @@ export function removeConfirmPageUnloadEvent(): void {
  * @param holdTime time in ms that the border stays with given addClass and without given removeClass, default is 1000
  * @return promise that resolves once animation is finished
  */
-export async function flashClass(elementId: string, addClass: string, removeClass: string, holdTime = 1000) {
+export async function flashClass(elementId: string, addClass: string, removeClass?: string, holdTime = 1000) {
 
     return new Promise((res, rej) => {
         const element = getJQueryElementById(elementId);
@@ -490,7 +495,7 @@ export async function flashClass(elementId: string, addClass: string, removeClas
         
         const resetCallback = () => {
             element.removeClass(addClass)
-            element.addClass(removeClass);
+            element.addClass(removeClass || "");
         }
 
         // reset
