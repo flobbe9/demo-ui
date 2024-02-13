@@ -5,20 +5,20 @@ import Column from "./Column";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getJQueryElementById, getRandomString, includesIgnoreCase, log, logWarn, stringToNumber } from "../../utils/basicUtils";
-import { DONT_SHOW_AGAIN_COOKIE_NAME, MAX_NUM_COLUMNS, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
+import { DEFAULT_FONT_SIZE, DONT_SHOW_AGAIN_COOKIE_NAME, MAX_NUM_COLUMNS, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
 import { DocumentContext } from "./Document";
 import Paragraph from "./Paragraph";
-import { getDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
+import { getBrowserFontSizeByMSWordFontSize, getDocumentId, getNextTextInput, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import Popup from "../popups/Popup";
 import PopupWarnConfirm from "../popups/PopupWarnConfirm";
+import { applyTextInputStyle, getDefaultStyle } from "../../abstract/Style";
 
 
 /**
  * @since 0.0.1
  */
-// TODO: font size change in multiple columns with single line columns is buggy
-// TODO: handle font size change on connect lines
-// TODO: landscape 4th line from bottom disappears when font size change 55
+// TODO: fast line breaks cause bugs
+// TODO: vanishing mouse...
 export default function Page(props: {
     pageIndex: number,
     id?: string,
@@ -66,12 +66,18 @@ export default function Page(props: {
      * Currently only possible on first page.
      * 
      * @param lineIndex index of lines to connect on a page
+     * @param textInputId id of one of the text inputs to connect
      */
-    function connectColumnLines(lineIndex: number): void {
+    // TODO: flashes if one text input has different font size
+    function connectColumnLines(lineIndex: number, textInputId: string): void {
 
         // case: no columns to connect
         if (documentContext.numColumns === 1 && props.pageIndex !== 0)
             return;
+        
+        // handle possible font size change
+        const fontSizeDiff = documentContext.subtractMSWordFontSizes(getBrowserFontSizeByMSWordFontSize(DEFAULT_FONT_SIZE), $("#" + textInputId).css("fontSize"));
+        documentContext.handleFontSizeChange(fontSizeDiff, textInputId);
 
         const textInputsToBeConnected = getNthTextInputOfAllColumnsOfPage(lineIndex, 0); // only works because there's one text input per paragraph
         let focusedTextInputId: string | undefined;
@@ -98,12 +104,16 @@ export default function Page(props: {
      * Remove a singleColumnLine from state in Document component and enable all TextInputs with given lineIndex that were disabled.
      * 
      * @param lineIndex index of line to split into separate text inputs 
+     * @param textInputId id of the single column line text input
      */
-    function disconnectColumnLine(lineIndex: number): void {
+    function disconnectColumnLine(lineIndex: number, textInputId: string): void {
 
         // case: no columns to disconnect
         if (documentContext.numColumns === 1 && props.pageIndex !== 0)
             return;
+
+        const fontSizeDiff = documentContext.subtractMSWordFontSizes(getBrowserFontSizeByMSWordFontSize(DEFAULT_FONT_SIZE), $("#" + textInputId).css("fontSize"));
+        documentContext.handleFontSizeChange(fontSizeDiff, textInputId);
 
         const lastSingleColumnLineWasFocused = getLastSingleColumnLine()?.className.includes("textInputFocus");
         for (let i = 0; i < documentContext.numColumns; i++) {
@@ -151,11 +161,11 @@ export default function Page(props: {
     }
 
 
-    function toggleConnectWarnPopup(lineIndex: number, disconnect = false): void {  
+    function toggleConnectWarnPopup(lineIndex: number, textInputId: string, disconnect = false): void {  
         
         // define confirm callback
         const handleConfirm = () => {
-            disconnect ? disconnectColumnLine(lineIndex) : connectColumnLines(lineIndex);
+            disconnect ? disconnectColumnLine(lineIndex, textInputId) : connectColumnLines(lineIndex, textInputId);
             documentContext.hidePopup()
         }
 
@@ -227,6 +237,7 @@ export default function Page(props: {
     /**
      * Finds ```<TextInput />``` component on this page with id of given params that is hidden and adds/removes neccessary
      * classes for the text input to become valid again (see also {@link disableTextInput()}).
+     * Also reset styles of hidden text input.
      * 
      * @param columnIndex of column with the disabled text input
      * @param paragraphIndex of paragraph with the disabled text input
@@ -247,6 +258,8 @@ export default function Page(props: {
         if (!hiddenParagraph)
             return null;
 
+        applyTextInputStyle(hiddenTextInputId, getDefaultStyle());
+
         // enable paragraph
         hiddenParagraph.prop("id", getDocumentId("Paragraph", props.pageIndex, "", columnIndex, paragraphIndex));
         hiddenParagraph.addClass("Paragraph");
@@ -256,7 +269,7 @@ export default function Page(props: {
         const textInputId = getDocumentId("TextInput", props.pageIndex, "", columnIndex, paragraphIndex, textInputIndex);
         hiddenTextInput.prop("id", textInputId);
         hiddenTextInput.addClass("TextInput");
-        hiddenTextInput.removeClass(SINGLE_COLUMN_LINE_CLASS_NAME)
+        hiddenTextInput.removeClass(SINGLE_COLUMN_LINE_CLASS_NAME);
 
         return hiddenTextInput;
     }
@@ -331,5 +344,5 @@ export default function Page(props: {
 }
 
 export const PageContext = createContext({
-    toggleConnectWarnPopup: (lineIndex: number, disconnect?: boolean) => {}
+    toggleConnectWarnPopup: (lineIndex: number, textInputId: string, disconnect?: boolean) => {}
 });

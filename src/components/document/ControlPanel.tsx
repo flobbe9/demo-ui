@@ -57,7 +57,7 @@ export default function ControlPanel(props: {
         if (!matchesAll(input.prop("value") + typedChar, DOCUMENT_FILE_PREFIX_PATTERN)) {
             event.preventDefault();
 
-            documentContext.showSubtlePopup("Dateiname ungültig", `Du kannst das Zeichen '${event.key}' hier nicht benutzen.`, "Warn");
+            documentContext.showSubtlePopup("Dateiname", `Du kannst das Zeichen '${event.key}' nicht im Dateinamen benutzen.`, "Warn");
 
             flashClass(input.prop("id"), "invalid");
 

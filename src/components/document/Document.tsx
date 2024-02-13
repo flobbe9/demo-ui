@@ -24,9 +24,12 @@ import WarnIcon from "../helpers/WarnIcon";
 // TODO: font size of bottom lines of pages should be changable if empty
 // TODO: about page, link github and stuff
 
-// TODO: test barrier usability
+// TODO: test barrier usability (alt, title etc.)
+// TODO: handle tab navigation correctly (Popups, stylepanel etc.)
 // TODO: check some seo criteria
-// TODO: what happens to db when docker restart?
+// TODO: what happens to db when docker restart? Create volume
+// TODO: what is the process behind 443 (tcp6)? How to run paralel
+// TODO: lookup portainer
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -73,12 +76,11 @@ export default function Document(props) {
 
 
     const context = {
-        isTextInputHeading,
+        isTextInputSingleColumnLine,
         refreshSingleColumnLines, 
         setRefreshSingleColumnLines,
 
-        handleFontSizeTooLarge,
-        handleFontSizeTooSmall,
+        handleFontSizeChange,
         getNumLinesDeviation,
         subtractMSWordFontSizes,
         appendTextInput,
@@ -375,6 +377,38 @@ export default function Document(props) {
 
 
     /**
+     * Calculate number of lines deviation in column of given ```documentId``` and append or remove some lines to even out the difference.
+     *  
+     * @param fontSizeDiff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
+     *                     stated as msWord font size. 
+     * @param documentId id of text input where the font size has changed, default is ```selectedTextInputId```
+     * @returns false if the fontSize should not be changed, else true
+     */
+    // TODO: does not work for column !== 0
+    function handleFontSizeChange(fontSizeDiff: number, documentId = selectedTextInputId): boolean {
+
+        const textInput = getJQueryElementById(documentId);
+
+        // case: falsy ids
+        if (!textInput)
+            return false;
+        
+        const numLinesDiff = getNumLinesDeviation(documentId, fontSizeDiff);
+        let isAbleToHandleFontSizeChange = true;
+        
+        // case: font size too large
+        if (numLinesDiff > 0) {
+            isAbleToHandleFontSizeChange = handleFontSizeTooLarge(false, numLinesDiff, documentId, true)
+
+        // case: font size too small
+        } else if (numLinesDiff < 0)
+            handleFontSizeTooSmall(numLinesDiff, documentId);
+
+        return isAbleToHandleFontSizeChange;
+    }
+
+
+    /**
      * Try to remove text inputs at the end of the column of given textInputId. Don't remove any text input if at least 
      * one is not blank and try to flash text input border instead.
      * 
@@ -413,6 +447,9 @@ export default function Document(props) {
         if (areTextInputsBlank && !areTextInputsToDeleteFocused) {
             const paragraphIndex = getParagraphIndexOfLastTextInputInColumn(documentId);
             const paragraphIds = getParagraphIdsForFontSizeChange(documentId, paragraphIndex);
+
+            log(paragraphIds)
+
             setParagraphIdRemoveTextInput([paragraphIds, deleteCount]);
 
         // case: last input not blank
@@ -435,7 +472,7 @@ export default function Document(props) {
      * 
      * @param numLinesToAdd number of lines of {@link DEFAULT_FONT_SIZE} that could fit at the bottom of selected column
      */
-    function handleFontSizeTooSmall(numLinesToAdd: number): void {
+    function handleFontSizeTooSmall(numLinesToAdd: number, documentId = selectedTextInputId): void {
 
         // case: some lines to add
         if (Math.abs(numLinesToAdd) !== 0) {
@@ -445,7 +482,7 @@ export default function Document(props) {
                 return;
             
             // get all paragraphs to 
-            const paragraphIds = getParagraphIdsForFontSizeChange();
+            const paragraphIds = getParagraphIdsForFontSizeChange(documentId);
             setParagraphIdAppendTextInput([paragraphIds, Math.abs(numLinesToAdd)]);
         }
     }
@@ -524,16 +561,16 @@ export default function Document(props) {
      * @param textInputId to check
      * @returns true if ```<TextInput />``` has {@link SINGLE_COLUMN_LINE_CLASS_NAME}
      */
-    function isTextInputHeading(textInputId = selectedTextInputId): boolean {
+    function isTextInputSingleColumnLine(textInputId = selectedTextInputId): boolean {
 
         if (isBlank(textInputId)) {
-            logWarn("'isTextInputHeading()' failed. 'textInputId' is blank")
+            logWarn("'isTextInputSingleColumnLine()' failed. 'textInputId' is blank")
             return false;
         }
 
         const textInput = $("#" + textInputId);
         if (!textInput.length) {
-            logWarn("'isTextInputHeading()' failed. 'textInput' is falsy")
+            logWarn("'isTextInputSingleColumnLine()' failed. 'textInput' is falsy")
             return false;
         }
 
@@ -544,14 +581,14 @@ export default function Document(props) {
     /**
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
      * @param paragraphIndex index of paragraph in column, relevant if only one column is changed
-     * @param isSingleColumnLine true if text input component is heading
+     * @param isSingleColumnLine true if text input component is singleColumnLine
      * @returns array of paragraph ids that should be considered for font size change
      */
-    function getParagraphIdsForFontSizeChange(documentId = selectedTextInputId, paragraphIndex?: number, isSingleColumnLine = isTextInputHeading()): string[] {
+    function getParagraphIdsForFontSizeChange(documentId = selectedTextInputId, paragraphIndex?: number, isSingleColumnLine = isTextInputSingleColumnLine(documentId)): string[] {
 
         const paragraphIds: string[] = [];
 
-        // case: is heading
+        // case: is singleColumnLine
         if (isSingleColumnLine) {
             const pageIndex = stringToNumber(getPartFromDocumentId(documentId, 1));
             
@@ -635,7 +672,7 @@ export default function Document(props) {
     /**
      * Display subtle popup, set content and set timeout to fade out.
      * 
-     * @param title heading to display inside popup, may be a plain string
+     * @param title singleColumnLine to display inside popup, may be a plain string
      * @param message message to display inside popup, may be a plain string
      * @param type reflects sevirity of popup and will define the style. Defualt is "Info". See {@link SubtlePopupType}.
      * @param duration time in ms that the popup should fade in, default is 100
@@ -897,12 +934,11 @@ export default function Document(props) {
 
 const paragraphIdAppendExample: [string[], number] = [[""], 0];
 export const DocumentContext = createContext({
-    isTextInputHeading: (textInputId?: string): boolean => {return false},
+    isTextInputSingleColumnLine: (textInputId?: string): boolean => {return false},
     refreshSingleColumnLines: false, 
     setRefreshSingleColumnLines: (bool: boolean) => {},
 
-    handleFontSizeTooLarge: (flash?: boolean, deleteCount?: number, documentId?: string, checkNextTextInputFocused?: boolean): boolean => {return false},
-    handleFontSizeTooSmall: (numLinesToAdd: number) => {},
+    handleFontSizeChange: (fontSizeDiff: number, textInputId?: string): boolean => {return false},
     getNumLinesDeviation: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},
     subtractMSWordFontSizes: (fontSize: number | string, fontSize2: number | string): number => {return 0},
     appendTextInput: (textInputs: React.JSX.Element[], setTextInputs: (textInputs: React.JSX.Element[]) => void, pageIndex: number, columnIndex: number, paragraphIndex: number, numTextInputs?: number): React.JSX.Element[] => {return []},

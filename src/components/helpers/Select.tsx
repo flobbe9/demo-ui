@@ -3,7 +3,7 @@ import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { equalsIgnoreCase, flashClass, flashCss, getJQueryElementById, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
-import { MAX_FONT_SIZE, MIN_FONT_SIZE, isMobileWidth } from "../../globalVariables";
+import { MAX_FONT_SIZE, MIN_FONT_SIZE } from "../../globalVariables";
 import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getMSWordFontSizeByBrowserFontSize } from "../../utils/documentBuilderUtils";
 import { DocumentContext } from "../document/Document";
 
@@ -147,6 +147,7 @@ export default function Select(props: {
     }
 
 
+    // TODO: only apply if value has changed (ignore case)
     function handleLabelKeyUp(event): void {
 
         if (event.key === "Enter")
@@ -167,9 +168,9 @@ export default function Select(props: {
             // select
             handleSelect(event, isFontSize ? inputValue + "px" : inputValue, inputValue);
 
-            // refocus on select input
-            if (isKeyAlphaNumeric(event.keyCode) || event.key === "Shift" || event.key === "CapsLock") 
-                setTimeout(() => $(labelRef.current!).trigger("focus"), 50)
+            // refocus on selectInput
+            if (isKeyAlphaNumeric(event.keyCode) || event.key === "Shift" || event.key === "CapsLock" || event.key === "Backspace") 
+                setTimeout(() => $(labelRef.current!).trigger("focus"), 0.1)
         }
     }
 

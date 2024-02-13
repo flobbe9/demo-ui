@@ -12,6 +12,7 @@ import PopupWarnConfirm from "./PopupWarnConfirm";
 import { DocumentContext } from "../document/Document";
 import PopupContainer from "./PopupContainer";
 import { DONT_SHOW_AGAIN_COOKIE_NAME } from "../../globalVariables";
+import { getDefaultStyle } from "../../abstract/Style";
 
 
 /**
@@ -54,6 +55,7 @@ export default function PopupOrientationConfig(props: {
             // reset all pages
             documentContext.setPages([]);
             setTimeout(() => documentContext.setPages(documentContext.initPages()), 0.1);
+            documentContext.setSelectedTextInputStyle(getDefaultStyle());
         }, 100);
     }
 

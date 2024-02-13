@@ -72,6 +72,8 @@ export default forwardRef(function StylePanel(props: {
     }
 
 
+    // TODO: note if font size is out of bounds
+    // TODO: handle key down for select font size input, validate
     function handleFontSizeSelect(fontSize: string): void {
         
         // case: text too long for text input length      
@@ -81,18 +83,9 @@ export default forwardRef(function StylePanel(props: {
             return;
         }
 
+        // handle font size change
         const diff = documentContext.subtractMSWordFontSizes(getCSSValueAsNumber(fontSize, 2), documentContext.selectedTextInputStyle.fontSize);
-        const numLinesDiff = documentContext.getNumLinesDeviation(documentContext.selectedTextInputId, diff);
-
-        // case: font size too large
-        if (numLinesDiff > 0) {
-            // case: dont increase font size
-            if (!documentContext.handleFontSizeTooLarge(true, numLinesDiff))
-                return;
-        
-        // case: font size too small
-        } else if (numLinesDiff < 0)
-            documentContext.handleFontSizeTooSmall(numLinesDiff);
+        documentContext.handleFontSizeChange(diff);
 
         documentContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
         documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
