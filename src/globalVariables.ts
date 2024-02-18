@@ -51,6 +51,8 @@ export const RAW_FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28,
 
 export const MAX_FONT_SIZE = RAW_FONT_SIZES[RAW_FONT_SIZES.length - 1];
 export const MIN_FONT_SIZE = RAW_FONT_SIZES[0];
+/** only numbers, min 8, max 72 */
+export const FONT_SIZE_REGEX = /^[8-9]$|^[1-6][0-9]$|^[7][0-2]$/;
 
 /** Formatted like: ```[msWordFontSize, browserFontSize]```. To get browserFontSize add a certain diff to even out font style difference in MS Word */
 export const FONT_SIZES = RAW_FONT_SIZES.map(fontSize => [fontSize, fontSize + getFontSizeDiffInWord(fontSize)]);
@@ -79,15 +81,15 @@ export const NO_TEXT_INPUT_SELECTED = "Wähle zuerst ein Texteingabefeld aus.";
 export const DEFAULT_FONT_SIZE = 14;
 
 /** Number of empty lines on top of every column, becuase of backend */
-const numFillerLines = 1;
+const NUM_FILLER_LINES = 1;
 
 /** assuming a fontSize of 14 */
-export const NUM_LINES_PROTRAIT = 41 - numFillerLines;
+export const NUM_LINES_PROTRAIT = 41 - NUM_FILLER_LINES;
 /** assuming a fontSize of 19 */
 export const MAX_FONT_SIZE_SUM_PORTRAIT = NUM_LINES_PROTRAIT * DEFAULT_FONT_SIZE;
 
 /** assuming a fontSize of 14 */
-export const NUM_LINES_LANDSCAPE = 29 - numFillerLines;
+export const NUM_LINES_LANDSCAPE = 29 - NUM_FILLER_LINES;
 /** assuming a fontSize of 19 */
 export const MAX_FONT_SIZE_SUM_LANDSCAPE = NUM_LINES_LANDSCAPE * DEFAULT_FONT_SIZE;
 
@@ -191,39 +193,39 @@ export const KEY_CODES_GERMAN_LETTERS = [
 // ------------------- Archive
 
 const NUM_LINES_PROTRAIT_OLD: ReadonlyArray<Object> = [{
-    8: 76 - numFillerLines,
-    9: 68 - numFillerLines,
-    10: 61 - numFillerLines,
-    11: 54 - numFillerLines,
-    12: 51 - numFillerLines,
-    14: 44 - numFillerLines,
-    16: 38 - numFillerLines,
-    18: 34 - numFillerLines,
-    20: 31 - numFillerLines,
-    22: 28 - numFillerLines,
-    24: 26 - numFillerLines,
-    26: 24 - numFillerLines,
-    28: 22 - numFillerLines,
-    36: 17 - numFillerLines,
-    48: 13 - numFillerLines,
-    72: 9 - numFillerLines
+    8: 76 - NUM_FILLER_LINES,
+    9: 68 - NUM_FILLER_LINES,
+    10: 61 - NUM_FILLER_LINES,
+    11: 54 - NUM_FILLER_LINES,
+    12: 51 - NUM_FILLER_LINES,
+    14: 44 - NUM_FILLER_LINES,
+    16: 38 - NUM_FILLER_LINES,
+    18: 34 - NUM_FILLER_LINES,
+    20: 31 - NUM_FILLER_LINES,
+    22: 28 - NUM_FILLER_LINES,
+    24: 26 - NUM_FILLER_LINES,
+    26: 24 - NUM_FILLER_LINES,
+    28: 22 - NUM_FILLER_LINES,
+    36: 17 - NUM_FILLER_LINES,
+    48: 13 - NUM_FILLER_LINES,
+    72: 9 - NUM_FILLER_LINES
 }];
 
 const NUM_LINES_LANDSCAPE_OLD: ReadonlyArray<Object> = [{
-    8: 53 - numFillerLines,
-    9: 47 - numFillerLines,
-    10: 43 - numFillerLines,
-    11: 39 - numFillerLines,
-    12: 36 - numFillerLines,
-    14: 31 - numFillerLines,
-    16: 28 - numFillerLines,
-    18: 25 - numFillerLines,
-    20: 23 - numFillerLines,
-    22: 21 - numFillerLines,
-    24: 19 - numFillerLines,
-    26: 18 - numFillerLines,
-    28: 17 - numFillerLines,
-    36: 14 - numFillerLines,
-    48: 11 - numFillerLines,
-    72: 8 - numFillerLines
+    8: 53 - NUM_FILLER_LINES,
+    9: 47 - NUM_FILLER_LINES,
+    10: 43 - NUM_FILLER_LINES,
+    11: 39 - NUM_FILLER_LINES,
+    12: 36 - NUM_FILLER_LINES,
+    14: 31 - NUM_FILLER_LINES,
+    16: 28 - NUM_FILLER_LINES,
+    18: 25 - NUM_FILLER_LINES,
+    20: 23 - NUM_FILLER_LINES,
+    22: 21 - NUM_FILLER_LINES,
+    24: 19 - NUM_FILLER_LINES,
+    26: 18 - NUM_FILLER_LINES,
+    28: 17 - NUM_FILLER_LINES,
+    36: 14 - NUM_FILLER_LINES,
+    48: 11 - NUM_FILLER_LINES,
+    72: 8 - NUM_FILLER_LINES
 }];

@@ -27,6 +27,7 @@ import { AppendRemoveTextInputWrapper, getDefaultAppendRemoveTextInputWrapper } 
 // TODO: check some seo criteria
 // TODO: lookup portainer
 
+// TODO: enter makes line break (only accross one column)
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -48,7 +49,7 @@ export default function Document(props) {
 
     const [pages, setPages] = useState<React.JSX.Element[]>(initPages());
     const [selectedTextInputId, setSelectedTextInputId] = useState("");
-    const [selectedTextInputStyle, setSelectedTextInputStyleState] = useState(getDefaultStyle());
+    const [selectedTextInputStyle, setSelectedTextInputStyleState] = useState<Style>(getDefaultStyle());
 
     const [orientation, setOrientation] = useState(Orientation.PORTRAIT);
     const [numColumns, setNumColumns] = useState(1);
@@ -61,9 +62,11 @@ export default function Document(props) {
     
     /** serves as notification for the singleColumnLines state in ```<Page />``` component to refresh */
     const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
+    /** serves as notification for columns state in ```<Page />``` component to refresh */
+    const [refreshColumns, setRefreshColumns] = useState(false);
 
-    const [isWindowWidthFitLandscape, setIsWindowWidthFitLandscape] = useState(checkIsWindowWidthFitLandscape());
-    const [isWindowWidthFitPortrait, setIsWindowWidthFitPortrait] = useState(checkIsWindowWidthFitPortrait());
+    const [isWindowWidthFitLandscape, setIsWindowWidthFitLandscape] = useState<boolean>(true);
+    const [isWindowWidthFitPortrait, setIsWindowWidthFitPortrait] = useState<boolean>(true);
 
     const windowScrollY = useRef(0);
     const documentPopupRef = useRef(null);
@@ -75,6 +78,9 @@ export default function Document(props) {
         isTextInputSingleColumnLine,
         refreshSingleColumnLines, 
         setRefreshSingleColumnLines,
+
+        refreshColumns,
+        setRefreshColumns,
 
         handleFontSizeChange,
         getNumLinesDeviation,
@@ -138,6 +144,9 @@ export default function Document(props) {
         setCssVariable("pageWidthPortrait", PAGE_WIDTH_PORTRAIT);
         setCssVariable("pageWidthLandscape", PAGE_WIDTH_LANDSCAPE);
         setCssVariable("controlPanelMenuTop", getCSSValueAsNumber($(".ControlPanel").css("height"), 2) + 5 + "px");
+
+        setIsWindowWidthFitLandscape(checkIsWindowWidthFitLandscape());
+        setIsWindowWidthFitPortrait(checkIsWindowWidthFitPortrait());
 
         // clean up
         return () => {
@@ -365,7 +374,7 @@ export default function Document(props) {
             // case: is single column line
             if (isTextInputSingleColumnLine) {
                 // consider aligned columns as well
-                const nonSingleColumnLineTextInputId = getNonSingleLineColumnTextInputIdInSameColumn(textInput.id);
+                const nonSingleColumnLineTextInputId = getNonSingleColumnLineTextInputIdInSameColumn(textInput.id);
                 const alignedTextInputIds = getAlignedTextInputIds(nonSingleColumnLineTextInputId);
 
                 // add column ids
@@ -414,7 +423,7 @@ export default function Document(props) {
 
         // case: single column line
         if (isTextInputSingleColumnLine) {
-            const nonSingleColumnLineTextInputId = getNonSingleLineColumnTextInputIdInSameColumn(textInputId);
+            const nonSingleColumnLineTextInputId = getNonSingleColumnLineTextInputIdInSameColumn(textInputId);
             getAlignedTextInputIds(nonSingleColumnLineTextInputId).forEach(textInputId => columnIds.add(documentIdToColumnId(textInputId)));
         
         // case: normal line
@@ -822,7 +831,7 @@ export default function Document(props) {
      * @param documentId to get page index and column index
      * @returns a text input id of a text input on the same page in the same column that is not a signle column line
      */
-    function getNonSingleLineColumnTextInputIdInSameColumn(documentId: string): string {
+    function getNonSingleColumnLineTextInputIdInSameColumn(documentId: string): string {
 
         const pageIndex = stringToNumber(getPartFromDocumentId(documentId, 1));
         const columnIndex = stringToNumber(getPartFromDocumentId(documentId, 2));
@@ -868,6 +877,9 @@ export const DocumentContext = createContext({
     isTextInputSingleColumnLine: (textInputId?: string): boolean => {return false},
     refreshSingleColumnLines: false, 
     setRefreshSingleColumnLines: (bool: boolean) => {},
+
+    refreshColumns: false,
+    setRefreshColumns: (bool: boolean) => {},
 
     handleFontSizeChange: (fontSizeDiff: number, textInputId?: string): boolean => {return false},
     getNumLinesDeviation: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},

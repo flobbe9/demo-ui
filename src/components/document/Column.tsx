@@ -10,6 +10,9 @@ import { getDocumentId } from "../../utils/documentBuilderUtils";
 import TextInput from "./TextInput";
 
 
+/**
+ * @since 0.0.1
+ */
 export default function Column(props: {
     pageIndex: number,
     columnIndex: number,
@@ -24,7 +27,7 @@ export default function Column(props: {
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
     
-    const [textInputs, setTextInputs] = useState(initTextInputs());
+    const [textInputs, setTextInputs] = useState<React.JSX.Element[]>([]);
 
     const componentRef = useRef(null);
     
@@ -32,6 +35,7 @@ export default function Column(props: {
 
 
     useEffect(() => {
+        setTextInputs(initTextInputs());
         addSpaceBetweenColumns();
 
     }, []);
@@ -45,6 +49,9 @@ export default function Column(props: {
     
 
     useEffect(() => {
+        // TODO: delete singlce column lines too
+        // if column index === 0 && textinputs.length === 0
+            // pagecontext.removelastsinglecolumnline
         if (documentContext.removeTextInputWrapper.columnIds.has(id))
             removeTextInputs(documentContext.removeTextInputWrapper.num);
 

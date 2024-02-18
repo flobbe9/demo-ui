@@ -45,18 +45,17 @@ export default function PopupOrientationConfig(props: {
 
 
     function handleSubmit(event): void {
+        
+        // reset all columns
+        documentContext.setRefreshColumns(!documentContext.refreshColumns);
 
+        // update selectedTextInputStyle state
+        documentContext.setSelectedTextInputStyle(getDefaultStyle());
+
+        // update orientation state
         documentContext.setOrientation(orientation);
 
-        documentContext.hidePopup(0);
-
-        // wait for popup to be hidden
-        setTimeout(() => {
-            // reset all pages
-            documentContext.setPages([]);
-            setTimeout(() => documentContext.setPages(documentContext.initPages()), 0.1);
-            documentContext.setSelectedTextInputStyle(getDefaultStyle());
-        }, 100);
+        documentContext.hidePopup();
     }
 
 
@@ -79,7 +78,7 @@ export default function PopupOrientationConfig(props: {
 
 
     return (
-        <div id={id} className={className}> 
+        <div id={id} className={className + " dontMarkText"}> 
             <div className="popupHeader flexRightStart">
                 <i className="fa-solid fa-xmark fa-xl closeIcon hideDocumentPopup"></i>
             </div>
@@ -88,7 +87,7 @@ export default function PopupOrientationConfig(props: {
                 <h2 className="textCenter">Ausrichtung ändern</h2>
                 
                 <div className="bodyContent flexCenter">
-                    <div id="orientationContainer" className="orientationContainer flexCenter dontMarkText">
+                    <div id="orientationContainer" className="orientationContainer flexCenter">
                         <div className="col-12 col-sm-4">
                             <RadioButton id="Portrait"
                                         className="flexCenter" 

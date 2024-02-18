@@ -57,14 +57,13 @@ export default function PopupColumnConfig(props: {
 
     function handleSubmit(event): void {
 
-        // update column state
+        // update num columns state
         documentContext.setNumColumns(selectedNumColumns);
 
-        // update pages state
-        documentContext.setPages([]);
-        setTimeout(() => 
-            documentContext.setPages(documentContext.initPages()), 1);
+        // update columns state
+        documentContext.setRefreshColumns(!documentContext.refreshColumns);
 
+        // update selectedTextInputStyle state
         documentContext.setSelectedTextInputStyle(getDefaultStyle());
 
         documentContext.hidePopup();
@@ -90,7 +89,7 @@ export default function PopupColumnConfig(props: {
 
 
     return (
-        <div id={id} className={className}>
+        <div id={id} className={className + " dontMarkText"}>
             <div className="popupHeader flexRightStart">
                 <i className="fa-solid fa-xmark fa-xl closeIcon hideDocumentPopup"></i>
             </div>
@@ -98,7 +97,7 @@ export default function PopupColumnConfig(props: {
             <div className="popupBody">
                 <h2 className="textCenter">Spalten Anzahl</h2>
                 <div className="bodyContent flexCenter">
-                    <div id="numColumnsContainer" className="numColumnsContainer flexCenter dontMarkText">
+                    <div id="numColumnsContainer" className="numColumnsContainer flexCenter">
                         <div className="radioContainer ms-1 m-2">
                             <RadioButton id="OneColumn" 
                                         labelClassName={"whiteButton " + orientationClassName}

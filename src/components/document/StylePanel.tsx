@@ -9,7 +9,7 @@ import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { flashClass, isBlank, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
-import { FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
+import { FONT_FAMILIES, FONT_SIZE_REGEX, MAX_FONT_SIZE, MIN_FONT_SIZE, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
 import Popup from "../popups/Popup";
 import PopupColumnConfig from "../popups/PopupColumnConfig";
@@ -284,9 +284,9 @@ export default forwardRef(function StylePanel(props: {
                                     maxHeight: "50vb"
                                 }}
                                 handleSelect={handleFontSizeSelect}
-                                title="Schriftgröße"
+                                title={`Schriftgröße (min ${MIN_FONT_SIZE}, max ${MAX_FONT_SIZE})`}
                                 options={RAW_FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
-                                pattern={/[0-9]/}
+                                pattern={FONT_SIZE_REGEX}
                                 />
                     </div>
 

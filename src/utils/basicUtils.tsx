@@ -252,16 +252,6 @@ export function getCursorIndex(textInputId: string): number {
 }
 
 
-/**
- * @param key name of the cookie
- * @returns the cookie value as string
- */
-function getCookie(key: string): string {
-
-    return document.cookie.split('; ').filter(row => row.startsWith(key)).map(c=>c.split('=')[1])[0];
-}
-
-
 function confirmPageUnloadEvent(event): void {
 
     event.preventDefault();
@@ -562,10 +552,28 @@ export function replaceAtIndex(str: string, replacement: string, startIndex: num
 /**
  * @param expected first value to compare
  * @param actual second value to compare
- * @returns ```expected === actual``` after calling ```trim()``` and ```toLowerCase()``` on both values.
+ * @returns ```expected === actual``` after calling ```toLowerCase()``` on both values.
  *          Types wont be considered: ```"1" === 1 = true```
  */
 export function equalsIgnoreCase(expected: string | number, actual: string | number): boolean {
+
+    if (!expected || !actual)
+        return expected === actual;
+
+    expected = expected.toString().toLowerCase();
+    actual = actual.toString().toLowerCase();
+
+    return expected === actual;
+}
+
+
+/**
+ * @param expected first value to compare
+ * @param actual second value to compare
+ * @returns ```expected === actual``` after calling ```trim()``` and ```toLowerCase()``` on both values.
+ *          Types wont be considered: ```"1" === 1 = true```
+ */
+export function equalsIgnoreCaseTrim(expected: string | number, actual: string | number): boolean {
 
     if (!expected || !actual)
         return expected === actual;
@@ -586,9 +594,26 @@ export function includesIgnoreCase(arr: (string | number)[] | string, value: str
 
     // case: arr is string
     if (typeof arr === "string")
-        return arr.trim().toLowerCase().includes(value.toString().trim().toLowerCase());
+        return arr.toLowerCase().includes(value.toString().toLowerCase());
 
     const result = arr.find(val => equalsIgnoreCase(val, value));
+
+    return result ? true : false;
+}
+
+
+/**
+ * @param arr array to search in
+ * @param value string or number to look for
+ * @returns true if value is included in array. Uses {@link equalsIgnoreCaseTrim} for comparison instead of ```includes()```.
+ */
+export function includesIgnoreCaseTrim(arr: (string | number)[] | string, value: string | number): boolean {
+        
+    // case: arr is string
+    if (typeof arr === "string")
+        return arr.trim().toLowerCase().includes(value.toString().trim().toLowerCase());
+
+    const result = arr.find(val => equalsIgnoreCaseTrim(val, value));
 
     return result ? true : false;
 }

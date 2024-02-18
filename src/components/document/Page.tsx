@@ -1,4 +1,4 @@
-import React, { useContext, useState, createContext, useRef } from "react";
+import React, { useContext, useState, createContext, useRef, useEffect } from "react";
 import useCookie from "react-use-cookie";
 import "../../assets/styles/Page.css";
 import Column from "./Column";
@@ -30,7 +30,7 @@ export default function Page(props: {
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
 
-    const [columns, setColumns] = useState(initColumns());
+    const [columns, setColumns] = useState<React.JSX.Element[]>([]);
     const [singleColumnLines, setSingleColumnLines] = useState<React.JSX.Element[]>([]);
 
     const dontShowAgainConnectWarningCookieId = useRef("ConnectLinesWarning");
@@ -41,6 +41,20 @@ export default function Page(props: {
     const context = {
         handleConnectDisconnectTextInput,
     }
+
+
+    useEffect(() => {
+        setColumns(initColumns());
+
+    }, [])
+
+
+    useEffect(() => {
+        // reset columns
+        resetColumns();
+        resetSingleColumnLines();
+            
+    }, [documentContext.refreshColumns])
 
 
     function initColumns(): React.JSX.Element[] {
@@ -55,6 +69,20 @@ export default function Page(props: {
             columns.push(<Column key={i} pageIndex={props.pageIndex} columnIndex={i}/>);
 
         return columns;
+    }
+
+    
+    function resetSingleColumnLines(): void {
+
+        setSingleColumnLines([]);
+        documentContext.setNumSingleColumnLines(0);
+    }
+
+
+    function resetColumns(): void {
+
+        setColumns([]);
+        setTimeout(() => setColumns([...initColumns()]), 100);
     }
 
     

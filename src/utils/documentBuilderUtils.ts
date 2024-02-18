@@ -1,4 +1,4 @@
-import { DOCX_SUFFIX, FONT_SIZES_WHOLE_SCALE, PDF_SUFFIX, Side, DOCUMENT_FILE_PREFIX_PATTERN, DOCUMENT_FILE_SUFFIX_PATTERN } from "../globalVariables";
+import { DOCX_SUFFIX, FONT_SIZES_WHOLE_SCALE, PDF_SUFFIX, Side, DOCUMENT_FILE_PREFIX_PATTERN, DOCUMENT_FILE_SUFFIX_PATTERN, DEFAULT_DOCUMENT_FILE_NAME } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isNumberFalsy, isStringNumeric, log, logError, logWarn, matchesAll, stringToNumber } from "./basicUtils";
 
@@ -270,6 +270,10 @@ export function getTextInputOverhead(textInputId: string): number {
  */
 export function adjustDocumentFileName(documentFileName: string | undefined, pdf = false): string | null {
 
+    // case: no file name passed at all
+    if (isBlank(documentFileName))
+        documentFileName = DEFAULT_DOCUMENT_FILE_NAME;
+
     const [isPrefixValid, isSuffixValid] = isFileNameValid(documentFileName);
 
     // case: prefix invalid
@@ -282,7 +286,7 @@ export function adjustDocumentFileName(documentFileName: string | undefined, pdf
 
     // case: suffix invalid
     if (!isSuffixValid)
-        // case: prefix + suffix invalid too
+        // case: prefix + suffix both invalid
         if (!matchesAll(fileName, DOCUMENT_FILE_PREFIX_PATTERN))
             return null;
 

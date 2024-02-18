@@ -3,7 +3,6 @@ import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { equalsIgnoreCaseTrim, flashClass, flashCss, getJQueryElementById, includesIgnoreCase, includesIgnoreCaseTrim, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
-import { FONT_SIZE_REGEX, KEY_CODES_NO_TYPED_CHAR, MAX_FONT_SIZE, MIN_FONT_SIZE } from "../../globalVariables";
 import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getMSWordFontSizeByBrowserFontSize } from "../../utils/documentBuilderUtils";
 import { DocumentContext } from "../document/Document";
 

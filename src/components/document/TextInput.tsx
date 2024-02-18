@@ -25,8 +25,6 @@ import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getDocumentId,
 // TODO: add table
 // TODO: add more pages
 
-// TODO: move cursor to prev line on arrow left at char 1 
-// TODO: move cursor to next line on arrow right at char last - 1
 // TODO: move cursor to same char index or end on arrow up / down
 export default function TextInput(props: {
     pageIndex: number,
@@ -113,7 +111,13 @@ export default function TextInput(props: {
         else if (eventKey === "ArrowUp")
             focusPrevTextInput(event);
 
-        else if (eventKey === "Backspace")
+        else if (eventKey === "ArrowLeft")
+            handleArrowLeft(event);
+
+        else if (eventKey === "ArrowRight")
+            handleArrowRight(event);
+
+        else if (eventKey === "ArrowLeft")
             handleBackspace(event);
     }
 
@@ -176,6 +180,28 @@ export default function TextInput(props: {
 
         // toggle very left connect button
         $("#ButtonConnectLines" + leftTextInputId).fadeIn(100);
+    }
+
+
+    function handleArrowLeft(event): void {
+
+        const cursorIndex = getCursorIndex(id);
+
+        if (cursorIndex === 0)
+            focusPrevTextInput(event);
+    }
+
+
+    function handleArrowRight(event): void {
+        
+        const cursorIndex = getCursorIndex(id);
+        const inputValue = $(inputRef.current!).prop("value");
+
+        if (!inputValue || cursorIndex === inputValue.length) {
+            event.preventDefault();
+            focusNextTextInput(false);
+            moveCursor(getNextTextInput(id)?.prop("id"), 0);
+        }
     }
 
 

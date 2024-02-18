@@ -8,7 +8,6 @@
 /* Note: dont change horizontal values (margin, padding etc.) since those are used for calculating text width.
          Vertical values can be changed though. */
 .textInputContainer {
-    margin-bottom: 2px;
     position: relative;
     
     .TextInput {
@@ -52,6 +51,7 @@
 
     .singleColumnLineCandidate {
         border-bottom: var(--textInputBorderBottom);
+        margin-top: 2px;
     }
 
     .textInputLeftColumnConnect {
@@ -82,11 +82,13 @@
  * Last singleColumnLine in heading container.
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-last-child?retiredLocale=de
  */
-.headingContainer .SingleColumnLine:nth-last-child(-n + 1) {
-    border-bottom: var(--textInputBorderBottom);
-
-    &:hover {
-        border: var(--connectLinesBorder);
-        margin-bottom: 0;
+.headingContainer .textInputContainer:nth-last-child(-n + 1) {
+    .SingleColumnLine {
+        border-bottom: var(--textInputBorderBottom);
+        
+        &:hover {
+            border: var(--connectLinesBorder);
+            margin-bottom: 0;
+        }
     }
 }

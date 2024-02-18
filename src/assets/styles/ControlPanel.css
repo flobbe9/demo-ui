@@ -37,4 +37,12 @@
             }
         }
     }
+    
+    ::-moz-selection {
+        background: rgb(172, 172, 172);
+    }
+      
+    ::selection {
+        background: rgb(172, 172, 172);
+    }
 }
