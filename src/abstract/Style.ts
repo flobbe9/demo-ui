@@ -117,7 +117,7 @@ function isTextInputBold(textInput: JQuery): boolean {
  * @param str to prepend "#" to
  * @returns string with ```newString.charAt(0) === "#"```, does not alter given ```str```
  */
-function prependHashTag(str: string): string {
+export function prependHashTag(str: string): string {
 
     const firstChar = str.charAt(0);
 

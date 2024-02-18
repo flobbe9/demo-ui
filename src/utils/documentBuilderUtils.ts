@@ -1,23 +1,23 @@
-import { DOCUMENT_SUFFIX, FONT_SIZES_WHOLE_SCALE, Side } from "../globalVariables";
-import { getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isNumberFalsy, isStringNumeric, log, logError, logWarn, stringToNumber } from "./basicUtils";
+import { DOCX_SUFFIX, FONT_SIZES_WHOLE_SCALE, PDF_SUFFIX, Side, DOCUMENT_FILE_PREFIX_PATTERN, DOCUMENT_FILE_SUFFIX_PATTERN, DEFAULT_DOCUMENT_FILE_NAME } from "../globalVariables";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isNumberFalsy, isStringNumeric, log, logError, logWarn, matchesAll, stringToNumber } from "./basicUtils";
 
 
 /**
  * Concat given params in given order using "_".
  * 
  * @param pageIndex index of page
- * @param customId any string to append to end of id
- * @param paragraphIndex index of paragraph
- * @param textInputIndex index of text input
  * @param columnIndex index of column
+ * @param textInputIndex index of text input
+ * @param customId any string to append to end of id
  * @returns id as string containing all params, valid or not
  */
 export function getDocumentId(prefix: string,
                             pageIndex: number,
-                            customId?: string | number,
                             columnIndex?: number,
-                            paragraphIndex?: number,
-                            textInputIndex?: number): string {
+                            textInputIndex?: number,
+                            customId?: string | number
+                            ): string {
 
     if (!prefix || isNumberFalsy(pageIndex))
         logError("Failed to create text input id. Falsy prefix: " + prefix + " or falsy pageIndex: " + pageIndex);
@@ -27,9 +27,6 @@ export function getDocumentId(prefix: string,
     if (!isNumberFalsy(columnIndex))
         id += "_" + columnIndex;
 
-    if (!isNumberFalsy(paragraphIndex))
-        id += "_" + paragraphIndex;
-
     if (!isNumberFalsy(textInputIndex))
         id += "_" + textInputIndex;
 
@@ -37,6 +34,19 @@ export function getDocumentId(prefix: string,
         id += "_" + customId;
 
     return id;
+}
+
+
+/**
+ * Appends given customId to given documentId in the same way as {@link getDocumentId} does.
+ * 
+ * @param documentId to append customId to
+ * @param customId any string to append to documentId
+ * @returns the concatenated string (does not alter documentId)
+ */
+export function appendCustumIdToDocumentId(documentId: string, customId: string): string {
+
+    return documentId + "_" + customId;
 }
 
 
@@ -50,9 +60,8 @@ export function getDocumentId(prefix: string,
  * - ```0```: prefix
  * - ```1```: pageIndex
  * - ```2```: columnIndex (optional in id)
- * - ```3```: paragraphIndex (optional in id)
- * - ```4```: textInputIndex (optional in id)
- * - ```length - 1```: customIdPart (optional in id, always last)
+ * - ```3```: textInputIndex (optional in id)
+ * - ```4```: customIdPart (optional in id, always last)
  * 
  * @returns the given part of the id or -1 if not found
  */
@@ -70,7 +79,7 @@ export function getPartFromDocumentId(id: string, idPart: number): string {
 
 
 /**
- * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+ * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
  * @returns page id of given document element (event if documentId element does not exist) or null
  */
 export function getPageIdByDocumentId(documentId: string): string | null {
@@ -81,12 +90,12 @@ export function getPageIdByDocumentId(documentId: string): string | null {
 
     const pageIndex = getPartFromDocumentId(documentId, 1);
 
-    return getDocumentId("Page", stringToNumber(pageIndex), "");
+    return getDocumentId("Page", stringToNumber(pageIndex));
 }
 
 
 /**
- * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+ * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
  * @returns column id of given document element (event if documentId element does not exist) or null
  */
 export function getColumnIdByDocumentId(documentId: string): string | null {
@@ -98,7 +107,7 @@ export function getColumnIdByDocumentId(documentId: string): string | null {
     const pageIndex = getPartFromDocumentId(documentId, 1);
     const columnIndex = getPartFromDocumentId(documentId, 2);
 
-    return getDocumentId("Column", stringToNumber(pageIndex), "", stringToNumber(columnIndex));
+    return getDocumentId("Column", stringToNumber(pageIndex), stringToNumber(columnIndex));
 }
 
 
@@ -250,37 +259,89 @@ export function getTextInputOverhead(textInputId: string): number {
     return paddingRight + paddingLeft + borderRightWidth + borderLefttWidth;
 }
 
+
 /**
- * Append {@link DOCUMENT_SUFFIX} if last chars dont match it.
+ * Trim file name and replace white space chars with '_'. 
+ * If valid suffix is missing, append one depending on ```pdf``` param
  * 
  * @param documentFileName to adjust
- * @returns fixed document file name (not altering givn param)
+ * @param pdf if true {@link PDF_SUFFIX} will be appended, else {@link DOCX_SUFFIX}
+ * @returns valid document file name (not altering given param) or null if file name param is invalid
  */
-export function adjustDocumentFileName(documentFileName: string): string {
+export function adjustDocumentFileName(documentFileName: string | undefined, pdf = false): string | null {
 
-    let fileName = documentFileName.trim();
+    // case: no file name passed at all
+    if (isBlank(documentFileName))
+        documentFileName = DEFAULT_DOCUMENT_FILE_NAME;
+
+    const [isPrefixValid, isSuffixValid] = isFileNameValid(documentFileName);
+
+    // case: prefix invalid
+    if (!isPrefixValid)
+        return null;
+
+    let fileName = documentFileName!.trim();
 
     fileName = fileName.replaceAll(" ", "_");
+
+    // case: suffix invalid
+    if (!isSuffixValid)
+        // case: prefix + suffix both invalid
+        if (!matchesAll(fileName, DOCUMENT_FILE_PREFIX_PATTERN))
+            return null;
+
+        // case: prefix + suffix valid
+        else
+            fileName = fileName += pdf ? PDF_SUFFIX : DOCX_SUFFIX;
 
     return fileName;
 }
 
 
 /**
- * @param fileName to append suffix to
- * @returns given fileName with {@link DOCUMENT_SUFFIX} appended or unaltered fileName, if fileName is falsy
- *          or has suffix already
+ * @param fileName to check
+ * @return true if file name without suffix matches {@link DOCUMENT_FILE_PREFIX_PATTERN} and suffix matches
+ *         {@link DOCUMENT_FILE_SUFFIX_PATTERN}
+ * 
+ * @see {@link DOCX_SUFFIX}
+ * @see {@link PDF_SUFFIX}
  */
-export function appendDocxSuffix(fileName: string): string {
+export function isFileNameValid(fileName: string | undefined): [boolean, boolean] {
 
-    if (!fileName) {
-        logWarn("'appendDocxSuffix()' failed. 'fileName' is falsy: " + fileName);
-        return fileName;
-    }
+    const prefixAndSuffix = separateFileNameSuffix(fileName || "");
 
-    const suffix = fileName.substring(fileName.length - 5);
+    // case: falsy fileName
+    if (!prefixAndSuffix)
+        return [false, false];
 
-    return suffix !== DOCUMENT_SUFFIX ? fileName += DOCUMENT_SUFFIX : fileName;
+    const prefix = prefixAndSuffix[0];
+    const suffix = prefixAndSuffix[1];
+
+    return [matchesAll(prefix, DOCUMENT_FILE_PREFIX_PATTERN), suffix.match(DOCUMENT_FILE_SUFFIX_PATTERN) !== null];
+}
+
+
+/**
+ * @param fileName to get prefix and suffix from
+ * @returns a touple with```[prefix, suffix]``` where suffix is a substring starting at the last '.' of given file name. 
+ *          I.e. ```Hello.world.pdf``` would return ```["Hello.world", ".pdf"]```.
+ *          Return ```null``` if fileName is blank.
+ */
+function separateFileNameSuffix(fileName: string): [string, string] | null {
+
+    if (isBlank(fileName))
+        return null;
+
+    const lastDotIndex = fileName.lastIndexOf(".");
+
+    // case: no '.' at all
+    if (lastDotIndex === -1)
+        return [fileName, ""];
+
+    const prefix = fileName.substring(0, lastDotIndex);
+    const suffix = fileName.substring(lastDotIndex);
+
+    return [prefix, suffix];
 }
 
 
@@ -373,4 +434,18 @@ export function getOppositeSide(side: Side): Side {
         return "top";
 
     return "none";
+}
+
+
+/**
+ * @param documentId to get the column id from
+ * @returns column id extracted from document id
+ */
+export function documentIdToColumnId(documentId: string): string {
+
+    const pageIndex = stringToNumber(getPartFromDocumentId(documentId, 1));
+    const columnIndex = stringToNumber(getPartFromDocumentId(documentId, 2));
+    const columnId = getDocumentId("Column", pageIndex, columnIndex);
+
+    return columnId;
 }

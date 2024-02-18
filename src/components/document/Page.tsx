@@ -1,24 +1,22 @@
-import React, { useContext, useState, createContext, useRef } from "react";
+import React, { useContext, useState, createContext, useRef, useEffect } from "react";
 import useCookie from "react-use-cookie";
 import "../../assets/styles/Page.css";
 import Column from "./Column";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getJQueryElementById, getRandomString, includesIgnoreCase, log, logWarn, stringToNumber } from "../../utils/basicUtils";
-import { DONT_SHOW_AGAIN_COOKIE_NAME, MAX_NUM_COLUMNS, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
+import { getJQueryElementById, getRandomString, includesIgnoreCaseTrim, log, logWarn, stringToNumber } from "../../utils/basicUtils";
+import { DEFAULT_FONT_SIZE, DONT_SHOW_AGAIN_COOKIE_NAME, MAX_NUM_COLUMNS, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
 import { DocumentContext } from "./Document";
-import Paragraph from "./Paragraph";
-import { getDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
+import { appendCustumIdToDocumentId, getBrowserFontSizeByMSWordFontSize, getDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import Popup from "../popups/Popup";
 import PopupWarnConfirm from "../popups/PopupWarnConfirm";
+import { applyTextInputStyle, getDefaultStyle } from "../../abstract/Style";
+import TextInput from "./TextInput";
 
 
 /**
  * @since 0.0.1
  */
-// TODO: font size change in multiple columns with single line columns is buggy
-// TODO: handle font size change on connect lines
-// TODO: landscape 4th line from bottom disappears when font size change 55
 export default function Page(props: {
     pageIndex: number,
     id?: string,
@@ -26,13 +24,13 @@ export default function Page(props: {
     style?: React.CSSProperties
 }) {
 
-    const id = getDocumentId("Page", props.pageIndex, props.id);
+    const id = getDocumentId("Page", props.pageIndex, NaN, NaN, props.id);
     let className = props.className ? "Page " + props.className : "Page";
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
 
-    const [columns, setColumns] = useState(initColumns());
+    const [columns, setColumns] = useState<React.JSX.Element[]>([]);
     const [singleColumnLines, setSingleColumnLines] = useState<React.JSX.Element[]>([]);
 
     const dontShowAgainConnectWarningCookieId = useRef("ConnectLinesWarning");
@@ -41,8 +39,22 @@ export default function Page(props: {
     const pageRef = useRef(null);
 
     const context = {
-        toggleConnectWarnPopup,
+        handleConnectDisconnectTextInput,
     }
+
+
+    useEffect(() => {
+        setColumns(initColumns());
+
+    }, [])
+
+
+    useEffect(() => {
+        // reset columns
+        resetColumns();
+        resetSingleColumnLines();
+            
+    }, [documentContext.refreshColumns])
 
 
     function initColumns(): React.JSX.Element[] {
@@ -59,60 +71,168 @@ export default function Page(props: {
         return columns;
     }
 
+    
+    function resetSingleColumnLines(): void {
+
+        setSingleColumnLines([]);
+        documentContext.setNumSingleColumnLines(0);
+    }
+
+
+    function resetColumns(): void {
+
+        setColumns([]);
+        setTimeout(() => setColumns([...initColumns()]), 100);
+    }
+
+    
+    /**
+     * Toggle warn popup (if 'dontShowAgain' is not selected) and connect or disconnect text input with given id.
+     * 
+     * @param textInputId of the single column line in case of disconnect (in case of connect it doesn't matter)
+     * @param disconnect if true, disconnect handler will be called with given text input id, else the connect handler is called
+     */
+    function handleConnectDisconnectTextInput(textInputId: string, disconnect = false): void {
+
+        const textInputIndex = stringToNumber(getPartFromDocumentId(textInputId, 3));
+        
+        // define confirm callback
+        const handleConfirm = () => {
+            disconnect ? disconnectColumnLine(textInputIndex, textInputId) : connectColumnLines(textInputIndex);
+            documentContext.hidePopup()
+        }
+
+        // case: dont show again was selected
+        if (dontShowAgainConnectWarningCookie === "true") {
+            handleConfirm();
+            return;
+        }
+
+        documentContext.togglePopup();
+
+        documentContext.setPopupContent(
+            <Popup id={dontShowAgainConnectWarningCookieId.current} height={appContext.isMobileView ? "350px" : "medium"} width="medium">
+                <PopupWarnConfirm id={dontShowAgainConnectWarningCookieId.current}
+                                    handleConfirm={handleConfirm} 
+                                    handleDecline={documentContext.hidePopup}
+                                    hideThis={documentContext.hidePopup}
+                                    displayDontShowAgainCheckbox={true}
+                                    checkboxContainerClassname="flexCenter mt-5"
+                                    setDontShowAgainCookie={setDontShowAgainConnectWarningCookie}
+                                    >
+                    <p className="textCenter">Der Inhalt dieser Zeile wird in allen Spalten <strong>gelöscht</strong> werden.</p>
+                    <p className="textCenter">Fortfahren?</p>
+                </PopupWarnConfirm>
+            </Popup>
+        );
+    }
+
 
     /**
-     * Disable (and hide) lines with given lineIndex in all columns of page and add a singleColunnLine in Document component instead. <p>
+     * Disable (and hide) lines with given textInputIndex in all columns of page and add a singleColunnLine in Document component instead. <p>
      * 
      * Currently only possible on first page.
      * 
-     * @param lineIndex index of lines to connect on a page
+     * @param textInputIndex index of lines to connect on a page
      */
-    function connectColumnLines(lineIndex: number): void {
+    function connectColumnLines(textInputIndex: number): void {
 
         // case: no columns to connect
         if (documentContext.numColumns === 1 && props.pageIndex !== 0)
             return;
-
-        const textInputsToBeConnected = getNthTextInputOfAllColumnsOfPage(lineIndex, 0); // only works because there's one text input per paragraph
+        
+        const textInputsToBeConnected = getNthTextInputsInAllColumnsOfPage(textInputIndex);
         let focusedTextInputId: string | undefined;
         
         // disable text inputs
         textInputsToBeConnected.forEach((textInput, i) => {
-            if (documentContext.selectedTextInputId === textInput.prop("id"))
-                focusedTextInputId = textInput.prop("id");
+            const textInputId = textInput.prop("id");
+            // case: was focused
+            if (documentContext.selectedTextInputId === textInputId) {
+                focusedTextInputId = textInputId;
+                // reset selected style
+                documentContext.setSelectedTextInputStyle(getDefaultStyle());
+            }
 
-            disableTextInput(textInput, i, lineIndex);
+            // handle possible font size change
+            const fontSizeDiff = documentContext.subtractMSWordFontSizes(getBrowserFontSizeByMSWordFontSize(DEFAULT_FONT_SIZE), $("#" + textInputId).css("fontSize"));
+            documentContext.handleFontSizeChange(fontSizeDiff, textInputId);
+
+            disableTextInput(textInput);
         });
 
         documentContext.setNumSingleColumnLines(documentContext.numSingleColumnLines + 1);
 
         // add singleColumnLine
-        setSingleColumnLines([...singleColumnLines, createSingleColumnLine(lineIndex, focusedTextInputId !== undefined)]);
+        setSingleColumnLines([...singleColumnLines, createSingleColumnLine(textInputIndex, Boolean(focusedTextInputId))]);
 
         // set state in order for singleColumnLines to render
         refreshSingleColumnLines();
     }
+    
+
+    /**
+     * Remove 'TextInput' class from given ```<TextInput />``` and hide it, sothat it is not considered by any other 
+     * code as 'TextInput' (see also: {@link enableTextInput()}).
+     * 
+     * Set selected textinput id from document context to ```""```.
+     * Also reset styles and value of hidden text input.
+     * 
+     * @param textInputToDisable to disable
+     * @returns the disabled text input or null if textInputToDisable param not present
+     */
+    function disableTextInput(textInputToDisable: JQuery): JQuery | null {
+
+        if (!isTextInputIdValid(textInputToDisable.prop("id"))) {
+            logWarn("'sortOutTextInput()' failed. 'textInputToDisable' is invalid");
+            return null;
+        }
+
+        const textInputToDisableId = textInputToDisable.prop("id");
+
+        // disable text input
+        textInputToDisable.prop("id", appendCustumIdToDocumentId(textInputToDisableId, "disabled"));
+        textInputToDisable.addClass("hidden");
+        textInputToDisable.removeClass("TextInput");
+        textInputToDisable.removeClass("textInputFocus");
+        textInputToDisable.removeClass("textInputLeftColumnConnect");
+        textInputToDisable.removeClass("textInputMiddleColumnConnect");
+        textInputToDisable.removeClass("textInputRightColumnConnect");
+
+        textInputToDisable.val("");
+
+        applyTextInputStyle(textInputToDisableId, getDefaultStyle());
+
+        return textInputToDisable;
+    }
 
 
     /**
-     * Remove a singleColumnLine from state in Document component and enable all TextInputs with given lineIndex that were disabled.
+     * Remove a singleColumnLine from state in Document component and enable all TextInputs with given textInputIndex that were disabled.
      * 
-     * @param lineIndex index of line to split into separate text inputs 
+     * @param textInputIndex index of line to split into separate text inputs 
+     * @param singleColumnLineId id of the single column line text input
      */
-    function disconnectColumnLine(lineIndex: number): void {
+    function disconnectColumnLine(textInputIndex: number, singleColumnLineId: string): void {
 
         // case: no columns to disconnect
         if (documentContext.numColumns === 1 && props.pageIndex !== 0)
             return;
 
+        const fontSizeDiff = documentContext.subtractMSWordFontSizes(getBrowserFontSizeByMSWordFontSize(DEFAULT_FONT_SIZE), $("#" + singleColumnLineId).css("fontSize"));
+        documentContext.handleFontSizeChange(fontSizeDiff, singleColumnLineId);
+
         const lastSingleColumnLineWasFocused = getLastSingleColumnLine()?.className.includes("textInputFocus");
         for (let i = 0; i < documentContext.numColumns; i++) {
-            // only works because there's one text input per paragraph
-            enableTextInput(i, lineIndex, 0);
+            enableTextInput(i, textInputIndex);
 
             // case: singleColumnLine was focused
-            if (lastSingleColumnLineWasFocused && i === 0)
-                documentContext.focusTextInput(getDocumentId("TextInput", props.pageIndex, "", i, lineIndex, 0))
+            if (lastSingleColumnLineWasFocused && i === 0) {
+                // focus enabled text input in first column
+                documentContext.focusTextInput(getDocumentId("TextInput", props.pageIndex, i, textInputIndex))
+                // reset selected text input style
+                documentContext.setSelectedTextInputStyle(getDefaultStyle());
+            }
         }
 
         documentContext.setNumSingleColumnLines(documentContext.numSingleColumnLines - 1);
@@ -123,6 +243,36 @@ export default function Page(props: {
 
         // set state in order for singleColumnLines to render
         refreshSingleColumnLines();
+    }
+
+
+    /**
+     * Finds ```<TextInput />``` component on this page with id of given params that is hidden and adds/removes neccessary
+     * classes for the text input to become valid again (see also {@link disableTextInput()}).
+     * Also reset styles of hidden text input.
+     * 
+     * @param columnIndex of column with the disabled text input
+     * @param textInputIndex of the disabled text input
+     * @returns the enabled text input that was disabled before or null if not found
+     */
+    function enableTextInput(columnIndex: number, textInputIndex: number): JQuery | null {
+
+        // find the hidden text input
+        const hiddenTextInputId = getDocumentId("TextInput", props.pageIndex, columnIndex, textInputIndex, "disabled");
+        const hiddenTextInput = getJQueryElementById(hiddenTextInputId);
+        if (!hiddenTextInput)
+            return null;
+
+        applyTextInputStyle(hiddenTextInputId, getDefaultStyle());
+
+        // enable text input
+        const textInputId = getDocumentId("TextInput", props.pageIndex, columnIndex, textInputIndex);
+        hiddenTextInput.prop("id", textInputId);
+        hiddenTextInput.addClass("TextInput");
+        hiddenTextInput.removeClass("hidden");
+        hiddenTextInput.removeClass(SINGLE_COLUMN_LINE_CLASS_NAME);
+
+        return hiddenTextInput;
     }
 
 
@@ -151,142 +301,30 @@ export default function Page(props: {
     }
 
 
-    function toggleConnectWarnPopup(lineIndex: number, disconnect = false): void {  
-        
-        // define confirm callback
-        const handleConfirm = () => {
-            disconnect ? disconnectColumnLine(lineIndex) : connectColumnLines(lineIndex);
-            documentContext.hidePopup()
-        }
-
-        // dont show popup
-        if (dontShowAgainConnectWarningCookie === "true") {
-            handleConfirm();
-            return;
-        }
-
-        documentContext.togglePopup();
-
-        documentContext.setPopupContent(
-            <Popup id={dontShowAgainConnectWarningCookieId.current} height={appContext.isMobileView ? "350px" : "medium"} width="medium">
-                <PopupWarnConfirm id={dontShowAgainConnectWarningCookieId.current}
-                                    handleConfirm={handleConfirm} 
-                                    handleDecline={documentContext.hidePopup}
-                                    hideThis={documentContext.hidePopup}
-                                    displayDontShowAgainCheckbox={true}
-                                    checkboxContainerClassname="flexCenter mt-5"
-                                    setDontShowAgainCookie={setDontShowAgainConnectWarningCookie}
-                                    >
-                    <p className="textCenter">Der Inhalt dieser Zeile wird in allen Spalten <strong>gelöscht</strong> werden.</p>
-                    <p className="textCenter">Fortfahren?</p>
-                </PopupWarnConfirm>
-            </Popup>
-        );
-    }
-
-
-    /**
-     * Remove 'TextInput' class from given ```<TextInput />``` and hide it, sothat it is not considered by any other 
-     * code as 'TextInput' (see also: {@link enableTextInput()}).
-     * 
-     * Set selected textinput id from document context to ```""```.
-     * 
-     * @param textInput to disable
-     * @param columnIndex of new invalid id
-     * @param paragraphIndex of new invalid id
-     * @returns the disabled text input or null if textInput param not present
-     */
-    function disableTextInput(textInput: JQuery, columnIndex: number, paragraphIndex: number): JQuery | null {
-
-        if (!isTextInputIdValid(textInput.prop("id"))) {
-            logWarn("'sortOutTextInput()' failed. 'textInput' is invalid");
-            return null;
-        }
-
-        // disable paragraph
-        const paragraph = textInput.parents(".Paragraph");
-        if (paragraph.length) {
-            paragraph.prop("id", getDocumentId("Paragraph", props.pageIndex, "disabled", columnIndex, paragraphIndex));
-            paragraph.addClass("hidden");
-            paragraph.removeClass("Paragraph");
-        }
-
-        // disable text input
-        const textInputIndex = stringToNumber(getPartFromDocumentId(textInput.prop("id"), 4));
-        textInput.prop("id", getDocumentId("TextInput", props.pageIndex, "disabled", columnIndex, paragraphIndex, textInputIndex === -1 ? 0 : textInputIndex));
-        textInput.removeClass("TextInput");
-        textInput.removeClass("textInputFocus");
-        textInput.removeClass("textInputLeftColumnConnect");
-        textInput.removeClass("textInputMiddleColumnConnect");
-        textInput.removeClass("textInputRightColumnConnect");
-
-        return textInput;
-    }
-
-
-    /**
-     * Finds ```<TextInput />``` component on this page with id of given params that is hidden and adds/removes neccessary
-     * classes for the text input to become valid again (see also {@link disableTextInput()}).
-     * 
-     * @param columnIndex of column with the disabled text input
-     * @param paragraphIndex of paragraph with the disabled text input
-     * @param textInputIndex of the disabled text input
-     * @returns the enabled text input that was disabled before or null if not found
-     */
-    function enableTextInput(columnIndex: number, paragraphIndex: number, textInputIndex: number): JQuery | null {
-
-        // find the hidden text input in same paragraph
-        const hiddenTextInputId = getDocumentId("TextInput", props.pageIndex, "disabled", columnIndex, paragraphIndex, textInputIndex);
-        const hiddenTextInput = getJQueryElementById(hiddenTextInputId);
-        if (!hiddenTextInput)
-            return null;
-
-        // find hidden paragraph
-        const hiddenParagraphId = getDocumentId("Paragraph", props.pageIndex, "disabled", columnIndex, paragraphIndex);
-        const hiddenParagraph = getJQueryElementById(hiddenParagraphId);
-        if (!hiddenParagraph)
-            return null;
-
-        // enable paragraph
-        hiddenParagraph.prop("id", getDocumentId("Paragraph", props.pageIndex, "", columnIndex, paragraphIndex));
-        hiddenParagraph.addClass("Paragraph");
-        hiddenParagraph.removeClass("hidden");
-
-        // enable text input
-        const textInputId = getDocumentId("TextInput", props.pageIndex, "", columnIndex, paragraphIndex, textInputIndex);
-        hiddenTextInput.prop("id", textInputId);
-        hiddenTextInput.addClass("TextInput");
-        hiddenTextInput.removeClass(SINGLE_COLUMN_LINE_CLASS_NAME)
-
-        return hiddenTextInput;
-    }
-
-
-    function createSingleColumnLine(paragraphIndex: number, focusFirstTextInputOnRender = false): React.JSX.Element {
+    function createSingleColumnLine(textInputIndex: number, focusFirstTextInputOnRender = false): React.JSX.Element {
 
         return (
-            <Paragraph pageIndex={props.pageIndex} 
+            <TextInput key={getRandomString()}
+                       pageIndex={props.pageIndex} 
                        columnIndex={0} 
-                       // only works because there's one text input per paragraph
-                       paragraphIndex={paragraphIndex}
-                       key={getRandomString()}
-                       textInputClassName={SINGLE_COLUMN_LINE_CLASS_NAME + " lastSingleColumnLine "}
-                       isTextInputSingleLineColumn={true}
-                       focusFirstTextInputOnRender={focusFirstTextInputOnRender}
-            />
+                       textInputIndex={textInputIndex} 
+                       isSingleColumnLine={true}
+                       className={SINGLE_COLUMN_LINE_CLASS_NAME + " lastSingleColumnLine "}
+                       focusOnRender={focusFirstTextInputOnRender} />
         )
     }
 
 
     /**
-     * @returns jquery of the first ```<TextInput />``` of each ```<Column />``` on this page.
+     * @param n index of the text input inside it's ```<Column />```
+     * @returns list of jquerys of ```<TextInput />```s on this page with same text input index for each ```<Column />```.
      */
-    function getNthTextInputOfAllColumnsOfPage(paragraphIndex = 0, textInputIndex = 0): JQuery[] {
+    function getNthTextInputsInAllColumnsOfPage(n = 0): JQuery[] {
 
         const textInputsToBeConnected: JQuery[] = [];
 
         for (let i = 0; i < documentContext.numColumns; i++) {
-            const textInput = $("#" + getDocumentId("TextInput", props.pageIndex, "", i, paragraphIndex, textInputIndex));
+            const textInput = $("#" + getDocumentId("TextInput", props.pageIndex, i, n));
             if (textInput.length)
                 textInputsToBeConnected.push(textInput);
         }
@@ -300,10 +338,10 @@ export default function Page(props: {
         const targetClassName = event.target.className;
 
         // hide connect / disconnect icon of text inputs
-        if (!includesIgnoreCase(targetClassName, "dontHideConnectIcon"))
+        if (!includesIgnoreCaseTrim(targetClassName, "dontHideConnectIcon"))
             $(".connectOrDisconnectButton.dontHideConnectIcon").hide(100);
 
-        if (!includesIgnoreCase(targetClassName, "dontHideDisConnectIcon"))
+        if (!includesIgnoreCaseTrim(targetClassName, "dontHideDisConnectIcon"))
             $(".connectOrDisconnectButton.dontHideDisConnectIcon").hide(100);
     }
 
@@ -331,5 +369,5 @@ export default function Page(props: {
 }
 
 export const PageContext = createContext({
-    toggleConnectWarnPopup: (lineIndex: number, disconnect?: boolean) => {}
+    handleConnectDisconnectTextInput: (textInputId: string, disconnect?: boolean) => {}
 });

@@ -8,7 +8,6 @@
 /* Note: dont change horizontal values (margin, padding etc.) since those are used for calculating text width.
          Vertical values can be changed though. */
 .textInputContainer {
-    margin-bottom: 2px;
     position: relative;
     
     .TextInput {
@@ -19,7 +18,7 @@
         font-family: 'Calibri';
         font-size: var(--initialTextInputFontSize);
         line-height: 11px;
-        margin: 0 3px 1px;
+        margin: 2px 3px 1px;
         padding: 0;
         outline: none;
         width: 100%;
@@ -52,6 +51,7 @@
 
     .singleColumnLineCandidate {
         border-bottom: var(--textInputBorderBottom);
+        margin-top: 2px;
     }
 
     .textInputLeftColumnConnect {
@@ -78,11 +78,14 @@
     }
 }
     
-/* last singleColumnLine in heading container */
-.headingContainer .Paragraph:nth-last-child(-n + 1) {
+/* 
+ * Last singleColumnLine in heading container.
+ * @see https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-last-child?retiredLocale=de
+ */
+.headingContainer .textInputContainer:nth-last-child(-n + 1) {
     .SingleColumnLine {
         border-bottom: var(--textInputBorderBottom);
-
+        
         &:hover {
             border: var(--connectLinesBorder);
             margin-bottom: 0;
