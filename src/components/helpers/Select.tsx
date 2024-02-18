@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/Select.css"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCase, flashClass, flashCss, getJQueryElementById, includesIgnoreCase, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { equalsIgnoreCaseTrim, flashClass, flashCss, getJQueryElementById, includesIgnoreCase, includesIgnoreCaseTrim, isBlank, isKeyAlphaNumeric, isNumberFalsy, log, logWarn, matchesAll, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
-import { MAX_FONT_SIZE, MIN_FONT_SIZE } from "../../globalVariables";
+import { FONT_SIZE_REGEX, KEY_CODES_NO_TYPED_CHAR, MAX_FONT_SIZE, MIN_FONT_SIZE } from "../../globalVariables";
 import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getMSWordFontSizeByBrowserFontSize } from "../../utils/documentBuilderUtils";
 import { DocumentContext } from "../document/Document";
 
@@ -42,13 +42,13 @@ export default function Select(props: {
 
     const [disabled, setDisabled] = useState(props.disabled);
 
-    // this is quite risky, change this if necessary
-    const [isFontSize, setIsFontSize] = useState(includesIgnoreCase(id, "fontsize"))
-
     const componentRef = useRef(null);
     const boxRef = useRef(null);
     const labelRef = useRef(null);
     const optionsBoxRef = useRef(null);
+    
+    // this is quite risky, change this if necessary
+    const isFontSize = useRef(includesIgnoreCaseTrim(id, "fontsize"));
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
@@ -105,7 +105,7 @@ export default function Select(props: {
 
     function handleSelect(event, value: string, label: string | number): void {
 
-        value = isFontSize ? getBrowserFontSizeByMSWordFontSize(getCSSValueAsNumber(value, 2)).toString() : getOptionsBoxValueByLabel(value, true);
+        value = isFontSize.current! ? getBrowserFontSizeByMSWordFontSize(getCSSValueAsNumber(value, 2)).toString() : getOptionsBoxValueByLabel(value, true);
         props.handleSelect(value);
     }
 
@@ -138,7 +138,7 @@ export default function Select(props: {
 
     function setSelectLabel(label: string | number): void {
 
-        if (isFontSize) {
+        if (isFontSize.current!) {
             $(labelRef.current!).prop("value", getMSWordFontSize(label));
             return;
         }
@@ -147,7 +147,6 @@ export default function Select(props: {
     }
 
 
-    // TODO: only apply if value has changed (ignore case)
     function handleLabelKeyUp(event): void {
 
         if (event.key === "Enter")
@@ -158,20 +157,41 @@ export default function Select(props: {
         let isValid = true;
         
         // edge case: font size
-        if (isFontSize) {
-            isValid = isFontSizeValid(inputValue);
+        if (isFontSize.current!) {
+            isValid = validateFontSize(event, event.key === "Enter");
 
         } else
-            isValid = validateLabelInput(inputValue, !isFontSize);
+            isValid = validateLabelInput(inputValue, !isFontSize.current!);
 
         if (isValid) {
             // select
-            handleSelect(event, isFontSize ? inputValue + "px" : inputValue, inputValue);
+            handleSelect(event, isFontSize.current! ? inputValue + "px" : inputValue, inputValue);
 
             // refocus on selectInput
             if (isKeyAlphaNumeric(event.keyCode) || event.key === "Shift" || event.key === "CapsLock" || event.key === "Backspace") 
                 setTimeout(() => $(labelRef.current!).trigger("focus"), 0.1)
         }
+    }
+    
+
+    function validateFontSize(event, notify = false): boolean {
+
+        const labelInput = $(labelRef.current!);
+
+        const isValid = (labelInput.prop("value")).match(props.pattern) !== null;
+        
+        // case: invalid and notify user
+        if (notify && !isValid) {
+            event.preventDefault();
+
+            documentContext.showSubtlePopup("Schriftgröße", `Die Schriftgröße muss zwischen 8 und 72 liegen.`, "Warn");
+
+            flashClass($(boxRef.current!).prop("id"), "invalid");
+
+            return isValid;
+        }
+
+        return isValid;
     }
 
 
@@ -183,7 +203,7 @@ export default function Select(props: {
     function validateLabelInput(label: string | number, checkIsInOptionsList = true): boolean {
 
         // map labels
-        const optionLabels: string[] = props.options.map(option => option[1].trim().toLowerCase());
+        const optionLabels: string[] = props.options.map(option => option[1]);
 
         // label is in options list
         const labelExistsInList = checkIsInOptionsList ? includesIgnoreCase(optionLabels, label) : true;
@@ -206,21 +226,9 @@ export default function Select(props: {
             return "";
 
         const results = props.options.find(([value, optionsLabel]) =>
-            ignoreCase ? equalsIgnoreCase(optionsLabel, label) : optionsLabel === label);
+            ignoreCase ? equalsIgnoreCaseTrim(optionsLabel, label) : optionsLabel === label);
 
         return results ? results[0] : "";
-    }
-
-
-    /**
-     * @param fontSize to validate
-     * @returns true if ```validateLabelInput(fontSize, false)``` is true and fontSize is in bounds of {@link MIN_FONT_SIZE} and {@link MAX_FONT_SIZE}
-     */
-    function isFontSizeValid(fontSize: string | number): boolean {
-
-        return validateLabelInput(fontSize, false) &&
-               stringToNumber(fontSize) >= MIN_FONT_SIZE && 
-               stringToNumber(fontSize) <= MAX_FONT_SIZE;
     }
 
 
@@ -234,7 +242,7 @@ export default function Select(props: {
      */
     function getMSWordFontSize(browserFontSize: string | number): number | string {
 
-        if (!isFontSize)
+        if (!isFontSize.current!)
             return browserFontSize;
 
         const browserFontSizeNumber = getCSSValueAsNumber(browserFontSize, 2);
@@ -269,7 +277,7 @@ export default function Select(props: {
                 <input id={"selectTextInput" + props.id}
                        className="selectLabel dontMarkText dontHideSelect" 
                        ref={labelRef}
-                       title={isFontSize ? getMSWordFontSize(props.label).toString() : props.label}
+                       title={isFontSize.current! ? getMSWordFontSize(props.label).toString() : props.label}
                        defaultValue={props.label}
                        onKeyUp={handleLabelKeyUp}
                        />

@@ -35,6 +35,11 @@
             &:hover, &:focus {
                 background-color: white;
             }
+
+        }
+
+        &.invalid {
+            border: 1px solid orange !important;
         }
     }
 
