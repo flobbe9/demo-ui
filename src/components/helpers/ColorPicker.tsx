@@ -115,7 +115,7 @@ export default function ColorPicker(props: {
              className={className} 
              ref={componentRef}
              onClick={handleClick} 
-             title={isRGB(props.color) ? props.color : "#" + props.color} 
+             title={"Farbe (" + (isRGB(props.color) ? props.color : prependHashTag(props.color)) + ")"} 
              style={props.componentStyle}
              >
             <label className="colorLabel"

@@ -9,7 +9,7 @@ import RadioButton from "../helpers/RadioButton";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { flashClass, isBlank, log, logWarn, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { DocumentContext } from "./Document";
-import { FONT_FAMILIES, RAW_FONT_SIZES } from "../../globalVariables";
+import { FONT_FAMILIES, FONT_SIZE_REGEX, MAX_FONT_SIZE, MIN_FONT_SIZE, RAW_FONT_SIZES } from "../../globalVariables";
 import Button from "../helpers/Button";
 import Popup from "../popups/Popup";
 import PopupColumnConfig from "../popups/PopupColumnConfig";
@@ -72,6 +72,8 @@ export default forwardRef(function StylePanel(props: {
     }
 
 
+    // TODO: note if font size is out of bounds
+    // TODO: handle key down for select font size input, validate
     function handleFontSizeSelect(fontSize: string): void {
         
         // case: text too long for text input length      
@@ -81,18 +83,9 @@ export default forwardRef(function StylePanel(props: {
             return;
         }
 
+        // handle font size change
         const diff = documentContext.subtractMSWordFontSizes(getCSSValueAsNumber(fontSize, 2), documentContext.selectedTextInputStyle.fontSize);
-        const numLinesDiff = documentContext.getNumLinesDeviation(documentContext.selectedTextInputId, diff);
-
-        // case: font size too large
-        if (numLinesDiff > 0) {
-            // case: dont increase font size
-            if (!documentContext.handleFontSizeTooLarge(true, numLinesDiff))
-                return;
-        
-        // case: font size too small
-        } else if (numLinesDiff < 0)
-            documentContext.handleFontSizeTooSmall(numLinesDiff);
+        documentContext.handleFontSizeChange(diff);
 
         documentContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
         documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
@@ -291,9 +284,9 @@ export default forwardRef(function StylePanel(props: {
                                     maxHeight: "50vb"
                                 }}
                                 handleSelect={handleFontSizeSelect}
-                                title="Schriftgröße"
+                                title={`Schriftgröße (min ${MIN_FONT_SIZE}, max ${MAX_FONT_SIZE})`}
                                 options={RAW_FONT_SIZES.map(fontSize => [fontSize + "px", fontSize.toString()])}
-                                pattern={/[0-9]/}
+                                pattern={FONT_SIZE_REGEX}
                                 />
                     </div>
 

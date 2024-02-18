@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { ApiExceptionFormat } from "../abstract/ApiExceptionFormat";
-import { NUM_SPACES_PER_TAB, TAB_UNICODE } from "../globalVariables";
+import { KEY_CODES_GERMAN_LETTERS, NUM_SPACES_PER_TAB, TAB_UNICODE } from "../globalVariables";
 import { getCSSValueAsNumber } from "./documentBuilderUtils";
 import { fetchAnyReturnBlobUrl } from "./fetchUtils";
 
@@ -143,7 +143,7 @@ export function isBooleanFalsy(bool: boolean | null | undefined) {
  * @param str string to check
  * @returns true if given string is empty or only contains white space chars
  */
-export function isBlank(str: string): boolean {
+export function isBlank(str: string | undefined): boolean {
 
     if (!str && str !== "") {
         logError("Falsy input str: " + str);
@@ -204,7 +204,7 @@ export function insertString(targetString: string, insertionString: string, inse
 
 /**
  * @param keyCode code of the key e.g ```65``` for letter 'A'
- * @returns true if key would use space inside a text input. Includes 'Tab' and 'Space'
+ * @returns true if key is either a letter or a number
  */
 export function isKeyAlphaNumeric(keyCode: number): boolean {
 
@@ -215,8 +215,9 @@ export function isKeyAlphaNumeric(keyCode: number): boolean {
 
     return (keyCode >= 48 && keyCode <= 57) || // numbers
            (keyCode >= 65 && keyCode <= 90) || // letters
-           keyCode === 32 || // "Space"
-           keyCode === 9; // "Tab"
+           KEY_CODES_GERMAN_LETTERS.includes(keyCode); // some german letters
+        //    keyCode === 32 || // "Space"
+        //    keyCode === 9; // "Tab"
 }
 
 
@@ -239,21 +240,15 @@ export function moveCursor(textInputId: string, start = 0, end = start): void {
 }
 
 
+/**
+ * @param textInputId of text input element to check
+ * @returns the current index of the cursor of given text input element or -1. If text is marked, the index of selection start is returned
+ */
 export function getCursorIndex(textInputId: string): number {
 
     const textInput = getJQueryElementById(textInputId);
 
     return textInput ? textInput.prop("selectionStart") : -1;
-}
-
-
-/**
- * @param key name of the cookie
- * @returns the cookie value as string
- */
-function getCookie(key: string): string {
-
-    return document.cookie.split('; ').filter(row => row.startsWith(key)).map(c=>c.split('=')[1])[0];
 }
 
 
@@ -474,7 +469,7 @@ export function removeConfirmPageUnloadEvent(): void {
  * @param holdTime time in ms that the border stays with given addClass and without given removeClass, default is 1000
  * @return promise that resolves once animation is finished
  */
-export async function flashClass(elementId: string, addClass: string, removeClass: string, holdTime = 1000) {
+export async function flashClass(elementId: string, addClass: string, removeClass?: string, holdTime = 1000) {
 
     return new Promise((res, rej) => {
         const element = getJQueryElementById(elementId);
@@ -490,7 +485,7 @@ export async function flashClass(elementId: string, addClass: string, removeClas
         
         const resetCallback = () => {
             element.removeClass(addClass)
-            element.addClass(removeClass);
+            element.addClass(removeClass || "");
         }
 
         // reset
@@ -557,10 +552,28 @@ export function replaceAtIndex(str: string, replacement: string, startIndex: num
 /**
  * @param expected first value to compare
  * @param actual second value to compare
- * @returns ```expected === actual``` after calling ```trim()``` and ```toLowerCase()``` on both values.
+ * @returns ```expected === actual``` after calling ```toLowerCase()``` on both values.
  *          Types wont be considered: ```"1" === 1 = true```
  */
 export function equalsIgnoreCase(expected: string | number, actual: string | number): boolean {
+
+    if (!expected || !actual)
+        return expected === actual;
+
+    expected = expected.toString().toLowerCase();
+    actual = actual.toString().toLowerCase();
+
+    return expected === actual;
+}
+
+
+/**
+ * @param expected first value to compare
+ * @param actual second value to compare
+ * @returns ```expected === actual``` after calling ```trim()``` and ```toLowerCase()``` on both values.
+ *          Types wont be considered: ```"1" === 1 = true```
+ */
+export function equalsIgnoreCaseTrim(expected: string | number, actual: string | number): boolean {
 
     if (!expected || !actual)
         return expected === actual;
@@ -581,9 +594,26 @@ export function includesIgnoreCase(arr: (string | number)[] | string, value: str
 
     // case: arr is string
     if (typeof arr === "string")
-        return arr.trim().toLowerCase().includes(value.toString().trim().toLowerCase());
+        return arr.toLowerCase().includes(value.toString().toLowerCase());
 
     const result = arr.find(val => equalsIgnoreCase(val, value));
+
+    return result ? true : false;
+}
+
+
+/**
+ * @param arr array to search in
+ * @param value string or number to look for
+ * @returns true if value is included in array. Uses {@link equalsIgnoreCaseTrim} for comparison instead of ```includes()```.
+ */
+export function includesIgnoreCaseTrim(arr: (string | number)[] | string, value: string | number): boolean {
+        
+    // case: arr is string
+    if (typeof arr === "string")
+        return arr.trim().toLowerCase().includes(value.toString().trim().toLowerCase());
+
+    const result = arr.find(val => equalsIgnoreCaseTrim(val, value));
 
     return result ? true : false;
 }

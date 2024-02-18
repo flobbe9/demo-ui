@@ -50,7 +50,7 @@ export default function ControlPanelMenu(props: {
                 <div className="controlPanelMenuItem dontHideControlPanelMenu">
                     <Button id={"DownloadPdf"}
                             className="dontHideControlPanelMenu"
-                            childrenClassName="flexLeft dontHideControlPanelMenu"
+                            childrenClassName="flexCenter dontHideControlPanelMenu"
 
                             handlePromise={(event) => documentContext.buildAndDownloadDocument(true)}
                             title="Als PDF Dokument herunterladen"

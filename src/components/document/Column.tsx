@@ -2,15 +2,17 @@ import React, { createContext, useContext, useEffect, useState, useRef } from "r
 import "../../assets/styles/Column.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getRandomString, isBlank, log } from "../../utils/basicUtils";
-import Paragraph from "./Paragraph";
 import { AppContext } from "../App";
 import { DocumentContext } from "./Document";
 import { NUM_LINES_LANDSCAPE, NUM_LINES_PROTRAIT } from "../../globalVariables";
 import { Orientation } from "../../enums/Orientation";
-import { PageContext } from "./Page";
 import { getDocumentId } from "../../utils/documentBuilderUtils";
+import TextInput from "./TextInput";
 
 
+/**
+ * @since 0.0.1
+ */
 export default function Column(props: {
     pageIndex: number,
     columnIndex: number,
@@ -19,44 +21,74 @@ export default function Column(props: {
     className?: string
 }) {
 
-    const id = getDocumentId("Column", props.pageIndex, props.id, props.columnIndex);
+    const id = getDocumentId("Column", props.pageIndex, props.columnIndex, NaN, props.id);
     const className = props.className ? "Column " + props.className : "Column";
 
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
-    const pageContext = useContext(PageContext);
     
-    const [numLinesPerParagraph, setNumLinesPerParagraph] = useState(1);
-    const [paragraphs, setParagraphs] = useState<React.JSX.Element[]>();
+    const [textInputs, setTextInputs] = useState<React.JSX.Element[]>([]);
 
     const componentRef = useRef(null);
     
-    const context = {
-        numLinesPerParagraph,
-        setNumLinesPerParagraph
-    }
+    const context = {}
 
 
     useEffect(() => {
-        setParagraphs(initParagraphs());
-
+        setTextInputs(initTextInputs());
         addSpaceBetweenColumns();
 
     }, []);
 
+    
+    useEffect(() => {
+        if (documentContext.appendTextInputWrapper.columnIds.has(id))
+            appendTextInputs(documentContext.appendTextInputWrapper.num);
 
-    function initParagraphs(): React.JSX.Element[] {
+    }, [documentContext.appendTextInputWrapper]);
+    
 
-        const paragraphs: React.JSX.Element[] = [];
-        const numParagraphs = getInitialNumParagraphs(documentContext.orientation);
+    useEffect(() => {
+        // TODO: delete singlce column lines too
+        // if column index === 0 && textinputs.length === 0
+            // pagecontext.removelastsinglecolumnline
+        if (documentContext.removeTextInputWrapper.columnIds.has(id))
+            removeTextInputs(documentContext.removeTextInputWrapper.num);
 
-        for (let i = 0; i < numParagraphs; i++) 
-            paragraphs.push(<Paragraph key={getRandomString()}
+    }, [documentContext.removeTextInputWrapper]);
+
+
+    function initTextInputs(): React.JSX.Element[] {
+
+        const initTextInputs: React.JSX.Element[] = [];
+        const initNumTextInputs = getInitialNumTextInputs(documentContext.orientation);
+
+        for (let i = 0; i < initNumTextInputs; i++)
+            initTextInputs.push(<TextInput key={getRandomString()}
                                         pageIndex={props.pageIndex}
-                                        columnIndex={props.columnIndex} 
-                                        paragraphIndex={i} />)
+                                        columnIndex={props.columnIndex}
+                                        textInputIndex={i} 
+                                        isSingleColumnLine={false}
+                                />)
 
-        return paragraphs;
+        return initTextInputs;
+    }
+
+
+    /**
+     * Remove given number of ```<TextInput />```s starting at given ```startIndex```.
+     *
+     * @param startIndex index of text input position in given ```textInputs``` array to start removing text inputs from
+     * @param deleteCount  number of elements to remove
+     * @returns array with the removed ```<TextInput />```s
+     */
+    function removeTextInputs(deleteCount = 1, startIndex: number = textInputs.length - deleteCount): React.JSX.Element[] {
+
+        const removedTextInputs = textInputs.splice(startIndex, deleteCount);
+
+        setTextInputs([...textInputs]);
+
+        return removedTextInputs;
     }
 
 
@@ -79,31 +111,53 @@ export default function Column(props: {
 
 
     /**
-     * @param orientation of the document
-     * @returns number of paragraphs considering the orientation of the document
+     * Append new ```<TextInput />```s to ```textInputs``` state
+     *
+     * @param numTextInputs number of text inputs to append
+     * @returns array with the appended ```<TextInput />```s
      */
-    function getInitialNumParagraphs(orientation: Orientation): number {
+    function appendTextInputs(numTextInputs = 1): React.JSX.Element[] {
 
-        const numLinesPerColumn = orientation === Orientation.PORTRAIT ? NUM_LINES_PROTRAIT : NUM_LINES_LANDSCAPE;
-        const numParagraphs = numLinesPerColumn / numLinesPerParagraph;
+        // if is single column line
+            // append in all columns of this page
+        // else
+            // append only here
 
-        return Math.floor(numParagraphs);
+        let newTextInputs: React.JSX.Element[] = [];
+
+        for (let i = 0; i < numTextInputs; i++) {
+            newTextInputs.push(<TextInput key={getRandomString()}
+                                        pageIndex={props.pageIndex}
+                                        columnIndex={props.columnIndex}
+                                        textInputIndex={textInputs.length + i}
+                                        isSingleColumnLine={false}
+                                        />);
+        }
+
+        setTextInputs([...textInputs, ...newTextInputs]);
+
+        return newTextInputs;
+    }
+
+
+    /**
+     * @param orientation of the document
+     * @returns number of ```<Textinput />```s considering the orientation of the document
+     */
+    function getInitialNumTextInputs(orientation: Orientation): number {
+
+        return orientation === Orientation.PORTRAIT ? NUM_LINES_PROTRAIT : NUM_LINES_LANDSCAPE;
     }
 
 
     return (
         <div id={id} className={className} ref={componentRef}>
             <ColumnContext.Provider value={context}>
-                <div className={"paragraphContainer"}>
-                    {paragraphs}
-                </div>
+                {textInputs}
             </ColumnContext.Provider>
         </div>
     )
 }
 
 
-export const ColumnContext = createContext({
-    numLinesPerParagraph: 1,
-    setNumLinesPerParagraph: (numLinesPerParagraph: number) => {}
-});
+export const ColumnContext = createContext({});

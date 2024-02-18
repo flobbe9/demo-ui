@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCase, flashClass, getCursorIndex, insertString, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { equalsIgnoreCaseTrim, flashClass, getCursorIndex, getJQueryElementById, insertString, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import { StyleProp, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
-import { DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
+import { DEFAULT_FONT_SIZE, KEY_CODES_NO_TYPED_CHAR, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
 import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getDocumentId, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
@@ -25,19 +25,19 @@ import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getDocumentId,
 // TODO: add table
 // TODO: add more pages
 
+// TODO: move cursor to same char index or end on arrow up / down
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
-    paragraphIndex: number,
     textInputIndex: number,
     isSingleColumnLine: boolean,
     focusOnRender?: boolean,
-    key?: string | number
+    propKey?: string | number
     id?: string | number,
     className?: string,
 }) {
 
-    const id = getDocumentId("TextInput", props.pageIndex, props.id ? props.id : "", props.columnIndex, props.paragraphIndex, props.textInputIndex);
+    const id = getDocumentId("TextInput", props.pageIndex, props.columnIndex, props.textInputIndex, props.id);
     const className = "TextInput " + (props.className || "");
 
     const inputRef = useRef(null);
@@ -56,7 +56,7 @@ export default function TextInput(props: {
         // set initial font size
         setCssVariable("initialTextInputFontSize", getBrowserFontSizeByMSWordFontSize(DEFAULT_FONT_SIZE) + "px");
 
-        if ((id === getDocumentId("TextInput", 0, "", 0, 0, 0) && !props.isSingleColumnLine) || props.focusOnRender)
+        if ((id === getDocumentId("TextInput", 0, 0, 0) && !props.isSingleColumnLine) || props.focusOnRender)
             documentContext.focusTextInput(id);
 
     }, []);
@@ -68,14 +68,14 @@ export default function TextInput(props: {
         handleRefreshSingleColumnLine(isSingleColumnLineCandidate);
 
         if (id === documentContext.selectedTextInputId) 
-            documentContext.focusTextInput(id, false, true, [], false);
+            documentContext.focusTextInput(id, false, true, undefined, false);
 
     }, [documentContext.refreshSingleColumnLines]);
 
 
     useEffect(() => {
         if (id === documentContext.selectedTextInputId) 
-            documentContext.focusTextInput(id, false);
+            documentContext.focusTextInput(id, false, true, undefined, false);
 
     }, [documentContext.selectedTextInputStyle]);
 
@@ -92,9 +92,12 @@ export default function TextInput(props: {
         const eventKey = event.key;
 
         // case: text too long when including typed char
-        if (isKeyAlphaNumeric(event.keyCode) && (appContext.pressedKey !== "Control")) 
-            if (isTextLongerThanInput(documentContext.selectedTextInputId, eventKey === "Tab" ? TAB_UNICODE : eventKey))
-                handleTextLongerThanLine(event);
+        if (!KEY_CODES_NO_TYPED_CHAR.includes(event.keyCode) && (appContext.pressedKey !== "Control"))
+            // case: no back tab
+            if (eventKey !== "Tab" || appContext.pressedKey !== "Shift")
+                // case: text too long
+                if (isTextLongerThanInput(documentContext.selectedTextInputId, eventKey === "Tab" ? TAB_UNICODE : eventKey))
+                    handleTextLongerThanLine(event);
 
         if (eventKey === "Tab")
             handleTab(event);
@@ -108,7 +111,13 @@ export default function TextInput(props: {
         else if (eventKey === "ArrowUp")
             focusPrevTextInput(event);
 
-        else if (eventKey === "Backspace")
+        else if (eventKey === "ArrowLeft")
+            handleArrowLeft(event);
+
+        else if (eventKey === "ArrowRight")
+            handleArrowRight(event);
+
+        else if (eventKey === "ArrowLeft")
             handleBackspace(event);
     }
 
@@ -160,7 +169,7 @@ export default function TextInput(props: {
                 if (isSingleColumnLineCandidate) {
                     toggleSingleColumnLineCandidateBorder(false, textInputId);
                     
-                    if (isLeftColumn(textInputId))
+                    if (isLeftColumn(textInputId, false))
                         leftTextInputId = textInputId;            
                 
                 // case: is singleColumnLine
@@ -171,6 +180,28 @@ export default function TextInput(props: {
 
         // toggle very left connect button
         $("#ButtonConnectLines" + leftTextInputId).fadeIn(100);
+    }
+
+
+    function handleArrowLeft(event): void {
+
+        const cursorIndex = getCursorIndex(id);
+
+        if (cursorIndex === 0)
+            focusPrevTextInput(event);
+    }
+
+
+    function handleArrowRight(event): void {
+        
+        const cursorIndex = getCursorIndex(id);
+        const inputValue = $(inputRef.current!).prop("value");
+
+        if (!inputValue || cursorIndex === inputValue.length) {
+            event.preventDefault();
+            focusNextTextInput(false);
+            moveCursor(getNextTextInput(id)?.prop("id"), 0);
+        }
     }
 
 
@@ -206,7 +237,7 @@ export default function TextInput(props: {
         event.preventDefault();
 
         if (appContext.pressedKey === "Shift") {
-            handleBackspace(event);
+            handleBackTab(event);
 
         } else {
             // case: text too long
@@ -222,8 +253,32 @@ export default function TextInput(props: {
             selectedTextInput.prop("value", newInputValue);
 
             // move cursor to end of tab
-            moveCursor(documentContext.selectedTextInputId, cursorIndex + (equalsIgnoreCase(documentContext.selectedTextInputStyle.textAlign, "right") ? 0 : + 1));
+            moveCursor(documentContext.selectedTextInputId, cursorIndex + (equalsIgnoreCaseTrim(documentContext.selectedTextInputStyle.textAlign, "right") ? 0 : + 1));
         }
+    }
+
+
+    function handleBackTab(event): void {
+
+        const textInputValue = $(inputRef.current!).prop("value");
+        const cursorIndex = getCursorIndex(id);
+
+        // case: no text or invalid cursor index
+        if (cursorIndex < 1)
+            return;
+
+        const charInFrontOfCursor = textInputValue.charAt(cursorIndex - 1);
+
+        // case: not a tab
+        if (charInFrontOfCursor !== TAB_UNICODE)
+            return;
+        
+        // remove tab
+        const newTextInputValue = replaceAtIndex(textInputValue, "", cursorIndex - 1, cursorIndex);
+
+        // update text input
+        $(inputRef.current!).val(newTextInputValue);
+        moveCursor(id, cursorIndex - 1);
     }
 
 
@@ -303,12 +358,11 @@ export default function TextInput(props: {
     }
 
 
-    function toggleSingleColumnLine(event): void {
+    function toggleSingleColumnLineStyle(event): void {
 
         $(".connectOrDisconnectButton").hide();
 
-        // only works because there's one text input per paragraph
-        pageContext.toggleConnectWarnPopup(props.paragraphIndex, props.isSingleColumnLine);
+        pageContext.handleConnectDisconnectTextInput(id, props.isSingleColumnLine);
     }
 
 
@@ -317,8 +371,7 @@ export default function TextInput(props: {
         const textInputs: JQuery[] = [];
         
         for (let i = 0; i < documentContext.numColumns; i++) {
-            // only works because there's one text input per paragraph
-            const textInputId = getDocumentId("TextInput", props.pageIndex, "", i, props.paragraphIndex, props.textInputIndex);
+            const textInputId = getDocumentId("TextInput", props.pageIndex, i, props.textInputIndex);
             
             const textInput = $("#" + textInputId);
             if (textInput)
@@ -471,23 +524,15 @@ export default function TextInput(props: {
             return;
 
         const nextTextInputId = nextTextInput.prop("id");
-        const nextTextInputFontSize = nextTextInput.css("fontSize");
 
         // case: next text input blank
         if (copyStyles && isBlank(nextTextInput.prop("value"))) {
             const fontSizeDiff = documentContext.subtractMSWordFontSizes($(inputRef.current!).css("fontSize"), nextTextInput.css("fontSize"));
-            const numLinesDiff = documentContext.getNumLinesDeviation(nextTextInputId, fontSizeDiff); 
             
-            // case: font size too large
-            if (numLinesDiff > 0) {
-                // case: cant handle font size too large
-                if (!documentContext.handleFontSizeTooLarge(false, numLinesDiff, nextTextInputId, true))
-                    // keep nextTextInput's fontSize
-                    stylePropsToOverride?.push(["fontSize", getCSSValueAsNumber(nextTextInputFontSize, 2)]);
-
-            // case: font size too small
-            } else if (numLinesDiff < 0)
-                documentContext.handleFontSizeTooSmall(numLinesDiff);
+            // case: cant handle font size
+            if (!documentContext.handleFontSizeChange(fontSizeDiff, nextTextInputId))
+                // keep nextTextInput's fontSize
+                stylePropsToOverride?.push(["fontSize", getCSSValueAsNumber(nextTextInput.css("fontSize"), 2)]);
             
             documentContext.focusTextInput(nextTextInputId, false);
             documentContext.setSelectedTextInputStyle(getTextInputStyle($(inputRef.current!)), stylePropsToOverride);
@@ -533,6 +578,7 @@ export default function TextInput(props: {
         <div className={"textInputContainer flexCenter " + dontHideConnectIconClassName} 
             onMouseOver={handleMouseOver}
             onMouseOut={handleMousOut}
+            key={props.propKey}
              >
             <label className={"textInputLabel " + dontHideConnectIconClassName} htmlFor={id}>
                 <Button id={"ConnectLines" + id}
@@ -552,7 +598,7 @@ export default function TextInput(props: {
                         }}      
                         hoverBackgroundColor={props.isSingleColumnLine ? "rgb(255, 180, 160)" : "rgb(160, 180, 255)"}
                         clickBackgroundColor="rgb(220, 220, 220)"
-                        onClick={toggleSingleColumnLine} 
+                        onClick={toggleSingleColumnLineStyle} 
                         >
                     <i className={"fa-solid fa-link connectIcon " + dontHideConnectIconClassName + " " + (props.isSingleColumnLine && " hidden")}></i>
                     <i className={"fa-solid fa-link-slash disconnectIcon minorMarginTopOne " + dontHideConnectIconClassName + " " + (!props.isSingleColumnLine && " hidden")}></i>

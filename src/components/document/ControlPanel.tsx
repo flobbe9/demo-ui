@@ -2,10 +2,12 @@ import React, { useContext, useEffect, useState, useRef } from "react";
 import "../../assets/styles/ControlPanel.css";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { confirmPageUnload, isBlank, log, removeConfirmPageUnloadEvent } from "../../utils/basicUtils";
+import { confirmPageUnload, flashClass, isBlank, isStringAlphaNumeric, log, removeConfirmPageUnloadEvent } from "../../utils/basicUtils";
 import Button from "../helpers/Button";
 import { DocumentContext } from "./Document";
-import { adjustDocumentFileName } from "../../utils/documentBuilderUtils";
+import { matchesAll } from './../../utils/basicUtils';
+import { DOCUMENT_FILE_PREFIX_PATTERN, KEY_CODES_NO_TYPED_CHAR } from "../../globalVariables";
+import { isFileNameValid } from "../../utils/documentBuilderUtils";
 
 
 /**
@@ -42,15 +44,25 @@ export default function ControlPanel(props: {
 
     function handleFileNameKeyUp(event): void {
 
+        documentContext.setDocumentFileName($(fileNameInputRef.current!).prop("value"));
+    }
+
+
+    function handleFileNameKeyDown(event): void {
+
         const input = $(fileNameInputRef.current!);
-        let inputValue: string;
+        const typedChar = KEY_CODES_NO_TYPED_CHAR.includes(event.keyCode) ? "" : event.key;
 
-        if (!input || !(inputValue = input.prop("value")))  
+        // case: invalid file name
+        if (!matchesAll(input.prop("value") + typedChar, DOCUMENT_FILE_PREFIX_PATTERN)) {
+            event.preventDefault();
+
+            documentContext.showSubtlePopup("Dateiname", `Du kannst das Zeichen '${event.key}' nicht im Dateinamen benutzen.`, "Warn");
+
+            flashClass(input.prop("id"), "invalid");
+
             return;
-
-        inputValue = adjustDocumentFileName(inputValue);
-
-        documentContext.setDocumentFileName(inputValue);
+        }
     }
 
 
@@ -91,6 +103,7 @@ export default function ControlPanel(props: {
                         ref={fileNameInputRef}
                         type="text" 
                         defaultValue={documentContext.documentFileName}
+                        onKeyDown={handleFileNameKeyDown}
                         onKeyUp={handleFileNameKeyUp}
                         />
                 </div>  

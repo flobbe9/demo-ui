@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../../assets/styles/RadioButton.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCase, log } from "../../utils/basicUtils";
+import { equalsIgnoreCaseTrim, log } from "../../utils/basicUtils";
 
 
 /**
@@ -40,7 +40,7 @@ export default function RadioButton(props: {
     const labelId = labelClassName + props.id;
     const childrenClassName = props.childrenClassName ? "radioChildren " + props.childrenClassName : "radioChildren";
 
-    const [checked, setChecked] = useState(equalsIgnoreCase(props.value, props.radioGroupValue));
+    const [checked, setChecked] = useState(equalsIgnoreCaseTrim(props.value, props.radioGroupValue));
     const [disabled, setDisabled] = useState(props.disabled);
 
     const boxRef = useRef(null);

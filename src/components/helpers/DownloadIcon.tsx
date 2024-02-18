@@ -7,7 +7,6 @@ import "../../assets/styles/DownloadIcon.css";
  * 
  * @since 0.0.6
  */
-// TODO: looks weird in firefox
 export default function DownloadIcon(props: {
     id: string,
     className?: string,

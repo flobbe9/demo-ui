@@ -11,8 +11,8 @@
         }
         
         .fileNameInput {
-            border: none;
-            border-radius: 3px;
+            border: 2px solid black;
+            border-radius: 4px;
             min-width: 191px;
             opacity: 0.6;
             overflow: auto;
@@ -31,6 +31,18 @@
             &:hover {
                 opacity: 0.8;
             }
+
+            &.invalid {
+                border: 2px solid orange;
+            }
         }
+    }
+    
+    ::-moz-selection {
+        background: rgb(172, 172, 172);
+    }
+      
+    ::selection {
+        background: rgb(172, 172, 172);
     }
 }
