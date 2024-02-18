@@ -78,14 +78,15 @@
     }
 }
     
-/* last singleColumnLine in heading container */
-.headingContainer .Paragraph:nth-last-child(-n + 1) {
-    .SingleColumnLine {
-        border-bottom: var(--textInputBorderBottom);
+/* 
+ * Last singleColumnLine in heading container.
+ * @see https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-last-child?retiredLocale=de
+ */
+.headingContainer .SingleColumnLine:nth-last-child(-n + 1) {
+    border-bottom: var(--textInputBorderBottom);
 
-        &:hover {
-            border: var(--connectLinesBorder);
-            margin-bottom: 0;
-        }
+    &:hover {
+        border: var(--connectLinesBorder);
+        margin-bottom: 0;
     }
 }

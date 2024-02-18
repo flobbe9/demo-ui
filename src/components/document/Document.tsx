@@ -6,16 +6,15 @@ import { AppContext } from "../App";
 import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE, DEFAULT_DOCUMENT_FILE_NAME } from "../../globalVariables";
 import ControlPanel from "./ControlPanel";
-import TextInput from "./TextInput";
 import { Orientation } from "../../enums/Orientation";
-import { getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
+import { documentIdToColumnId, getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import PopupContainer from "../popups/PopupContainer";
 import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
 import { buildDocument, downloadDocument } from "../../builder/builder";
 import { SubtlePopupType } from "../../abstract/SubtlePopupType";
 import ControlPanelMenu from "./ControlPanelMenu";
-import WarnIcon from "../helpers/WarnIcon";
+import { AppendRemoveTextInputWrapper, getDefaultAppendRemoveTextInputWrapper } from "../../abstract/AppendRemoveTextInputWrapper";
 
 
 // TODO: add some kind of "back" button
@@ -23,13 +22,11 @@ import WarnIcon from "../helpers/WarnIcon";
 // TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
 // TODO: font size of bottom lines of pages should be changable if empty
 // TODO: about page, link github and stuff
-
-// TODO: test barrier usability (alt, title etc.)
+// TODO: test barrier usability (alt, title etc.)ne
 // TODO: handle tab navigation correctly (Popups, stylepanel etc.)
 // TODO: check some seo criteria
-// TODO: what happens to db when docker restart? Create volume
-// TODO: what is the process behind 443 (tcp6)? How to run paralel
 // TODO: lookup portainer
+
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -58,16 +55,15 @@ export default function Document(props) {
     const [numSingleColumnLines, setNumSingleColumnLines] = useState(0);
     const [documentFileName, setDocumentFileName] = useState(DEFAULT_DOCUMENT_FILE_NAME);
 
-    /** <Paragraph /> component listens to changes of these states and attempts to append or remove a <TextInput /> at the end */
-    const [paragraphIdAppendTextInput, setParagraphIdAppendTextInput] = useState<[string[], number]>([[""], 0]); // [paragraphIds, numTextInputsToAppend]
-    const [paragraphIdRemoveTextInput, setParagraphIdRemoveTextInput] = useState<[string[], number]>([[""], 0]); // [paragraphIds, numTextInputsToRemove]
+    /** ```<Column />``` component listens to this state and appends or removes given text inputs.*/
+    const [appendTextInputWrapper, setAppendTextInputWrapper] = useState<AppendRemoveTextInputWrapper>(getDefaultAppendRemoveTextInputWrapper());
+    const [removeTextInputWrapper, setRemoveTextInputWrapper] = useState<AppendRemoveTextInputWrapper>(getDefaultAppendRemoveTextInputWrapper());
     
     /** serves as notification for the singleColumnLines state in ```<Page />``` component to refresh */
     const [refreshSingleColumnLines, setRefreshSingleColumnLines] = useState(false);
 
     const [isWindowWidthFitLandscape, setIsWindowWidthFitLandscape] = useState(checkIsWindowWidthFitLandscape());
     const [isWindowWidthFitPortrait, setIsWindowWidthFitPortrait] = useState(checkIsWindowWidthFitPortrait());
-
 
     const windowScrollY = useRef(0);
     const documentPopupRef = useRef(null);
@@ -83,14 +79,10 @@ export default function Document(props) {
         handleFontSizeChange,
         getNumLinesDeviation,
         subtractMSWordFontSizes,
-        appendTextInput,
-        removeTextInput,
-        paragraphIdAppendTextInput,
-        setParagraphIdAppendTextInput,
-        paragraphIdRemoveTextInput,
-        setParagraphIdRemoveTextInput,
-        getParagraphIdByDocumentId,
-        getParagraphIdsForFontSizeChange,
+        appendTextInputWrapper,
+        setAppendTextInputWrapper,
+        removeTextInputWrapper,
+        setRemoveTextInputWrapper,
 
         getColumnTextInputs,
         getColumnFontSizesSum,
@@ -276,7 +268,7 @@ export default function Document(props) {
 
 
     /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
      * @returns jquery of all ```<TextInput />``` components inside given column or ```null``` if column was not found.
      *          Also include ```<TextInput />```components in page with className {@link SINGLE_COLUMN_LINE_CLASS_NAME}.
      */
@@ -303,106 +295,32 @@ export default function Document(props) {
 
 
     /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-     * @returns jquery of all ```<TextInput />``` components inside given paragraph or ```null``` if paragraph was not found
-     */
-    function getColumnParagraphs(documentId = selectedTextInputId): JQuery | null {
-
-        const docxElement = getJQueryElementById(documentId);
-        if (!docxElement)
-            return null;
-
-        const columnId = getColumnIdByDocumentId(documentId);
-
-        return $("#" + columnId + " .Paragraph");
-    }
-
-
-    /**
-     * Append new ```<TextInput />``` to ```textInputs``` state (passed as param).
-     *
-     * @param textInputs array of ```<TextInput />``` (state) to add new text input to
-     * @param setTextInputs state setter to use
-     * @param pageIndex index of page to append the text input to
-     * @param columnIndex index of column to append the text input to
-     * @param paragraphIndex index of paragraph to append the text input to
-     * @param numTextInputs number of text inputs to append
-     * @returns array with the appended ```<TextInput />```s
-     */
-    function appendTextInput(textInputs: React.JSX.Element[],
-                            setTextInputs: (textInputs: React.JSX.Element[]) => void,
-                            pageIndex: number,
-                            columnIndex: number,
-                            paragraphIndex: number,
-                            numTextInputs = 1): React.JSX.Element[] {
-
-        let newTextInputs: React.JSX.Element[] = [];
-
-        for (let i = 0; i < numTextInputs; i++) {
-            newTextInputs.push(<TextInput key={getRandomString()}
-                                            pageIndex={pageIndex}
-                                            columnIndex={columnIndex}
-                                            paragraphIndex={paragraphIndex}
-                                            textInputIndex={textInputs.length + i}
-                                            isSingleColumnLine={false}
-                                            />);
-        }
-
-        setTextInputs([...textInputs, ...newTextInputs]);
-
-        return newTextInputs;
-    }
-
-
-    /**
-     * Remove ```<TextInput />``` from given ```textInputs``` array at given ```index```.
-     *
-     * @param textInputs array of ```<TextInput />``` (state) to add new text input to
-     * @param setTextInputs state setter to use
-     * @param index of text input position in given ```textInputs``` array to remove the text input at
-     * @param deleteCount  number of elements to remove
-     * @returns array with the removed ```<TextInput />```s
-     */
-    function removeTextInput(textInputs: React.JSX.Element[],
-                            setTextInputs: (textInputs: React.JSX.Element[]) => void,
-                            index: number = textInputs.length - 1,
-                            deleteCount = 1): React.JSX.Element[] {
-
-        const removedTextInput = textInputs.splice(index, deleteCount);
-
-        setTextInputs([...textInputs]);
-
-        return removedTextInput;
-    }
-
-
-    /**
      * Calculate number of lines deviation in column of given ```documentId``` and append or remove some lines to even out the difference.
      *  
      * @param fontSizeDiff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
      *                     stated as msWord font size. 
-     * @param documentId id of text input where the font size has changed, default is ```selectedTextInputId```
+     * @param textInputId id of text input where the font size has changed, default is ```selectedTextInputId```
      * @returns false if the fontSize should not be changed, else true
      */
-    // TODO: does not work for column !== 0
-    function handleFontSizeChange(fontSizeDiff: number, documentId = selectedTextInputId): boolean {
+    function handleFontSizeChange(fontSizeDiff: number, textInputId = selectedTextInputId): boolean {
 
-        const textInput = getJQueryElementById(documentId);
+        const textInput = getJQueryElementById(textInputId);
 
-        // case: falsy ids
+        // case: falsy id
         if (!textInput)
             return false;
         
-        const numLinesDiff = getNumLinesDeviation(documentId, fontSizeDiff);
+        const numLinesDiff = getNumLinesDeviation(textInputId, fontSizeDiff);
+        const isSingleColumnLine = isTextInputSingleColumnLine(textInputId);
         let isAbleToHandleFontSizeChange = true;
-        
+
         // case: font size too large
         if (numLinesDiff > 0) {
-            isAbleToHandleFontSizeChange = handleFontSizeTooLarge(false, numLinesDiff, documentId, true)
+            isAbleToHandleFontSizeChange = handleFontSizeTooLarge(false, numLinesDiff, textInputId, true, isSingleColumnLine)
 
         // case: font size too small
         } else if (numLinesDiff < 0)
-            handleFontSizeTooSmall(numLinesDiff, documentId);
+            handleFontSizeTooSmall(numLinesDiff, textInputId, isSingleColumnLine);
 
         return isAbleToHandleFontSizeChange;
     }
@@ -414,45 +332,61 @@ export default function Document(props) {
      * 
      * @param flash if true, the given text input will flash if no text input can be removed, default is true
      * @param deleteCount number of lines to remove if blank, default is 1
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-     * @param checkNextTextInputFocused if true, one more text input will be checked for "is focused" than it normally would to prevent
-     *                                  focusing a text input that will be deleted
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
+     * @param checkNextTextInputFocused if true, next text input will be checked for "is focused" too (i.e. if this function was triggered by "Enter" handler)
+     * @param isTextInputSingleColumnLine if true, the text input that has it's font size changed is a single column line, default is false
      * @returns false if the fontSize should not be changed, else true
      */
-    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId, checkNextTextInputFocused = false): boolean {
+    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId, checkNextTextInputFocused = false, isTextInputSingleColumnLine = false): boolean {
 
-        const columnTextInputs = getColumnTextInputs(documentId);
-        if (!columnTextInputs) {
-            logError("'handleFontSizeTooLarge()' failed. 'columnTextInputs' is falsy.");
-            return false;
-        }
+        const lastTextInputsInColumn = getNLastTextInputs(documentId, deleteCount);
+        const columnIds = new Set<string>();
+        let numTextInputsToRemove = 0;
 
-        // get last textinputs
         let areTextInputsBlank = true;
-        let areTextInputsToDeleteFocused = false;
-        const columnTextInputsToDelete = Array.from(columnTextInputs).slice(columnTextInputs.length - deleteCount - (checkNextTextInputFocused ? 1 : 0));
+        let areTextInputsToRemoveFocused = false;
 
-        // check for non blank textInputs
-        columnTextInputsToDelete.forEach(textInput => {
+        // validate text inputs to be removed
+        lastTextInputsInColumn.forEach(textInput => {
             // case: is not blank
-            if (areTextInputsBlank && !isBlank((textInput as HTMLInputElement).value))
+            if (areTextInputsBlank && !isBlank((textInput as HTMLInputElement).value)) {
                 areTextInputsBlank = false;
+                return;
+            }
 
             // case: is focused
-            if (!areTextInputsToDeleteFocused && textInput.id === selectedTextInputId)
-                areTextInputsToDeleteFocused = true;
+            if (!areTextInputsToRemoveFocused) {
+                if (textInput.id === selectedTextInputId || (checkNextTextInputFocused && selectedTextInputId === getNextTextInput(textInput.id)?.prop("id"))) {
+                    areTextInputsToRemoveFocused = true;
+                    return;
+                }
+            }
+
+            // case: is single column line
+            if (isTextInputSingleColumnLine) {
+                // consider aligned columns as well
+                const nonSingleColumnLineTextInputId = getNonSingleLineColumnTextInputIdInSameColumn(textInput.id);
+                const alignedTextInputIds = getAlignedTextInputIds(nonSingleColumnLineTextInputId);
+
+                // add column ids
+                if (columnIds.size < 3)
+                    alignedTextInputIds.forEach(textInputId => columnIds.add(documentIdToColumnId(textInputId)));
+            
+            } else
+                if (columnIds.size < 1)
+                    columnIds.add(documentIdToColumnId(documentId));
+            
+            numTextInputsToRemove++;
         });
 
-        // case: last input blank
-        if (areTextInputsBlank && !areTextInputsToDeleteFocused) {
-            const paragraphIndex = getParagraphIndexOfLastTextInputInColumn(documentId);
-            const paragraphIds = getParagraphIdsForFontSizeChange(documentId, paragraphIndex);
+        // case: text inputs to remove are valid
+        if (areTextInputsBlank && !areTextInputsToRemoveFocused) {
+            setRemoveTextInputWrapper({
+                columnIds: columnIds, 
+                num: numTextInputsToRemove
+            });
 
-            log(paragraphIds)
-
-            setParagraphIdRemoveTextInput([paragraphIds, deleteCount]);
-
-        // case: last input not blank
+        // case: text inputs to remove are not valid
         } else {
             // case: warn user
             if (flash) {
@@ -468,28 +402,49 @@ export default function Document(props) {
 
     
     /**
-     * Set weird "paragraph append" state for some paragraphs to be added.
+     * Set weird "textInput append" state for some text inputs to be added.
      * 
-     * @param numLinesToAdd number of lines of {@link DEFAULT_FONT_SIZE} that could fit at the bottom of selected column
+     * @param numLinesToAppend number of lines of {@link DEFAULT_FONT_SIZE} that could fit at the bottom of selected column
+     * @param textInputId in order to get aligned text inputs and to determine
+     * @param isTextInputSingleColumnLine if true, the text input that has it's font size changed is a single column line, default is false
      */
-    function handleFontSizeTooSmall(numLinesToAdd: number, documentId = selectedTextInputId): void {
+    function handleFontSizeTooSmall(numLinesToAppend: number, textInputId = selectedTextInputId, isTextInputSingleColumnLine = false): void {
 
-        // case: some lines to add
-        if (Math.abs(numLinesToAdd) !== 0) {
-            // case: is last text input
-            const lastTextInputInColumn = getLastTextInputOfColumn();
-            if (lastTextInputInColumn && lastTextInputInColumn.prop("id") === selectedTextInputId)
-                return;
-            
-            // get all paragraphs to 
-            const paragraphIds = getParagraphIdsForFontSizeChange(documentId);
-            setParagraphIdAppendTextInput([paragraphIds, Math.abs(numLinesToAdd)]);
-        }
+        const columnIds = new Set<string>();
+
+        // case: single column line
+        if (isTextInputSingleColumnLine) {
+            const nonSingleColumnLineTextInputId = getNonSingleLineColumnTextInputIdInSameColumn(textInputId);
+            getAlignedTextInputIds(nonSingleColumnLineTextInputId).forEach(textInputId => columnIds.add(documentIdToColumnId(textInputId)));
+        
+        // case: normal line
+        } else
+            columnIds.add(documentIdToColumnId(textInputId));
+
+        setAppendTextInputWrapper({
+            columnIds: columnIds,
+            num: Math.abs(numLinesToAppend)
+        });
     }
 
 
     /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @param documentId to identify the column of the text inputs
+     * @param n number of text inputs to get from column
+     * @returns ```n``` to last ```<TextInput />```s
+     */
+    function getNLastTextInputs(documentId: string, n: number): HTMLElement[] {
+
+        const columnTextInputs = getColumnTextInputs(documentId);
+        if (!columnTextInputs)
+            return [];
+
+        return Array.from(columnTextInputs).slice(columnTextInputs.length - n);
+    }
+
+
+    /**
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
      * @returns sum of font sizes of all text inputs in column (in px) or -1 if column was not found. Uses msWord font size.
      */
     function getColumnFontSizesSum(documentId = selectedTextInputId): number {
@@ -511,7 +466,7 @@ export default function Document(props) {
 
 
     /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
      * @param diff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
      *             stated as msWord font size. 
      * @param columnFontSizesSum sum of fontSizes of all text inputs in this column. If present it wont be calculated again to increase performance 
@@ -579,78 +534,36 @@ export default function Document(props) {
 
 
     /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-     * @param paragraphIndex index of paragraph in column, relevant if only one column is changed
-     * @param isSingleColumnLine true if text input component is singleColumnLine
-     * @returns array of paragraph ids that should be considered for font size change
+     * @param textInputId id of text input to align
+     * @returns string array of valid text input ids with same text input index on same page accross all columns of page.
+     *          Return ```[]``` if given id invalid
      */
-    function getParagraphIdsForFontSizeChange(documentId = selectedTextInputId, paragraphIndex?: number, isSingleColumnLine = isTextInputSingleColumnLine(documentId)): string[] {
+    function getAlignedTextInputIds(textInputId: string): string[] {
 
-        const paragraphIds: string[] = [];
+        // get text input
+        const textInput = getJQueryElementById(textInputId);
+        if (!textInput)
+            return [];
+        
+        const textInputIds: string[] = [];
 
-        // case: is singleColumnLine
-        if (isSingleColumnLine) {
-            const pageIndex = stringToNumber(getPartFromDocumentId(documentId, 1));
+        const pageIndex = getPartFromDocumentId(textInputId, 1);
+        const textInputIndex = getPartFromDocumentId(textInputId, 3);
+
+        // iterate columns
+        for (let i = 0; i < numColumns; i++) {
+            const alignedTextInputId = getDocumentId("TextInput", stringToNumber(pageIndex), i, stringToNumber(textInputIndex));
             
-            // add lines to all columns
-            for (let i = 0; i < numColumns; i++)
-                paragraphIds.push(getParagraphIdByDocumentId(getDocumentId("Column", pageIndex, "", i), paragraphIndex));
-
-        // case: normal line
-        } else 
-            paragraphIds.push(getParagraphIdByDocumentId(documentId, paragraphIndex));
-
-        return paragraphIds;
-    }
-
-
-    /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-     * @param paragraphIndex index of the paragraph inside the column, will be set to last paragraph in column if not present
-     * @returns id of the paragraph found with given params. Contains -1 as paragraphIndex if paragraph wasn't found
-     */
-    function getParagraphIdByDocumentId(documentId = selectedTextInputId, paragraphIndex?: number): string {
-
-        // set default paragraph index to last paragraph in column
-        if (!paragraphIndex) {
-            const columnParagraphs = getColumnParagraphs(documentId);
-
-            if (!columnParagraphs) 
-                paragraphIndex = -1;
-                
-            else 
-                paragraphIndex = columnParagraphs.length - 1;
+            if (isTextInputIdValid(alignedTextInputId))
+                textInputIds.push(alignedTextInputId);
         }
 
-        const pageIndex = getPartFromDocumentId(documentId, 1);
-        const columnIndex = getPartFromDocumentId(documentId, 2);
-
-        const paragraphId = getDocumentId("Paragraph", stringToNumber(pageIndex), "", stringToNumber(columnIndex), paragraphIndex);
-
-        return paragraphId;
+        return textInputIds;
     }
 
 
     /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
-     * @return index of last ```<Paragraph />``` with a ```<TextInput />``` in it in given ```<Column />``` or -1
-     */
-    function getParagraphIndexOfLastTextInputInColumn(documentId = selectedTextInputId): number {
-
-        const lastTextInputOfColumn = getLastTextInputOfColumn(documentId);
-        if (!lastTextInputOfColumn)
-            return -1;
-
-        const paragraph = lastTextInputOfColumn.parents(".Paragraph");
-        if (!paragraph.length)
-            return -1;
-
-        return stringToNumber(getPartFromDocumentId(paragraph.prop("id"), 3));
-    }
-
-
-    /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. paragraphId or textInputId). Default is selectedTextInputId
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
      * @returns a JQuery of the last ```<TextInput />``` in given column or null if not found
      */
     function getLastTextInputOfColumn(documentId = selectedTextInputId): JQuery | null {
@@ -905,6 +818,25 @@ export default function Document(props) {
     }
 
 
+    /**
+     * @param documentId to get page index and column index
+     * @returns a text input id of a text input on the same page in the same column that is not a signle column line
+     */
+    function getNonSingleLineColumnTextInputIdInSameColumn(documentId: string): string {
+
+        const pageIndex = stringToNumber(getPartFromDocumentId(documentId, 1));
+        const columnIndex = stringToNumber(getPartFromDocumentId(documentId, 2));
+
+        const textInputId = getDocumentId("TextInput", pageIndex, columnIndex, numSingleColumnLines);
+
+        // case: only lingle column lines on page
+        if (isTextInputSingleColumnLine(textInputId))
+            return documentId;
+
+        return textInputId;
+    }
+
+
     return (
         <div id={id} className={className} onClick={handleDocumentClick} onMouseMove={handleDocumentMouseMove}>
             <DocumentContext.Provider value={context}>
@@ -932,7 +864,6 @@ export default function Document(props) {
     );
 }
 
-const paragraphIdAppendExample: [string[], number] = [[""], 0];
 export const DocumentContext = createContext({
     isTextInputSingleColumnLine: (textInputId?: string): boolean => {return false},
     refreshSingleColumnLines: false, 
@@ -941,14 +872,10 @@ export const DocumentContext = createContext({
     handleFontSizeChange: (fontSizeDiff: number, textInputId?: string): boolean => {return false},
     getNumLinesDeviation: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},
     subtractMSWordFontSizes: (fontSize: number | string, fontSize2: number | string): number => {return 0},
-    appendTextInput: (textInputs: React.JSX.Element[], setTextInputs: (textInputs: React.JSX.Element[]) => void, pageIndex: number, columnIndex: number, paragraphIndex: number, numTextInputs?: number): React.JSX.Element[] => {return []},
-    removeTextInput: (textInputs: React.JSX.Element[], setTextInputs: (textInputs: React.JSX.Element[]) => void, index?: number, deleteCount?: number): React.JSX.Element[] => {return []},
-    paragraphIdAppendTextInput: paragraphIdAppendExample,
-    setParagraphIdAppendTextInput: (paragraphIdAppendTextInput: [string[], number]) => {},
-    paragraphIdRemoveTextInput: paragraphIdAppendExample,
-    setParagraphIdRemoveTextInput: (paragraphIdAppendTextInput: [string[], number]) => {},
-    getParagraphIdByDocumentId: (documentId?: string, paragraphIndex?: number): string => {return ""},
-    getParagraphIdsForFontSizeChange: (documentId?: string, paragraphIndex?: number, isSingleColumnLine?: boolean): string[] => {return []},
+    appendTextInputWrapper: getDefaultAppendRemoveTextInputWrapper(),
+    setAppendTextInputWrapper: (appendTextInputWrapper: AppendRemoveTextInputWrapper) => {},
+    removeTextInputWrapper: getDefaultAppendRemoveTextInputWrapper(),
+    setRemoveTextInputWrapper: (appendTextInputWrapper: AppendRemoveTextInputWrapper) => {},
 
     getColumnTextInputs: (documentId?: string): JQuery | null => {return null},
     getColumnFontSizesSum: (documentId?: string): number => {return 0},

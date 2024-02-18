@@ -122,7 +122,7 @@ function buildContent(numColumns: number): BasicParagraph[] {
  */
 function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps: BasicParagraph[], numColumns: number): void {
 
-    const columnId = getDocumentId("Column", pageIndex, "", columnIndex);
+    const columnId = getDocumentId("Column", pageIndex, columnIndex);
     let columnTextInputs = $("#" + columnId + " .TextInput");
     
     // case: no text inputs yet

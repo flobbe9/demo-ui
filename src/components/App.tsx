@@ -22,9 +22,7 @@ import { fetchAny, isHttpStatusCodeAlright } from "../utils/fetchUtils";
  * 
  *      [<Page>
  *          [<Column>
- *              [<Paragraph>
- *                  [<TextInput />]
- *              </ Paragraph>]
+*               [<TextInput />]
  *          </ Column>]
  *      </ Page>]
  *  </ Document>
@@ -61,6 +59,8 @@ export default function App() {
 
 
     useEffect(() => {
+        redirectWWW();
+
         if (API_ENV === "prod")
             initCookies();
 
@@ -77,6 +77,20 @@ export default function App() {
             document.removeEventListener("resize", handleWindowResize);
         }
     }, []);
+
+
+    /**
+     * If url starts with 'https://www....' redirect to 'https://...'. Makes ist easier for backend to configure cors.
+     */
+    function redirectWWW(): void {
+
+        const currentUrl = window.location.href;
+
+        if (currentUrl.startsWith("https://www.")) {
+            const redirectUrl = currentUrl.replace("www.", "")
+            window.location.href = redirectUrl;
+        }
+    }
 
 
     function handleClick(event): void {
@@ -208,6 +222,7 @@ export default function App() {
         <div className="App" ref={appRef} onClick={handleClick}>
             <BrowserRouter>
                 <AppContext.Provider value={context}>
+                    {/* <AppWrapper /> */}
 
                     <NavBar />
 
