@@ -12,6 +12,11 @@
         width: max-content;
     }
 
+    h1.navSectionLeft {
+        font-size: inherit;
+        margin-bottom: 0;
+    }
+
     .navSectionRight {
         .navButton {
             margin-left: 10px;

@@ -46,9 +46,9 @@ export default forwardRef(function SubtlePopup(props: {
             </div>
 
             {/* body */}
-            <h5 className="dontHideSubtlePopup textCenter">
+            <h4 className="dontHideSubtlePopup textCenter">
                 {props.title}
-            </h5>
+            </h4>
             <div className="dontHideSubtlePopup">{props.message}</div>
         </div>
 
