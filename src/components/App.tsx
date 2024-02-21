@@ -68,7 +68,7 @@ export default function App() {
         document.addEventListener("keyup", handleGlobalKeyUp);
         $(window).on("resize", handleWindowResize);
 
-        document.title = WEBSITE_NAME;
+        document.title = WEBSITE_NAME + " | Word Dokumente schreiben";
 
         // clean up
         return () => {

@@ -72,8 +72,6 @@ export default forwardRef(function StylePanel(props: {
     }
 
 
-    // TODO: note if font size is out of bounds
-    // TODO: handle key down for select font size input, validate
     function handleFontSizeSelect(fontSize: string): void {
         
         // case: text too long for text input length      
@@ -83,9 +81,13 @@ export default forwardRef(function StylePanel(props: {
             return;
         }
 
-        // handle font size change
         const diff = documentContext.subtractMSWordFontSizes(getCSSValueAsNumber(fontSize, 2), documentContext.selectedTextInputStyle.fontSize);
-        documentContext.handleFontSizeChange(diff);
+        // case: cant chnage font size
+        if (!documentContext.handleFontSizeChange(diff)) {
+            flashClass(documentContext.selectedTextInputId, "textInputFlash", "textInputFocus", 500);
+            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Fokussiere eine Zeile, die weiter oben liegt und versuche es dann erneut.", "Warn");
+            return;
+        }
 
         documentContext.selectedTextInputStyle.fontSize = getCSSValueAsNumber(fontSize, 2);
         documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});

@@ -40,6 +40,13 @@ export default function Column(props: {
 
     }, []);
 
+
+    useEffect(() => {
+        setTextInputs(initTextInputs());
+        addSpaceBetweenColumns();
+        
+    }, [documentContext.refreshColumns]);
+
     
     useEffect(() => {
         if (documentContext.appendTextInputWrapper.columnIds.has(id))

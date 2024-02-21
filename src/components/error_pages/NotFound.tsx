@@ -20,7 +20,7 @@ export default function NotFound(props: {
 
     return (
         <div id={id} className={className + " textCenter"}>
-            <h1 className="mt-5">404</h1>
+            <h2 className="mt-5">404</h2>
 
             <p>Es sieht so aus, als ob diese Seite nicht existiert.</p>
 

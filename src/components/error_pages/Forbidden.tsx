@@ -20,7 +20,7 @@ export default function Forbidden(props: {
 
     return (
         <div id={id} className={className + " textCenter"}>
-            <h1 className="mt-5">403</h1>
+            <h2 className="mt-5">403</h2>
 
             <p>Deine Berechtigungen reichen nicht aus, um auf diese Seite zuzugreifen.</p>
 

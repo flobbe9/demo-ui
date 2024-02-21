@@ -60,11 +60,11 @@ export default function PopupColumnConfig(props: {
         // update num columns state
         documentContext.setNumColumns(selectedNumColumns);
 
-        // update columns state
-        documentContext.setRefreshColumns(!documentContext.refreshColumns);
-
         // update selectedTextInputStyle state
         documentContext.setSelectedTextInputStyle(getDefaultStyle());
+
+        // update columns state
+        documentContext.setRefreshColumns(!documentContext.refreshColumns);
 
         documentContext.hidePopup();
     }
