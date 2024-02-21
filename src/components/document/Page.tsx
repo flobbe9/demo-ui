@@ -81,8 +81,7 @@ export default function Page(props: {
 
     function resetColumns(): void {
 
-        setColumns([]);
-        setTimeout(() => setColumns([...initColumns()]), 100);
+        setColumns([...initColumns()]);
     }
 
     

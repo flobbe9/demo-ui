@@ -28,6 +28,7 @@ import { AppendRemoveTextInputWrapper, getDefaultAppendRemoveTextInputWrapper } 
 // TODO: lookup portainer
 
 // TODO: enter makes line break (only accross one column)
+// TODO: last single column line button does not disappear on hover over other single column lines
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
