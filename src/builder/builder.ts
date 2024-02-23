@@ -3,12 +3,13 @@ import DocumentWrapper from "../abstract/DocumentWrapper";
 import { getTextInputStyle } from "../abstract/Style";
 import { BreakType } from "../enums/Breaktype";
 import { Orientation } from "../enums/Orientation";
-import { DOCUMENT_BUILDER_BASE_URL, DEFAULT_BASIC_PARAGRAPH_TEXT, SINGLE_COLUMN_LINE_CLASS_NAME } from "../globalVariables";
+import { DOCUMENT_BUILDER_BASE_URL, SINGLE_COLUMN_LINE_CLASS_NAME } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { downloadFileByUrl, isBlank, log, logApiResponse, logError, logWarn, stringToNumber } from "../utils/basicUtils";
 import { adjustDocumentFileName, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPartFromDocumentId } from "../utils/documentBuilderUtils";
 import fetchJson from "../utils/fetchUtils";
 import { ApiExceptionFormat, getApiExceptionInstance } from '../abstract/ApiExceptionFormat';
+import { addInvisibleText } from './../abstract/BasicParagraph';
 
 
 // NOTE: remember to add empty line after table (in case of column break, or second table following)
@@ -142,16 +143,22 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
     Array.from(columnTextInputs).forEach(textInputElement => {
         const textInputId = textInputElement.id;
         const textInput = $("#" + textInputId);
+        const style = getTextInputStyle(textInput);
 
         let text = getTextInputContent(textInput);
-        if (isBlank(text))
-            text = DEFAULT_BASIC_PARAGRAPH_TEXT;
 
-        const style = getTextInputStyle(textInput);
         // fix font size for MS Word
         style.fontSize = getMSWordFontSizeByBrowserFontSize(style.fontSize);
+        const basicParagraph: BasicParagraph = {
+            text: text,
+            style: style
+        }
 
-        allBasicParagrahps.push({text: text, style})
+        // add white text for blank lines. Backend wont apply font size otherwise
+        if (isBlank(text))
+            addInvisibleText(basicParagraph);
+        
+        allBasicParagrahps.push(basicParagraph)
     });
 
     // case: is not very last column
