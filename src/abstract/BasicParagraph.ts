@@ -20,3 +20,18 @@ export function getDefaultBasicParagraph(): BasicParagraph {
         style: getDefaultStyle()
     }
 }
+
+
+/**
+ * Set text to ```_``` and color to ```ffffff``` (white).
+ * 
+ * @param basicParagraph to adjust
+ * @returns altered basic paragraph
+ */
+export function addInvisibleText(basicParagraph: BasicParagraph): BasicParagraph {
+
+    basicParagraph.style.color = "ffffff"; // white
+    basicParagraph.text = "_";
+
+    return basicParagraph;
+}

@@ -73,7 +73,7 @@ function getAllFontSizes(): number[][] {
 
 export type Side = "top" | "right" | "left" | "bottom" | "none";
 
-export const DEFAULT_BASIC_PARAGRAPH_TEXT = " ";
+export const DEFAULT_BASIC_PARAGRAPH_TEXT = "";
 
 export const NO_TEXT_INPUT_SELECTED = "Wähle zuerst ein Texteingabefeld aus.";
 
