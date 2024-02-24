@@ -336,6 +336,7 @@ export default function TextInput(props: {
         // get text after cursor
 
         // case: last line blank
+            // if 
             // iterate column text inputs in reverse, start at second to last text input
             // shift text and style to next text input
             // if event.target is reached
@@ -344,7 +345,8 @@ export default function TextInput(props: {
                 // focus next text input
         
         // case: last line not blank
-            // 
+            // prevent default
+            // notify "cant make line break, delete last line of column / page"
     }
 
 
@@ -597,9 +599,10 @@ export default function TextInput(props: {
             const fontSizeDiff = documentContext.subtractMSWordFontSizes($(inputRef.current!).css("fontSize"), nextTextInput.css("fontSize"));
             
             // case: cant handle font size
-            if (!documentContext.handleFontSizeChange(fontSizeDiff, nextTextInputId))
+            if (!documentContext.handleFontSizeChange(fontSizeDiff, nextTextInputId, true)) {
                 // keep nextTextInput's fontSize
                 stylePropsToOverride?.push(["fontSize", getCSSValueAsNumber(nextTextInput.css("fontSize"), 2)]);
+            }
             
             documentContext.focusTextInput(nextTextInputId, false);
             documentContext.setSelectedTextInputStyle(getTextInputStyle($(inputRef.current!)), stylePropsToOverride);

@@ -309,9 +309,10 @@ export default function Document(props) {
      * @param fontSizeDiff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
      *                     stated as msWord font size. 
      * @param textInputId id of text input where the font size has changed, default is ```selectedTextInputId```
+     * @param nextTextInputWillBeFocused if true, next text input will be considered as "focused" (i.e. if this function was triggered by "Enter" handler)
      * @returns false if the fontSize should not be changed, else true
      */
-    function handleFontSizeChange(fontSizeDiff: number, textInputId = selectedTextInputId): boolean {
+    function handleFontSizeChange(fontSizeDiff: number, textInputId = selectedTextInputId, nextTextInputWillBeFocused = false): boolean {
 
         const textInput = getJQueryElementById(textInputId);
 
@@ -325,7 +326,7 @@ export default function Document(props) {
 
         // case: font size too large
         if (numLinesDiff > 0) {
-            isAbleToHandleFontSizeChange = handleFontSizeTooLarge(false, numLinesDiff, textInputId, true, isSingleColumnLine)
+            isAbleToHandleFontSizeChange = handleFontSizeTooLarge(false, numLinesDiff, textInputId, nextTextInputWillBeFocused, isSingleColumnLine)
 
         // case: font size too small
         } else if (numLinesDiff < 0)
@@ -342,11 +343,11 @@ export default function Document(props) {
      * @param flash if true, the given text input will flash if no text input can be removed, default is true
      * @param deleteCount number of lines to remove if blank, default is 1
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
-     * @param checkNextTextInputFocused if true, next text input will be checked for "is focused" too (i.e. if this function was triggered by "Enter" handler)
+     * @param nextTextInputWillBeFocused if true, next text input will be considered as "focused" (i.e. if this function was triggered by "Enter" handler)
      * @param isTextInputSingleColumnLine if true, the text input that has it's font size changed is a single column line, default is false
      * @returns false if the fontSize should not be changed, else true
      */
-    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId, checkNextTextInputFocused = false, isTextInputSingleColumnLine = false): boolean {
+    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId, nextTextInputWillBeFocused = false, isTextInputSingleColumnLine = false): boolean {
 
         const lastTextInputsInColumn = getNLastTextInputs(documentId, deleteCount);
         const columnIds = new Set<string>();
@@ -365,7 +366,9 @@ export default function Document(props) {
 
             // case: is focused
             if (!areTextInputsToRemoveFocused) {
-                if (textInput.id === selectedTextInputId || (checkNextTextInputFocused && selectedTextInputId === getNextTextInput(textInput.id)?.prop("id"))) {
+                const isTextInputFocuesd = textInput.id === selectedTextInputId;
+                const isTextInputAfterSelectedOneFocused = nextTextInputWillBeFocused ? getNextTextInput(selectedTextInputId)?.prop("id") === textInput.id : false;
+                if (isTextInputFocuesd || isTextInputAfterSelectedOneFocused) {
                     areTextInputsToRemoveFocused = true;
                     return;
                 }
@@ -387,6 +390,8 @@ export default function Document(props) {
             
             numTextInputsToRemove++;
         });
+
+        log(areTextInputsToRemoveFocused);
 
         // case: text inputs to remove are valid
         if (areTextInputsBlank && !areTextInputsToRemoveFocused) {
@@ -881,7 +886,7 @@ export const DocumentContext = createContext({
     refreshColumns: false,
     setRefreshColumns: (bool: boolean) => {},
 
-    handleFontSizeChange: (fontSizeDiff: number, textInputId?: string): boolean => {return false},
+    handleFontSizeChange: (fontSizeDiff: number, textInputId?: string, nextTextInputWillBeFocused?: boolean): boolean => {return false},
     getNumLinesDeviation: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},
     subtractMSWordFontSizes: (fontSize: number | string, fontSize2: number | string): number => {return 0},
     appendTextInputWrapper: getDefaultAppendRemoveTextInputWrapper(),
