@@ -18,7 +18,6 @@ import { AppendRemoveTextInputWrapper, getDefaultAppendRemoveTextInputWrapper } 
 
 
 // TODO: add some kind of "back" button
-// TODO: num lines calculation is wrong, if not all lines are filled with text
 // TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
 // TODO: font size of bottom lines of pages should be changable if empty
 // TODO: about page, link github and stuff

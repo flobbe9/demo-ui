@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCaseTrim, flashClass, getCursorIndex, getJQueryElementById, insertString, isBlank, isKeyAlphaNumeric, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { equalsIgnoreCaseTrim, flashClass, getCursorIndex, insertString, isBlank, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
 import { StyleProp, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
@@ -25,7 +25,6 @@ import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getDocumentId,
 // TODO: add table
 // TODO: add more pages
 
-// TODO: move cursor to same char index or end on arrow up / down
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
@@ -103,13 +102,16 @@ export default function TextInput(props: {
             handleTab(event);
         
         else if (eventKey === "Enter")
-            focusNextTextInput(true);
+            handleEnter(event);
+
+        else if (eventKey === "Backspace")
+            handleBackspace(event);
 
         else if (eventKey === "ArrowDown")
-            focusNextTextInput(false);
+            handleArrowDown(event);
 
         else if (eventKey === "ArrowUp")
-            focusPrevTextInput(event);
+            handleArrowUp(event);
 
         else if (eventKey === "ArrowLeft")
             handleArrowLeft(event);
@@ -187,8 +189,14 @@ export default function TextInput(props: {
 
         const cursorIndex = getCursorIndex(id);
 
-        if (cursorIndex === 0)
-            focusPrevTextInput(event);
+        if (cursorIndex !== 0)
+            return;
+
+        const prevTextInput = focusPrevTextInput(event);
+        if (!prevTextInput)
+            return;
+
+        moveCursor(prevTextInput.prop("id"), prevTextInput.prop("value").length)
     }
 
 
@@ -199,9 +207,43 @@ export default function TextInput(props: {
 
         if (!inputValue || cursorIndex === inputValue.length) {
             event.preventDefault();
-            focusNextTextInput(false);
-            moveCursor(getNextTextInput(id)?.prop("id"), 0);
+
+            const nextTextInput = focusNextTextInput(false);
+            if (nextTextInput)
+                moveCursor(nextTextInput.prop("id"), 0);
         }
+    }
+
+
+    function handleArrowDown(event): void {
+
+        event.preventDefault();
+
+        const cursorPos = getCursorIndex(id);
+
+        const nextTextInput = focusNextTextInput(false);
+
+        if (!nextTextInput)
+            return;
+
+        // set cursor to where it was in text input above
+        moveCursor(nextTextInput.prop("id"), cursorPos, cursorPos);
+    }
+
+
+    function handleArrowUp(event): void {
+        
+        event.preventDefault();
+
+        const cursorPos = getCursorIndex(id);
+
+        const prevTextInput = focusPrevTextInput(event);
+
+        if (!prevTextInput)
+            return;
+
+        // set cursor to where it was in text input below
+        moveCursor(prevTextInput.prop("id"), cursorPos, cursorPos);
     }
 
 
@@ -279,6 +321,30 @@ export default function TextInput(props: {
         // update text input
         $(inputRef.current!).val(newTextInputValue);
         moveCursor(id, cursorIndex - 1);
+    }
+
+
+    function handleEnter(event): void {
+
+        focusNextTextInput(true);
+
+        // if text input blank or cursor at end
+            // focus next
+            // return
+
+        // get cursor pos
+        // get text after cursor
+
+        // case: last line blank
+            // iterate column text inputs in reverse, start at second to last text input
+            // shift text and style to next text input
+            // if event.target is reached
+                // shift only text after cursor to next text input (and style)
+                // move cursor to 0
+                // focus next text input
+        
+        // case: last line not blank
+            // 
     }
 
 
@@ -514,14 +580,15 @@ export default function TextInput(props: {
     /**
      * @param copyStyles if true, all styles of selected text input will be copied to next text input
      * @param stylePropsToOverride style props to override the selected style props with if ```copyStyles```is true
+     * @return the next textinput or null if not found
      */
-    function focusNextTextInput(copyStyles: boolean, stylePropsToOverride: [StyleProp, string | number][] = []): void {
+    function focusNextTextInput(copyStyles: boolean, stylePropsToOverride: [StyleProp, string | number][] = []): JQuery | null {
 
         const nextTextInput = getNextTextInput(id);
         
         // case: end of document
         if (!nextTextInput)
-            return;
+            return null;
 
         const nextTextInputId = nextTextInput.prop("id");
 
@@ -540,23 +607,27 @@ export default function TextInput(props: {
         // case: next text input not blank
         } else 
             documentContext.focusTextInput(nextTextInput.prop("id"), true);
+
+        return nextTextInput;
     }
 
 
-    function focusPrevTextInput(event): void {
+    /**
+     * @param event 
+     * @returns the prev text input or null if not found
+     */
+    function focusPrevTextInput(event): JQuery | null {
 
         const prevTextInput = getPrevTextInput(id);
 
         // case: has no prev text input
         if (!prevTextInput) 
-            return;
+            return null;
 
         event.preventDefault();
         documentContext.focusTextInput(prevTextInput.prop("id"), true);
 
-        // move cursor to end of text
-        const lastCharIndex = prevTextInput.prop("value").length;
-        moveCursor(prevTextInput.prop("id"), lastCharIndex);
+        return prevTextInput;
     }
 
 
