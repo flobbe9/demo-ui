@@ -63,7 +63,7 @@ export default function NavBar(props: {
 
                 <div className="col-4 navSectionRight textRight" style={{position: "relative"}}>
                     
-                    {/* TODO: add functionality */}
+                    {/* FEAT: add functionality */}
                     {/* desktop mode */}
                     <div className={"navSectionRightDesktop " + (appContext.isMobileView && "hidden")}>
                         <LoadingButton 
@@ -97,7 +97,7 @@ export default function NavBar(props: {
                         </LoadingButton>
                     </div>
 
-                    {/* TODO: add functionality */}
+                    {/* FEAT: add functionality */}
                     {/* mobile mode*/}
                     <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile hover " + (!appContext.isMobileView && "hidden")} onClick={handleClickMenuIcon}></i>
                     <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile boxShadowDark">

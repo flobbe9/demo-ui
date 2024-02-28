@@ -24,7 +24,7 @@ import SubtlePopup from "../popups/SubtlePopup";
  * 
  * @since 0.0.1
  */
-// TODO: add hide option, or dont fix
+// FEAT: add hide option, or dont fix
 
 export default forwardRef(function StylePanel(props: {
     id?: string,
