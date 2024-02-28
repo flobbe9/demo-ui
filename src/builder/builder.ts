@@ -143,7 +143,7 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
     Array.from(columnTextInputs).forEach(textInputElement => {
         const textInputId = textInputElement.id;
         const textInput = $("#" + textInputId);
-        const style = getTextInputStyle(textInput);
+        const style = getTextInputStyle(textInputId);
 
         let text = getTextInputContent(textInput);
 

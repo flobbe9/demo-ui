@@ -83,6 +83,8 @@ export default function Document(props) {
         setRefreshColumns,
 
         handleFontSizeChange,
+        canHandlefontSizeTooLarge,
+        handleFontSizeTooLarge,
         getNumLinesDeviation,
         subtractMSWordFontSizes,
         appendTextInputWrapper,
@@ -227,7 +229,7 @@ export default function Document(props) {
 
         // style state
         if (updateSelectedTextInputStyle) 
-            setSelectedTextInputStyle(getTextInputStyle(textInput), stylePropsToOverride);
+            setSelectedTextInputStyle(getTextInputStyle(textInputId), stylePropsToOverride);
 
         // style text input
         if (applySelectedTextInputStyle)
@@ -326,7 +328,12 @@ export default function Document(props) {
 
         // case: font size too large
         if (numLinesDiff > 0) {
-            isAbleToHandleFontSizeChange = handleFontSizeTooLarge(false, numLinesDiff, textInputId, nextTextInputWillBeFocused, isSingleColumnLine)
+            const wrapper = {
+                columnIds: new Set<string>(),
+                numTextInputsToRemove: 0
+            }
+            isAbleToHandleFontSizeChange = canHandlefontSizeTooLarge(wrapper, numLinesDiff, textInputId, nextTextInputWillBeFocused, isSingleColumnLine)
+            handleFontSizeTooLarge(isAbleToHandleFontSizeChange, wrapper, false);
 
         // case: font size too small
         } else if (numLinesDiff < 0)
@@ -336,7 +343,9 @@ export default function Document(props) {
     }
 
 
+    // TODO: solve this more elegantly than with "wrapper"
     /**
+     * // TODO
      * Try to remove text inputs at the end of the column of given textInputId. Don't remove any text input if at least 
      * one is not blank and try to flash text input border instead.
      * 
@@ -347,16 +356,15 @@ export default function Document(props) {
      * @param isTextInputSingleColumnLine if true, the text input that has it's font size changed is a single column line, default is false
      * @returns false if the fontSize should not be changed, else true
      */
-    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId, nextTextInputWillBeFocused = false, isTextInputSingleColumnLine = false): boolean {
+    function canHandlefontSizeTooLarge(wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, deleteCount = 1, documentId = selectedTextInputId, nextTextInputWillBeFocused = false, isTextInputSingleColumnLine = false): boolean {
 
         const lastTextInputsInColumn = getNLastTextInputs(documentId, deleteCount);
-        const columnIds = new Set<string>();
-        let numTextInputsToRemove = 0;
 
         let areTextInputsBlank = true;
         let areTextInputsToRemoveFocused = false;
 
         // validate text inputs to be removed
+        // TODO: break loop
         lastTextInputsInColumn.forEach(textInput => {
             // case: is not blank
             if (areTextInputsBlank && !isBlank((textInput as HTMLInputElement).value)) {
@@ -381,23 +389,39 @@ export default function Document(props) {
                 const alignedTextInputIds = getAlignedTextInputIds(nonSingleColumnLineTextInputId);
 
                 // add column ids
-                if (columnIds.size < 3)
-                    alignedTextInputIds.forEach(textInputId => columnIds.add(documentIdToColumnId(textInputId)));
+                if (wrapper.columnIds.size < 3)
+                    alignedTextInputIds.forEach(textInputId => wrapper.columnIds.add(documentIdToColumnId(textInputId)));
             
             } else
-                if (columnIds.size < 1)
-                    columnIds.add(documentIdToColumnId(documentId));
+                if (wrapper.columnIds.size < 1)
+                    wrapper.columnIds.add(documentIdToColumnId(documentId));
             
-            numTextInputsToRemove++;
+            wrapper.numTextInputsToRemove++;
         });
 
-        log(areTextInputsToRemoveFocused);
+        return areTextInputsBlank && !areTextInputsToRemoveFocused;
+    }
+
+
+    /**
+     * Try to remove text inputs at the end of the column of given textInputId. Don't remove any text input if at least 
+     * one is not blank and try to flash text input border instead.
+     * 
+     * @param flash if true, the given text input will flash if no text input can be removed, default is true
+     * @param deleteCount number of lines to remove if blank, default is 1
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
+     * @param nextTextInputWillBeFocused if true, next text input will be considered as "focused" (i.e. if this function was triggered by "Enter" handler)
+     * @param isTextInputSingleColumnLine if true, the text input that has it's font size changed is a single column line, default is false
+     * @returns false if the fontSize should not be changed, else true
+     */
+    function handleFontSizeTooLarge(canHandleFontSizeTooLarge: boolean, wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, flash = true): void {
 
         // case: text inputs to remove are valid
-        if (areTextInputsBlank && !areTextInputsToRemoveFocused) {
+        // const canHandleFontSizeTooLarge = canHandlefontSizeTooLarge(wrapper, deleteCount, documentId, nextTextInputWillBeFocused, isTextInputSingleColumnLine);
+        if (canHandleFontSizeTooLarge) {
             setRemoveTextInputWrapper({
-                columnIds: columnIds, 
-                num: numTextInputsToRemove
+                columnIds: wrapper.columnIds, 
+                num: wrapper.numTextInputsToRemove
             });
 
         // case: text inputs to remove are not valid
@@ -407,11 +431,7 @@ export default function Document(props) {
                 flashClass(selectedTextInputId, "textInputFlash", "textInputFocus");
                 showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite und wähle diese Zeilen nicht aus, dann versuche es erneut.", "Warn");
             }
-
-            return false;
         }
-
-        return true;
     }
 
     
@@ -887,6 +907,8 @@ export const DocumentContext = createContext({
     setRefreshColumns: (bool: boolean) => {},
 
     handleFontSizeChange: (fontSizeDiff: number, textInputId?: string, nextTextInputWillBeFocused?: boolean): boolean => {return false},
+    canHandlefontSizeTooLarge: (wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, deleteCount?: number, documentId?: string, nextTextInputWillBeFocused?: boolean, isTextInputSingleColumnLine?: boolean): boolean => {return false},
+    handleFontSizeTooLarge: (canHandleFontSizeTooLarge: boolean, wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, flash = true) => {},
     getNumLinesDeviation: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},
     subtractMSWordFontSizes: (fontSize: number | string, fontSize2: number | string): number => {return 0},
     appendTextInputWrapper: getDefaultAppendRemoveTextInputWrapper(),

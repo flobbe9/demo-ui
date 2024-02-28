@@ -8,6 +8,7 @@ import { NUM_LINES_LANDSCAPE, NUM_LINES_PROTRAIT } from "../../globalVariables";
 import { Orientation } from "../../enums/Orientation";
 import { getDocumentId } from "../../utils/documentBuilderUtils";
 import TextInput from "./TextInput";
+import Style from "../../abstract/Style";
 
 
 /**
@@ -31,7 +32,10 @@ export default function Column(props: {
 
     const componentRef = useRef(null);
     
-    const context = {}
+    const context = {
+        addTextInputs,
+        removeTextInputs
+    }
 
 
     useEffect(() => {
@@ -50,7 +54,7 @@ export default function Column(props: {
     
     useEffect(() => {
         if (documentContext.appendTextInputWrapper.columnIds.has(id))
-            appendTextInputs(documentContext.appendTextInputWrapper.num);
+            addTextInputs(documentContext.appendTextInputWrapper.num);
 
     }, [documentContext.appendTextInputWrapper]);
     
@@ -89,7 +93,7 @@ export default function Column(props: {
      * @param deleteCount  number of elements to remove
      * @returns array with the removed ```<TextInput />```s
      */
-    function removeTextInputs(deleteCount = 1, startIndex: number = textInputs.length - deleteCount): React.JSX.Element[] {
+    function removeTextInputs(deleteCount: number, startIndex = textInputs.length - deleteCount): React.JSX.Element[] {
 
         const removedTextInputs = textInputs.splice(startIndex, deleteCount);
 
@@ -118,13 +122,22 @@ export default function Column(props: {
 
 
     /**
-     * Append new ```<TextInput />```s to ```textInputs``` state
-     *
+     * Append new ```<TextInput />```s to ```textInputs``` state at given index.
+     * 
+     * TODO
      * @param numTextInputs number of text inputs to append
+     * @param startIndex index of the first text input added to ```textInputs```, i.e. when adding number 10 to the end of the array 
+     *                   ```[0, 1, 2]``` then the startIndex would have to be 3. Default is ```textInputs.length```.
      * @returns array with the appended ```<TextInput />```s
      */
-    function appendTextInputs(numTextInputs = 1): React.JSX.Element[] {
+    function addTextInputs(numTextInputs: number, 
+                           startIndex = textInputs.length, 
+                           focusOnRender = false,
+                           cursorIndex?: number,
+                           initValue?: string,
+                           initStyle?: Style): React.JSX.Element[] {
 
+        // TODO: (?)
         // if is single column line
             // append in all columns of this page
         // else
@@ -136,12 +149,17 @@ export default function Column(props: {
             newTextInputs.push(<TextInput key={getRandomString()}
                                         pageIndex={props.pageIndex}
                                         columnIndex={props.columnIndex}
-                                        textInputIndex={textInputs.length + i}
+                                        textInputIndex={startIndex + i}
                                         isSingleColumnLine={false}
+                                        focusOnRender={focusOnRender}
+                                        cursorIndex={cursorIndex}
+                                        initValue={initValue}
+                                        initStyle={initStyle}
                                         />);
         }
 
-        setTextInputs([...textInputs, ...newTextInputs]);
+        textInputs.splice(startIndex, 0, ...newTextInputs);
+        setTextInputs([...textInputs]);
 
         return newTextInputs;
     }
@@ -167,4 +185,7 @@ export default function Column(props: {
 }
 
 
-export const ColumnContext = createContext({});
+export const ColumnContext = createContext({
+    addTextInputs: (numTextInputs: number, startIndex?: number, focusOnRender?: boolean, cursorIndex?: number, initValue?: string, initStyle?: Style): React.JSX.Element[] => {return []},
+    removeTextInputs: (deleteCount: number, startIndex?: number): React.JSX.Element[] => {return []}
+});

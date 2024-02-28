@@ -1,14 +1,15 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "../../assets/styles/TextInput.css"; 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { equalsIgnoreCaseTrim, flashClass, getCursorIndex, insertString, isBlank, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
+import { equalsIgnoreCaseTrim, flashClass, getCursorIndex, getJQueryElementById, insertString, isBlank, isNumberFalsy, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
-import { StyleProp, getTextInputStyle } from "../../abstract/Style";
+import Style, { StyleProp, applyTextInputStyle, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
 import { DEFAULT_FONT_SIZE, KEY_CODES_NO_TYPED_CHAR, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
 import { getBrowserFontSizeByMSWordFontSize, getCSSValueAsNumber, getDocumentId, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
+import { ColumnContext } from "./Column";
 
 
 /**
@@ -31,6 +32,10 @@ export default function TextInput(props: {
     textInputIndex: number,
     isSingleColumnLine: boolean,
     focusOnRender?: boolean,
+    /** initial position of cursor in case of focusOnRender === true */
+    cursorIndex?: number,
+    initValue?: string,
+    initStyle?: Style,
     propKey?: string | number
     id?: string | number,
     className?: string,
@@ -44,6 +49,7 @@ export default function TextInput(props: {
     const appContext = useContext(AppContext);
     const documentContext = useContext(DocumentContext);
     const pageContext = useContext(PageContext);
+    const columnContext = useContext(ColumnContext);
 
     const [dontHideConnectIconClassName, setDontHideConnectIconClassName] = useState("");
     const [isSingleColumnLineCandidate, setIsSingleColumnLineCandidate] = useState(false);
@@ -55,8 +61,7 @@ export default function TextInput(props: {
         // set initial font size
         setCssVariable("initialTextInputFontSize", getBrowserFontSizeByMSWordFontSize(DEFAULT_FONT_SIZE) + "px");
 
-        if ((id === getDocumentId("TextInput", 0, 0, 0) && !props.isSingleColumnLine) || props.focusOnRender)
-            documentContext.focusTextInput(id);
+        applyInitProps();
 
     }, []);
     
@@ -85,6 +90,36 @@ export default function TextInput(props: {
 
     }, [documentContext.selectedTextInputId]);
 
+    
+    /**
+     * TODO
+     */
+    function applyInitProps(): void {
+
+        const textInput = $(inputRef.current!);
+        const focusTextInput = (id === getDocumentId("TextInput", 0, 0, 0) && !props.isSingleColumnLine) || props.focusOnRender;
+
+        if (props.initValue)
+            textInput.val(props.initValue);
+
+        if (props.initStyle) {
+            applyTextInputStyle(id, props.initStyle);
+
+            // only set style if not focusing on render
+            if (!focusTextInput)
+                documentContext.setSelectedTextInputStyle(props.initStyle);
+        }
+
+        if (focusTextInput) {
+            documentContext.focusTextInput(id);
+
+            if (!isNumberFalsy(props.cursorIndex))
+                moveCursor(id, props.cursorIndex);
+        }
+
+        log(documentContext.selectedTextInputId)
+    }
+
 
     function handleKeyDown(event): void {
 
@@ -103,7 +138,7 @@ export default function TextInput(props: {
         
         else if (eventKey === "Enter")
             handleEnter(event);
-
+            
         else if (eventKey === "Backspace")
             handleBackspace(event);
 
@@ -324,35 +359,79 @@ export default function TextInput(props: {
     }
 
 
+    // TODO: text vanishes at bottom line
+    // TODO: arrow keys not reliable anymore
+    // TODO: fast calls break functionality
     function handleEnter(event): void {
 
-        focusNextTextInput(true);
+        const nextTextInput = getNextTextInput(id);
+        if (!nextTextInput)
+            return;
 
-        // if text input blank or cursor at end
-            // focus next
-            // return
+        const nextTextInputId = nextTextInput.prop("id");
+        const textInput = $(inputRef.current!);
+        const textInputValue: string = textInput.prop("value");
+        const cursorIndex = getCursorIndex(id);
+        const textBeforeCursor = textInputValue.substring(0, cursorIndex);
+        const textAfterCursor = textInputValue.substring(cursorIndex);
 
-        // get cursor pos
-        // get text after cursor
+        const columnTextInputs = documentContext.getColumnTextInputs(id);
+        if (!columnTextInputs)
+            return;
 
-        // case: last line blank
-            // if 
-            // iterate column text inputs in reverse, start at second to last text input
-            // shift text and style to next text input
-            // if event.target is reached
-                // shift only text after cursor to next text input (and style)
-                // move cursor to 0
-                // focus next text input
+        const fontSizeDiff = documentContext.subtractMSWordFontSizes(textInput.css("fontSize"), nextTextInput.css("fontSize"));
+        const numLinesDiff = documentContext.getNumLinesDeviation(id, fontSizeDiff);
+        const wrapper = {
+            columnIds: new Set<string>(),
+            numTextInputsToRemove: 0
+        }
+        // TODO: 
+        // case: font size too large if enter
+        const canHandleFontSize = documentContext.canHandlefontSizeTooLarge(wrapper, numLinesDiff + (isBlank(textAfterCursor) ? 0 : 1), nextTextInputId, true, props.isSingleColumnLine);
+        if (!canHandleFontSize) {
+            // TODO
+            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "asdfasdf", "Warn");
+            return;
+        }
+
+        // TODO: make this a helper
+        // iterate all column text inputs in reverse
+        for (let i = columnTextInputs.length - 1; i >= 0; i--) {
+            const columnTextInput = columnTextInputs.get(i);
+            if (!columnTextInput)
+                continue;
+
+            // case: reached selected text input
+            if (columnTextInput.id === documentContext.selectedTextInputId)
+                break;
+
+            // increase text input id index
+            const textInputIndex = stringToNumber(getPartFromDocumentId(columnTextInput.id, 3));
+            const newTextInputId = getDocumentId("TextInput", props.pageIndex, props.columnIndex, textInputIndex + 1);
+            columnTextInput.id = newTextInputId;
+            (columnTextInput.previousSibling as HTMLLabelElement).htmlFor = newTextInputId;
+        }
+
+        // reverse 'numLinesDiff + 1'
+        wrapper.numTextInputsToRemove--;
+        // handle font size change
+        documentContext.handleFontSizeTooLarge(canHandleFontSize, wrapper, false);
         
-        // case: last line not blank
-            // prevent default
-            // notify "cant make line break, delete last line of column / page"
+        // remove last text input in column
+        columnContext.removeTextInputs(1);
+                
+        // add text input after this one
+        columnContext.addTextInputs(1, props.textInputIndex + 1, true, 0, textAfterCursor, getTextInputStyle(id));
+
+        // remove text from this text input
+        textInput.val(textBeforeCursor);
     }
 
 
     /**
      * Move cursor to prev text input if at first char.
      */
+    // TODO: move text in front of cursor on line up (handleEnter() but in reverse)
     function handleBackspace(event): void {
 
         const cursorIndex = getCursorIndex(id);
@@ -605,7 +684,7 @@ export default function TextInput(props: {
             }
             
             documentContext.focusTextInput(nextTextInputId, false);
-            documentContext.setSelectedTextInputStyle(getTextInputStyle($(inputRef.current!)), stylePropsToOverride);
+            documentContext.setSelectedTextInputStyle(getTextInputStyle(id), stylePropsToOverride);
 
         // case: next text input not blank
         } else 

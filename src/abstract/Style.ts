@@ -1,8 +1,8 @@
 import { BreakType } from "../enums/Breaktype";
 import { DEFAULT_FONT_SIZE } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { isBlank, log, logError, stringToNumber } from "../utils/basicUtils";
-import { getCSSValueAsNumber, getFontSizeDiffInWord, isRGB, rgbStringToHex } from "../utils/documentBuilderUtils";
+import { getJQueryElementById, isBlank, log, logError, stringToNumber } from "../utils/basicUtils";
+import { getCSSValueAsNumber, getFontSizeDiffInWord, isRGB, isTextInputIdValid, rgbStringToHex } from "../utils/documentBuilderUtils";
 
 
 /**
@@ -30,16 +30,17 @@ export type StyleProp = keyof Style;
 
 
 /**
- * @param textInput text input element
- * @returns Style object with style attributes from text input (breakType always null) or a default style object
+ * @param textInputId id of text input element
+ * @returns Style object with style attributes from text input (breakType always null) or a default style object if given id is invalid
  */
-export function getTextInputStyle(textInput: JQuery<any>): Style {
-    
+export function getTextInputStyle(textInputId: string): Style {
+
     // case: textInput falsy
-    if (!textInput.length) {
+    if (!isTextInputIdValid(textInputId)) {
         logError("Failed to get style from text input. 'textInput' is falsy. Returning default style instead");
         return getDefaultStyle();
     }
+    const textInput = getJQueryElementById(textInputId)!;
 
     return {
         fontSize: getCSSValueAsNumber(textInput.css("fontSize"), 2),
