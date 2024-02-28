@@ -9,7 +9,7 @@ import ControlPanel from "./ControlPanel";
 import { Orientation } from "../../enums/Orientation";
 import { documentIdToColumnId, getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import PopupContainer from "../popups/PopupContainer";
-import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
+import Style, { SingleStyle, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
 import { buildDocument, downloadDocument } from "../../builder/builder";
 import { SubtlePopupType } from "../../abstract/SubtlePopupType";
@@ -17,16 +17,15 @@ import ControlPanelMenu from "./ControlPanelMenu";
 import { AppendRemoveTextInputWrapper, getDefaultAppendRemoveTextInputWrapper } from "../../abstract/AppendRemoveTextInputWrapper";
 
 
-// TODO: add some kind of "back" button
-// TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
-// TODO: font size of bottom lines of pages should be changable if empty
-// TODO: about page, link github and stuff
-// TODO: test barrier usability (alt, title etc.)ne
-// TODO: handle tab navigation correctly (Popups, stylepanel etc.)
-// TODO: check some seo criteria
-// TODO: lookup portainer
+// FEAT: add some kind of "back" button
+// FEAT: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
+// FEAT: font size of bottom lines of pages should be changable if empty
+// FEAT: about page, link github and stuff
+// FEAT: test barrier usability (alt, title etc.)ne
+// FEAT: handle tab navigation correctly (Popups, stylepanel etc.)
+// FEAT: check some seo criteria
+// FEAT: lookup portainer
 
-// TODO: enter makes line break (only accross one column)
 // TODO: last single column line button does not disappear on hover over other single column lines
 export default function Document(props) {
 
@@ -190,13 +189,13 @@ export default function Document(props) {
 
     /**
      * @param style to update selectedTextInputStyle with
-     * @param stylePropsToOverride style props to override in ```style``` param
+     * @param stylesToOverride style props to override in ```style``` param
      */
-    function setSelectedTextInputStyle(style: Style, stylePropsToOverride?: [StyleProp, string | number][]): void {
+    function setSelectedTextInputStyle(style: Style, stylesToOverride: SingleStyle[] = []): void {
 
         // set specific props
-        if (stylePropsToOverride) 
-            stylePropsToOverride.forEach(([styleProp, value]) => style[styleProp.toString()] = value);
+        if (stylesToOverride) 
+            Object.entries(stylesToOverride).forEach(([styleProp, value]) => style[styleProp.toString()] = value);
         
         setSelectedTextInputStyleState(style);
     }
@@ -206,13 +205,13 @@ export default function Document(props) {
      * @param textInputId id of valid ```<TextInput />``` to focus
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` state will be updated with focused text input style
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` will be applied to text input with ```selectedTextInputId```
-     * @param stylePropsToOverride list of style properties to override when copying styles 
+     * @param stylesToOverride list of style properties to override when copying styles 
      * @param debug if false, no logs will be printed in case of falsy textInputId, default is ```true```
      */
     function focusTextInput(textInputId: string, 
                             updateSelectedTextInputStyle = true, 
                             applySelectedTextInputStyle = true,
-                            stylePropsToOverride?: [StyleProp, string | number][], 
+                            stylesToOverride: SingleStyle[] = [],
                             debug = true): void {
 
         if (!isTextInputIdValid(textInputId, debug))
@@ -229,7 +228,7 @@ export default function Document(props) {
 
         // style state
         if (updateSelectedTextInputStyle) 
-            setSelectedTextInputStyle(getTextInputStyle(textInputId), stylePropsToOverride);
+            setSelectedTextInputStyle(getTextInputStyle(textInputId), stylesToOverride);
 
         // style text input
         if (applySelectedTextInputStyle)
@@ -936,7 +935,7 @@ export const DocumentContext = createContext({
 
     hideSelectOptions: (selectComponentId?: string) => {},
 
-    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][], debug?: boolean) => {},
+    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylesToOverride: SingleStyle[] = [], debug?: boolean) => {},
 
     setPages: (pages: React.JSX.Element[]) => {},
     initPages: (): React.JSX.Element[] => {return []},
@@ -949,7 +948,7 @@ export const DocumentContext = createContext({
     selectedTextInputId: "",
     setSelectedTextInputId: (id: string) => {},
     selectedTextInputStyle: getDefaultStyle(),
-    setSelectedTextInputStyle: (style: Style, stylePropsToOverride?: [StyleProp, string | number][]) => {},
+    setSelectedTextInputStyle: (style: Style, stylesToOverride: SingleStyle[] = []) => {},
     documentFileName: "",
     setDocumentFileName: (fileName: string) => {},
 

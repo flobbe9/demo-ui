@@ -11,7 +11,6 @@ import { getCSSValueAsNumber, getFontSizeDiffInWord, isRGB, isTextInputIdValid, 
  * @since 0.0.5
  */
 export default interface Style {
-
     fontSize: number,
     fontFamily: string,
     /** as hexa deciaml WITHOUT the '#' appended */
@@ -23,10 +22,20 @@ export default interface Style {
     breakType: BreakType | null
 }
 
+
 /**
- * Defines all properties one {@link Style} object can have (as defined in backend)
+ * Represents keys that a {@link Style} object can have (as defined in backend)
  */
 export type StyleProp = keyof Style;
+
+
+/**
+ * One single key value pair from {@link Style}.
+ */
+export interface SingleStyle {
+    attr: StyleProp,
+    value: string | number | typeof BreakType
+}
 
 
 /**
