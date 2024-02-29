@@ -1,8 +1,25 @@
 {
   "short_name": "word light",
   "name": "Word light",
-  "start_url": ".",
+  "icons": [
+    {
+        "src": "favicon.png",
+        "type": "image/png",
+        "sizes": "512x512"
+    },
+    {
+        "src": "columnIcon.png",
+        "type": "image/png",
+        "sizes": "512x512"
+    },
+    {
+        "src": "orientation.png",
+        "type": "image/png",
+        "sizes": "200x200"
+    }
+  ],
+  "start_url": "https://word-light.de",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#ffe4c4",
   "background_color": "#ffffff"
 }

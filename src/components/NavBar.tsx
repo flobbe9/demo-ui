@@ -56,7 +56,7 @@ export default function NavBar(props: {
             <div className="boxShadowContainer flexCenter p-2">
                 <h1 className="col-8 navSectionLeft textLeft flexLeft">
                     <Link className="navLink link hover" to="/">
-                        <img className="navImage me-2" src="/favicon.png" alt="" height="40" width="40"/>
+                        <img className="navImage me-2" src="/images/favicon.png" alt="" height="40" width="40"/>
                         <span className="dontBreakText">{WEBSITE_NAME}</span>
                     </Link>
                 </h1>

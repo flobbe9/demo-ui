@@ -372,7 +372,7 @@ export default forwardRef(function StylePanel(props: {
                             onClick={handleOrientationConfigClick}
                             >
                         <div className={id + "IconContainer"}>
-                            <img src="orientation.png" alt="orientation icon" height="50" />
+                            <img src="/images/orientation.png" alt="orientation icon" height="50" />
                         </div>
                         Ausrichtung
                     </Button>
@@ -391,7 +391,7 @@ export default forwardRef(function StylePanel(props: {
                             onClick={handleColumnConfigClick}
                             >
                         <div className={id + "IconContainer mb-2"}>
-                            <img src="columnIcon.png" alt="column icon" height="40" />
+                            <img src="/images/columnIcon.png" alt="column icon" height="40" />
                         </div>
                         Spalten
                     </Button>
