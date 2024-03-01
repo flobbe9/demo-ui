@@ -3,8 +3,13 @@
     border: 1px solid green;
     line-height: normal;
     padding: 10px;
+
+    h4 {
+        font-size: 18px; /* h5 font size, using h4 for SEO*/
+    }
 }
 
+/* popup that holds this component */
 .Popup.Subtle {
     .Info {
         border-color: rgb(0, 140, 255);

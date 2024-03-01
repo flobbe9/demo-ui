@@ -174,6 +174,49 @@ export function getPrevTextInput(textInputId: string, debug = true): JQuery | nu
 
 
 /**
+ * @param textInputId id of the starting text input (exluded by default)
+ * @param includeThisTextInput if true, the text input with given id will be included in the jquery, else it wont be included (which means 
+ *                       the first element in the jquery will be the text input after the given one). Default is false
+ * @returns a jquery of all text inputs after the one with given id (excluded by default). Return null if given id is invalid or no text inputs can be found at all.
+ */
+export function getAllTextInputsAfter(textInputId: string, includeThisTextInput = false): JQuery | null {
+
+    // case: id invalid
+    if (!isTextInputIdValid(textInputId))
+        return null;
+
+    const allTextInputs = $(".TextInput");
+    // case: no text input found
+    if (!allTextInputs.length)
+        return null;
+
+    let allTextInputsAfter = $();
+    let reachedThisTextInput = false;
+
+    // iterate all text inputs
+    // TODO: make this more efficient?
+    allTextInputs.each((i, textInputElement) => {
+        // case: already iterated past thisTextInput
+        if (reachedThisTextInput) {
+            allTextInputsAfter = allTextInputsAfter.add(textInputElement);
+            return;
+        }
+
+        // case: reached thisTextInput
+        if (textInputElement.id === textInputId) {
+            // case: include thisTextInput
+            if (includeThisTextInput)
+                allTextInputsAfter = allTextInputsAfter.add(textInputElement);
+
+            reachedThisTextInput = true;
+        }
+    });
+
+    return allTextInputsAfter;
+}
+
+
+/**
  * This calculation is quite inaccurate. Tends to subtract more pixels than necessary which means the fontSize in 
  * Word will be a bit too small.
  * 
@@ -214,16 +257,17 @@ export function getMSWordFontSizeByBrowserFontSize(browserFontSize: number): num
 
 
 /**
+ * TODO
  * @param textInputId id of text input to compare text width to
  * @param testChars string that is not part of input value but should be included in value when calculating value's width
  * @param fontSize to use when calculating the text width instead of the font size of given text input
  * @returns true if width of text is greater than width of input
  */
-export function isTextLongerThanInput(textInputId: string, testChars: string, fontSize?: string): boolean {
+export function isTextLongerThanInput(textInputId: string, testChars: string, fontSize?: string): {isTextTooLong: boolean, textOverheadWidth: number} {
 
     const textInput = getJQueryElementById(textInputId);
     if (!textInput)
-        return false;
+        return {isTextTooLong: false, textOverheadWidth: NaN};
 
     // insert test chars at correct position
     const cursorIndex = getCursorIndex(textInputId);
@@ -235,9 +279,23 @@ export function isTextLongerThanInput(textInputId: string, testChars: string, fo
     const textWidth = getTextWidth(textInputValue, fontSize || textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
     const totalTabWidth = getTotalTabWidthInText(textInputValue, fontSize || textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
 
-    return textInputWidth < textWidth + totalTabWidth;
+    // [isTextLonger, textOverheadWidth]
+    return {
+        isTextTooLong: textInputWidth < textWidth + totalTabWidth, 
+        textOverheadWidth: textWidth + totalTabWidth - textInputWidth
+    };
 }
-    
+
+
+// TODO
+// export function getTextInputValueByWidth(): string {
+//     // iterate text char by char
+//     // if text width is larger than target width
+//         // use previous text
+
+//     // const textWidth = getTextWidth(textInputValue, fontSize || textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
+// }
+
 
 /**
  * @param textInputId id of the text input to check

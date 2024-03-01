@@ -24,6 +24,7 @@ import { AppendRemoveTextInputWrapper, getDefaultAppendRemoveTextInputWrapper } 
 // FEAT: test barrier usability (alt, title etc.)ne
 // FEAT: handle tab navigation correctly (Popups, stylepanel etc.)
 // FEAT: check some seo criteria
+    // img height width
 // FEAT: lookup portainer
 
 // TODO: last single column line button does not disappear on hover over other single column lines

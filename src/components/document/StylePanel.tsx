@@ -75,8 +75,8 @@ export default forwardRef(function StylePanel(props: {
     function handleFontSizeSelect(fontSize: string): void {
         
         // case: text too long for text input length      
-        const isFontSizeTooLargeForTextInput = isTextLongerThanInput(documentContext.selectedTextInputId, "", fontSize + "px");
-        if (isFontSizeTooLargeForTextInput) {
+        const { isTextTooLong } = isTextLongerThanInput(documentContext.selectedTextInputId, "", fontSize + "px");
+        if (isTextTooLong) {
             documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.", "Warn");
             return;
         }

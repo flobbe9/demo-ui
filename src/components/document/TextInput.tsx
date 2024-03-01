@@ -3,12 +3,12 @@ import "../../assets/styles/TextInput.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { equalsIgnoreCaseTrim, flashClass, getCursorIndex, getJQueryElementById, insertString, isBlank, isNumberFalsy, log, moveCursor, replaceAtIndex, setCssVariable, stringToNumber } from "../../utils/basicUtils";
 import { AppContext } from "../App";
-import Style, { SingleStyle, applyTextInputStyle, getTextInputStyle } from "../../abstract/Style";
+import Style, { SingleStyle, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import { DocumentContext } from "./Document";
 import { DEFAULT_FONT_SIZE, KEY_CODES_NO_TYPED_CHAR, SINGLE_COLUMN_LINE_CLASS_NAME, TAB_UNICODE } from "../../globalVariables";
 import { PageContext } from "./Page";
 import Button from "../helpers/Button";
-import { getBrowserFontSizeByMSWordFontSize, getDocumentId, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
+import { getAllTextInputsAfter, getBrowserFontSizeByMSWordFontSize, getDocumentId, getNextTextInput, getPartFromDocumentId, getPrevTextInput, isTextInputIdValid, isTextLongerThanInput } from "../../utils/documentBuilderUtils";
 import { ColumnContext } from "./Column";
 
 
@@ -26,6 +26,7 @@ import { ColumnContext } from "./Column";
 // FEAT: add table
 // FEAT: add more pages
 
+// replace get next and get prev methods with simple jquery calls 
 export default function TextInput(props: {
     pageIndex: number,
     columnIndex: number,
@@ -119,6 +120,7 @@ export default function TextInput(props: {
     }
 
 
+    // TODO: handle entf
     function handleKeyDown(event): void {
 
         const eventKey = event.key;
@@ -128,7 +130,7 @@ export default function TextInput(props: {
             // case: no back tab
             if (eventKey !== "Tab" || appContext.pressedKey !== "Shift")
                 // case: text too long
-                if (isTextLongerThanInput(documentContext.selectedTextInputId, eventKey === "Tab" ? TAB_UNICODE : eventKey))
+                if (isTextLongerThanInput(documentContext.selectedTextInputId, eventKey === "Tab" ? TAB_UNICODE : eventKey).isTextTooLong)
                     handleTextLongerThanLine(event);
 
         if (eventKey === "Tab")
@@ -161,7 +163,7 @@ export default function TextInput(props: {
 
         const pastedText = event.clipboardData.getData("text") || "";
 
-        if (isTextLongerThanInput(documentContext.selectedTextInputId, pastedText))
+        if (isTextLongerThanInput(documentContext.selectedTextInputId, pastedText).isTextTooLong)
             handleTextLongerThanLinePreventKeyDown(event);
     }
 
@@ -316,7 +318,7 @@ export default function TextInput(props: {
 
         } else {
             // case: text too long
-            if (isTextLongerThanInput(documentContext.selectedTextInputId, TAB_UNICODE)) {
+            if (isTextLongerThanInput(documentContext.selectedTextInputId, TAB_UNICODE).isTextTooLong) {
                 handleTextLongerThanLine(event);
                 return;
             }
@@ -357,6 +359,11 @@ export default function TextInput(props: {
     }
 
 
+    /**
+     * TODO
+     * @param event 
+     * @returns 
+     */
     function handleEnter(event): void {
 
         const nextTextInput = getNextTextInput(id);
@@ -364,18 +371,25 @@ export default function TextInput(props: {
             return;
         const nextTextInputId = nextTextInput.prop("id");
 
-        const textInput = $(inputRef.current!);
-        const textInputValue: string = textInput.prop("value");
+        const thisTextInput = $(inputRef.current!);
+        const textInputValue: string = thisTextInput.prop("value");
 
         const cursorIndex = getCursorIndex(id);
         const textBeforeCursor = textInputValue.substring(0, cursorIndex);
         const textAfterCursor = textInputValue.substring(cursorIndex);
 
-        const allTextInputs = $(".TextInput");
-        if (!allTextInputs)
+        // case: no text inputs found
+        const allTextInputsAfterIncluding = getAllTextInputsAfter(id, true);
+        if (!allTextInputsAfterIncluding)
             return;
 
-        const fontSizeDiff = documentContext.subtractMSWordFontSizes(textInput.css("fontSize"), nextTextInput.css("fontSize"));
+        // case: last text input not blank
+        if (allTextInputsAfterIncluding.length > 1 && !isBlank(allTextInputsAfterIncluding.last().prop("value"))) {
+            documentContext.showSubtlePopup("Kann keinen Absatz machen", "Die Letzte Zeile des Dokumentes muss leer sein, um weitere Absätze machen zu können.", "Warn");
+            return;
+        }
+
+        const fontSizeDiff = documentContext.subtractMSWordFontSizes(thisTextInput.css("fontSize"), nextTextInput.css("fontSize"));
         const numLinesDiff = documentContext.getNumLinesDeviation(id, fontSizeDiff);
         const wrapper = {
             columnIds: new Set<string>(),
@@ -383,31 +397,27 @@ export default function TextInput(props: {
         }
         const canHandleFontSize = documentContext.canHandlefontSizeTooLarge(wrapper, numLinesDiff, nextTextInputId, true, props.isSingleColumnLine);
         const stylesToOverride: SingleStyle[] = canHandleFontSize ? [] : [{attr: "fontSize", value: 14}];
-
-        // TODO: make this a helper
+        
         // iterate all column text inputs in reverse
-        for (let i = allTextInputs.length - 1; i >= 0; i--) {
-            const columnTextInput = (allTextInputs.get(i) as HTMLInputElement);
-            if (!columnTextInput)
+        for (let i = allTextInputsAfterIncluding.length - 1; i >= 0; i--) {
+            const textInput = (allTextInputsAfterIncluding.get(i) as HTMLInputElement);
+            if (!textInput)
                 continue;
-            
-            // case: reached text input after selected text input
-            const prevTextInput = (allTextInputs.get(i - 1) as HTMLInputElement);
-            if (!prevTextInput)
-                break;
-            
-            if (prevTextInput?.id === documentContext.selectedTextInputId)
+
+            const prevTextInput = (allTextInputsAfterIncluding.get(i - 1) as HTMLInputElement);
+            // case: reached selected text input
+            if (i === 0)
                 break;
 
             const prevTextInputValue = prevTextInput.value;
             const prevTextInputStyle = getTextInputStyle(prevTextInput.id);
 
-            columnTextInput.value = prevTextInputValue;
-            applyTextInputStyle(columnTextInput.id, prevTextInputStyle);
+            textInput.value = prevTextInputValue;
+            applyTextInputStyle(textInput.id, prevTextInputStyle);
         }
 
         // remove text from this text input
-        textInput.val(textBeforeCursor);
+        thisTextInput.val(textBeforeCursor);
 
         // add text to next text input
         nextTextInput.val(textAfterCursor);
@@ -418,72 +428,74 @@ export default function TextInput(props: {
 
 
     /**
-     * Move cursor to prev text input if at first char.
+     * TODO
      */
-    // TODO: move text in front of cursor on line up (handleEnter() but in reverse)
+    // TODO: make this shorter
     function handleBackspace(event): void {
 
-        // const cursorIndex = getCursorIndex(id);
+        const cursorIndex = getCursorIndex(id);
 
-        // // case: cursor at first char
-        // if (cursorIndex === 0 && !isTextInputValueMarked(id)) 
-        //     focusPrevTextInput(event);
+        // case: not at start of line
+        if (cursorIndex !== 0)
+            return;
 
         const prevTextInput = getPrevTextInput(id);
+        // case: is first line of document
         if (!prevTextInput)
             return;
         const prevTextInputId = prevTextInput.prop("id");
+        const prevTextInputValue: string = prevTextInput.prop("value");
 
-        const textInput = $(inputRef.current!);
-        const textInputValue: string = textInput.prop("value");
+        const thisTextInput = $(inputRef.current!);
+        const textInputValue: string = thisTextInput.prop("value");
 
-        const cursorIndex = getCursorIndex(id);
-        const textBeforeCursor = textInputValue.substring(0, cursorIndex);
-        const textAfterCursor = textInputValue.substring(cursorIndex);
+        // case: this value is too long for prev text input
+        const { isTextTooLong, textOverheadWidth} = isTextLongerThanInput(prevTextInputId, textInputValue);
+        if (isTextTooLong) {
+            // TODO: add as much text as possible
+            // get part from text to add that fits width
 
-        const allTextInputs = $(".TextInput");
-        if (!allTextInputs)
+            return;
+        }
+
+        // append this value to prev value
+        const newTextInputValue = prevTextInputValue + textInputValue;
+        prevTextInput.val(newTextInputValue);
+
+        const allTextInputsAfterIncluding = getAllTextInputsAfter(id, true);
+        if (!allTextInputsAfterIncluding)
             return;
 
-        const fontSizeDiff = documentContext.subtractMSWordFontSizes(textInput.css("fontSize"), prevTextInput.css("fontSize"));
-        const numLinesDiff = documentContext.getNumLinesDeviation(id, fontSizeDiff);
-        const wrapper = {
-            columnIds: new Set<string>(),
-            numTextInputsToRemove: 0
-        }
-        const canHandleFontSize = documentContext.canHandlefontSizeTooLarge(wrapper, numLinesDiff, prevTextInputId, true, props.isSingleColumnLine);
-        const stylesToOverride: SingleStyle[] = canHandleFontSize ? [] : [{attr: "fontSize", value: 14}];
+        // handle potential font size change
+        const fontSizeDiff = documentContext.subtractMSWordFontSizes(prevTextInput.css("fontSize"), thisTextInput.css("fontSize"));
+        documentContext.handleFontSizeChange(fontSizeDiff, id);
 
-        // TODO: make this a helper
         // iterate all column text inputs in reverse
-        for (let i = allTextInputs.length - 1; i >= 0; i--) {
-            const columnTextInput = (allTextInputs.get(i) as HTMLInputElement);
-            if (!columnTextInput)
+        for (let i = 0; i < allTextInputsAfterIncluding.length; i++) {
+            const textInput = (allTextInputsAfterIncluding.get(i) as HTMLInputElement);
+            if (!textInput)
                 continue;
-            
-            // case: reached text input after selected text input
-            const prevTextInput = (allTextInputs.get(i - 1) as HTMLInputElement);
-            if (!prevTextInput)
+
+            const nextTextInput = (allTextInputsAfterIncluding.get(i + 1) as HTMLInputElement);
+            // case: end of document
+            if (!nextTextInput) {
+                textInput.value = "";
+                applyTextInputStyle(textInput.id, getDefaultStyle());
                 break;
+            }
             
-            if (prevTextInput?.id === documentContext.selectedTextInputId)
+            if (nextTextInput.id === documentContext.selectedTextInputId)
                 break;
 
-            const prevTextInputValue = prevTextInput.value;
-            const prevTextInputStyle = getTextInputStyle(prevTextInput.id);
+            const nextTextInputValue = nextTextInput.value;
+            const nextTextInputStyle = getTextInputStyle(nextTextInput.id);
 
-            columnTextInput.value = prevTextInputValue;
-            applyTextInputStyle(columnTextInput.id, prevTextInputStyle);
+            textInput.value = nextTextInputValue;
+            applyTextInputStyle(textInput.id, nextTextInputStyle);
         }
-
-        // remove text from this text input
-        textInput.val(textBeforeCursor);
-
-        // add text to next text input
-        prevTextInput.val(textAfterCursor);
 
         focusPrevTextInput(event);
-        moveCursor(prevTextInputId, 0);
+        moveCursor(prevTextInputId, prevTextInputValue.length);
     }
 
 
