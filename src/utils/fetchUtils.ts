@@ -21,7 +21,7 @@ export default async function fetchJson(url: string, method = "get", body?: obje
     // set headers
     const fetchConfig: RequestInit = {
         method: method,
-        headers: getFetchHeaders(headers),
+        headers: await getFetchHeaders(headers, false),
         credentials: "include"
     }
 
@@ -35,8 +35,14 @@ export default async function fetchJson(url: string, method = "get", body?: obje
         const jsonResponse = await response.json();
 
         // case: request failed
-        if (!isHttpStatusCodeAlright(response.status))
+        if (!isHttpStatusCodeAlright(response.status)) {
+            log(response.status)
+            // try with new csrf token
+            if (response.status === 403)
+                return await handleForbiddenReturnJson(url, fetchConfig);
+
             logApiResponse(jsonResponse);
+        }
         
         return jsonResponse;
 
@@ -64,7 +70,7 @@ export async function fetchAny(url: string, method = "get", body?: object, heade
     // set headers
     const fetchConfig: RequestInit = {
         method: method,
-        headers: getFetchHeaders(headers),
+        headers: await getFetchHeaders(headers),
         credentials: "include"
     }
 
@@ -75,9 +81,16 @@ export async function fetchAny(url: string, method = "get", body?: object, heade
     // send request
     try {
         const response = await fetch(url, fetchConfig);
-        if (!isHttpStatusCodeAlright(response.status))
-            logApiResponse(await response.json());
 
+        // case: request failed
+        if (!isHttpStatusCodeAlright(response.status)) {
+            // try with fresh csrf token
+            if (response.status === 403)
+                return await handleForbiddenReturnAny(url, fetchConfig);
+
+            logApiResponse(await response.json());
+        }
+        
         return response;
 
     // case: failed to fetch
@@ -143,11 +156,17 @@ export const FAILED_TO_FETCH_STATUS_CODE = 503;
 
 /**
  * @param headers json object with strings as keys and values
+ * @param refreshCsrfToken if true the csrf token will be fetched again before sending the request
  * @returns ```headers``` param with ```"Content-Type": "application/json"``` as default content type if none set 
  */
-function getFetchHeaders(headers?) {
+async function getFetchHeaders(headers?: Record<string, any>, refreshCsrfToken = false) {
 
     const contentType = {"Content-Type": "application/json"};
+
+    // case: refresh csrf token
+    if (refreshCsrfToken)
+        CSRF_TOKEN.setToken(await getCsrfToken());
+    
     const csrfToken = {[CSRF_TOKEN.getHeaderName()]: CSRF_TOKEN.getToken()};
 
     if (!headers)
@@ -160,6 +179,22 @@ function getFetchHeaders(headers?) {
         Object.assign(headers, csrfToken);
 
     return headers;
+}
+
+
+/**
+ * Fetch csrf token from session id.
+ * 
+ * @returns return csrf token string or empty string if request failed
+ */
+async function getCsrfToken(): Promise<string> {
+
+    const response = await fetchAny(DOCUMENT_BUILDER_BASE_URL + "/getCsrfToken");
+
+    if (!isHttpStatusCodeAlright(response.status))
+        return "";
+    
+    return await (response as Response).text();
 }
 
 
@@ -182,4 +217,61 @@ function handleFetchError(e: Error, url: string): ApiExceptionFormat {
     logApiResponse(error);
 
     return error;
+}
+
+
+/**
+ * Call fetch with given params but refresh csrf token first.
+ * 
+ * @param url of the request
+ * @param fetchConfig options to pass to fetch call
+ * @returns raw response of request
+ */
+async function handleForbiddenReturnAny(url: string, fetchConfig: RequestInit): Promise<Response | ApiExceptionFormat> {
+
+    // get headers with fresh csrf token
+    fetchConfig.headers = await getFetchHeaders(fetchConfig.headers, true);
+
+    try {
+        // fetch again
+        const response = await fetch(url, fetchConfig);
+
+        // case: still not successful
+        if (!isHttpStatusCodeAlright(response.status))
+            logApiResponse(await response.json());
+    
+        return response;
+
+    } catch (e) {
+        return handleFetchError(e, url);
+    }
+}
+
+
+/**
+ * Call fetch with given params but refresh csrf token first.
+ * 
+ * @param url of the request
+ * @param fetchConfig options to pass to fetch call
+ * @returns json response of request
+ */
+async function handleForbiddenReturnJson(url: string, fetchConfig: RequestInit): Promise<Response | ApiExceptionFormat> {
+
+    // get headers with fresh csrf token
+    fetchConfig.headers = await getFetchHeaders(fetchConfig.headers, true);
+
+    try {
+        // fetch again
+        const response = await fetch(url, fetchConfig);
+        const jsonResponse = await response.json();
+
+        // case: still not successful
+        if (!isHttpStatusCodeAlright(response.status))
+            logApiResponse(jsonResponse);
+    
+        return jsonResponse;
+
+    } catch (e) {
+        return handleFetchError(e, url);
+    }
 }

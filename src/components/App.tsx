@@ -166,17 +166,11 @@ export default function App() {
      */
     async function initCookies(): Promise<void> {
 
-        let csrfToken = "";
-
-        // send request that does nothing
-        const response = await fetchAny(DOCUMENT_BUILDER_BASE_URL + "/getCsrfToken");    
+        // retrieve csrf token from session id
+        const response = await fetchAny(DOCUMENT_BUILDER_BASE_URL + "/getCsrfToken");
+        
         if (isHttpStatusCodeAlright(response.status))
-            csrfToken = await (response as Response).text();
-
-        if (csrfToken)
-            CSRF_TOKEN.setToken(csrfToken);
-        else
-            logWarn("Failed to init csrf token: " + csrfToken);
+            CSRF_TOKEN.setToken(await (response as Response).text() || "");
     }
     
 
