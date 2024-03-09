@@ -7,7 +7,7 @@ import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE, DEFAULT_DOCUMENT_FILE_NAME } from "../../globalVariables";
 import ControlPanel from "./ControlPanel";
 import { Orientation } from "../../enums/Orientation";
-import { documentIdToColumnId, getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
+import { documentIdToColumnId, getCSSValueAsNumber, getColumnTextInputs, getDocumentId, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import PopupContainer from "../popups/PopupContainer";
 import Style, { SingleStyle, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
@@ -27,7 +27,7 @@ import { AppendRemoveTextInputWrapper, getDefaultAppendRemoveTextInputWrapper } 
     // img height width
 // FEAT: lookup portainer
 
-// TODO: last single column line button does not disappear on hover over other single column lines
+// TODO: do more testing
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -83,7 +83,7 @@ export default function Document(props) {
         setRefreshColumns,
 
         handleFontSizeChange,
-        canHandlefontSizeTooLarge,
+        canHandleFontSizeTooLarge,
         handleFontSizeTooLarge,
         getNumLinesDeviation,
         subtractMSWordFontSizes,
@@ -92,9 +92,7 @@ export default function Document(props) {
         removeTextInputWrapper,
         setRemoveTextInputWrapper,
 
-        getColumnTextInputs,
         getColumnFontSizesSum,
-        getLastTextInputOfColumn,
         checkIsColumnEmptyById,
 
         togglePopup,
@@ -196,8 +194,9 @@ export default function Document(props) {
 
         // set specific props
         if (stylesToOverride) 
-            Object.entries(stylesToOverride).forEach(([styleProp, value]) => style[styleProp.toString()] = value);
-        
+            stylesToOverride.forEach(singleStyle => 
+                style[singleStyle.attr.toString()] = singleStyle.value);
+            
         setSelectedTextInputStyleState(style);
     }
 
@@ -279,33 +278,6 @@ export default function Document(props) {
 
 
     /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
-     * @returns jquery of all ```<TextInput />``` components inside given column or ```null``` if column was not found.
-     *          Also include ```<TextInput />```components in page with className {@link SINGLE_COLUMN_LINE_CLASS_NAME}.
-     */
-    function getColumnTextInputs(documentId = selectedTextInputId): JQuery | null {
-
-        const docxElement = getJQueryElementById(documentId);
-        if (!docxElement)
-            return null;
-        
-        // get .TextInput
-        const columnId = getColumnIdByDocumentId(documentId);
-        let columnTextInputs = $("#" + columnId + " .TextInput");
-        
-        // get .SingleColumnLine
-        const pageId = getPageIdByDocumentId(documentId);
-        if (!pageId)
-            return null;
-
-        const singleColumnLines = $("#" + pageId + " .TextInput." + SINGLE_COLUMN_LINE_CLASS_NAME);
-        columnTextInputs = columnTextInputs.add(singleColumnLines);
-
-        return columnTextInputs;
-    }
-
-
-    /**
      * Calculate number of lines deviation in column of given ```documentId``` and append or remove some lines to even out the difference.
      *  
      * @param fontSizeDiff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
@@ -332,7 +304,7 @@ export default function Document(props) {
                 columnIds: new Set<string>(),
                 numTextInputsToRemove: 0
             }
-            isAbleToHandleFontSizeChange = canHandlefontSizeTooLarge(wrapper, numLinesDiff, textInputId, nextTextInputWillBeFocused, isSingleColumnLine)
+            isAbleToHandleFontSizeChange = canHandleFontSizeTooLarge(wrapper, numLinesDiff, textInputId, nextTextInputWillBeFocused, isSingleColumnLine)
             handleFontSizeTooLarge(isAbleToHandleFontSizeChange, wrapper, false);
 
         // case: font size too small
@@ -343,20 +315,17 @@ export default function Document(props) {
     }
 
 
-    // TODO: solve this more elegantly than with "wrapper"
     /**
-     * // TODO
-     * Try to remove text inputs at the end of the column of given textInputId. Don't remove any text input if at least 
-     * one is not blank and try to flash text input border instead.
+     * Try to remove text inputs at the end of the column of given textInputId. Don't remove any text input if at least one is not blank or focused.
      * 
-     * @param flash if true, the given text input will flash if no text input can be removed, default is true
+     * @param wrapper object with set of "columnIds" and numTextInputsToRemove. Has to be an object because props will be altered and reused else where
      * @param deleteCount number of lines to remove if blank, default is 1
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
      * @param nextTextInputWillBeFocused if true, next text input will be considered as "focused" (i.e. if this function was triggered by "Enter" handler)
      * @param isTextInputSingleColumnLine if true, the text input that has it's font size changed is a single column line, default is false
      * @returns false if the fontSize should not be changed, else true
      */
-    function canHandlefontSizeTooLarge(wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, deleteCount = 1, documentId = selectedTextInputId, nextTextInputWillBeFocused = false, isTextInputSingleColumnLine = false): boolean {
+    function canHandleFontSizeTooLarge(wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, deleteCount = 1, documentId = selectedTextInputId, nextTextInputWillBeFocused = false, isTextInputSingleColumnLine = false): boolean {
 
         const lastTextInputsInColumn = getNLastTextInputs(documentId, deleteCount);
 
@@ -364,7 +333,6 @@ export default function Document(props) {
         let areTextInputsToRemoveFocused = false;
 
         // validate text inputs to be removed
-        // TODO: break loop
         lastTextInputsInColumn.forEach(textInput => {
             // case: is not blank
             if (areTextInputsBlank && !isBlank((textInput as HTMLInputElement).value)) {
@@ -417,7 +385,6 @@ export default function Document(props) {
     function handleFontSizeTooLarge(canHandleFontSizeTooLarge: boolean, wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, flash = true): void {
 
         // case: text inputs to remove are valid
-        // const canHandleFontSizeTooLarge = canHandlefontSizeTooLarge(wrapper, deleteCount, documentId, nextTextInputWillBeFocused, isTextInputSingleColumnLine);
         if (canHandleFontSizeTooLarge) {
             setRemoveTextInputWrapper({
                 columnIds: wrapper.columnIds, 
@@ -593,20 +560,6 @@ export default function Document(props) {
         }
 
         return textInputIds;
-    }
-
-
-    /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
-     * @returns a JQuery of the last ```<TextInput />``` in given column or null if not found
-     */
-    function getLastTextInputOfColumn(documentId = selectedTextInputId): JQuery | null {
-
-        const columnTextInputs = getColumnTextInputs(documentId);
-        if (!columnTextInputs || !columnTextInputs.length)
-            return null;
-
-        return $(columnTextInputs.get(columnTextInputs.length - 1)!);
     }
 
 
@@ -907,7 +860,7 @@ export const DocumentContext = createContext({
     setRefreshColumns: (bool: boolean) => {},
 
     handleFontSizeChange: (fontSizeDiff: number, textInputId?: string, nextTextInputWillBeFocused?: boolean): boolean => {return false},
-    canHandlefontSizeTooLarge: (wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, deleteCount?: number, documentId?: string, nextTextInputWillBeFocused?: boolean, isTextInputSingleColumnLine?: boolean): boolean => {return false},
+    canHandleFontSizeTooLarge: (wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, deleteCount?: number, documentId?: string, nextTextInputWillBeFocused?: boolean, isTextInputSingleColumnLine?: boolean): boolean => {return false},
     handleFontSizeTooLarge: (canHandleFontSizeTooLarge: boolean, wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, flash = true) => {},
     getNumLinesDeviation: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},
     subtractMSWordFontSizes: (fontSize: number | string, fontSize2: number | string): number => {return 0},
@@ -916,9 +869,7 @@ export const DocumentContext = createContext({
     removeTextInputWrapper: getDefaultAppendRemoveTextInputWrapper(),
     setRemoveTextInputWrapper: (appendTextInputWrapper: AppendRemoveTextInputWrapper) => {},
 
-    getColumnTextInputs: (documentId?: string): JQuery | null => {return null},
     getColumnFontSizesSum: (documentId?: string): number => {return 0},
-    getLastTextInputOfColumn: (documentId?: string): JQuery | null => {return null},
     checkIsColumnEmptyById: (documentId?: string): boolean => {return false},
 
     togglePopup: (duration?: number) => {},
