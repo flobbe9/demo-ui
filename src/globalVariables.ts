@@ -22,6 +22,7 @@ export const PAGE_WIDTH_PORTRAIT = "806px";
 export const PAGE_WIDTH_LANDSCAPE = "1170px";
 
 export const MAX_NUM_COLUMNS = 3;
+export const MAX_NUM_SINGLE_COLUMN_LINES = 7;
 
 export const FONT_FAMILIES = [
     "Helvetica",
