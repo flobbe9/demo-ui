@@ -254,10 +254,8 @@ export function getColumnTextInputsAfter(textInputId: string, includeThisTextInp
     if (!isTextInputIdValid(textInputId))
         return null;
 
-    const columnId = getColumnIdByDocumentId(textInputId);
-    const columnTextInputs = $("#" + columnId + " .TextInput");
-    // case: no text input found
-    if (!columnTextInputs.length)
+    const columnTextInputs = getColumnTextInputs(textInputId);
+    if (!columnTextInputs)
         return null;
 
     let columnTextInputsAfter = $();
@@ -375,11 +373,17 @@ export function getMSWordFontSizeByBrowserFontSize(browserFontSize: number): num
  * @param textInputId id of text input to compare text width to
  * @param testChars string that is not part of input value but should be included in value when calculating value's width
  * @param fontSize to use when calculating the text width instead of the font size of given text input
+ * @param fontFamily to use when calculating the text width instead of the font family of given text input
+ * @param fontWeight to use when calculating the text width instead of the font weight of given text input
  * @returns isTextTooLong: true if width of text is greater than width of input
  * 
  *          textOverheadWidth: width of the text that does not fit into text input
  */
-export function isTextLongerThanInput(textInputId: string, testChars: string, fontSize?: string): {isTextTooLong: boolean, textOverheadWidth: number} {
+export function isTextLongerThanInput(textInputId: string, 
+                                      testChars: string, 
+                                      fontSize?: string, 
+                                      fontFamily?: string,
+                                      fontWeight?: string): {isTextTooLong: boolean, textOverheadWidth: number} {
 
     const textInput = getJQueryElementById(textInputId);
     if (!textInput)
@@ -392,8 +396,8 @@ export function isTextLongerThanInput(textInputId: string, testChars: string, fo
 
     // measure width of text and tabs
     const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - getTextInputOverhead(textInputId);
-    const textWidth = getTextWidth(textInputValue, fontSize || textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
-    const totalTabWidth = getTotalTabWidthInText(textInputValue, fontSize || textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
+    const textWidth = getTextWidth(textInputValue, fontSize || textInput.css("fontSize"), fontFamily || textInput.css("fontFamily"), fontWeight || textInput.css("fontWeight"));
+    const totalTabWidth = getTotalTabWidthInText(textInputValue, fontSize || textInput.css("fontSize"), fontFamily || textInput.css("fontFamily"), fontWeight || textInput.css("fontWeight"));
 
     return {
         isTextTooLong: textInputWidth < textWidth + totalTabWidth, 

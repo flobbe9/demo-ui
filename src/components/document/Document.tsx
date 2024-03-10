@@ -7,7 +7,7 @@ import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE, DEFAULT_DOCUMENT_FILE_NAME } from "../../globalVariables";
 import ControlPanel from "./ControlPanel";
 import { Orientation } from "../../enums/Orientation";
-import { documentIdToColumnId, getCSSValueAsNumber, getColumnTextInputs, getDocumentId, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
+import { documentIdToColumnId, getCSSValueAsNumber, getColumnTextInputs, getDocumentId, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import PopupContainer from "../popups/PopupContainer";
 import Style, { SingleStyle, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
@@ -205,13 +205,11 @@ export default function Document(props) {
      * @param textInputId id of valid ```<TextInput />``` to focus
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` state will be updated with focused text input style
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` will be applied to text input with ```selectedTextInputId```
-     * @param stylesToOverride list of style properties to override when copying styles 
      * @param debug if false, no logs will be printed in case of falsy textInputId, default is ```true```
      */
     function focusTextInput(textInputId: string, 
                             updateSelectedTextInputStyle = true, 
                             applySelectedTextInputStyle = true,
-                            stylesToOverride: SingleStyle[] = [],
                             debug = true): void {
 
         if (!isTextInputIdValid(textInputId, debug))
@@ -226,13 +224,17 @@ export default function Document(props) {
         // id state
         setSelectedTextInputId(textInputId);
 
-        // style state
-        if (updateSelectedTextInputStyle) 
-            setSelectedTextInputStyle(getTextInputStyle(textInputId), stylesToOverride);
+        let style = selectedTextInputStyle;
 
+        // style state
+        if (updateSelectedTextInputStyle) {
+            style = getTextInputStyle(textInputId);
+            setSelectedTextInputStyle(style);
+        }
+        
         // style text input
         if (applySelectedTextInputStyle)
-            applyTextInputStyle(textInputId, selectedTextInputStyle);
+            applyTextInputStyle(textInputId, style);
 
         textInput.trigger("focus");
     }
@@ -325,7 +327,12 @@ export default function Document(props) {
      * @param isTextInputSingleColumnLine if true, the text input that has it's font size changed is a single column line, default is false
      * @returns false if the fontSize should not be changed, else true
      */
-    function canHandleFontSizeTooLarge(wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, deleteCount = 1, documentId = selectedTextInputId, nextTextInputWillBeFocused = false, isTextInputSingleColumnLine = false): boolean {
+    function canHandleFontSizeTooLarge(wrapper: {columnIds: Set<string>, 
+                                       numTextInputsToRemove: number}, 
+                                       deleteCount = 1, 
+                                       documentId = selectedTextInputId, 
+                                       nextTextInputWillBeFocused = false, 
+                                       isTextInputSingleColumnLine = false): boolean {
 
         const lastTextInputsInColumn = getNLastTextInputs(documentId, deleteCount);
 
@@ -576,9 +583,9 @@ export default function Document(props) {
      * @param message message to display inside popup, may be a plain string
      * @param type reflects sevirity of popup and will define the style. Defualt is "Info". See {@link SubtlePopupType}.
      * @param duration time in ms that the popup should fade in, default is 100
-     * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
+     * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 5000
      */
-    function showSubtlePopup(title: string, message: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 3000): void {
+    function showSubtlePopup(title: string, message: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 5000): void {
 
         const subtlePopup = $(subtlePopupRef.current!);
 
@@ -623,7 +630,7 @@ export default function Document(props) {
      * 
      * @param holdeTime time in ms that the popup waits until starting to fade out AND also the time that the popup takes to fade out
      */
-    function startSubtlePopupTimeout(holdeTime = 3000): void {
+    function startSubtlePopupTimeout(holdeTime = 5000): void {
 
         const subtlePopup = $(subtlePopupRef.current!);
 
@@ -887,7 +894,7 @@ export const DocumentContext = createContext({
 
     hideSelectOptions: (selectComponentId?: string) => {},
 
-    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylesToOverride: SingleStyle[] = [], debug?: boolean) => {},
+    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, debug?: boolean) => {},
 
     setPages: (pages: React.JSX.Element[]) => {},
     initPages: (): React.JSX.Element[] => {return []},

@@ -36,7 +36,6 @@ export default async function fetchJson(url: string, method = "get", body?: obje
 
         // case: request failed
         if (!isHttpStatusCodeAlright(response.status)) {
-            log(response.status)
             // try with new csrf token
             if (response.status === 403)
                 return await handleForbiddenReturnJson(url, fetchConfig);

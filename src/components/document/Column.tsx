@@ -60,9 +60,6 @@ export default function Column(props: {
     
 
     useEffect(() => {
-        // TODO: delete singlce column lines too
-        // if column index === 0 && textinputs.length === 0
-            // pagecontext.removelastsinglecolumnline
         if (documentContext.removeTextInputWrapper.columnIds.has(id))
             removeTextInputs(documentContext.removeTextInputWrapper.num);
 
@@ -121,14 +118,17 @@ export default function Column(props: {
     }
 
 
+    
     /**
      * Append new ```<TextInput />```s to ```textInputs``` state at given index.
      * 
-     * TODO
-     * @param numTextInputs number of text inputs to append
-     * @param startIndex index of the first text input added to ```textInputs```, i.e. when adding number 10 to the end of the array 
-     *                   ```[0, 1, 2]``` then the startIndex would have to be 3. Default is ```textInputs.length```.
-     * @returns array with the appended ```<TextInput />```s
+     * @param numTextInputs number of text inputs to add
+     * @param startIndex index in textInputs state to insert the first text input
+     * @param focusOnRender if true, every added text input will focus on render (resulting in the last text input beeing focused)
+     * @param cursorIndex index to move the cursor to on render of text input
+     * @param initValue initial value of all text inputs
+     * @param initStyle initial style to apply to all text inputs
+     * @returns array of newly added text inputs
      */
     function addTextInputs(numTextInputs: number, 
                            startIndex = textInputs.length, 
@@ -136,12 +136,6 @@ export default function Column(props: {
                            cursorIndex?: number,
                            initValue?: string,
                            initStyle?: Style): React.JSX.Element[] {
-
-        // TODO: (?)
-        // if is single column line
-            // append in all columns of this page
-        // else
-            // append only here
 
         let newTextInputs: React.JSX.Element[] = [];
 

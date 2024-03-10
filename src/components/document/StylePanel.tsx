@@ -67,6 +67,13 @@ export default forwardRef(function StylePanel(props: {
     
     function handleFontFamilySelect(fontFamily: string): void {
 
+        // case: text too long for text input length      
+        const { isTextTooLong } = isTextLongerThanInput(documentContext.selectedTextInputId, "", undefined, fontFamily);
+        if (isTextTooLong) {
+            documentContext.showSubtlePopup("Kann Schriftart nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.", "Warn");
+            return;
+        } 
+
         documentContext.selectedTextInputStyle.fontFamily = fontFamily;
         documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
@@ -85,7 +92,7 @@ export default forwardRef(function StylePanel(props: {
         // case: cant chnage font size
         if (!documentContext.handleFontSizeChange(diff)) {
             flashClass(documentContext.selectedTextInputId, "textInputFlash", "textInputFocus", 500);
-            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Fokussiere eine Zeile, die weiter oben liegt und versuche es dann erneut.", "Warn");
+            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Fokussiere eine Zeile, die weiter oben liegt oder lösche den Text in ein paar der untersten Zeilen und versuche es dann erneut.", "Warn");
             return;
         }
 
@@ -96,6 +103,13 @@ export default forwardRef(function StylePanel(props: {
 
     function handleBoldSelect(bold: boolean): void {
 
+        // case: text too long for text input length      
+        const { isTextTooLong } = isTextLongerThanInput(documentContext.selectedTextInputId, "", undefined, undefined, bold ? "bold" : "normal");
+        if (isTextTooLong && bold) {
+            documentContext.showSubtlePopup("Kann Text Dicke nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.", "Warn");
+            return;
+        } 
+        
         documentContext.selectedTextInputStyle.bold = bold;
         documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }

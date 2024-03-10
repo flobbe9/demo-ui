@@ -9,7 +9,6 @@ import { downloadFileByUrl, isBlank, log, logApiResponse, logError, logWarn, str
 import { adjustDocumentFileName, getDocumentId, getMSWordFontSizeByBrowserFontSize, getPartFromDocumentId } from "../utils/documentBuilderUtils";
 import fetchJson from "../utils/fetchUtils";
 import { ApiExceptionFormat, getApiExceptionInstance } from '../abstract/ApiExceptionFormat';
-import { addInvisibleText } from './../abstract/BasicParagraph';
 
 
 // NOTE: remember to add empty line after table (in case of column break, or second table following)
@@ -153,10 +152,6 @@ function buildColumn(pageIndex: number, columnIndex: number, allBasicParagrahps:
             text: text,
             style: style
         }
-
-        // add white text for blank lines. Backend wont apply font size otherwise
-        if (isBlank(text))
-            addInvisibleText(basicParagraph);
         
         allBasicParagrahps.push(basicParagraph)
     });
