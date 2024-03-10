@@ -15,7 +15,7 @@ import { isFileNameValid } from "../../utils/documentBuilderUtils";
  * 
  * @since 0.0.6
  */
-// TODO: scroll like user does
+// FEAT: scroll like user does
 
 export default function ControlPanel(props: {
     id?: string,

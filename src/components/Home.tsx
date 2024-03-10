@@ -29,7 +29,7 @@ export default function Home(props) {
     }, []);
 
 
-    // TODO: fetch saved documents from backend
+    // FEAT: fetch saved documents from backend
     function initSavedDocuments(): React.JSX.Element[] {
 
         const temp1 = <div key={0} className="savedDocument dontMarkText">File 1</div>;

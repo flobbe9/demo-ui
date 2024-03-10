@@ -7,9 +7,9 @@ import StylePanel from "./StylePanel";
 import { API_ENV, DEFAULT_FONT_SIZE, SINGLE_COLUMN_LINE_CLASS_NAME, MAX_FONT_SIZE_SUM_LANDSCAPE, MAX_FONT_SIZE_SUM_PORTRAIT, SELECT_COLOR, NUM_PAGES, PAGE_WIDTH_PORTRAIT, PAGE_WIDTH_LANDSCAPE, DEFAULT_DOCUMENT_FILE_NAME } from "../../globalVariables";
 import ControlPanel from "./ControlPanel";
 import { Orientation } from "../../enums/Orientation";
-import { documentIdToColumnId, getCSSValueAsNumber, getColumnIdByDocumentId, getDocumentId, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPageIdByDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
+import { documentIdToColumnId, getCSSValueAsNumber, getColumnTextInputs, getDocumentId, getMSWordFontSizeByBrowserFontSize, getNextTextInput, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import PopupContainer from "../popups/PopupContainer";
-import Style, { StyleProp, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
+import Style, { SingleStyle, applyTextInputStyle, getDefaultStyle, getTextInputStyle } from "../../abstract/Style";
 import Page from "./Page";
 import { buildDocument, downloadDocument } from "../../builder/builder";
 import { SubtlePopupType } from "../../abstract/SubtlePopupType";
@@ -17,18 +17,17 @@ import ControlPanelMenu from "./ControlPanelMenu";
 import { AppendRemoveTextInputWrapper, getDefaultAppendRemoveTextInputWrapper } from "../../abstract/AppendRemoveTextInputWrapper";
 
 
-// TODO: add some kind of "back" button
-// TODO: num lines calculation is wrong, if not all lines are filled with text
-// TODO: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
-// TODO: font size of bottom lines of pages should be changable if empty
-// TODO: about page, link github and stuff
-// TODO: test barrier usability (alt, title etc.)ne
-// TODO: handle tab navigation correctly (Popups, stylepanel etc.)
-// TODO: check some seo criteria
-// TODO: lookup portainer
+// FEAT: add some kind of "back" button
+// FEAT: text input margin not accurate at all, last line should always be on bottom even with larger font sizes
+// FEAT: font size of bottom lines of pages should be changable if empty
+// FEAT: about page, link github and stuff
+// FEAT: test barrier usability (alt, title etc.)ne
+// FEAT: handle tab navigation correctly (Popups, stylepanel etc.)
+// FEAT: check some seo criteria
+    // img height width
+// FEAT: lookup portainer
 
-// TODO: enter makes line break (only accross one column)
-// TODO: last single column line button does not disappear on hover over other single column lines
+// TODO: do more testing
 export default function Document(props) {
 
     const id = props.id ? "Document" + props.id : "Document";
@@ -84,6 +83,8 @@ export default function Document(props) {
         setRefreshColumns,
 
         handleFontSizeChange,
+        canHandleFontSizeTooLarge,
+        handleFontSizeTooLarge,
         getNumLinesDeviation,
         subtractMSWordFontSizes,
         appendTextInputWrapper,
@@ -91,9 +92,7 @@ export default function Document(props) {
         removeTextInputWrapper,
         setRemoveTextInputWrapper,
 
-        getColumnTextInputs,
         getColumnFontSizesSum,
-        getLastTextInputOfColumn,
         checkIsColumnEmptyById,
 
         togglePopup,
@@ -189,14 +188,15 @@ export default function Document(props) {
 
     /**
      * @param style to update selectedTextInputStyle with
-     * @param stylePropsToOverride style props to override in ```style``` param
+     * @param stylesToOverride style props to override in ```style``` param
      */
-    function setSelectedTextInputStyle(style: Style, stylePropsToOverride?: [StyleProp, string | number][]): void {
+    function setSelectedTextInputStyle(style: Style, stylesToOverride: SingleStyle[] = []): void {
 
         // set specific props
-        if (stylePropsToOverride) 
-            stylePropsToOverride.forEach(([styleProp, value]) => style[styleProp.toString()] = value);
-        
+        if (stylesToOverride) 
+            stylesToOverride.forEach(singleStyle => 
+                style[singleStyle.attr.toString()] = singleStyle.value);
+            
         setSelectedTextInputStyleState(style);
     }
 
@@ -205,13 +205,11 @@ export default function Document(props) {
      * @param textInputId id of valid ```<TextInput />``` to focus
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` state will be updated with focused text input style
      * @param updateSelectedTextInputStyle if true, the ```selectedTextInputStyle``` will be applied to text input with ```selectedTextInputId```
-     * @param stylePropsToOverride list of style properties to override when copying styles 
      * @param debug if false, no logs will be printed in case of falsy textInputId, default is ```true```
      */
     function focusTextInput(textInputId: string, 
                             updateSelectedTextInputStyle = true, 
                             applySelectedTextInputStyle = true,
-                            stylePropsToOverride?: [StyleProp, string | number][], 
                             debug = true): void {
 
         if (!isTextInputIdValid(textInputId, debug))
@@ -226,13 +224,17 @@ export default function Document(props) {
         // id state
         setSelectedTextInputId(textInputId);
 
-        // style state
-        if (updateSelectedTextInputStyle) 
-            setSelectedTextInputStyle(getTextInputStyle(textInput), stylePropsToOverride);
+        let style = selectedTextInputStyle;
 
+        // style state
+        if (updateSelectedTextInputStyle) {
+            style = getTextInputStyle(textInputId);
+            setSelectedTextInputStyle(style);
+        }
+        
         // style text input
         if (applySelectedTextInputStyle)
-            applyTextInputStyle(textInputId, selectedTextInputStyle);
+            applyTextInputStyle(textInputId, style);
 
         textInput.trigger("focus");
     }
@@ -278,41 +280,15 @@ export default function Document(props) {
 
 
     /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
-     * @returns jquery of all ```<TextInput />``` components inside given column or ```null``` if column was not found.
-     *          Also include ```<TextInput />```components in page with className {@link SINGLE_COLUMN_LINE_CLASS_NAME}.
-     */
-    function getColumnTextInputs(documentId = selectedTextInputId): JQuery | null {
-
-        const docxElement = getJQueryElementById(documentId);
-        if (!docxElement)
-            return null;
-        
-        // get .TextInput
-        const columnId = getColumnIdByDocumentId(documentId);
-        let columnTextInputs = $("#" + columnId + " .TextInput");
-        
-        // get .SingleColumnLine
-        const pageId = getPageIdByDocumentId(documentId);
-        if (!pageId)
-            return null;
-
-        const singleColumnLines = $("#" + pageId + " .TextInput." + SINGLE_COLUMN_LINE_CLASS_NAME);
-        columnTextInputs = columnTextInputs.add(singleColumnLines);
-
-        return columnTextInputs;
-    }
-
-
-    /**
      * Calculate number of lines deviation in column of given ```documentId``` and append or remove some lines to even out the difference.
      *  
      * @param fontSizeDiff amount of px to consider when comparing ```columnFontSizesSum``` to ```maxFontSizeSum```. Will be added to ```columnFontSizesSum``` and should be
      *                     stated as msWord font size. 
      * @param textInputId id of text input where the font size has changed, default is ```selectedTextInputId```
+     * @param nextTextInputWillBeFocused if true, next text input will be considered as "focused" (i.e. if this function was triggered by "Enter" handler)
      * @returns false if the fontSize should not be changed, else true
      */
-    function handleFontSizeChange(fontSizeDiff: number, textInputId = selectedTextInputId): boolean {
+    function handleFontSizeChange(fontSizeDiff: number, textInputId = selectedTextInputId, nextTextInputWillBeFocused = false): boolean {
 
         const textInput = getJQueryElementById(textInputId);
 
@@ -326,7 +302,12 @@ export default function Document(props) {
 
         // case: font size too large
         if (numLinesDiff > 0) {
-            isAbleToHandleFontSizeChange = handleFontSizeTooLarge(false, numLinesDiff, textInputId, true, isSingleColumnLine)
+            const wrapper = {
+                columnIds: new Set<string>(),
+                numTextInputsToRemove: 0
+            }
+            isAbleToHandleFontSizeChange = canHandleFontSizeTooLarge(wrapper, numLinesDiff, textInputId, nextTextInputWillBeFocused, isSingleColumnLine)
+            handleFontSizeTooLarge(isAbleToHandleFontSizeChange, wrapper, false);
 
         // case: font size too small
         } else if (numLinesDiff < 0)
@@ -337,21 +318,23 @@ export default function Document(props) {
 
 
     /**
-     * Try to remove text inputs at the end of the column of given textInputId. Don't remove any text input if at least 
-     * one is not blank and try to flash text input border instead.
+     * Try to remove text inputs at the end of the column of given textInputId. Don't remove any text input if at least one is not blank or focused.
      * 
-     * @param flash if true, the given text input will flash if no text input can be removed, default is true
+     * @param wrapper object with set of "columnIds" and numTextInputsToRemove. Has to be an object because props will be altered and reused else where
      * @param deleteCount number of lines to remove if blank, default is 1
      * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
-     * @param checkNextTextInputFocused if true, next text input will be checked for "is focused" too (i.e. if this function was triggered by "Enter" handler)
+     * @param nextTextInputWillBeFocused if true, next text input will be considered as "focused" (i.e. if this function was triggered by "Enter" handler)
      * @param isTextInputSingleColumnLine if true, the text input that has it's font size changed is a single column line, default is false
      * @returns false if the fontSize should not be changed, else true
      */
-    function handleFontSizeTooLarge(flash = true, deleteCount = 1, documentId = selectedTextInputId, checkNextTextInputFocused = false, isTextInputSingleColumnLine = false): boolean {
+    function canHandleFontSizeTooLarge(wrapper: {columnIds: Set<string>, 
+                                       numTextInputsToRemove: number}, 
+                                       deleteCount = 1, 
+                                       documentId = selectedTextInputId, 
+                                       nextTextInputWillBeFocused = false, 
+                                       isTextInputSingleColumnLine = false): boolean {
 
         const lastTextInputsInColumn = getNLastTextInputs(documentId, deleteCount);
-        const columnIds = new Set<string>();
-        let numTextInputsToRemove = 0;
 
         let areTextInputsBlank = true;
         let areTextInputsToRemoveFocused = false;
@@ -366,7 +349,9 @@ export default function Document(props) {
 
             // case: is focused
             if (!areTextInputsToRemoveFocused) {
-                if (textInput.id === selectedTextInputId || (checkNextTextInputFocused && selectedTextInputId === getNextTextInput(textInput.id)?.prop("id"))) {
+                const isTextInputFocuesd = textInput.id === selectedTextInputId;
+                const isTextInputAfterSelectedOneFocused = nextTextInputWillBeFocused ? getNextTextInput(selectedTextInputId)?.prop("id") === textInput.id : false;
+                if (isTextInputFocuesd || isTextInputAfterSelectedOneFocused) {
                     areTextInputsToRemoveFocused = true;
                     return;
                 }
@@ -379,21 +364,38 @@ export default function Document(props) {
                 const alignedTextInputIds = getAlignedTextInputIds(nonSingleColumnLineTextInputId);
 
                 // add column ids
-                if (columnIds.size < 3)
-                    alignedTextInputIds.forEach(textInputId => columnIds.add(documentIdToColumnId(textInputId)));
+                if (wrapper.columnIds.size < 3)
+                    alignedTextInputIds.forEach(textInputId => wrapper.columnIds.add(documentIdToColumnId(textInputId)));
             
             } else
-                if (columnIds.size < 1)
-                    columnIds.add(documentIdToColumnId(documentId));
+                if (wrapper.columnIds.size < 1)
+                    wrapper.columnIds.add(documentIdToColumnId(documentId));
             
-            numTextInputsToRemove++;
+            wrapper.numTextInputsToRemove++;
         });
 
+        return areTextInputsBlank && !areTextInputsToRemoveFocused;
+    }
+
+
+    /**
+     * Try to remove text inputs at the end of the column of given textInputId. Don't remove any text input if at least 
+     * one is not blank and try to flash text input border instead.
+     * 
+     * @param flash if true, the given text input will flash if no text input can be removed, default is true
+     * @param deleteCount number of lines to remove if blank, default is 1
+     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
+     * @param nextTextInputWillBeFocused if true, next text input will be considered as "focused" (i.e. if this function was triggered by "Enter" handler)
+     * @param isTextInputSingleColumnLine if true, the text input that has it's font size changed is a single column line, default is false
+     * @returns false if the fontSize should not be changed, else true
+     */
+    function handleFontSizeTooLarge(canHandleFontSizeTooLarge: boolean, wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, flash = true): void {
+
         // case: text inputs to remove are valid
-        if (areTextInputsBlank && !areTextInputsToRemoveFocused) {
+        if (canHandleFontSizeTooLarge) {
             setRemoveTextInputWrapper({
-                columnIds: columnIds, 
-                num: numTextInputsToRemove
+                columnIds: wrapper.columnIds, 
+                num: wrapper.numTextInputsToRemove
             });
 
         // case: text inputs to remove are not valid
@@ -403,11 +405,7 @@ export default function Document(props) {
                 flashClass(selectedTextInputId, "textInputFlash", "textInputFocus");
                 showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche den Text in ein paar der unteren Zeilen auf dieser Seite und wähle diese Zeilen nicht aus, dann versuche es erneut.", "Warn");
             }
-
-            return false;
         }
-
-        return true;
     }
 
     
@@ -572,20 +570,6 @@ export default function Document(props) {
     }
 
 
-    /**
-     * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId). Default is selectedTextInputId
-     * @returns a JQuery of the last ```<TextInput />``` in given column or null if not found
-     */
-    function getLastTextInputOfColumn(documentId = selectedTextInputId): JQuery | null {
-
-        const columnTextInputs = getColumnTextInputs(documentId);
-        if (!columnTextInputs || !columnTextInputs.length)
-            return null;
-
-        return $(columnTextInputs.get(columnTextInputs.length - 1)!);
-    }
-
-
     function handleDocumentMouseMove(event): void {
 
         handleSubtlePopupMouseMove(event);
@@ -599,9 +583,9 @@ export default function Document(props) {
      * @param message message to display inside popup, may be a plain string
      * @param type reflects sevirity of popup and will define the style. Defualt is "Info". See {@link SubtlePopupType}.
      * @param duration time in ms that the popup should fade in, default is 100
-     * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 3000
+     * @param holdTime time in ms that the popup should stay displayed and should fade out, default is 5000
      */
-    function showSubtlePopup(title: string, message: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 3000): void {
+    function showSubtlePopup(title: string, message: string, type = "Info" as SubtlePopupType, duration = 100, holdTime = 5000): void {
 
         const subtlePopup = $(subtlePopupRef.current!);
 
@@ -646,7 +630,7 @@ export default function Document(props) {
      * 
      * @param holdeTime time in ms that the popup waits until starting to fade out AND also the time that the popup takes to fade out
      */
-    function startSubtlePopupTimeout(holdeTime = 3000): void {
+    function startSubtlePopupTimeout(holdeTime = 5000): void {
 
         const subtlePopup = $(subtlePopupRef.current!);
 
@@ -882,7 +866,9 @@ export const DocumentContext = createContext({
     refreshColumns: false,
     setRefreshColumns: (bool: boolean) => {},
 
-    handleFontSizeChange: (fontSizeDiff: number, textInputId?: string): boolean => {return false},
+    handleFontSizeChange: (fontSizeDiff: number, textInputId?: string, nextTextInputWillBeFocused?: boolean): boolean => {return false},
+    canHandleFontSizeTooLarge: (wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, deleteCount?: number, documentId?: string, nextTextInputWillBeFocused?: boolean, isTextInputSingleColumnLine?: boolean): boolean => {return false},
+    handleFontSizeTooLarge: (canHandleFontSizeTooLarge: boolean, wrapper: {columnIds: Set<string>, numTextInputsToRemove: number}, flash = true) => {},
     getNumLinesDeviation: (documentId?: string, diff?: number, columnFontSizeSum?: number): number => {return 0},
     subtractMSWordFontSizes: (fontSize: number | string, fontSize2: number | string): number => {return 0},
     appendTextInputWrapper: getDefaultAppendRemoveTextInputWrapper(),
@@ -890,9 +876,7 @@ export const DocumentContext = createContext({
     removeTextInputWrapper: getDefaultAppendRemoveTextInputWrapper(),
     setRemoveTextInputWrapper: (appendTextInputWrapper: AppendRemoveTextInputWrapper) => {},
 
-    getColumnTextInputs: (documentId?: string): JQuery | null => {return null},
     getColumnFontSizesSum: (documentId?: string): number => {return 0},
-    getLastTextInputOfColumn: (documentId?: string): JQuery | null => {return null},
     checkIsColumnEmptyById: (documentId?: string): boolean => {return false},
 
     togglePopup: (duration?: number) => {},
@@ -910,7 +894,7 @@ export const DocumentContext = createContext({
 
     hideSelectOptions: (selectComponentId?: string) => {},
 
-    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, stylePropsToOverride?: [StyleProp, string | number][], debug?: boolean) => {},
+    focusTextInput: (textInputId: string, updateSelectedTextInputStyle?: boolean, applySelectedTextInputStyle?: boolean, debug?: boolean) => {},
 
     setPages: (pages: React.JSX.Element[]) => {},
     initPages: (): React.JSX.Element[] => {return []},
@@ -923,7 +907,7 @@ export const DocumentContext = createContext({
     selectedTextInputId: "",
     setSelectedTextInputId: (id: string) => {},
     selectedTextInputStyle: getDefaultStyle(),
-    setSelectedTextInputStyle: (style: Style, stylePropsToOverride?: [StyleProp, string | number][]) => {},
+    setSelectedTextInputStyle: (style: Style, stylesToOverride: SingleStyle[] = []) => {},
     documentFileName: "",
     setDocumentFileName: (fileName: string) => {},
 

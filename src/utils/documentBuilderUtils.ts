@@ -1,4 +1,4 @@
-import { DOCX_SUFFIX, FONT_SIZES_WHOLE_SCALE, PDF_SUFFIX, Side, DOCUMENT_FILE_PREFIX_PATTERN, DOCUMENT_FILE_SUFFIX_PATTERN, DEFAULT_DOCUMENT_FILE_NAME } from "../globalVariables";
+import { DOCX_SUFFIX, FONT_SIZES_WHOLE_SCALE, PDF_SUFFIX, Side, DOCUMENT_FILE_PREFIX_PATTERN, DOCUMENT_FILE_SUFFIX_PATTERN, DEFAULT_DOCUMENT_FILE_NAME, SINGLE_COLUMN_LINE_CLASS_NAME } from "../globalVariables";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getCursorIndex, getJQueryElementById, getTextWidth, getTotalTabWidthInText, insertString, isBlank, isNumberFalsy, isStringNumeric, log, logError, logWarn, matchesAll, stringToNumber } from "./basicUtils";
 
@@ -174,6 +174,162 @@ export function getPrevTextInput(textInputId: string, debug = true): JQuery | nu
 
 
 /**
+ * @param textInputId id of the starting text input (exluded by default)
+ * @param includeThisTextInput if true, the text input with given id will be included in the jquery, else it wont be included (which means 
+ *                       the first element in the jquery will be the text input after the given one). Default is false
+ * @returns a jquery of all text inputs after the one with given id (excluded by default). Return null if given id is invalid or no text inputs can be found at all.
+ */
+export function getAllTextInputsAfter(textInputId: string, includeThisTextInput = false): JQuery | null {
+
+    // case: id invalid
+    if (!isTextInputIdValid(textInputId))
+        return null;
+
+    const allTextInputs = $(".TextInput");
+    // case: no text input found
+    if (!allTextInputs.length)
+        return null;
+
+    let allTextInputsAfter = $();
+    let reachedThisTextInput = false;
+
+    // iterate all text inputs
+    allTextInputs.each((i, textInputElement) => {
+        // case: already iterated past thisTextInput
+        if (reachedThisTextInput) {
+            allTextInputsAfter = allTextInputsAfter.add(textInputElement);
+            return;
+        }
+
+        // case: reached thisTextInput
+        if (textInputElement.id === textInputId) {
+            // case: include thisTextInput
+            if (includeThisTextInput)
+                allTextInputsAfter = allTextInputsAfter.add(textInputElement);
+
+            reachedThisTextInput = true;
+        }
+    });
+
+    return allTextInputsAfter;
+}
+
+
+/**
+ * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId).
+ * @returns jquery of all ```<TextInput />``` components inside given column or ```null``` if column was not found.
+ *          Also include ```<TextInput />```components in page with className {@link SINGLE_COLUMN_LINE_CLASS_NAME}.
+ */
+export function getColumnTextInputs(documentId: string): JQuery | null {
+
+    const docxElement = getJQueryElementById(documentId);
+    if (!docxElement)
+        return null;
+    
+    // get .TextInput
+    const columnId = getColumnIdByDocumentId(documentId);
+    let columnTextInputs = $("#" + columnId + " .TextInput");
+    
+    // get .SingleColumnLine
+    const pageId = getPageIdByDocumentId(documentId);
+    if (!pageId)
+        return null;
+
+    const singleColumnLines = $("#" + pageId + " .TextInput." + SINGLE_COLUMN_LINE_CLASS_NAME);
+    columnTextInputs = columnTextInputs.add(singleColumnLines);
+
+    return columnTextInputs;
+}
+
+
+/**
+ * @param textInputId id of the starting text input (exluded by default)
+ * @param includeThisTextInput if true, the text input with given id will be included in the jquery, else it wont be included (which means 
+ *                       the first element in the jquery will be the text input after the given one). Default is false
+ * @returns a jquery of all text inputs after given one (excluded by default) in same column of given one. Return null if given id is invalid or no text inputs can be found at all.
+ */
+export function getColumnTextInputsAfter(textInputId: string, includeThisTextInput = false): JQuery | null {
+
+    // case: id invalid
+    if (!isTextInputIdValid(textInputId))
+        return null;
+
+    const columnTextInputs = getColumnTextInputs(textInputId);
+    if (!columnTextInputs)
+        return null;
+
+    let columnTextInputsAfter = $();
+    let reachedThisTextInput = false;
+
+    // iterate all text inputs
+    columnTextInputs.each((i, textInputElement) => {
+        // case: already iterated past thisTextInput
+        if (reachedThisTextInput) {
+            columnTextInputsAfter = columnTextInputsAfter.add(textInputElement);
+            return;
+        }
+
+        // case: reached thisTextInput
+        if (textInputElement.id === textInputId) {
+            // case: include thisTextInput
+            if (includeThisTextInput)
+                columnTextInputsAfter = columnTextInputsAfter.add(textInputElement);
+
+            reachedThisTextInput = true;
+        }
+    });
+
+    return columnTextInputsAfter;
+}
+
+
+
+/**
+ * @param documentId in order to identify the column. Must be a columnId or a deeper level (i.e. textInputId)
+ * @returns a JQuery of the last ```<TextInput />``` in given column or null if not found
+ */
+export function getLastTextInputOfColumn(documentId: string): JQuery | null {
+
+    const columnTextInputs = getColumnTextInputs(documentId);
+    if (!columnTextInputs || !columnTextInputs.length)
+        return null;
+
+    return $(columnTextInputs.get(columnTextInputs.length - 1)!);
+}
+
+
+/**
+* @param textInputId id of text input to check the value of 
+* @returns true if value of text input is marked
+*/
+export function isTextInputValueMarked(textInputId: string): boolean {
+
+   if (!textInputId)
+       return false;
+
+   const textInput = $("#" + textInputId);
+   return textInput.prop("selectionStart") !== textInput.prop("selectionEnd")
+}
+
+
+/**
+* @param textInputId id of text input to get the marked value of 
+* @returns the marked part of given text input's value
+*/
+export function getMarkedTextInputValue(textInputId: string): string {
+
+    if (!textInputId)
+        return "";
+ 
+    const textInput = $("#" + textInputId);
+    const selectionStart = textInput.prop("selectionStart");
+    const selectionEnd = textInput.prop("selectionEnd");
+
+    return (textInput.prop("value") as string).substring(selectionStart, selectionEnd);
+ }
+
+
+/**
  * This calculation is quite inaccurate. Tends to subtract more pixels than necessary which means the fontSize in 
  * Word will be a bit too small.
  * 
@@ -217,13 +373,21 @@ export function getMSWordFontSizeByBrowserFontSize(browserFontSize: number): num
  * @param textInputId id of text input to compare text width to
  * @param testChars string that is not part of input value but should be included in value when calculating value's width
  * @param fontSize to use when calculating the text width instead of the font size of given text input
- * @returns true if width of text is greater than width of input
+ * @param fontFamily to use when calculating the text width instead of the font family of given text input
+ * @param fontWeight to use when calculating the text width instead of the font weight of given text input
+ * @returns isTextTooLong: true if width of text is greater than width of input
+ * 
+ *          textOverheadWidth: width of the text that does not fit into text input
  */
-export function isTextLongerThanInput(textInputId: string, testChars: string, fontSize?: string): boolean {
+export function isTextLongerThanInput(textInputId: string, 
+                                      testChars: string, 
+                                      fontSize?: string, 
+                                      fontFamily?: string,
+                                      fontWeight?: string): {isTextTooLong: boolean, textOverheadWidth: number} {
 
     const textInput = getJQueryElementById(textInputId);
     if (!textInput)
-        return false;
+        return {isTextTooLong: false, textOverheadWidth: NaN};
 
     // insert test chars at correct position
     const cursorIndex = getCursorIndex(textInputId);
@@ -232,12 +396,58 @@ export function isTextLongerThanInput(textInputId: string, testChars: string, fo
 
     // measure width of text and tabs
     const textInputWidth = getCSSValueAsNumber(textInput.css("width"), 2) - getTextInputOverhead(textInputId);
-    const textWidth = getTextWidth(textInputValue, fontSize || textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
-    const totalTabWidth = getTotalTabWidthInText(textInputValue, fontSize || textInput.css("fontSize"), textInput.css("fontFamily"), textInput.css("fontWeight"));
+    const textWidth = getTextWidth(textInputValue, fontSize || textInput.css("fontSize"), fontFamily || textInput.css("fontFamily"), fontWeight || textInput.css("fontWeight"));
+    const totalTabWidth = getTotalTabWidthInText(textInputValue, fontSize || textInput.css("fontSize"), fontFamily || textInput.css("fontFamily"), fontWeight || textInput.css("fontWeight"));
 
-    return textInputWidth < textWidth + totalTabWidth;
+    return {
+        isTextTooLong: textInputWidth < textWidth + totalTabWidth, 
+        textOverheadWidth: textWidth + totalTabWidth - textInputWidth
+    };
 }
+
+
+/**
+ * @param textInputId of text input to get the value from
+ * @param targetWidth width of the text input value beeing retrieved
+ * @param endOfText if true, the width measurment starts at the end of the text input value, else it will start in front
+ * @returns longest substring of given text input's value that doesn't exceed given width
+ */
+export function getTextInputValueSubstringOfWidth(textInputId: string, targetWidth: number, endOfText = false): string | null {
+
+    const textInput = getJQueryElementById(textInputId);
+    if (!textInput)
+        return null;
+
+    const textInputValue: string = textInput.prop("value");
+    const fontSize = textInput.css("fontSize");
+    const fontFamily = textInput.css("fontFamily");
+    const fontWeight = textInput.css("fontWeight");
+
+    let charSequence = "";
+
+    const measureAndCollectChars = (i: number): void => {
     
+        const char = textInputValue.charAt(i);
+        const width = getTextWidth(char + charSequence, fontSize, fontFamily, fontWeight);
+        
+        // case: targetWidth not exceeded yet
+        if (width <= targetWidth)
+            charSequence = endOfText ?  char + charSequence : charSequence + char;
+    }
+
+    // case: get end part of text input value
+    if (endOfText) 
+        for (let i = textInputValue.length - 1; i >= 0; i--) 
+            measureAndCollectChars(i);
+
+    // case: get start part of text input value
+    else 
+        for (let i = 0; i < textInputValue.length; i++) 
+            measureAndCollectChars(i);
+
+    return charSequence;
+}
+
 
 /**
  * @param textInputId id of the text input to check
