@@ -18,7 +18,7 @@ export default function ControlPanelMenu(props: {
     const menuRef = useRef(null);
 
 
-    // TODO: 
+    // FEAT: 
         // new document
         // pdf
         // save

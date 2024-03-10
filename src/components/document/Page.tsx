@@ -5,7 +5,7 @@ import Column from "./Column";
 import { AppContext } from "../App";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getJQueryElementById, getRandomString, includesIgnoreCaseTrim, log, logWarn, stringToNumber } from "../../utils/basicUtils";
-import { DEFAULT_FONT_SIZE, DONT_SHOW_AGAIN_COOKIE_NAME, MAX_NUM_COLUMNS, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
+import { DEFAULT_FONT_SIZE, DONT_SHOW_AGAIN_COOKIE_NAME, MAX_NUM_COLUMNS, MAX_NUM_SINGLE_COLUMN_LINES, SINGLE_COLUMN_LINE_CLASS_NAME } from "../../globalVariables";
 import { DocumentContext } from "./Document";
 import { appendCustumIdToDocumentId, getBrowserFontSizeByMSWordFontSize, getDocumentId, getPartFromDocumentId, isTextInputIdValid } from "../../utils/documentBuilderUtils";
 import Popup from "../popups/Popup";
@@ -138,6 +138,10 @@ export default function Page(props: {
 
         // case: no columns to connect
         if (documentContext.numColumns === 1 && props.pageIndex !== 0)
+            return;
+
+        // case: max num single column lines reached
+        if (documentContext.numSingleColumnLines === MAX_NUM_SINGLE_COLUMN_LINES)
             return;
         
         const textInputsToBeConnected = getNthTextInputsInAllColumnsOfPage(textInputIndex);
@@ -336,10 +340,11 @@ export default function Page(props: {
 
         const targetClassName = event.target.className;
 
-        // hide connect / disconnect icon of text inputs
+        // hide connect icon
         if (!includesIgnoreCaseTrim(targetClassName, "dontHideConnectIcon"))
             $(".connectOrDisconnectButton.dontHideConnectIcon").hide(100);
 
+        // hide disconnect icon
         if (!includesIgnoreCaseTrim(targetClassName, "dontHideDisConnectIcon"))
             $(".connectOrDisconnectButton.dontHideDisConnectIcon").hide(100);
     }

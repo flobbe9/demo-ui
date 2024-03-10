@@ -24,7 +24,7 @@ import SubtlePopup from "../popups/SubtlePopup";
  * 
  * @since 0.0.1
  */
-// TODO: add hide option, or dont fix
+// FEAT: add hide option, or dont fix
 
 export default forwardRef(function StylePanel(props: {
     id?: string,
@@ -67,6 +67,13 @@ export default forwardRef(function StylePanel(props: {
     
     function handleFontFamilySelect(fontFamily: string): void {
 
+        // case: text too long for text input length      
+        const { isTextTooLong } = isTextLongerThanInput(documentContext.selectedTextInputId, "", undefined, fontFamily);
+        if (isTextTooLong) {
+            documentContext.showSubtlePopup("Kann Schriftart nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.", "Warn");
+            return;
+        } 
+
         documentContext.selectedTextInputStyle.fontFamily = fontFamily;
         documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
@@ -75,8 +82,8 @@ export default forwardRef(function StylePanel(props: {
     function handleFontSizeSelect(fontSize: string): void {
         
         // case: text too long for text input length      
-        const isFontSizeTooLargeForTextInput = isTextLongerThanInput(documentContext.selectedTextInputId, "", fontSize + "px");
-        if (isFontSizeTooLargeForTextInput) {
+        const { isTextTooLong } = isTextLongerThanInput(documentContext.selectedTextInputId, "", fontSize + "px");
+        if (isTextTooLong) {
             documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.", "Warn");
             return;
         }
@@ -85,7 +92,7 @@ export default forwardRef(function StylePanel(props: {
         // case: cant chnage font size
         if (!documentContext.handleFontSizeChange(diff)) {
             flashClass(documentContext.selectedTextInputId, "textInputFlash", "textInputFocus", 500);
-            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Fokussiere eine Zeile, die weiter oben liegt und versuche es dann erneut.", "Warn");
+            documentContext.showSubtlePopup("Kann Schriftgröße nicht ändern", "Fokussiere eine Zeile, die weiter oben liegt oder lösche den Text in ein paar der untersten Zeilen und versuche es dann erneut.", "Warn");
             return;
         }
 
@@ -96,6 +103,13 @@ export default forwardRef(function StylePanel(props: {
 
     function handleBoldSelect(bold: boolean): void {
 
+        // case: text too long for text input length      
+        const { isTextTooLong } = isTextLongerThanInput(documentContext.selectedTextInputId, "", undefined, undefined, bold ? "bold" : "normal");
+        if (isTextTooLong && bold) {
+            documentContext.showSubtlePopup("Kann Text Dicke nicht ändern", "Lösche ein paar der letzten Zeichen in der Zeile und versuche es dann erneut.", "Warn");
+            return;
+        } 
+        
         documentContext.selectedTextInputStyle.bold = bold;
         documentContext.setSelectedTextInputStyle({...documentContext.selectedTextInputStyle});
     }
@@ -372,7 +386,7 @@ export default forwardRef(function StylePanel(props: {
                             onClick={handleOrientationConfigClick}
                             >
                         <div className={id + "IconContainer"}>
-                            <img src="orientation.png" alt="orientation icon" height="50" />
+                            <img src="/images/orientation.png" alt="orientation icon" height="50" />
                         </div>
                         Ausrichtung
                     </Button>
@@ -391,7 +405,7 @@ export default forwardRef(function StylePanel(props: {
                             onClick={handleColumnConfigClick}
                             >
                         <div className={id + "IconContainer mb-2"}>
-                            <img src="columnIcon.png" alt="column icon" height="40" />
+                            <img src="/images/columnIcon.png" alt="column icon" height="40" />
                         </div>
                         Spalten
                     </Button>
