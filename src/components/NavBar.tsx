@@ -69,14 +69,13 @@ export default function NavBar(props: {
                         <LoadingButton 
                                     id={"Register"}
                                     boxStyle={{
-                                        backgroundColor: "transparent", 
+                                        // TODO: style
+                                        backgroundColor: "white", 
                                         border: "1px solid grey", 
                                         marginRight: "15px", 
                                     }}
                                     hoverBackgroundColor={"rgb(255, 238, 214)"} 
                                     clickBackgroundColor={"rgb(180, 180, 180)"}
-                                    disabled={true}
-                                    rendered={false}
                                     >
                             Registrieren
                         </LoadingButton>
@@ -90,8 +89,6 @@ export default function NavBar(props: {
                                     childrenStyle={{width: "100px"}}
                                     hoverBackgroundColor={"rgb(60, 60, 60)"} 
                                     clickBackgroundColor={"rgb(200, 200, 200)"}
-                                    disabled={true}
-                                    rendered={false}
                                     >
                             Login
                         </LoadingButton>
@@ -101,7 +98,7 @@ export default function NavBar(props: {
                     {/* mobile mode*/}
                     <i className={"navMenuIcon fa fa-bars fa-lg dontHideNavSectionRightMobile hover " + (!appContext.isMobileView && "hidden")} onClick={handleClickMenuIcon}></i>
                     <div className="navSectionRightMobile hidden textLeft dontHideNavSectionRightMobile boxShadowDark">
-                        {/* <div id="navSectionRightMobileItem-1" 
+                        <div id="navSectionRightMobileItem-1" 
                             className="navSectionRightMobileItem dontHideNavSectionRightMobile" 
                             onClick={handleClickMobileItem}
                             >
@@ -113,7 +110,7 @@ export default function NavBar(props: {
                             onClick={handleClickMobileItem}
                             >
                             Login
-                        </div> */}
+                        </div>
 
                         <div id="navSectionRightMobileItem-3" 
                             className="navSectionRightMobileItem dontHideNavSectionRightMobile" 

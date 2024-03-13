@@ -11,6 +11,7 @@ import PopupContainer from "./popups/PopupContainer";
 import { WEBSITE_NAME, BUILDER_PATH, isMobileWidth, DOCUMENT_BUILDER_BASE_URL, API_ENV, CSRF_TOKEN} from "../globalVariables";
 import NotFound from "./error_pages/NotFound";
 import { fetchAny, isHttpStatusCodeAlright } from "../utils/fetchUtils";
+import ConfirmAccount from "./ConfirmAccount";
 
 
 /**
@@ -233,7 +234,7 @@ export default function App() {
                             <Route path="/home" element={<Home />} />
                             <Route path={BUILDER_PATH} element={<Document />} />
                             {/* <Route path="/login" element={<Login />} /> */}
-                            {/* <Route path="/confirmAccount" element={<AccountConfirmed />} /> */}
+                            <Route path="/confirmAccount" element={<ConfirmAccount />} />
                             <Route path="*" element={<NotFound />} />
                         </Routes>
                     </div>

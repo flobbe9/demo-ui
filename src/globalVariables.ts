@@ -190,7 +190,11 @@ export const KEY_CODES_GERMAN_LETTERS = [
     192, // ö / Ö
     186, // ü / Ü
     219, // ß / ?
-]
+];
+
+
+/** Name of the url param holding the confirmation token for confirming a user account. */
+export const CONFIRMATION_TOKEN_PARAM_NAME = "token";
 
 
 // ------------------- Archive
